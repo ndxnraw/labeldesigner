@@ -1,0 +1,290 @@
+﻿Otvoriť	Open	Otevřít	Megnyitás
+Uložiť	Save	Uložit	Mentés
+Uložiť ako	Save as	Uložit jako	Mentés másként
+Návod	Help	Návod	Súgó
+Svetlý režim	Light mode	Světlý režim	Világos mód
+☀ Svetlý režim	☀ Light mode	☀ Světlý režim	☀ Világos mód
+☾ Tmavý režim	☾ Dark mode	☾ Tmavý režim	☾ Sötét mód
+Etiketa a kód	Label and barcode	Etiketa a kód	Címke és vonalkód
+Papier a kópie	Paper and copies	Papír a kopie	Papír és példányok
+Jednotky rozmerov	Measurement units	Jednotky rozměrů	Mértékegység
+Šírka etikety (mm)	Label width (mm)	Šířka etikety (mm)	Címke szélessége (mm)
+Výška etikety (mm)	Label height (mm)	Výška etikety (mm)	Címke magassága (mm)
+Typ kódu	Barcode type	Typ kódu	Vonalkód típusa
+Identifikátory…	Identifiers…	Identifikátory…	Azonosítók…
+Obsah kódu (ručne)	Barcode data (manual)	Obsah kódu (ručně)	Vonalkód adatai (kézzel)
+Poloha kódu X (mm)	Barcode X (mm)	Poloha kódu X (mm)	Vonalkód X (mm)
+Poloha kódu Y (mm)	Barcode Y (mm)	Poloha kódu Y (mm)	Vonalkód Y (mm)
+Šírka kódu s okrajmi (mm)	Barcode width incl. margins (mm)	Šířka kódu s okraji (mm)	Kód szélessége margókkal (mm)
+Výška čiar (mm)	Bar height (mm)	Výška čar (mm)	Vonalmagasság (mm)
+Zobraziť popis	Show caption	Zobrazit popis	Felirat megjelenítése
+Popis kódu	Barcode caption	Popis kódu	Vonalkód felirata
+Veľkosť popisu (pt)	Caption size (pt)	Velikost popisu (pt)	Felirat mérete (pt)
+Rozlíšenie tlačiarne	Printer resolution	Rozlišení tiskárny	Nyomtató felbontása
+Počet rovnakých etikiet	Number of identical labels	Počet stejných etiket	Azonos címkék száma
+Viac etikiet na jednom hárku	Multiple labels per sheet	Více etiket na jednom archu	Több címke egy lapon
+Word a PDF	Word and PDF	Word a PDF	Word és PDF
+Šírka papiera (mm)	Paper width (mm)	Šířka papíru (mm)	Papír szélessége (mm)
+Výška papiera (mm)	Paper height (mm)	Výška papíru (mm)	Papír magassága (mm)
+Ľavý / pravý okraj (mm)	Left / right margin (mm)	Levý / pravý okraj (mm)	Bal / jobb margó (mm)
+Horný / dolný okraj (mm)	Top / bottom margin (mm)	Horní / dolní okraj (mm)	Felső / alsó margó (mm)
+Vodorovná medzera (mm)	Horizontal gap (mm)	Vodorovná mezera (mm)	Vízszintes térköz (mm)
+Zvislá medzera (mm)	Vertical gap (mm)	Svislá mezera (mm)	Függőleges térköz (mm)
+Bez režimu hárku je každá etiketa samostatnou stranou. ZPL vždy vytvorí jednotlivé etikety na kotúči.\r\n\r\nPozície X a Y sa merajú od ľavého horného rohu etikety. Rozmery sú v zvolených jednotkách mm/cm, veľkosti písma v bodoch (pt).	Without sheet mode, each label is a separate page. ZPL always creates individual roll labels.\r\n\r\nX and Y are measured from the top-left corner. Dimensions use mm/cm; font sizes use points (pt).	Bez režimu archu je každá etiketa samostatnou stranou. ZPL vždy vytváří jednotlivé etikety na roli.\r\n\r\nPozice X a Y se měří od levého horního rohu. Rozměry jsou v mm/cm, velikosti písma v bodech (pt).	Lapmód nélkül minden címke külön oldal. A ZPL mindig különálló tekercscímkéket készít.\r\n\r\nAz X és Y a bal felső saroktól mérendő. A méretek mm/cm-ben, a betűméretek pontban (pt) értendők.
+Textové polia	Text fields	Textová pole	Szövegmezők
+Pridať text	Add text	Přidat text	Szöveg hozzáadása
+Odstrániť prvok	Delete element	Odstranit prvek	Elem törlése
+Vybrať kód	Select barcode	Vybrat kód	Kód kijelölése
+Centrovať kód	Center barcode	Vystředit kód	Kód középre
+Symbol Zálohované	Deposit symbol	Symbol Zálohované	Visszaváltási jel
+Dvojklik: úprava.	Double-click to edit.	Dvojklik: úprava.	Szerkesztés: dupla kattintás.
+Text	Text	Text	Szöveg
+Šírka (mm)	Width (mm)	Šířka (mm)	Szélesség (mm)
+Výška (mm)	Height (mm)	Výška (mm)	Magasság (mm)
+Písmo (pt)	Size (pt)	Písmo (pt)	Betűméret (pt)
+Tučné	Bold	Tučné	Félkövér
+Na stred	Center	Na střed	Középre
+Font	Font	Písmo	Betűtípus
+Skontrolujte hodnotu v textovej tabuľke.	Check the value in the text table.	Zkontrolujte hodnotu v textové tabulce.	Ellenőrizze a szövegtáblázat értékét.
+ND LabelDesigner • neuložené zmeny	ND LabelDesigner • unsaved changes	ND LabelDesigner • neuložené změny	ND LabelDesigner • nem mentett módosítások
+Riadok 	Row 	Řádek 	Sor: 
+: zadajte číselnú hodnotu pre 	: enter a numeric value for 	: zadejte číselnou hodnotu pro 	: adjon meg számértéket ehhez: 
+Súbor obsahuje nepodporované DPI.	The file contains an unsupported DPI value.	Soubor obsahuje nepodporované DPI.	A fájl nem támogatott DPI-értéket tartalmaz.
+  •  Šírka kódu po zarovnaní na body: 	  •  Barcode width aligned to dots: 	  •  Šířka kódu po zarovnání na body: 	  •  Kódszélesség képpontra igazítva: 
+ strana/strán	 page(s)	 strana/stran	 oldal
+ etikiet na hárku	 labels per sheet	 etiket na archu	 címke laponként
+Pripravené na export. Pri tlači použite skutočnú veľkosť (100 %).	Ready to export. Print at actual size (100%).	Připraveno k exportu. Tiskněte ve skutečné velikosti (100 %).	Exportálásra kész. Nyomtasson tényleges méretben (100%).
+Nový text	New text	Nový text	Új szöveg
+Chcete uložiť aktuálne nastavenie etikety?	Save the current label project?	Chcete uložit aktuální nastavení etikety?	Menti az aktuális címkeprojektet?
+Neuložené nastavenie	Unsaved project	Neuložené nastavení	Nem mentett projekt
+Nastavenie uložené: 	Project saved: 	Nastavení uloženo: 	Projekt mentve: 
+Nastavenie etikety (*.ean.xml)|*.ean.xml	Label project (*.ean.xml)|*.ean.xml	Nastavení etikety (*.ean.xml)|*.ean.xml	Címkeprojekt (*.ean.xml)|*.ean.xml
+Moja etiketa.ean.xml	My label.ean.xml	Moje etiketa.ean.xml	Címkém.ean.xml
+\r\n\r\nPokračovať v exporte?	\r\n\r\nContinue exporting?	\r\n\r\nPokračovat v exportu?	\r\n\r\nFolytatja az exportálást?
+Kontrola etikety	Label check	Kontrola etikety	Címkeellenőrzés
+Export uložený: 	Export saved: 	Export uložen: 	Export mentve: 
+Ako používať program	How to use the program	Jak používat program	A program használata
+NÁHĽAD ETIKETY	LABEL PREVIEW	NÁHLED ETIKETY	CÍMKE ELŐNÉZETE
+Kliknite na text alebo kód a presuňte ho myšou.	Click an element and drag it with the mouse.	Klikněte na prvek a přesuňte jej myší.	Kattintson egy elemre, majd húzza az egérrel.
+Rohy: veľkosť aj písmo. Hrany: šírka/výška. Esc: zrušiť.	Corners: size and font. Edges: width/height. Esc: cancel.	Rohy: velikost i písmo. Hrany: šířka/výška. Esc: zrušit.	Sarkok: méret és betű. Élek: szélesség/magasság. Esc: mégse.
+Upravte údaje podľa hlásenia nižšie.	Adjust the data according to the message below.	Upravte údaje podle zprávy níže.	Javítsa az adatokat az alábbi üzenet szerint.
+Názov produktu	Product name	Název produktu	Terméknév
+Jazyk	Language	Jazyk	Nyelv
+Uložiť nastavenia spustenia	Save startup settings	Uložit nastavení spuštění	Indítási beállítások mentése
+Nastavenia spustenia uložené: 	Startup settings saved: 	Nastavení spuštění uloženo: 	Indítási beállítások mentve: 
+Neplatné nastavenia spustenia.	Invalid startup settings.	Neplatné nastavení spuštění.	Érvénytelen indítási beállítások.
+Podporované súbory (*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl)|*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl|Nastavenie etikety (*.ean.xml)|*.ean.xml|ZPL / PRN (*.zpl;*.prn)|*.zpl;*.prn|NiceLabel – externé otvorenie (*.nlbl)|*.nlbl|XML (*.xml)|*.xml	Supported files (*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl)|*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl|Label project (*.ean.xml)|*.ean.xml|ZPL / PRN (*.zpl;*.prn)|*.zpl;*.prn|NiceLabel – open externally (*.nlbl)|*.nlbl|XML (*.xml)|*.xml	Podporované soubory (*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl)|*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl|Nastavení etikety (*.ean.xml)|*.ean.xml|ZPL / PRN (*.zpl;*.prn)|*.zpl;*.prn|NiceLabel – externí otevření (*.nlbl)|*.nlbl|XML (*.xml)|*.xml	Támogatott fájlok (*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl)|*.ean.xml;*.xml;*.zpl;*.prn;*.nlbl|Címkeprojekt (*.ean.xml)|*.ean.xml|ZPL / PRN (*.zpl;*.prn)|*.zpl;*.prn|NiceLabel – külső megnyitás (*.nlbl)|*.nlbl|XML (*.xml)|*.xml
+Priamy import šablón NiceLabel (.nlbl) zatiaľ nie je podporovaný.\r\n\r\nOtvoriť súbor v aplikácii priradenej vo Windows (NiceLabel)? Na náhľad v tomto programe vyexportujte etiketu v NiceLabel do ZPL a otvorte výsledný .zpl súbor.	Direct import of NiceLabel templates (.nlbl) is not supported.\r\n\r\nOpen the file with the associated Windows application (NiceLabel)? To preview here, export the label to ZPL in NiceLabel and open the resulting .zpl file.	Přímý import šablon NiceLabel (.nlbl) není podporován.\r\n\r\nOtevřít soubor v přidružené aplikaci Windows (NiceLabel)? Pro náhled zde exportujte etiketu v NiceLabel do ZPL a otevřete výsledný soubor .zpl.	A NiceLabel-sablonok (.nlbl) közvetlen importálása nem támogatott.\r\n\r\nMegnyitja a társított Windows-alkalmazásban (NiceLabel)? Az itteni előnézethez exportálja a címkét ZPL-be a NiceLabelben, majd nyissa meg a .zpl fájlt.
+Šablóna NiceLabel	NiceLabel template	Šablona NiceLabel	NiceLabel-sablon
+Windows nemá dostupnú aplikáciu na otvorenie .nlbl. Otvorte súbor v NiceLabel a vyexportujte ZPL.	No Windows application is available to open .nlbl. Open the file in NiceLabel and export ZPL.	Windows nemá aplikaci pro otevření .nlbl. Otevřete soubor v NiceLabel a exportujte ZPL.	Nincs elérhető Windows-alkalmazás az .nlbl megnyitásához. Nyissa meg NiceLabelben és exportáljon ZPL-t.
+Nepodporované DPI projektu v ZPL.	Unsupported project DPI in ZPL.	Nepodporované DPI projektu v ZPL.	Nem támogatott projekt-DPI a ZPL-ben.
+ZPL/PRN bol otvorený ako editovateľná etiketa. Uložiť vytvorí nový súbor .ean.xml.	ZPL/PRN opened as an editable label. Save creates a new .ean.xml file.	ZPL/PRN byl otevřen jako upravitelná etiketa. Uložit vytvoří nový soubor .ean.xml.	A ZPL/PRN szerkeszthető címkeként nyílt meg. A Mentés új .ean.xml fájlt hoz létre.
+Nepodporované DPI v súbore.	Unsupported DPI in file.	Nepodporované DPI v souboru.	Nem támogatott DPI a fájlban.
+DPI pôvodnej tlačiarne:	Original printer DPI:	DPI původní tiskárny:	Eredeti nyomtató DPI-je:
+Uložiť kópiu ZPL	Save ZPL copy	Uložit kopii ZPL	ZPL-másolat mentése
+Náhľad	Preview	Náhled	Előnézet
+Zdrojový ZPL	ZPL source	Zdrojový ZPL	ZPL-forrás
+\r\nDPI sa zo ZPL spravidla nedá určiť. Zvoľte hodnotu pôvodnej tlačiarne.	\r\nDPI usually cannot be determined from ZPL. Select the original printer value.	\r\nDPI zpravidla nelze určit ze ZPL. Zvolte hodnotu původní tiskárny.	\r\nA DPI általában nem állapítható meg a ZPL-ből. Válassza az eredeti nyomtató értékét.
+\r\nZdrojový ZPL je dostupný na druhej karte.	\r\nThe ZPL source is available on the second tab.	\r\nZdrojový ZPL je dostupný na druhé kartě.	\r\nA ZPL-forrás a második lapon érhető el.
+ZPL súbor je príliš veľký (limit 16 MB).	ZPL file is too large (16 MB limit).	ZPL soubor je příliš velký (limit 16 MB).	A ZPL-fájl túl nagy (korlát: 16 MB).
+Neplatná číselná hodnota ZPL: 	Invalid numeric ZPL value: 	Neplatná číselná hodnota ZPL: 	Érvénytelen ZPL-számérték: 
+Náhľad nepodporuje príkaz alebo variant 	Preview does not support command or variant 	Náhled nepodporuje příkaz nebo variantu 	Az előnézet nem támogatja ezt a parancsot vagy változatot: 
+. Súbor sa neotvoril ako neúplná etiketa. Pôvodný súbor zostal nezmenený.	. No incomplete label was opened. The original file is unchanged.	. Soubor nebyl otevřen jako neúplná etiketa. Původní soubor zůstal nezměněn.	. Hiányos címke nem lett megnyitva. Az eredeti fájl változatlan maradt.
+ZPL je príliš veľké.	ZPL is too large.	ZPL je příliš velké.	A ZPL túl nagy.
+neplatná syntax ZPL	invalid ZPL syntax	neplatná syntaxe ZPL	érvénytelen ZPL-szintaxis
+viac etikiet ^XA/^XZ v jednom súbore	multiple ^XA/^XZ labels in one file	více etiket ^XA/^XZ v jednom souboru	több ^XA/^XZ címke egy fájlban
+príkaz mimo ^XA/^XZ	command outside ^XA/^XZ	příkaz mimo ^XA/^XZ	parancs a ^XA/^XZ szakaszon kívül
+ZPL musí obsahovať jednu úplnú etiketu ^XA … ^XZ.	ZPL must contain one complete ^XA … ^XZ label.	ZPL musí obsahovat jednu úplnou etiketu ^XA … ^XZ.	A ZPL-nek egy teljes ^XA … ^XZ címkét kell tartalmaznia.
+Rozmery ZPL prekračujú limit 40 miliónov bodov.	ZPL dimensions exceed the 40 million dot limit.	Rozměry ZPL překračují limit 40 milionů bodů.	A ZPL méretei meghaladják a 40 millió pontos korlátot.
+ dáta	 data	 data	 adatok
+^A0 rotácia	^A0 rotation	^A0 otočení	^A0 forgatás
+^BY šírka	^BY width	^BY šířka	^BY szélesség
+^BY pomer iný než 3	^BY ratio other than 3	^BY poměr jiný než 3	^BY 3-tól eltérő arány
+ rotácia	 rotation	 otočení	 forgatás
+^B3 kontrolná číslica	^B3 check digit	^B3 kontrolní číslice	^B3 ellenőrző számjegy
+popis nad kódom	caption above barcode	popis nad kódem	felirat a kód fölött
+ kontrolná číslica	 check digit	 kontrolní číslice	 ellenőrző számjegy
+^BC režim	^BC mode	^BC režim	^BC mód
+Neúplné ^FH dáta.	Incomplete ^FH data.	Neúplná data ^FH.	Hiányos ^FH-adatok.
+Neplatné ^FH dáta.	Invalid ^FH data.	Neplatná data ^FH.	Érvénytelen ^FH-adatok.
+viacriadkové ^FD	multiline ^FD	víceřádkové ^FD	többsoros ^FD
+nulová veľkosť fontu	zero font size	nulová velikost písma	nulla betűméret
+^GF (podporované je ASCII ^GFA)	^GF (ASCII ^GFA is supported)	^GF (podporováno je ASCII ^GFA)	^GF (ASCII ^GFA támogatott)
+Neplatné rozmery ^GFA.	Invalid ^GFA dimensions.	Neplatné rozměry ^GFA.	Érvénytelen ^GFA-méretek.
+Grafika je príliš veľká.	Graphics are too large.	Grafika je příliš velká.	A grafika túl nagy.
+ZPL neobsahuje zobraziteľné polia.	ZPL contains no displayable fields.	ZPL neobsahuje zobrazitelná pole.	A ZPL nem tartalmaz megjeleníthető mezőket.
+ kópií. 	 copies. 	 kopií. 	 példány. 
+Textové fonty a popisy kódov sú približné (Arial). 	Text fonts and barcode captions are approximate (Arial). 	Písma a popisy kódů jsou přibližné (Arial). 	A betűtípusok és kódfeliratok közelítőek (Arial). 
+Chýba ^PW alebo ^LL: rozmer bol prevzatý z aktuálnej etikety. 	Missing ^PW or ^LL: dimensions taken from the current label. 	Chybí ^PW nebo ^LL: rozměr byl převzat z aktuální etikety. 	Hiányzó ^PW vagy ^LL: a méretek az aktuális címkéből származnak. 
+Náhľad je iba na čítanie; V tejto verzii sa tento ZPL neprevádza na editovateľné prvky.	Read-only preview; this ZPL is not converted to editable elements in this version.	Náhled je pouze pro čtení; v této verzii se tento ZPL nepřevádí na upravitelné prvky.	Csak olvasható előnézet; ez a ZPL ebben a verzióban nem alakul szerkeszthető elemekké.
+Neplatná hlavička B64/Z64.	Invalid B64/Z64 header.	Neplatná hlavička B64/Z64.	Érvénytelen B64/Z64-fejléc.
+Chýba CRC B64/Z64.	Missing B64/Z64 CRC.	Chybí CRC B64/Z64.	Hiányzó B64/Z64 CRC.
+Nesprávny CRC grafiky B64/Z64.	Incorrect B64/Z64 graphics CRC.	Nesprávné CRC grafiky B64/Z64.	Hibás B64/Z64 grafikai CRC.
+Nesprávna dĺžka B64.	Incorrect B64 length.	Nesprávná délka B64.	Hibás B64-hossz.
+Neplatná zlib hlavička Z64.	Invalid Z64 zlib header.	Neplatná hlavička zlib Z64.	Érvénytelen Z64 zlib-fejléc.
+Nesprávna dĺžka Z64.	Incorrect Z64 length.	Nesprávná délka Z64.	Hibás Z64-hossz.
+Nesprávny Adler32 grafiky Z64.	Incorrect Z64 graphics Adler32.	Nesprávný Adler32 grafiky Z64.	Hibás Z64 grafikai Adler32.
+Neplatné rozmery grafiky.	Invalid graphics dimensions.	Neplatné rozměry grafiky.	Érvénytelen grafikai méretek.
+Dĺžka ^GFA nezodpovedá hlavičke.	^GFA length does not match its header.	Délka ^GFA neodpovídá hlavičce.	A ^GFA hossza nem felel meg a fejlécnek.
+Neplatná kompresia ^GFA.	Invalid ^GFA compression.	Neplatná komprese ^GFA.	Érvénytelen ^GFA-tömörítés.
+Neplatné opakovanie riadka ^GFA.	Invalid ^GFA row repeat.	Neplatné opakování řádku ^GFA.	Érvénytelen ^GFA-sorismétlés.
+Neúplné dáta ^GFA.	Incomplete ^GFA data.	Neúplná data ^GFA.	Hiányos ^GFA-adatok.
+Nastavenia spustenia sa nepodarilo načítať. Použité sú predvolené hodnoty. 	Could not load startup settings. Defaults are in use. 	Nastavení spuštění se nepodařilo načíst. Použity výchozí hodnoty. 	Az indítási beállítások nem tölthetők be. Alapértékek használata. 
+Verzia 2.6.1	Version 2.6.1	Verze 2.6.1	Verzió: 2.6.1
+Šírka	Width	Šířka	Szélesség
+Výška	Height	Výška	Magasság
+Upraviť textové pole	Edit text field	Upravit textové pole	Szövegmező szerkesztése
+Veľkosť (pt)	Size (pt)	Velikost (pt)	Méret (pt)
+Poloha X	Position X	Poloha X	X pozíció
+Poloha Y	Position Y	Poloha Y	Y pozíció
+Rohy menia veľkosť pomerne, hrany šírku alebo výšku. Dvojklik znovu otvorí tieto rozmery.	Corners preserve proportions; edges change width or height. Double-click to reopen these dimensions.	Rohy zachovávají poměr stran, hrany mění šířku nebo výšku. Dvojklik znovu otevře tyto rozměry.	A sarkok megőrzik az arányokat; az élek a szélességet vagy magasságot módosítják. Dupla kattintással újra megnyithatók a méretek.
+Pomer strán	Aspect ratio	Poměr stran	Oldalarány
+Pridať	Add	Přidat	Hozzáadás
+Odstrániť	Delete	Odstranit	Törlés
+Skontrolovať	Check	Zkontrolovat	Ellenőrzés
+Použiť	Apply	Použít	Alkalmaz
+Zrušiť	Cancel	Zrušit	Mégse
+↑ Vyššie	↑ Move up	↑ Výše	↑ Feljebb
+↓ Nižšie	↓ Move down	↓ Níže	↓ Lejjebb
+Použiť GS1 AI	Use GS1 AIs	Použít GS1 AI	GS1 AI használata
+Nastavte identifikátory a ich dáta tlačidlom Identifikátory…	Set identifiers and data using Identifiers…	Nastavte identifikátory a data tlačítkem Identifikátory…	Az azonosítókat és adatokat az Azonosítók… gombbal állíthatja be.
+GS1-128 – aplikačné identifikátory	GS1-128 – application identifiers	GS1-128 – aplikační identifikátory	GS1-128 – alkalmazásazonosítók
+Význam / formát	Meaning / format	Význam / formát	Jelentés / formátum
+Dáta	Data	Data	Adatok
+ číslic	 digits	 číslic	 számjegy
+ znakov	 characters	 znaků	 karakter
+\r\nPoradie riadkov určuje poradie v kóde. FNC1 sa vkladá automaticky. 	\r\nRow order determines barcode order. FNC1 is inserted automatically. 	\r\nPořadí řádků určuje pořadí v kódu. FNC1 se vkládá automaticky. 	\r\nA sorok sorrendje határozza meg a kód sorrendjét. Az FNC1 automatikusan kerül be. 
+203,2 DPI (8 bodov/mm)	203.2 DPI (8 dots/mm)	203,2 DPI (8 bodů/mm)	203,2 DPI (8 pont/mm)
+304,8 DPI (12 bodov/mm)	304.8 DPI (12 dots/mm)	304,8 DPI (12 bodů/mm)	304,8 DPI (12 pont/mm)
+609,6 DPI (24 bodov/mm)	609.6 DPI (24 dots/mm)	609,6 DPI (24 bodů/mm)	609,6 DPI (24 pont/mm)
+Neznámy kód	Unknown barcode	Neznámý kód	Ismeretlen vonalkód
+GTIN-14: 13 alebo 14 číslic, kód ITF-14 s ochrannými pásmi.	GTIN-14: 13 or 14 digits, ITF-14 with bearer bars.	GTIN-14: 13 nebo 14 číslic, ITF-14 s ochrannými pásy.	GTIN-14: 13 vagy 14 számjegy, ITF-14 keretvonalakkal.
+12 alebo 13 číslic; kontrolná číslica sa doplní alebo overí.	12 or 13 digits; the check digit is added or verified.	12 nebo 13 číslic; kontrolní číslice se doplní nebo ověří.	12 vagy 13 számjegy; az ellenőrző számjegy hozzáadása vagy ellenőrzése automatikus.
+7 alebo 8 číslic; kontrolná číslica sa doplní alebo overí.	7 or 8 digits; the check digit is added or verified.	7 nebo 8 číslic; kontrolní číslice se doplní nebo ověří.	7 vagy 8 számjegy; az ellenőrző számjegy hozzáadása vagy ellenőrzése automatikus.
+11 alebo 12 číslic; kontrolná číslica sa doplní alebo overí.	11 or 12 digits; the check digit is added or verified.	11 nebo 12 číslic; kontrolní číslice se doplní nebo ověří.	11 vagy 12 számjegy; az ellenőrző számjegy hozzáadása vagy ellenőrzése automatikus.
+1–80 znakov ASCII: písmená, číslice, medzery a symboly. Bez diakritiky.	1–80 ASCII characters: letters, digits, spaces and symbols. No accents.	1–80 znaků ASCII: písmena, číslice, mezery a symboly. Bez diakritiky.	1–80 ASCII-karakter: betűk, számjegyek, szóközök és jelek. Ékezetek nélkül.
+1–40 znakov: A–Z, 0–9, medzera a - . $ / + %. Bez kontrolnej číslice.	1–40 characters: A–Z, 0–9, space and - . $ / + %. No check digit.	1–40 znaků: A–Z, 0–9, mezera a - . $ / + %. Bez kontrolní číslice.	1–40 karakter: A–Z, 0–9, szóköz és - . $ / + %. Ellenőrző számjegy nélkül.
+Párny počet číslic (2–80). Bez kontrolnej číslice; nejde o ITF-14.	Even number of digits (2–80). No check digit; this is not ITF-14.	Sudý počet číslic (2–80). Bez kontrolní číslice; nejde o ITF-14.	Páros számú számjegy (2–80). Ellenőrző számjegy nélkül; ez nem ITF-14.
+Nepodporovaný typ čiarového kódu.	Unsupported barcode type.	Nepodporovaný typ čárového kódu.	Nem támogatott vonalkódtípus.
+Číselný kód musí obsahovať 	The numeric code must contain 	Číselný kód musí obsahovat 	A numerikus kódnak tartalmaznia kell 
+ číslic bez kontrolnej číslice alebo 	 digits without the check digit or 	 číslic bez kontrolní číslice nebo 	 számjegyet ellenőrző számjegy nélkül vagy 
+ číslic s kontrolnou číslicou.	 digits including the check digit.	 číslic s kontrolní číslicí.	 számjegyet az ellenőrző számjeggyel együtt.
+Číselný kód môže obsahovať iba číslice 0 až 9.	The numeric code may contain only digits 0 to 9.	Číselný kód může obsahovat pouze číslice 0 až 9.	A numerikus kód csak 0 és 9 közötti számjegyeket tartalmazhat.
+Nesprávna kontrolná číslica. Správna posledná číslica je 	Incorrect check digit. The correct last digit is 	Nesprávná kontrolní číslice. Správná poslední číslice je 	Hibás ellenőrző számjegy. A helyes utolsó számjegy: 
+: povolený rozsah 	: allowed range 	: povolený rozsah 	: megengedett tartomány: 
+ až 	 to 	 až 	 – 
+Šírka etikety	Label width	Šířka etikety	Címke szélessége
+Výška etikety	Label height	Výška etikety	Címke magassága
+Rozlíšenie	Resolution	Rozlišení	Felbontás
+Počet kópií	Copies	Počet kopií	Példányszám
+Poloha kódu X	Barcode X	Poloha kódu X	Vonalkód X
+Poloha kódu Y	Barcode Y	Poloha kódu Y	Vonalkód Y
+Šírka kódu	Barcode width	Šířka kódu	Vonalkód szélessége
+Výška čiar	Bar height	Výška čar	Vonalmagasság
+Písmo kódu	Barcode font size	Písmo kódu	Vonalkód betűmérete
+Kód je pre zvolené rozlíšenie príliš úzky.	The barcode is too narrow for the selected resolution.	Kód je pro zvolené rozlišení příliš úzký.	A vonalkód túl keskeny a választott felbontáshoz.
+Etiketa je pri tomto DPI príliš veľká. Znížte rozmery alebo DPI.	The label is too large at this DPI. Reduce dimensions or DPI.	Etiketa je při tomto DPI příliš velká. Snižte rozměry nebo DPI.	A címke túl nagy ezen a DPI-n. Csökkentse a méreteket vagy a DPI-t.
+Najviac 20 symbolov.	Maximum 20 symbols.	Nejvýše 20 symbolů.	Legfeljebb 20 jel.
+Neplatný symbol.	Invalid symbol.	Neplatný symbol.	Érvénytelen jel.
+Šírka symbolu	Symbol width	Šířka symbolu	Jel szélessége
+Výška symbolu	Symbol height	Výška symbolu	Jel magassága
+Povolených je najviac 50 textových polí.	At most 50 text fields are allowed.	Povoleno je nejvýše 50 textových polí.	Legfeljebb 50 szövegmező engedélyezett.
+Neplatný názov fontu.	Invalid font name.	Neplatný název písma.	Érvénytelen betűtípusnév.
+Text je príliš dlhý.	The text is too long.	Text je příliš dlouhý.	A szöveg túl hosszú.
+Šírka textového poľa	Text field width	Šířka textového pole	Szövegmező szélessége
+Výška textového poľa	Text field height	Výška textového pole	Szövegmező magassága
+Veľkosť písma	Font size	Velikost písma	Betűméret
+Šírka papiera	Paper width	Šířka papíru	Papír szélessége
+Výška papiera	Paper height	Výška papíru	Papír magassága
+Okraj X	Margin X	Okraj X	X margó
+Okraj Y	Margin Y	Okraj Y	Y margó
+Medzera X	Gap X	Mezera X	X térköz
+Medzera Y	Gap Y	Mezera Y	Y térköz
+Na papier sa nezmestí ani jedna etiketa. Upravte rozmery alebo okraje.	No label fits on the paper. Adjust dimensions or margins.	Na papír se nevejde ani jedna etiketa. Upravte rozměry nebo okraje.	Egy címke sem fér a papírra. Módosítsa a méreteket vagy a margókat.
+Kód presahuje etiketu. Pri exporte sa časť mimo etikety oreže.	The barcode extends beyond the label and will be clipped on export.	Kód přesahuje etiketu. Při exportu se část mimo etiketu ořízne.	A vonalkód túlnyúlik a címkén. Exportáláskor a kilógó rész levágódik.
+Text presahuje etiketu a pri exporte sa oreže: 	Text extends beyond the label and will be clipped: 	Text přesahuje etiketu a při exportu se ořízne: 	A szöveg túlnyúlik a címkén és levágódik: 
+ITF-14: skontrolujte rozmery pre distribučné balenia; odporúčaná úzka čiara aspoň 0,495 mm a výška čiar 31,75 mm.	ITF-14: check distribution packaging dimensions; recommended narrow bar at least 0.495 mm and bar height 31.75 mm.	ITF-14: zkontrolujte rozměry pro distribuční balení; doporučená úzká čára alespoň 0,495 mm a výška čar 31,75 mm.	ITF-14: ellenőrizze a gyűjtőcsomagolás méreteit; ajánlott keskeny vonal legalább 0,495 mm, vonalmagasság 31,75 mm.
+Úzka čiara má iba 	The narrow bar is only 	Úzká čára má pouze 	A keskeny vonal csak 
+ mm. Zväčšite šírku kódu pre spoľahlivejšie čítanie.	 mm. Increase barcode width for more reliable scanning.	 mm. Zvětšete šířku kódu pro spolehlivější čtení.	 mm. Növelje a kód szélességét a megbízhatóbb olvasáshoz.
+Výška čiar je nízka vzhľadom na ich šírku. Pred použitím overte čitateľnosť skenerom.	Bars are short relative to their width. Verify readability with a scanner before use.	Výška čar je nízká vzhledem k jejich šířce. Před použitím ověřte čitelnost skenerem.	A vonalak a szélességükhöz képest alacsonyak. Használat előtt ellenőrizze az olvashatóságot leolvasóval.
+Symbol presahuje etiketu a pri exporte sa oreže.	The symbol extends beyond the label and will be clipped.	Symbol přesahuje etiketu a při exportu se ořízne.	A jel túlnyúlik a címkén és exportáláskor levágódik.
+Zálohované: šírka loga s textom je menšia než 10 mm.	Deposit symbol: logo width including text is less than 10 mm.	Zálohované: šířka loga s textem je menší než 10 mm.	Visszaváltási jel: a logó szélessége szöveggel együtt kisebb mint 10 mm.
+Zálohované: zmenený pomer strán. Obnovte ho dvojklikom na symbol.	Deposit symbol: aspect ratio changed. Double-click the symbol to restore it.	Zálohované: změněný poměr stran. Obnovte jej dvojklikem na symbol.	Visszaváltási jel: az oldalarány megváltozott. Dupla kattintással állítható vissza.
+Symbol zasahuje do oblasti kódu vrátane okrajov.	The symbol overlaps the barcode area including margins.	Symbol zasahuje do oblasti kódu včetně okrajů.	A jel a vonalkód területére vagy margóira nyúlik.
+Popis kódu je príliš široký a bude orezaný. Zmenšite jeho písmo alebo zväčšite kód.	The barcode caption is too wide and will be clipped. Reduce its font size or widen the barcode.	Popis kódu je příliš široký a bude oříznut. Zmenšete písmo nebo zvětšete kód.	A kódfelirat túl széles és levágódik. Csökkentse a betűméretet vagy szélesítse a kódot.
+ nie je dostupný. Použije sa Arial.	 is unavailable. Arial will be used.	 není dostupné. Použije se Arial.	 nem érhető el. Az Arial lesz használva.
+Textové pole zasahuje do oblasti kódu: 	Text field overlaps the barcode area: 	Textové pole zasahuje do oblasti kódu: 	A szövegmező a vonalkód területére nyúlik: 
+Text sa nezmestí do výšky poľa: 	Text does not fit the field height: 	Text se nevejde do výšky pole: 	A szöveg nem fér el a mező magasságában: 
+SSCC – logistická jednotka	SSCC – logistic unit	SSCC – logistická jednotka	SSCC – logisztikai egység
+GTIN – obchodná položka	GTIN – trade item	GTIN – obchodní položka	GTIN – kereskedelmi áru
+GTIN položiek v logistickej jednotke	GTIN of items in a logistic unit	GTIN položek v logistické jednotce	Logisztikai egységben lévő áruk GTIN-je
+Šarža / dávka	Batch / lot	Šarže / dávka	Gyártási tétel
+Dátum výroby	Production date	Datum výroby	Gyártási dátum
+Dátum balenia	Packaging date	Datum balení	Csomagolási dátum
+Minimálna trvanlivosť	Best before date	Minimální trvanlivost	Minőségmegőrzési idő
+Predať do	Sell by date	Prodat do	Értékesíthető eddig
+Dátum exspirácie	Expiration date	Datum expirace	Lejárati dátum
+Variant produktu	Product variant	Varianta produktu	Termékváltozat
+Sériové číslo	Serial number	Sériové číslo	Sorozatszám
+Spotrebiteľský variant	Consumer product variant	Spotřebitelská varianta	Fogyasztói termékváltozat
+Počet – premenlivé množstvo	Count – variable measure	Počet – proměnlivé množství	Darabszám – változó mennyiség
+Počet položiek v logistickej jednotke	Count of items in a logistic unit	Počet položek v logistické jednotce	Áruk száma a logisztikai egységben
+Doplnkový identifikátor produktu	Additional product identifier	Doplňkový identifikátor produktu	Kiegészítő termékazonosító
+Číslo produktu zákazníka	Customer product number	Číslo produktu zákazníka	Vevői termékszám
+Doplnkové sériové číslo	Secondary serial number	Doplňkové sériové číslo	Kiegészítő sorozatszám
+Odkaz na pôvodnú položku	Reference to source entity	Odkaz na původní položku	Hivatkozás az eredeti árura
+Číslo objednávky zákazníka	Customer order number	Číslo objednávky zákazníka	Vevői rendelési szám
+GLN príjemcu	Ship-to GLN	GLN příjemce	Címzett GLN-je
+GLN fyzického miesta	Physical location GLN	GLN fyzického místa	Fizikai hely GLN-je
+Čistá hmotnosť kg – 	Net weight kg – 	Čistá hmotnost kg – 	Nettó tömeg kg – 
+Čistá hmotnosť lb – 	Net weight lb – 	Čistá hmotnost lb – 	Nettó tömeg lb – 
+ desatinných miest	 decimal places	 desetinných míst	 tizedesjegy
+Nepodporovaný GS1 identifikátor: 	Unsupported GS1 identifier: 	Nepodporovaný GS1 identifikátor: 	Nem támogatott GS1-azonosító: 
+GS1: pridajte 1 až 20 identifikátorov.	GS1: add 1 to 20 identifiers.	GS1: přidejte 1 až 20 identifikátorů.	GS1: adjon hozzá 1–20 azonosítót.
+Neplatné pole GS1.	Invalid GS1 field.	Neplatné pole GS1.	Érvénytelen GS1-mező.
+GS1: identifikátor (	GS1: identifier (	GS1: identifikátor (	GS1: azonosító (
+) sa opakuje.	) is duplicated.	) se opakuje.	) ismétlődik.
+1 až 	1 to 	1 až 	1–
+číslic	digits	číslic	számjegy
+znakov	characters	znaků	karakter
+): nepovolený znak. Použite 	): invalid character. Use 	): nepovolený znak. Použijte 	): érvénytelen karakter. Használjon 
+číslice 0–9.	digits 0–9.	číslice 0–9.	0–9 számjegyeket.
+GS1 znaky bez medzier a diakritiky.	GS1 characters without spaces or accents.	GS1 znaky bez mezer a diakritiky.	szóköz és ékezet nélküli GS1-karaktereket.
+): nesprávna kontrolná číslica.	): incorrect check digit.	): nesprávná kontrolní číslice.	): hibás ellenőrző számjegy.
+): neplatný dátum RRMMDD. Deň 00 označuje posledný deň mesiaca.	): invalid YYMMDD date. Day 00 means the last day of the month.	): neplatné datum RRMMDD. Den 00 označuje poslední den měsíce.	): érvénytelen ÉÉHHNN dátum. A 00 nap a hónap utolsó napját jelenti.
+GS1-128: najviac 48 dátových znakov vrátane AI. Rozdeľte údaje do viacerých etikiet/kódov.	GS1-128: maximum 48 data characters including AIs. Split the data across labels/barcodes.	GS1-128: nejvýše 48 datových znaků včetně AI. Rozdělte údaje do více etiket/kódů.	GS1-128: legfeljebb 48 adatkarakter az AI-kkal együtt. Ossza fel az adatokat több címkére/kódra.
+GS1 (02) vyžaduje aj (37) na označovanej jednotke.	GS1 (02) also requires (37) on the labelled unit.	GS1 (02) vyžaduje také (37) na označené jednotce.	A GS1 (02) mellett (37) is szükséges a jelölt egységen.
+GS1 (37) vyžaduje aj identifikáciu obsahu (02) na označovanej jednotke.	GS1 (37) also requires content identification (02) on the labelled unit.	GS1 (37) vyžaduje také identifikaci obsahu (02) na označené jednotce.	A GS1 (37) mellett tartalomazonosítás (02) is szükséges a jelölt egységen.
+GS1: (01) sa nekombinuje s (02)/(37).	GS1: (01) must not be combined with (02)/(37).	GS1: (01) se nekombinuje s (02)/(37).	GS1: (01) nem kombinálható (02)/(37)-tel.
+): skontrolujte súvisiaci GTIN na označovanej jednotke.	): check the associated GTIN on the labelled unit.	): zkontrolujte související GTIN na označené jednotce.	): ellenőrizze a kapcsolódó GTIN-t a jelölt egységen.
+): skontrolujte súvisiaci GTIN (01).	): check the associated GTIN (01).	): zkontrolujte související GTIN (01).	): ellenőrizze a kapcsolódó GTIN (01) értékét.
+GS1 (250) vyžaduje aj (21).	GS1 (250) also requires (21).	GS1 (250) vyžaduje také (21).	A GS1 (250) mellett (21) is szükséges.
+: zadajte 1 až 	: enter 1 to 	: zadejte 1 až 	: adjon meg 1–
+
+Tlačiť	Print	Tisknout	Nyomtatás
+Tlač	Print	Tisk	Nyomtatás
+Papier tlačiarne je menší než nastavený formát. Upravte formát v nastavení tlačiarne.	Printer paper is smaller than the configured format. Adjust the paper size in printer settings.	Papír tiskárny je menší než nastavený formát. Upravte formát v nastavení tiskárny.	A nyomtató papírja kisebb a beállított formátumnál. Módosítsa a papírméretet a nyomtató beállításaiban.
+Vo Windows nie je nainštalovaná tlačiareň.	No printer is installed in Windows.	Ve Windows není nainstalována tiskárna.	Nincs nyomtató telepítve a Windowsban.
+Vybraná tlačiareň nie je dostupná.	The selected printer is unavailable.	Vybraná tiskárna není dostupná.	A kiválasztott nyomtató nem érhető el.
+Časť obsahu je mimo tlačiteľnej oblasti tlačiarne a môže byť orezaná.	Some content is outside the printable area and may be clipped.	Část obsahu je mimo tisknutelnou oblast a může být oříznuta.	A tartalom egy része a nyomtatható területen kívül van és levágódhat.
+Pokračovať v tlači?	Continue printing?	Pokračovat v tisku?	Folytatja a nyomtatást?
+Úloha bola odoslaná do tlačového systému Windows.	The job was sent to the Windows print system.	Úloha byla odeslána do tiskového systému Windows.	A feladat elküldve a Windows nyomtatási rendszerének.
+
+Podľa etikety	Label size	Podle etikety	Címkeméret
+Vlastné rozmery	Custom size	Vlastní rozměry	Egyéni méret
+Formát papiera	Paper size	Formát papíru	Papírméret
+Ľavý okraj (mm)	Left margin (mm)	Levý okraj (mm)	Bal margó (mm)
+Pravý okraj (mm)	Right margin (mm)	Pravý okraj (mm)	Jobb margó (mm)
+Horný okraj (mm)	Top margin (mm)	Horní okraj (mm)	Felső margó (mm)
+Dolný okraj (mm)	Bottom margin (mm)	Dolní okraj (mm)	Alsó margó (mm)
+Jedna etiketa na strane. Počet kópií nastavte v okne tlače. Okraje platia pre papier, export PDF a Word.	One label per page. Set copies in the print dialog. Margins apply to paper, PDF and Word.	Jedna etiketa na stránce. Počet kopií nastavte v okně tisku. Okraje platí pro papír, export PDF a Word.	Egy címke oldalanként. A példányszámot a nyomtatási ablakban állítsa be. A margók a papírra, PDF-re és Wordre érvényesek.
+Náhľad pred tlačou	Print preview	Náhled před tiskem	Nyomtatási kép
+Kópie:	Copies:	Kopie:	Példányok:
+Nastavte rozmery etikety a údaje kódu. Prvky presúvajte myšou, veľkosť meňte úchytmi a text upravte dvojklikom.\r\n\r\nNa karte Papier a kópie vyberte bežný formát, Podľa etikety alebo Vlastné rozmery. Pre papier nastavte všetky štyri okraje. Na každej strane je jedna etiketa.\r\n\r\nTlačiť najprv otvorí náhľad so zoomom a výberom strany. Cez Tlačiareň a nastavenia vyberte tlačiareň a počet kópií. Po potvrdení skontrolujte obnovený náhľad; až Tlačiť v náhľade odošle úlohu. Tlačí sa v skutočnej veľkosti. Systémový dialóg vlastný náhľad neposkytuje.\r\n\r\nWord obsahuje samostatné transparentné SVG objekty: každý text, celý čiarový kód s popisom a každý symbol. Objekty môžete vo Worde presúvať a meniť ich veľkosť; obsah textu upravujte v tomto programe. SVG export celej etikety zostáva transparentný.\r\n\r\nNastavenia spustenia ukladajú iba jazyk, vzhľad, jednotky a rozmery etikety. Projekty ukladajte cez Uložiť / Uložiť ako. GS1 nastavíte cez Code 128 a Identifikátory. ZPL/PRN majú obmedzený import; NLBL sa otvára externe.	Set label dimensions and barcode data. Drag elements, resize with handles and double-click text to edit.\r\n\r\nIn Paper and copies, select a standard size, Label size or Custom size. Set all four paper margins. Each page contains one label.\r\n\r\nPrint first opens a preview with zoom and page selection. Use Printer and settings to select the printer and copy count. Review the refreshed preview after confirming; only Print in the preview sends the job. Output is at actual size. The system dialog does not provide its own preview.\r\n\r\nWord contains separate transparent SVG objects: each text field, the complete barcode with caption, and each symbol. Move and resize these objects in Word; edit text content in this program. Whole-label SVG export remains transparent.\r\n\r\nStartup settings store only language, theme, units and label dimensions. Save projects using Save / Save as. Configure GS1 using Code 128 and Identifiers. ZPL/PRN import is limited; NLBL opens externally.	Nastavte rozměry etikety a údaje kódu. Prvky přesouvejte myší, velikost měňte úchyty a text upravte dvojklikem.\r\n\r\nNa kartě Papír a kopie vyberte běžný formát, Podle etikety nebo Vlastní rozměry. Nastavte všechny čtyři okraje. Na každé stránce je jedna etiketa.\r\n\r\nTisknout nejprve otevře náhled s přiblížením a výběrem stránky. Přes Tiskárna a nastavení vyberte tiskárnu a počet kopií. Po potvrzení zkontrolujte obnovený náhled; až Tisknout v náhledu odešle úlohu. Tiskne se ve skutečné velikosti. Systémový dialog vlastní náhled neposkytuje.\r\n\r\nWord obsahuje samostatné průhledné SVG objekty: každý text, celý čárový kód s popisem a každý symbol. Ve Wordu lze objekty přesouvat a měnit velikost; obsah textu upravujte v tomto programu. SVG export celé etikety zůstává průhledný.\r\n\r\nNastavení spuštění ukládá jen jazyk, vzhled, jednotky a rozměry etikety. Projekty ukládejte přes Uložit / Uložit jako. GS1 nastavíte přes Code 128 a Identifikátory. ZPL/PRN mají omezený import; NLBL se otevírá externě.	Állítsa be a címkeméretet és a kód adatait. Húzással mozgassa, fogópontokkal méretezze az elemeket, dupla kattintással szerkessze a szöveget.\r\n\r\nA Papír és példányok lapon válasszon szabványos méretet, Címkeméretet vagy Egyéni méretet. Állítsa be mind a négy margót. Oldalanként egy címke készül.\r\n\r\nA Nyomtatás először nagyítható, lapozható előnézetet nyit meg. A Nyomtató és beállítások gombbal válassza ki a nyomtatót és a példányszámot. Jóváhagyás után ellenőrizze a frissített előnézetet; csak az ottani Nyomtatás gomb küldi el a feladatot. A nyomtatás tényleges méretű. A rendszerablak nem biztosít saját előnézetet.\r\n\r\nA Word különálló átlátszó SVG-objektumokat tartalmaz: minden szöveget, a teljes vonalkódot felirattal és minden jelet. A Wordben az objektumok mozgathatók és méretezhetők; a szöveg tartalmát ebben a programban módosítsa. A teljes címke SVG-exportja átlátszó marad.\r\n\r\nAz indítási beállítások csak a nyelvet, témát, mértékegységet és címkeméretet tárolják. Projekteket a Mentés / Mentés másként gombbal menthet. GS1: Code 128 és Azonosítók. A ZPL/PRN import korlátozott; az NLBL külső alkalmazásban nyílik meg.
+
+Tlačiareň a nastavenia…	Printer and settings…	Tiskárna a nastavení…	Nyomtató és beállítások…
+Strana:	Page:	Strana:	Oldal:
+Celá strana	Fit page	Celá strana	Teljes oldal
+Dokument neobsahuje nič na tlač.	The document has nothing to print.	Dokument neobsahuje nic k tisku.	A dokumentumban nincs nyomtatható tartalom.
+Náhľad aplikácie používa rovnaký dokument ako tlač. Systémový dialóg WinForms tento náhľad nezobrazuje.	The app preview uses the same document as printing. The WinForms system dialog does not show this preview.	Náhled aplikace používá stejný dokument jako tisk. Systémový dialog WinForms tento náhled nezobrazuje.	Az előnézet és a nyomtatás ugyanazt a dokumentumot használja. A WinForms rendszerablaka nem jeleníti meg ezt az előnézetet.
+Vyberte tlačiareň. Potom skontrolujte obnovený náhľad a stlačte Tlačiť.	Choose a printer, review the refreshed preview, then click Print.	Vyberte tiskárnu. Poté zkontrolujte obnovený náhled a stiskněte Tisknout.	Válasszon nyomtatót, ellenőrizze a frissített előnézetet, majd kattintson a Nyomtatás gombra.

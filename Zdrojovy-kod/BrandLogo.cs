@@ -1,0 +1,6 @@
+using System;using System.Drawing;using System.Drawing.Drawing2D;
+namespace EanEtikety {
+public static class BrandLogo {
+ public static Bitmap Image(int size){var b=new Bitmap(size,size);using(var g=Graphics.FromImage(b)){g.SmoothingMode=SmoothingMode.AntiAlias;g.ScaleTransform(size/256f,size/256f);using(var bg=new LinearGradientBrush(new Point(0,0),new Point(256,256),Color.FromArgb(22,109,246),Color.FromArgb(0,205,191)))using(var p=new GraphicsPath()){p.AddArc(4,4,64,64,180,90);p.AddArc(188,4,64,64,270,90);p.AddArc(188,188,64,64,0,90);p.AddArc(4,188,64,64,90,90);p.CloseFigure();g.FillPath(bg,p);}using(var p=new GraphicsPath()){p.AddPolygon(new[]{new PointF(48,58),new PointF(168,58),new PointF(213,103),new PointF(213,188),new PointF(48,188)});using(var pen=new Pen(Color.White,9){LineJoin=LineJoin.Round})g.DrawPath(pen,p);}g.FillEllipse(Brushes.White,169,81,13,13);using(var pen=new Pen(Color.White,11){StartCap=LineCap.Round,EndCap=LineCap.Round,LineJoin=LineJoin.Round}){g.DrawLines(pen,new[]{new PointF(75,158),new PointF(75,99),new PointF(110,158),new PointF(110,99)});g.DrawLine(pen,135,116,135,160);g.DrawArc(pen,116,115,62,47,-90,180);}g.FillRectangle(Brushes.White,188,129,5,35);}return b;}
+}
+}

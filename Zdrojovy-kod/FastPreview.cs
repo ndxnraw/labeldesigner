@@ -1,0 +1,6 @@
+﻿using System;
+namespace EanEtikety {
+public partial class MainForm {
+ bool FastMove(ElementEdit edit){var old=preview.Element(edit.Index);if(old==null||preview.Scene==null||Math.Abs(old.Width-edit.Width)>.001||Math.Abs(old.Height-edit.Height)>.011||Math.Abs(old.Font-edit.Font)>.001)return false;double dx=edit.X-old.X,dy=edit.Y-old.Y;loading=true;try{if(edit.Index<=-3){int i=-3-edit.Index;symbols[i].X=edit.X;symbols[i].Y=edit.Y;preview.Settings.Symbols[i].X=edit.X;preview.Settings.Symbols[i].Y=edit.Y;}else if(edit.Index==-1){nums["BarX"].Value=(decimal)Display(edit.X);nums["BarY"].Value=(decimal)Display(edit.Y);preview.Settings.BarX=edit.X;preview.Settings.BarY=edit.Y;}else{grid.Rows[edit.Index].Cells[1].Value=Display(edit.X);grid.Rows[edit.Index].Cells[2].Value=Display(edit.Y);preview.Settings.Texts[edit.Index].X=edit.X;preview.Settings.Texts[edit.Index].Y=edit.Y;}preview.Scene.TranslateElement(edit.Index,(float)dx,(float)dy);}finally{loading=false;}dirty=true;Text=Loc.T("ND LabelDesigner • neuložené zmeny");preview.Invalidate();timer.Stop();timer.Start();return true;}
+}
+}
