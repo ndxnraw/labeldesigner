@@ -1,0 +1,91 @@
+ND LabelDesigner 2.6 — Windows
+Revízia 21. 9. 2026
+
+SPUSTENIE A NÁZOV
+Rozbaľte ZIP a spustite ND-LabelDesigner.exe. Program nadväzuje na
+ND LabelMaker 2.5 a používa .NET Framework 4.8. Nevyžaduje inštaláciu.
+Nové vektorové logo je súčasťou záhlavia a ikony EXE. V priečinku Logo
+sú aj samostatné súbory SVG, PNG a ICO. Zdrojovy-kod obsahuje build.cmd.
+Podpis: Created by Daniel Návojský (ndxnraw) using Codex | 2026
+
+PAPIER A KÓPIE
+K dispozícii sú tieto možnosti:
+- Podľa etikety: papier má rovnakú veľkosť ako etiketa, bez papierových okrajov.
+- A3: 297 × 420 mm
+- A4: 210 × 297 mm
+- A5: 148 × 210 mm
+- A6: 105 × 148 mm
+- Letter: 215,9 × 279,4 mm
+- Legal: 215,9 × 355,6 mm
+- Vlastné rozmery: nastaviteľná šírka a výška 10–500 mm.
+
+Pri predvolených formátoch sú rozmery pevné. Na ich zmenu vyberte Vlastné
+rozmery. Jednotky možno prepínať medzi mm a cm. Papier má samostatný ľavý,
+pravý, horný a dolný okraj. Etiketa začína za ľavým a horným okrajom;
+pravý a dolný okraj určujú voľný priestor, do ktorého etiketa nesmie zasiahnuť.
+Pre orientáciu na šírku možno použiť vlastný rozmer, napríklad 297 × 210 mm.
+
+Na strane sa umiestňuje jedna etiketa. Voľba viacerých etikiet na hárok,
+medzery medzi etiketami a počet kópií boli z hlavného rozhrania odstránené.
+Počet kópií sa zadáva výhradne v systémovom tlačovom dialógu.
+Rozmery papiera a okraje sa použijú aj pri exporte PDF a Word.
+SVG exportuje samotnú etiketu s transparentným pozadím. ZPL zostáva
+formátom pre etiketu na kotúči a neobsahuje papier okolo etikety.
+
+TLAČ A NÁHĽAD
+1. Nastavte papier a okraje v aplikácii.
+2. Kliknite na Tlačiť a vyberte tlačiareň, jej vlastnosti a počet kópií
+   v systémovom dialógu Windows.
+3. Po potvrdení sa zobrazí tlačový náhľad. Vykresľuje sa cez Windows/.NET
+   PrintDocument a PrintPreviewControl, nie zo snímky editora etikety.
+4. Až tlačidlo Tlačiť v tomto náhľade odošle úlohu. Zrušiť zavrie náhľad
+   bez odoslania úlohy. Náhľad zobrazuje jednu stranu, ktorá sa tlačí
+   v zadanom počte kópií.
+
+Opravený je posun náhľadu spôsobený prepočtom hardvérových okrajov medzi
+jednotkami tlačového systému a milimetrami. Náhľad zachováva fyzické rozmery
+papiera a polohu obsahu. Program kontroluje malý papier a orezanie obsahu
+mimo tlačiteľnej oblasti. V ovládači nastavte správne médium a mierku 100 %.
+Náhľad je samostatné okno aplikácie s komponentom Windows/.NET; nejde
+o zmenu systémového dialógu tlačiarne alebo náhľadu poskytovaného jej výrobcom.
+
+WORD: SAMOSTATNÉ TRANSPARENTNÉ SVG OBJEKTY
+Každé textové pole, celý čiarový kód vrátane jeho popisu a každý symbol
+Zálohované sa exportujú ako samostatný SVG obrázok s vlastnou polohou
+a veľkosťou. V dokumente ich možno označovať, presúvať a škálovať jednotlivo.
+Čiarový kód zostáva jedným objektom, aby sa pri presúvaní nerozdelili čiary
+a popis. Text je prevedený na krivky; na zmenu jeho slov použite program
+a export zopakujte. V Microsoft Worde môže pri výbere pomôcť tabla výberu.
+
+SVG ani ich náhradné PNG nemajú biele pozadie. Každý objekt má samostatný
+transparentný PNG náhradný obrázok pre aplikácie bez podpory SVG. Časti
+presahujúce etiketu sa pri exporte orežú. Dokument rešpektuje nastavený
+papier aj štyri okraje. Neobsahuje jediný zlúčený obrázok celej etikety.
+
+ROZHRANIE A KOMPATIBILITA
+Odstránené sú nadbytočné posuvníky na paneloch tlačidiel. Pri menšom okne
+sa tlačidlá zalomia do ďalšieho riadka. Posúvanie v sekcii nastavení zostáva
+dostupné iba vtedy, keď sa celý obsah nezmestí do okna.
+Jazyky SK/EN/CS/HU, tmavý/svetlý režim, editácia, symboly, GS1 a exporty ostávajú.
+Staré projekty sa otvárajú; ich viacnásobné rozloženie sa v rozhraní 2.6
+zmení na jednu etiketu na strane. Pôvodný súbor sa nemení bez uloženia.
+Nové ZPL projektové metadáta majú označenie ELG26; otvárajte ich vo verzii 2.6.
+
+Uložiť nastavenia spustenia si stále pamätá iba jazyk, režim, jednotky
+a rozmery etikety. Obsah etikety sa po štarte vytvorí nanovo a vycentruje.
+Kvôli kompatibilite zostáva cesta %LOCALAPPDATA%\NDLabelMaker\startup.xml.
+Papier a okraje patria do uloženého projektu .ean.xml, nie do preferencií spustenia.
+
+OVERENIE
+Overené sú formáty papiera, vlastné rozmery, štyri okraje, mm/cm, jazyky,
+minimálna veľkosť okna, tlačová cesta náhľadu, jednotlivé SVG objekty,
+priehľadnosť náhradných PNG a ich rozloženie podľa súradníc DOCX.
+Microsoft Word nie je v testovacom prostredí nainštalovaný. Skutočné otvorenie
+DOCX v Microsoft Worde a fyzická tlač neboli overené. Pri testovaní sa žiadna
+fyzická tlačová úloha neodoslala.
+
+Technické zdroje k tlačovému náhľadu:
+https://learn.microsoft.com/en-us/dotnet/api/system.drawing.printing.previewprintcontroller
+https://learn.microsoft.com/en-us/dotnet/api/system.drawing.printing.printdocument.originatmargins
+Oficiálna predloha symbolu Zálohované:
+https://slovenskozalohuje.sk/wp-content/uploads/2024/03/Logo_Z_Design_Manual_1_2_4_5_2021.pdf

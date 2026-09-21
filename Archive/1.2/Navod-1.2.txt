@@ -1,0 +1,105 @@
+EAN ETIKETY 1.2 – program pre Windows
+
+SPUSTENIE A AKTUALIZÁCIA
+Rozbaľte ZIP do nového priečinka a spustite EAN-Etikety.exe.
+Starú verziu pred nahradením zatvorte. Inštalátor nie je potrebný.
+Program pracuje lokálne bez internetu a bez nainštalovaného Wordu.
+Vyžaduje Windows s .NET Framework 4.8 (bežná súčasť Windows 10/11).
+Nastavenia .ean.xml z verzií 1.0 a 1.1 otvoríte cez Otvoriť.
+Pre nové nastavenia odporúčame Uložiť ako: staršie verzie nepodporujú
+ITF-14 ani povolené presahy z verzie 1.2.
+
+ČO JE NOVÉ
+1. Myšou možno posúvať čiarový kód aj každé textové pole.
+2. Vybraný prvok má osem úchytov na zmenu veľkosti.
+3. Podpora EAN14 / ITF-14 pre 14-miestny identifikátor GTIN-14.
+4. Presah za hranice etikety už nevypne náhľad ani export.
+
+VÝBER A POSÚVANIE
+Kliknite na text alebo čiarový kód v náhľade. Objaví sa rám s úchytmi.
+Držte ľavé tlačidlo vo vnútri rámu a prvok presuňte. Uvoľnením ho umiestnite.
+Text možno vybrať aj kliknutím na jeho riadok v tabuľke.
+Tlačidlo Vybrať kód vyberie kód, aj keď sa prekrýva s textom.
+Pri prekrývajúcich sa textoch vyberte požadovaný text v tabuľke.
+Zmena sa okamžite zapíše do súradníc X/Y a prejaví sa pri exporte.
+
+ZMENA VEĽKOSTI MYŠOU
+Rohový úchyt: pomerné škálovanie šírky, výšky a veľkosti písma.
+  Pri kóde sa škáluje aj písmo číselného alebo textového popisu pod ním.
+Bočný úchyt: zmena šírky bez zmeny písma.
+Horný/dolný úchyt: zmena výšky bez zmeny písma.
+  Pri texte mení veľkosť textového poľa; text sa podľa šírky zalamuje.
+  Pri kóde mení výšku čiar.
+Escape počas ťahania vráti polohu, rozmery aj písmo do stavu pred úpravou.
+Presné rozmery možno naďalej zadávať číselne vľavo alebo v tabuľke.
+Veľmi malé kódy sú obmedzené rozlíšením tlačiarne a celými tlačovými bodmi.
+
+PRESAH ZA ETIKETU
+Prvok možno presunúť aj za ľavý, pravý, horný alebo dolný okraj.
+Povolené sú záporné súradnice X/Y. Presahujúci rám sa zobrazuje červeno.
+Náhľad zostane funkčný a zobrazuje obsah vnútri etikety.
+Obsah mimo etikety sa v PDF, Worde aj ZPL oreže. Pri exporte sa zobrazí
+upozornenie, aby ste mohli vedome pokračovať aj s orezaným obsahom.
+Orezaný čiarový kód nemusí byť čitateľný skenerom.
+Ak sa celý prvok ocitne mimo viditeľnej pracovnej plochy, vráťte ho číselným
+nastavením X/Y. Pri texte použite jeho riadok v tabuľke.
+Neplatné údaje kódu (napríklad nesprávna kontrolná číslica) treba opraviť.
+Modré/červené rámy ani úchyty sa netlačia a neexportujú.
+
+EAN14 / ITF-14
+Vo výbere typu zvoľte EAN14 / ITF-14.
+Ide o GTIN-14 zakódovaný symbologiou ITF-14.
+Zadajte 13 číslic a program doplní kontrolnú číslicu, alebo zadajte všetkých
+14 číslic a program kontrolnú číslicu overí. Úvodné nuly zostávajú zachované.
+Kód má horný a dolný ochranný pás (bearer bar), vhodný na tlač etikiet.
+Šírka zahŕňa prázdne okraje; výška čiar sa nastavuje samostatne od pásov
+a popisu. Pásy sa prispôsobujú šírke najtenšej čiary.
+Príklad platného vstupu na skúšku: 10012345000017.
+ITF-14 sa používa na distribučné balenia; nejde o EAN-13 pre maloobchodnú kasu.
+Zdroj: https://www.gs1.org/standards/barcodes/1d-general-distribution
+
+ĎALŠIE FORMÁTY
+EAN-13: 12 číslic bez kontrolnej číslice alebo 13 s kontrolnou číslicou.
+EAN-8: 7 číslic bez kontrolnej číslice alebo 8 s kontrolnou číslicou.
+UPC-A: 11 číslic bez kontrolnej číslice alebo 12 s kontrolnou číslicou.
+Code 128: 1–80 tlačiteľných ASCII znakov, bez diakritiky. Číslice, malé
+  aj veľké písmená, medzery a symboly. Sady B/C, automatická kontrolná hodnota.
+  Nejde o GS1-128.
+Code 39: 1–40 znakov A–Z, 0–9, medzera a - . $ / + %.
+  Bez voliteľnej kontrolnej číslice. Hviezdičky pridáva program.
+ITF (2 z 5): párny počet číslic 2–80, bez kontrolnej číslice a ochranných pásov.
+Medzery v Code 128 a Code 39 sa zachovávajú ako súčasť dát.
+
+ROZMERY, TEXTY, KÓPIE A ULOŽENIE
+Rozmery a polohy sú v mm, písmo v bodoch (pt). X sa meria zľava, Y zhora.
+Etiketa: 10–500 mm v každom smere. Poloha prvkov: -500 až 500 mm.
+Najviac 50 textových polí a 500 rovnakých kópií na export.
+Texty používajú Arial, voliteľne tučné písmo a zarovnanie na stred.
+Papier a kópie: vlastný rozmer hárku, okraje a medzery alebo jedna etiketa
+na samostatnej strane. Veľmi veľké etikety pri vysokom DPI obmedzuje pamäť.
+Uložiť / Uložiť ako uloží údaje, polohy, rozmery a formát do .ean.xml.
+
+EXPORT A TLAČ
+PDF: pevný rozmer strany, bezstratový čiernobiely obraz.
+Word (.docx): etikety sú obrázky s pevnými rozmermi. Obsah upravujte
+  v tomto programe a potom znovu exportujte.
+ZPL: čiernobiele grafické pásy ^GFA vrátane diakritiky v textoch etikety.
+  Počet kópií je v ^PQ; režim hárku sa ignoruje. Program sám tlačiarni
+  nič neposiela; súbor odošlite svojím nástrojom pre tlačiareň so ZPL.
+Tlačte v mierke 100 % / Skutočná veľkosť a vyberte správny papier v ovládači.
+DPI musí zodpovedať tlačiarni. Voľby: 203, 203,2 (8 bodov/mm), 300,
+304,8 (12 bodov/mm), 600, 609,6 (24 bodov/mm).
+Pred sériovou tlačou premerajte jednu etiketu a načítajte ju skenerom.
+Program neprideľuje registračné čísla GS1.
+
+OVERENIE VERZIE 1.2
+Otestované: presun textov a kódu, všetkých osem úchytov, škálovanie písma,
+Escape, zmena veľkosti okna, synchronizácia tabuľky a súradníc, presahy,
+záporné súradnice, uloženie nastavení a načítanie predchádzajúcich verzií.
+ITF-14 bol porovnaný s nezávislým generátorom vrátane ochranných pásov.
+Overená zhoda obrazu v PDF, DOCX a ZPL a pôvodné formáty aj viacstranové PDF.
+Fyzická tlač a hardvérové skenovanie neboli testované. DOCX bol overený
+štruktúrne a podľa obrazu; zobrazenie v konkrétnej verzii Wordu treba overiť.
+
+ZDROJOVÝ KÓD
+Priečinok Zdrojovy-kod obsahuje kód aplikácie a build.cmd na jej zostavenie.

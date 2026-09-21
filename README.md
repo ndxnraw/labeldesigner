@@ -27,3 +27,7 @@ Overené: zostavenie, regresné testy, grafický náhľad a trojstranové PDF A4
 Fyzická tlač ani špecifické funkcie jednotlivých ovládačov neboli overené.
 
 Created by Daniel Návojský (ndxnraw) using Codex | 2026
+
+## Staršie verzie
+
+[Všetky predchádzajúce verzie 1.0–2.6](Archive/README.md) vrátane pôvodných ZIP balíkov, zdrojov a dostupných návodov.

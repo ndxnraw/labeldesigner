@@ -1,0 +1,87 @@
+ND LabelMaker 2.4 — Windows
+Pokračovanie programu EAN Label Generator. Dátum vydania: 18. 9. 2026.
+
+SPUSTENIE
+Rozbaľte ZIP a spustite ND-LabelMaker.exe. Program používa .NET Framework 4.8.
+Nevyžaduje inštaláciu, internet ani externé knižnice. Preklady sú súčasťou EXE.
+Zdrojový kód je v priečinku Zdrojovy-kod; build.cmd zostaví program.
+
+NOVINKY 2.4
+1. Predvolená etiketa obsahuje jediný text Názov produktu. Text je vodorovne
+   vycentrovaný v poli umiestnenom symetricky na etikete.
+2. SVG má transparentné pozadie. Obsahuje čierne vektorové tvary textov,
+   kódu a symbolov. Biela plocha v náhľade predstavuje papier; neexportuje
+   sa ako pozadie SVG. SVG obsahuje jednu etiketu v skutočných rozmeroch.
+3. Jazyk vpravo hore prepína slovenčinu, angličtinu, češtinu a maďarčinu
+   okamžite, bez reštartu. Preložené sú ovládacie prvky, dialógy, návod,
+   identifikátory GS1 a aplikačné hlásenia. Systémové dialógy a správy
+   Windows/.NET sa riadia jazykom systému. Číselný formát ostáva podľa
+   regionálneho nastavenia Windows. Vaše texty a dáta kódu sa neprekladajú.
+4. Tlačidlo Uložiť nastavenia spustenia uloží aktuálny jazyk, svetlý/tmavý
+   režim, jednotky mm/cm a CELÚ AKTUÁLNU ETIKETU ako predvolenú šablónu.
+   Patrí sem rozmer, typ a obsah kódu, texty, fonty, symboly, ich polohy,
+   veľkosti, DPI, papier, okraje a počet kópií. Následné zmeny sa neukladajú
+   automaticky; na zmenu predvoleného stavu tlačidlo stlačte znovu.
+5. Nový názov programu je ND LabelMaker. Verzia je v ľavom dolnom rohu.
+
+KDE SÚ ULOŽENÉ NASTAVENIA
+Nastavenia spustenia sú pre aktuálneho používateľa Windows v súbore:
+%LOCALAPPDATA%\NDLabelMaker\startup.xml
+Prenesenie samotného EXE na iný počítač neprenesie tieto nastavenia.
+Na návrat k pôvodnému stavu zatvorte program a premenujte startup.xml.
+Pri chybnom súbore sa použijú predvolené hodnoty a zobrazí sa hlásenie.
+Poškodený súbor sa automaticky neprepíše.
+
+Uložiť / Uložiť ako na hlavnej lište naďalej ukladajú samostatný projekt
+etikety .ean.xml. Nezamieňajte ich s uložením nastavení spustenia.
+Otvorenie projektu nemení uloženú predvolenú šablónu. Staršie projekty sa
+otvárajú vrátane pôvodného zarovnania textu; automatické centrovanie sa
+týka novej predvolenej etikety, nie prepísania existujúcich návrhov.
+
+ZACHOVANÉ FUNKCIE
+EAN-13, EAN-8, UPC-A, Code 128, Code 39, ITF a EAN14 / ITF-14.
+Code 128 s GS1 AI: výber identifikátorov, dáta, poradie a automatické FNC1.
+Presúvanie prvkov myšou, osem úchytov, Escape na zrušenie ťahania.
+Dvojklik na text otvorí text a font; dvojklik na symbol otvorí rozmery.
+Centrovanie kódu, zarovnanie textu v poli a centrovanie symbolu v dialógu.
+PDF, Word (.docx), SVG a ZPL. PDF a SVG používajú vektorové krivky.
+Word obsahuje SVG a bitmapový náhradný obrázok pre staršie verzie Wordu.
+ZPL používa tlačové body podľa zvoleného DPI. Tlačte v mierke 100 %.
+Otvorenie ZPL a PRN obsahujúcich ZPL: vlastné projektové metadáta obnovia
+editovateľnú etiketu, podporovaný cudzí ZPL sa zobrazí iba na čítanie.
+NLBL sa otvára externe v NiceLabel; natívny import NLBL nie je podporovaný.
+Presah etikety nezablokuje náhľad; pri exporte sa obsah mimo etikety oreže.
+
+SYMBOL ZÁLOHOVANÉ
+Oficiálna slovenská vektorová predloha vrátane nápisu sa pri zmene jazyka
+nemení. Rohy zachovajú pomer strán, hrany menia rozmery samostatne.
+Program upozorní na šírku pod 10 mm, deformáciu, presah alebo zásah do kódu.
+Zdroj predlohy, strana 4:
+https://slovenskozalohuje.sk/wp-content/uploads/2024/03/Logo_Z_Design_Manual_1_2_4_5_2021.pdf
+
+OVERENIE
+Overené: všetky štyri jazyky a prepínanie bez zmeny dát, dialógy textu,
+symbolu a GS1, mm/cm, uloženie/opakované uloženie a obnovenie štartovacej
+šablóny, správanie pri poškodenom súbore, exporty a staršie projekty.
+Overené aj posúvanie/škálovanie, GS1 a regresia centrovania v tabuľke.
+Fyzická tlač a vizuálne otvorenie DOCX v Microsoft Word neboli testované.
+
+ENGLISH — QUICK START
+Select Language in the header. Use Save startup settings to store the
+current language, theme, units and entire label as your startup template.
+Later changes are not saved automatically. Save / Save as stores a separate
+label project. SVG has a transparent background. Help is available in English.
+
+ČEŠTINA — RYCHLÝ START
+Jazyk vyberte v záhlaví. Uložit nastavení spuštění uloží aktuální jazyk,
+vzhled, jednotky a celou etiketu jako výchozí šablonu. Další změny se
+neukládají automaticky. Uložit / Uložit jako ukládá samostatný projekt.
+SVG má průhledné pozadí. Návod v programu je dostupný česky.
+
+MAGYAR — GYORS KEZDÉS
+Válasszon nyelvet a fejlécben. Az Indítási beállítások mentése az aktuális
+nyelvet, témát, mértékegységet és a teljes címkét menti indítási sablonként.
+A további módosítások nem mentődnek automatikusan. A Mentés / Mentés másként
+külön címkeprojektet ment. Az SVG háttere átlátszó. Magyar súgó is elérhető.
+
+Created by Daniel Návojský using Codex | 2026

@@ -1,0 +1,85 @@
+ND LabelMaker 2.5 — Windows
+Revízia z 18. 9. 2026
+
+Rozbaľte ZIP a spustite ND-LabelMaker.exe. Program používa .NET Framework 4.8.
+Zdrojový kód vrátane prekladov a build.cmd je v priečinku Zdrojovy-kod.
+
+1. NASTAVENIA SPUSTENIA BEZ OBSAHU ETIKETY
+Tlačidlo Uložiť nastavenia spustenia si zapamätá výhradne:
+- jazyk programu,
+- svetlý/tmavý režim,
+- jednotky mm/cm,
+- šírku a výšku etikety.
+
+Neukladá texty, fonty, dáta alebo typ kódu, symboly, ich rozloženie,
+počet kópií, DPI ani rozloženie papiera. Uloženie preferencií funguje
+aj vtedy, keď je obsah aktuálneho čiarového kódu neplatný.
+
+Pri štarte vznikne nová etiketa s názvom produktu v zvolenom jazyku
+a predvoleným EAN-13 8580000000016. Veľkosť písma a kódu sa prispôsobí
+rozmerom etikety. Text aj kód sa vodorovne vycentrujú a ich spoločná
+zostava sa umiestni do zvislého stredu etikety. Pri veľmi malých etiketách
+naďalej platia upozornenia na čitateľnosť a minimálne rozmery čiarového kódu.
+Rozloženie sa vytvára pri spustení; neskoršie ručné zmeny zostávajú pod
+kontrolou používateľa.
+
+Nastavenia sú v %LOCALAPPDATA%\NDLabelMaker\startup.xml.
+Z nastavení verzie 2.4 sa prevezme len jazyk, vzhľad, jednotky a rozmery.
+Starý uložený obsah sa ignoruje. Pri ďalšom stlačení tlačidla sa súbor
+prepíše novým formátom bez obsahu etikety. Pre úplný reset zatvorte program
+a premenujte startup.xml. Pri poškodenom súbore sa použijú základné hodnoty.
+
+Uložiť / Uložiť ako na hlavnej lište naďalej ukladajú celý projekt .ean.xml.
+Otvorené projekty si zachovávajú svoje texty, kódy aj ručné rozloženie.
+
+2. PRIAMA TLAČ
+Kliknite na Tlačiť na hlavnej lište. Otvorí sa systémový výber tlačiarne
+a jej vlastností. Program používa nainštalované tlačiarne Windows,
+vrátane ovládačov etiketových tlačiarní. Zrušením dialógu sa nič netlačí.
+
+Tlačí sa aktuálna etiketa v skutočnej veľkosti, bez automatického zmenšovania.
+Texty, kód a symbol sú vykresľované z vektorových tvarov, nie zo snímky náhľadu.
+- Bez režimu hárku: jedna etiketa na stranu, papier podľa rozmeru etikety.
+- Režim hárku: použijú sa rozmery papiera, okraje a medzery z karty Papier a kópie.
+- Počet rovnakých etikiet v aplikácii určuje počet etikiet v dokumente.
+- Počet kópií v systémovom tlačovom dialógu násobí celý tlačový dokument.
+  Pre bežnú tlač ho nechajte na 1 a počet etikiet nastavte v aplikácii.
+
+Vo vlastnostiach tlačiarne skontrolujte správny rozmer vloženého papiera
+alebo etikety a vypnite prispôsobenie mierky v ovládači. Program upozorní,
+ak je obsah mimo tlačiteľnej oblasti; menší papier odmietne, aby etiketu
+automaticky nedeformoval. Rozlíšenie etikety nastavte podľa tlačiarne.
+Hlásenie o odoslaní úlohy znamená odovzdanie systému Windows, nie potvrdenie
+fyzického vytlačenia.
+
+3. ZACHOVANÉ FUNKCIE
+Jazyky SK/EN/CS/HU, tmavý/svetlý režim, mm/cm, editácia textu dvojklikom,
+fonty, posúvanie a zmena veľkosti myšou, centrovanie a Escape na zrušenie.
+EAN-13, EAN-8, UPC-A, Code 128, Code 39, ITF, EAN14 / ITF-14 a GS1-128.
+Export PDF, Word, ZPL a SVG s transparentným pozadím.
+Otvorenie projektov XML, ZPL a PRN s podporovaným ZPL. NLBL sa otvára
+externe v NiceLabel. Symbol Zálohované zostáva podľa oficiálnej predlohy:
+https://slovenskozalohuje.sk/wp-content/uploads/2024/03/Logo_Z_Design_Manual_1_2_4_5_2021.pdf
+
+OVERENIE
+Testované rozmery 10–500 mm v rôznych pomeroch strán a všetkých jazykoch,
+vycentrovanie, čistý obsah po štarte, migrácia starých preferencií,
+uloženie bez textov a kódov, rozloženie tlačových strán a neúplný posledný
+hárok, kontrola formátu papiera a tlačiteľných okrajov.
+Tlačová cesta PrintDocument bola overená cez PreviewPrintController
+s nainštalovaným ovládačom; fyzická tlačová úloha sa pri testoch neodosielala.
+Dokumentácia použitého súradnicového systému tlače:
+https://learn.microsoft.com/en-us/dotnet/api/system.drawing.printing.printdocument.originatmargins
+
+EN: Startup settings now store only language, theme, units and label size.
+Startup creates fresh centered text and barcode. Print uses Windows printers
+at actual size, with the application's paper layout and label count.
+CS: Nastavení spuštění ukládá pouze jazyk, vzhled, jednotky a rozměry etikety.
+Při spuštění se vytvoří nový vystředěný text a kód. Tisknout použije tiskárnu
+Windows a rozložení i počet etiket z aplikace ve skutečné velikosti.
+HU: Az indítási beállítások csak a nyelvet, témát, mértékegységet és a címke
+méretét tárolják. Indításkor új, középre igazított szöveg és kód készül.
+A Nyomtatás a Windows nyomtatóit használja tényleges méretben, az alkalmazás
+lapelrendezésével és címkeszámával.
+
+Created by Daniel Návojský using Codex | 2026

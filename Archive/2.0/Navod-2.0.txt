@@ -1,0 +1,78 @@
+EAN Etikety 2.0 — Windows
+Created by Daniel Návojský using Codex | 2026
+
+SPUSTENIE A AKTUALIZÁCIA
+Rozbaľte celý ZIP do nového priečinka a spustite EAN-Etikety.exe.
+Inštalácia ani administrátorské oprávnenia nie sú potrebné.
+Určené pre Windows 10/11 s .NET Framework 4.8 alebo novším.
+Predchádzajúcu verziu a uložené .ean.xml súbory môžete ponechať.
+Verzia 2.0 načíta nastavenia zo starších verzií. Nové nastavenia ukladajte
+samostatne, ak sa chcete neskôr vrátiť k starému programu.
+
+NOVINKY 2.0
+• Prepracované rozhranie inšpirované dodaným návrhom: tmavé panely,
+  modré exportné tlačidlá, oddelená oblasť náhľadu, textov a stavu.
+• Svetlý aj tmavý režim — prepínač v hornom paneli.
+• Vektorový náhľad bez zväčšovania bitmapy. Text má vyhladené okraje;
+  čiary kódu zostávajú ostré. Rámy a úchyty sa neexportujú.
+• PDF obsahuje vektorové krivky textov a čiar, nie bitmapu etikety.
+• Word obsahuje vektorové SVG a PNG náhradu pri 600 DPI; pri veľmi
+  veľkých etiketách sa rozlíšenie náhrady zníži na limit 40 miliónov pixelov.
+• Dvojklik na text v náhľade otvorí editor obsahu, fontu, veľkosti,
+  tučného písma a zarovnania. Použiť uloží zmeny; Zrušiť ich zahodí.
+• Stĺpec Font ponúka fonty nainštalované vo Windows.
+• Prepínanie mm/cm pre rozmery etikety, kódu, textov, papiera a medzier.
+• Podpis v pravom dolnom rohu programu. Podpis sa netlačí na etikety.
+
+PRÁCA S ETIKETOU
+Údaje sa zadávajú ručne. Vyberte typ kódu a zadajte jeho obsah.
+Podporované sú EAN-13, EAN-8, UPC-A, Code 128, Code 39, ITF a EAN14 / ITF-14.
+Pri EAN/UPC sa kontrolná číslica doplní alebo overí. EAN14 sa kreslí ako
+ITF-14 s hornou a dolnou nosnou čiarou.
+
+Na karte Etiketa a kód zvoľte jednotky mm alebo cm. Prepnutie prepočíta
+zobrazené údaje bez zmeny fyzickej veľkosti. Fonty zostávajú v bodoch (pt),
+rozlíšenie v DPI. Uložený XML súbor používa interné rozmery v milimetroch.
+Režim vzhľadu, jednotky a fonty sa ukladajú spolu s nastavením etikety.
+Ak sa spodné nastavenia nezmestia do okna, posuňte ľavý panel kolieskom.
+
+Text alebo kód vyberte kliknutím a posuňte myšou. Rohové úchyty menia
+rozmery aj veľkosť písma, bočné úchyty šírku alebo výšku. Escape zruší
+prebiehajúce ťahanie. Centrovať kód vycentruje kód vodorovne na etikete.
+Na stred v tabuľke zarovnáva text vo vnútri jeho textového poľa.
+Presah neblokuje náhľad; časť mimo etikety sa pri exporte oreže.
+Pôvodná oprava chyby výberu riadkov a centrovania ostáva zachovaná.
+
+FONTY A EXPORT
+Zvolený font sa použije v náhľade aj vo všetkých exportoch. PDF a SVG
+obsahujú obrysy písmen, takže príjemca nemusí mať tento font nainštalovaný.
+Text v exportoch nie je bežným editovateľným textom; upravujte ho v programe.
+Ak pri načítaní nastavenia chýba font, použije sa Arial a zobrazí sa upozornenie.
+Veľkosť textového poľa musí stačiť na text; pri zmene fontu skontrolujte náhľad.
+
+PDF je najvhodnejší výstup na presnú vektorovú tlač. Tlačte v mierke 100 %,
+bez prispôsobovania na stranu. Karta Papier a kópie nastavuje rozloženie
+na hárok, okraje, medzery a počet rovnakých etikiet.
+
+Word: aplikácie podporujúce vložené SVG použijú vektorový obraz. Staršie
+aplikácie použijú bitmapovú náhradu. Súbor DOCX bol overený štruktúrne,
+vrátane SVG a obrázkov; otvorenie v Microsoft Worde nebolo v tomto prostredí
+vizuálne overené.
+
+ZPL: používa čiernobielu grafiku ^GFA vrátane diakritiky a zvolených fontov.
+Nastavené DPI musí zodpovedať tlačiarni. Na 203 DPI zostávajú fyzické tlačové
+body viditeľnejšie než na 300/600 DPI; vyhladenie odtieňmi sivej ZPL výstup
+nepoužíva. Kód sa zarovnáva na celé tlačové body. Program vytvorí súbor,
+nevykonáva automatické odoslanie na tlačiareň.
+
+OVERENIE VERZIE
+Prešli testy kontrolných číslic, 10 vzorov porovnaných s nezávislým encoderom,
+ITF-14, výberu a centrovania bez reentrantnej chyby, ťahania a ôsmich úchytov,
+Escape, presahu, starých XML súborov, mm/cm, fontov, dvojkliku a oboch režimov.
+Overené bolo generovanie PDF/DOCX/ZPL; PDF bolo aj vizuálne skontrolované.
+Fyzická tlač a čítanie skenerom neboli testované.
+
+ZDROJOVÝ KÓD
+Priečinok Zdrojovy-kod obsahuje zdrojové súbory a build.cmd.
+Build.cmd zostaví EAN-Etikety.exe v nadradenom priečinku pomocou kompilátora
+.NET Framework, ktorý je súčasťou Windows s nainštalovaným .NET Framework.
