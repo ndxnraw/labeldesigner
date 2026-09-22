@@ -1,8 +1,8 @@
 # Archív predchádzajúcich verzií
 
-Všetkých 12 zachovaných vydaní od 1.0 po 2.6. Pôvodné ZIP balíky sú uložené bez úprav a obsahujú program aj dostupné zdrojové kódy. Verzia 1.0 mala pôvodne názov balíka bez čísla verzie.
+Všetkých 14 zachovaných vydaní od 1.0 po 2.7. Pôvodné ZIP balíky sú uložené bez úprav a obsahujú program aj dostupné zdrojové kódy. Verzia 1.0 mala pôvodne názov balíka bez čísla verzie.
 
-Aktuálna verzia 2.6.1 je v [koreňovom priečinku](../README.md).
+Aktuálna verzia 2.7.1 je v [koreňovom priečinku](../README.md).
 
 | Verzia | Program a zdroje | Návod | Súbory C# v ZIP |
 |---|---|---|---|
@@ -18,6 +18,8 @@ Aktuálna verzia 2.6.1 je v [koreňovom priečinku](../README.md).
 | 2.4 | [ZIP](2.4/ND-LabelMaker-2.4-Windows.zip) | [Návod](2.4/Navod-2.4.txt) | 18 |
 | 2.5 | [ZIP](2.5/ND-LabelMaker-2.5-Windows.zip) | [Návod](2.5/Navod-2.5.txt) | 20 |
 | 2.6 | [ZIP](2.6/ND-LabelDesigner-2.6-Windows.zip) | [Návod](2.6/Navod-2.6.txt) | 23 |
+| 2.6.1 | [ZIP](2.6.1/ND-LabelDesigner-2.6.1-Windows.zip) | [Návod](2.6.1/Navod-2.6.1.txt) | 26 |
+| 2.7 | [ZIP](2.7/ND-LabelDesigner-2.7-Windows.zip) | [Návod](2.7/Navod-2.7.txt) | 26 |
 
 [Prehľad revízií 1.0–2.3](EAN-Label-Generator-Prehlad-revizii-1.0-2.3.pdf)
 

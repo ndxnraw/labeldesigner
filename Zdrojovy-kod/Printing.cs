@@ -18,16 +18,17 @@ public class LabelPrintDocument:PrintDocument {
 
  public bool ContentFits(RectangleF printable){var area=new RectangleF(printable.X*.254f,printable.Y*.254f,printable.Width*.254f,printable.Height*.254f);area.Inflate(.15f,.15f);for(int i=0;i<Math.Min(Capacity,label.Copies);i++){var pos=LabelBounds(i);foreach(var shape in scene.Shapes){var b=RectangleF.Intersect(shape.Path.GetBounds(),shape.Clip);b=RectangleF.Intersect(b,new RectangleF(0,0,(float)label.Width,(float)label.Height));if(b.IsEmpty)continue;b.Offset(pos.X,pos.Y);if(!area.Contains(b))return false;}}return true;}
  protected override void OnBeginPrint(PrintEventArgs e){page=0;Cancelled=false;base.OnBeginPrint(e);}
- protected override void OnPrintPage(PrintPageEventArgs e){if(!FitsPaper(e.PageBounds))throw new InvalidOperationException(Loc.T("Papier tlačiarne je menší než nastavený formát. Upravte formát v nastavení tlačiarne."));var graphicsState=e.Graphics.Save();try{e.Graphics.ResetTransform();e.Graphics.PageUnit=GraphicsUnit.Millimeter;e.Graphics.PageScale=1;if(!PrintController.IsPreview)e.Graphics.TranslateTransform(-e.PageSettings.HardMarginX*.254f,-e.PageSettings.HardMarginY*.254f);RenderPage(e.Graphics,page++);}finally{e.Graphics.Restore(graphicsState);}e.HasMorePages=page<PageCount;base.OnPrintPage(e);}
+ protected override void OnPrintPage(PrintPageEventArgs e){if(!FitsPaper(e.PageBounds))throw new InvalidOperationException(Loc.T("Papier tlačiarne je menší než nastavený formát. Upravte formát v nastavení tlačiarne."));var graphicsState=e.Graphics.Save();try{e.Graphics.ResetTransform();e.Graphics.PageUnit=GraphicsUnit.Millimeter;e.Graphics.PageScale=1;if(!PrintController.IsPreview)e.Graphics.TranslateTransform(-e.PageSettings.HardMarginX*.254f,-e.PageSettings.HardMarginY*.254f);var area=e.PageSettings.PrintableArea;e.Graphics.SetClip(new RectangleF(area.X*.254f,area.Y*.254f,area.Width*.254f,area.Height*.254f),System.Drawing.Drawing2D.CombineMode.Intersect);RenderPage(e.Graphics,page++);}finally{e.Graphics.Restore(graphicsState);}e.HasMorePages=page<PageCount;base.OnPrintPage(e);}
  public void ValidatePrinter(){if(!PrinterSettings.IsValid)throw new InvalidOperationException(Loc.T("Vybraná tlačiareň nie je dostupná."));if(!FitsPaper(DefaultPageSettings.Bounds))throw new InvalidOperationException(Loc.T("Papier tlačiarne je menší než nastavený formát. Upravte formát v nastavení tlačiarne."));}
  public System.Collections.Generic.List<string> PrintWarnings(){var warnings=Engine.Warnings(label);if(!ContentFits(DefaultPageSettings.PrintableArea))warnings.Add(Loc.T("Časť obsahu je mimo tlačiteľnej oblasti tlačiarne a môže byť orezaná."));return warnings;}
  protected override void OnEndPrint(PrintEventArgs e){base.OnEndPrint(e);Cancelled=e.Cancel;}
  protected override void Dispose(bool disposing){if(disposing)scene.Dispose();base.Dispose(disposing);}
 }
 public partial class MainForm {
- void PrintLabel(){try{var settings=Read();using(var document=new LabelPrintDocument(settings)){
-  if(System.Drawing.Printing.PrinterSettings.InstalledPrinters.Count==0)throw new InvalidOperationException(Loc.T("Vo Windows nie je nainštalovaná tlačiareň."));
-  using(var window=new PrintPreviewWindow(document)){window.ShowDialog(this);if(window.Submitted)status.Text=Loc.T("Úloha bola odoslaná do tlačového systému Windows.");}
- }}catch(Exception ex){Error(ex);}}
+ Form CreatePrintWindow(LabelSettings settings){var document=new LabelPrintDocument(settings);PrintPanel panel;try{panel=new PrintPanel(document);}catch{document.Dispose();throw;}
+  var window=new Form{Text="ND LabelDesigner – "+Loc.T("Tlačiť"),Size=new Size(1180,820),MinimumSize=new Size(900,640),StartPosition=FormStartPosition.CenterParent,ShowInTaskbar=false,Font=Font,Icon=Icon,AutoScaleMode=AutoScaleMode.Dpi};
+  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);panel.BackRequested+=delegate{window.Close();};window.HandleCreated+=delegate{try{int value=dark?1:0;DwmSetWindowAttribute(window.Handle,20,ref value,4);}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}};return window;
+ }
+ void PrintLabel(){try{var settings=Read();timer.Stop();using(var window=CreatePrintWindow(settings))window.ShowDialog(this);}catch(Exception ex){Error(ex);}}
 }
 }

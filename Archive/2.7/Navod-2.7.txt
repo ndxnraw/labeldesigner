@@ -1,0 +1,102 @@
+ND LabelDesigner 2.7 — Windows
+Revízia 21. 9. 2026
+
+SPUSTENIE A NÁZOV
+Rozbaľte ZIP a spustite ND-LabelDesigner.exe. Program nadväzuje na
+ND LabelMaker 2.5 a používa .NET Framework 4.8. Nevyžaduje inštaláciu.
+Nové vektorové logo je súčasťou záhlavia a ikony EXE. V priečinku Logo
+sú aj samostatné súbory SVG, PNG a ICO. Zdrojovy-kod obsahuje build.cmd.
+Podpis: Created by Daniel Návojský (ndxnraw) using Codex | 2026
+
+PAPIER A KÓPIE
+K dispozícii sú tieto možnosti:
+- Podľa etikety: papier má rovnakú veľkosť ako etiketa, bez papierových okrajov.
+- A3: 297 × 420 mm
+- A4: 210 × 297 mm
+- A5: 148 × 210 mm
+- A6: 105 × 148 mm
+- Letter: 215,9 × 279,4 mm
+- Legal: 215,9 × 355,6 mm
+- Vlastné rozmery: nastaviteľná šírka a výška 10–500 mm.
+
+Pri predvolených formátoch sú rozmery pevné. Na ich zmenu vyberte Vlastné
+rozmery. Jednotky možno prepínať medzi mm a cm. Papier má samostatný ľavý,
+pravý, horný a dolný okraj. Etiketa začína za ľavým a horným okrajom;
+pravý a dolný okraj určujú voľný priestor, do ktorého etiketa nesmie zasiahnuť.
+Pre orientáciu na šírku možno použiť vlastný rozmer, napríklad 297 × 210 mm.
+
+Na strane sa umiestňuje jedna etiketa. Voľba viacerých etikiet na hárok,
+medzery medzi etiketami a počet kópií boli z hlavného rozhrania odstránené.
+Počet kópií sa zadáva priamo v integrovanom tlačovom paneli.
+Rozmery papiera a okraje sa použijú aj pri exporte PDF a Word.
+SVG exportuje samotnú etiketu s transparentným pozadím. ZPL zostáva
+formátom pre etiketu na kotúči a neobsahuje papier okolo etikety.
+
+TLAČOVÝ PANEL — VERZIA 2.7
+Tlačiť otvorí panel priamo v hlavnom okne. Dostupná predvolená tlačiareň
+sa vyberie automaticky. Vyberte tlačiareň a počet kópií priamo v paneli,
+skontrolujte bielu stranu v náhľade a kliknite na modré Tlačiť.
+Späť do editora alebo Esc vráti rozpracovaný návrh bez zmien a bez tlače.
+
+Náhľad sa prispôsobí oknu. Zoom mení iba zobrazenie, nie rozmery výtlačku.
+Pri zväčšení možno náhľad posúvať. Ovládanie strán sa zobrazí iba pri
+viacstranovom dokumente. Počet kópií nevytvára ďalšie strany náhľadu.
+Prerušovaný okraj označuje tlačiteľnú oblasť; na výtlačku sa nezobrazuje.
+
+Rozšírené nastavenia obsahujú prehľad papiera a Vlastnosti tlačiarne.
+Toto tlačidlo otvorí systémový dialóg, kde možno zmeniť nastavenia ovládača.
+Potvrdenie obnoví náhľad; nič ešte neodošle. Zrušenie obnoví predchádzajúce
+nastavenia. Papier a okraje návrhu naďalej nastavujete v editore.
+
+Tlačiareň s neplatným názvom alebo chýbajúci ovládač tlač zablokujú.
+Chyba odoslania sa zobrazí v paneli; návrh zostáva zachovaný. Pri obsahu
+mimo tlačiteľnej oblasti program upozorní pred odoslaním. Stav fyzického
+zariadenia a čakajúce úlohy kontrolujte v tlačovom fronte Windows.
+
+Náhľad a výtlačok zdieľajú rovnaké vykresľovanie v milimetroch. Nevykonáva
+sa automatické prispôsobenie etikety papieru. Formát zvolený v ovládači
+musí etiketu podporovať. V ovládači ponechajte 100 % a jednu stranu na
+hárok; dodatočné škálovanie či brožúru ovládača náhľad nezobrazuje.
+
+WORD: SAMOSTATNÉ TRANSPARENTNÉ SVG OBJEKTY
+Každé textové pole, celý čiarový kód vrátane jeho popisu a každý symbol
+Zálohované sa exportujú ako samostatný SVG obrázok s vlastnou polohou
+a veľkosťou. V dokumente ich možno označovať, presúvať a škálovať jednotlivo.
+Čiarový kód zostáva jedným objektom, aby sa pri presúvaní nerozdelili čiary
+a popis. Text je prevedený na krivky; na zmenu jeho slov použite program
+a export zopakujte. V Microsoft Worde môže pri výbere pomôcť tabla výberu.
+
+SVG ani ich náhradné PNG nemajú biele pozadie. Každý objekt má samostatný
+transparentný PNG náhradný obrázok pre aplikácie bez podpory SVG. Časti
+presahujúce etiketu sa pri exporte orežú. Dokument rešpektuje nastavený
+papier aj štyri okraje. Neobsahuje jediný zlúčený obrázok celej etikety.
+
+ROZHRANIE A KOMPATIBILITA
+Odstránené sú nadbytočné posuvníky na paneloch tlačidiel. Pri menšom okne
+sa tlačidlá zalomia do ďalšieho riadka. Posúvanie v sekcii nastavení zostáva
+dostupné iba vtedy, keď sa celý obsah nezmestí do okna.
+Jazyky SK/EN/CS/HU, tmavý/svetlý režim, editácia, symboly, GS1 a exporty ostávajú.
+Staré projekty sa otvárajú; ich viacnásobné rozloženie sa v rozhraní 2.6
+zmení na jednu etiketu na strane. Pôvodný súbor sa nemení bez uloženia.
+Nové ZPL projektové metadáta majú označenie ELG26; otvárajte ich vo verzii 2.6.
+
+Uložiť nastavenia spustenia si stále pamätá iba jazyk, režim, jednotky
+a rozmery etikety. Obsah etikety sa po štarte vytvorí nanovo a vycentruje.
+Kvôli kompatibilite zostáva cesta %LOCALAPPDATA%\NDLabelMaker\startup.xml.
+Papier a okraje patria do uloženého projektu .ean.xml, nie do preferencií spustenia.
+
+OVERENIE 2.7
+Overené zostavenie, vstavané a regresné testy, náhľad pri bežnej aj
+minimálnej veľkosti okna, výber tlačiarne, kópie, zoom, viac strán,
+zmena orientácie, zrušenie nastavení, nedostupná tlačiareň, chyba tlače
+a návrat do editora so zachovaním rozpracovaného návrhu.
+Testy tlače používajú iba Microsoft Print to PDF. Fyzická tlač nebola
+spustená; správanie konkrétnych fyzických tlačiarní nebolo overené.
+
+MANUÁLNA KONTROLA
+Otvorte návrh, kliknite Tlačiť, zvoľte Microsoft Print to PDF a počet kópií.
+Vyskúšajte zoom a zmenu veľkosti okna. V Rozšírených nastaveniach zmeňte
+orientáciu a overte obnovený náhľad; ďalšiu zmenu zrušte. Späť do editora
+musí zachovať obsah aj neuložené zmeny. Pri tlači do PDF porovnajte rozmery
+a polohu etikety. Fyzickú skúšku vykonajte až podľa vlastného uváženia.
+

@@ -1,4 +1,4 @@
-﻿ND LabelDesigner 2.6.1 — Windows
+ND LabelDesigner 2.7.1 — Windows
 Revízia 21. 9. 2026
 
 SPUSTENIE A NÁZOV
@@ -27,42 +27,38 @@ Pre orientáciu na šírku možno použiť vlastný rozmer, napríklad 297 × 21
 
 Na strane sa umiestňuje jedna etiketa. Voľba viacerých etikiet na hárok,
 medzery medzi etiketami a počet kópií boli z hlavného rozhrania odstránené.
-Počet kópií sa zadáva výhradne v systémovom tlačovom dialógu.
+Počet kópií sa zadáva priamo v integrovanom tlačovom paneli.
 Rozmery papiera a okraje sa použijú aj pri exporte PDF a Word.
 SVG exportuje samotnú etiketu s transparentným pozadím. ZPL zostáva
 formátom pre etiketu na kotúči a neobsahuje papier okolo etikety.
 
-TLAČ A NÁHĽAD — OPRAVA 2.6.1
-1. Nastavte papier a všetky štyri okraje v aplikácii.
-2. Tlačiť otvorí priamo náhľad aplikácie. Vyberte stranu alebo priblíženie
-   (celá strana, 50–400 %). Zoom mení iba zobrazenie, nie veľkosť výtlačku.
-3. Tlačiareň a nastavenia otvorí systémový dialóg Windows: vyberte tlačiareň,
-   jej formát, orientáciu a počet kópií. Potvrdenie ešte nič nevytlačí.
-4. Skontrolujte obnovený náhľad. Až tlačidlo Tlačiť odošle úlohu.
-   Zrušiť zatvorí náhľad bez tlače. Zrušenie systémového dialógu obnoví
-   nastavenia platné pred jeho otvorením.
+TLAČOVÉ OKNO — OPRAVA 2.7.1
+Tlačiť otvorí samostatné tmavé okno. Editor zostáva zachovaný. Späť do
+editora, Esc alebo zatvorenie okna vráti návrh bez zmeny obsahu.
 
-Príčinou hlásenia o nepodporovanej ukážke je systémový PrintDlgEx, ktorý
-nepreberá stránky náhľadu z WinForms PrintDocument. Pôvodná verzia navyše
-otvárala vlastný náhľad až po tomto dialógu. Verzia 2.6.1 otvára náhľad
-pred ním. Systémový dialóg môže uvedené hlásenie naďalej zobrazovať;
-funkčný náhľad je v samostatnom okne aplikácie.
+Pri otvorení a zmene tlačiarne sa načíta jej predvolený formát papiera
+aj orientácia z ovládača. Vo výbere Papier môžete použiť ďalší formát,
+ktorý ovládač poskytuje. Zobrazuje sa celý hárok so skutočnou polohou
+etikety. Rozmery etikety ani jej poloha sa automaticky neškálujú.
+Papier v tlačovom okne určuje tlač; nastavenie papiera projektu naďalej
+určuje exporty. Pre tlač etikety na kotúči vyberte príslušný rozmer média.
 
-Náhľad aj tlač používajú ten istý nemenný dokument, vektorové prvky
-a vykresľovanie v milimetroch. Rozmery etikety, jej pozícia a okraje sa
-automaticky neškálujú ani nerozmiestňujú nanovo. Formát a orientácia
-potvrdené v ovládači určujú výsledný papier a obnovia náhľad. Príliš malý
-papier program odmietne; pri obsahu mimo tlačiteľnej oblasti upozorní
-pred odoslaním. Nežiaducemu orezaniu predídete úpravou okrajov alebo média.
+Formát v ovládači musí zodpovedať papieru fyzicky vloženému v tlačiarni.
+Program nevie automaticky zistiť obsah zásobníka. Vlastné rozmery a
+výber zásobníka nastavte cez Rozšírené nastavenia / Vlastnosti tlačiarne.
+Ponechajte mierku 100 % a jednu stranu na hárok. Dodatočné škálovanie
+alebo brožúra vykonaná ovládačom nie sú súčasťou náhľadu aplikácie.
 
-Vlastné rozmery musí podporovať ovládač tlačiarne. Zaokrúhlenie rozmerov
-Windows na stotiny palca môže spôsobiť rozdiel približne 0,1 mm.
-Vo vlastnostiach ovládača používajte mierku 100 %, jednu stranu na hárok
-a vypnuté prispôsobenie papieru. Špeciálne úpravy výrobcu (napríklad N-up,
-brožúra či dodatočné škálovanie) WinForms náhľad nedokáže zobraziť.
-Počet kópií sa opakuje v tlačiarni; nevytvára ďalšie strany náhľadu.
-Viacstranový dokument má v náhľade vlastné prepínanie strán.
+Náhľad sa generuje cez PrintDocument a PreviewPrintController rovnakou
+cestou PrintPage ako výtlačok. Zohľadňuje tlačiteľnú oblasť, orezanie,
+orientáciu a formát papiera. Po zmene nastavení sa znova vytvorí.
+Zoom mení iba zobrazenie. Stránkovanie sa ukáže pri viacstranovom výstupe.
 
+Celý názov tlačiarne sa zobrazuje zalomený pod zoznamom, aj v bubline
+po podržaní myši. Rozbalený zoznam sa rozšíri podľa dĺžky názvov.
+Počet kópií nastavte priamo v okne. Tlačiť odošle úlohu. Zrušenie
+systémových nastavení obnoví pôvodný výber. Nedostupná tlačiareň tlač
+zablokuje; chyba tlače ani zatvorenie okna nemenia rozpracovaný návrh.
 WORD: SAMOSTATNÉ TRANSPARENTNÉ SVG OBJEKTY
 Každé textové pole, celý čiarový kód vrátane jeho popisu a každý symbol
 Zálohované sa exportujú ako samostatný SVG obrázok s vlastnou polohou
@@ -90,27 +86,10 @@ a rozmery etikety. Obsah etikety sa po štarte vytvorí nanovo a vycentruje.
 Kvôli kompatibilite zostáva cesta %LOCALAPPDATA%\NDLabelMaker\startup.xml.
 Papier a okraje patria do uloženého projektu .ean.xml, nie do preferencií spustenia.
 
-OVERENIE 2.6.1
-Zostavenie .NET Framework, regresné testy tlače a existujúce testy aplikácie.
-Overené: zoom, prepínanie strán, nemennosť rozloženia, zrušenie bez tlače,
-obnovenie nastavení po zrušení, kópie, orientácia, prázdny dokument,
-odmietnutie malého papiera, viacstranový výstup a posledná neúplná strana.
-Graficky skontrolované okno náhľadu a výstup Microsoft Print to PDF:
-tri strany A4 (približne 210,02 × 297,01 mm), text, kód a symbol.
-Žiadna fyzická tlač nebola spustená. Výstup na fyzických tlačiarňach,
-ich špecifické nastavenia a ručné ovládanie systémového dialógu neboli
-overené. Zrušenie a potvrdenie dialógu pokrýva automatický test logiky.
-
-MANUÁLNA KONTROLA
-Nastavte A4 a ľavý/horný okraj napríklad 12/15 mm. Kliknite na Tlačiť,
-vyskúšajte zoom a potom Tlačiareň a nastavenia. Zvoľte Microsoft Print to
-PDF, potvrďte formát/orientáciu a skontrolujte aktualizovaný náhľad.
-Kliknite na Tlačiť, uložte PDF a porovnajte rozmer strany aj polohu etikety.
-Zopakujte otvorenie nastavení a zvoľte Zrušiť: nastavenia sa nesmú zmeniť
-a úloha sa nesmie odoslať. Fyzickú skúšku vykonajte až podľa vlastného uváženia.
-
-Technické zdroje:
-https://learn.microsoft.com/en-us/windows/win32/dlgbox/print-dialog-box
-https://learn.microsoft.com/en-us/dotnet/desktop/winforms/printing/how-to-print-in-windows-forms-using-print-preview
-Oficiálna predloha symbolu Zálohované:
-https://slovenskozalohuje.sk/wp-content/uploads/2024/03/Logo_Z_Design_Manual_1_2_4_5_2021.pdf
+OVERENIE 2.7.1
+Overené zostavenie a regresné testy: samostatné okno, návrat do editora,
+dlhé názvy, načítanie papiera tlačiarne, A4/A5, zoom, viac strán,
+zrušenie nastavení a nedostupná tlačiareň. Porovnaný náhľad a dvojstranový
+výstup Microsoft Print to PDF: rozmery A4, poloha a veľkosť potlače.
+Fyzická tlač nebola spustená. Zhodu s konkrétnou fyzickou tlačiarňou treba
+skontrolovať so správne nastaveným formátom a papierom v zásobníku.

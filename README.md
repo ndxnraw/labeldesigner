@@ -1,33 +1,25 @@
 # ND LabelDesigner
 
-Windows aplikácia na návrh a tlač etikiet. Aktuálna verzia: **2.6.1**.
+Windows aplikácia na návrh a tlač etikiet. Aktuálna verzia: **2.7.1**.
 
-## Spustenie
+[Stiahnuť najnovšie vydanie](https://github.com/ndxnraw/LabelDesigner/releases/latest)
 
-Spustite `ND-LabelDesigner.exe` vo Windows s .NET Framework 4.8.
-Podrobný návod: [Navod.txt](Navod.txt).
+Vyžaduje Windows a .NET Framework 4.8. Rozbaľte ZIP a spustite `ND-LabelDesigner.exe`. [Podrobný návod](Navod.txt).
 
-## Oprava tlače 2.6.1
+## Tlač
 
-Tlačiť najprv otvorí náhľad so zoomom a prepínaním strán. Cez Tlačiareň
-a nastavenia vyberte zariadenie, papier, orientáciu a počet kópií.
-Po potvrdení skontrolujte obnovený náhľad. Až Tlačiť v náhľade odošle úlohu.
-Náhľad a tlač používajú rovnaký dokument a rozmery v milimetroch.
+Samostatné tmavé okno načíta formát papiera a orientáciu tlačiarne. Tlačiareň, papier a počet kópií vyberiete priamo. Náhľad aj výtlačok používajú PrintDocument; zoom nemení fyzické rozmery. Celý názov tlačiarne je uvedený pod zoznamom. Späť do editora alebo Esc zachová návrh.
 
-Systémový dialóg WinForms vlastný náhľad neposkytuje. Dodatočné škálovanie
-ovládača nie je súčasťou náhľadu; používajte 100 % a jednu stranu na hárok.
+Papier nastavený v ovládači musí zodpovedať papieru v zásobníku. Používajte mierku 100 % a jednu stranu na hárok.
 
 ## Zostavenie a testy
 
-- `Zdrojovy-kod/build.cmd`: zostavenie pomocou kompilátora .NET Framework.
-- `Testy/run-tests.cmd`: regresné a vstavané testy aplikácie.
-- Test tlače používa výhradne Microsoft Print to PDF, ak je nainštalovaný.
+- `Zdrojovy-kod/build.cmd`: zostavenie cez .NET Framework.
+- `Testy/run-tests.cmd`: regresné a vstavané testy. Tlačí iba virtuálne do Microsoft Print to PDF, ak je dostupný.
+- Overené zostavenie, A4/A5, viac strán, zrušenie nastavení a zhoda náhľadu s PDF. Fyzická tlač nebola overená.
 
-Overené: zostavenie, regresné testy, grafický náhľad a trojstranové PDF A4.
-Fyzická tlač ani špecifické funkcie jednotlivých ovládačov neboli overené.
+## Archív
+
+[Všetky staršie verzie 1.0–2.7](Archive/README.md) obsahujú pôvodné programy, zdrojové kódy a dostupné návody.
 
 Created by Daniel Návojský (ndxnraw) using Codex | 2026
-
-## Staršie verzie
-
-[Všetky predchádzajúce verzie 1.0–2.6](Archive/README.md) vrátane pôvodných ZIP balíkov, zdrojov a dostupných návodov.
