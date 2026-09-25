@@ -1,4 +1,4 @@
-using System;using System.Windows.Forms;
+﻿using System;using System.Windows.Forms;
 namespace EanEtikety {
 public static class PaperOptions {
  public static readonly string[] Ids={"Label","A3","A4","A5","A6","Letter","Legal","Custom"};

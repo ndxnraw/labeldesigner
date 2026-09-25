@@ -2,7 +2,7 @@
 
 Všetkých 14 zachovaných vydaní od 1.0 po 2.7. Pôvodné ZIP balíky sú uložené bez úprav a obsahujú program aj dostupné zdrojové kódy. Verzia 1.0 mala pôvodne názov balíka bez čísla verzie.
 
-Aktuálna verzia 2.7.1 je v [koreňovom priečinku](../README.md).
+Aktuálny program a odkazy na vydania nájdete v [koreňovom priečinku](../README.md). Prvá verzia je dostupná aj ako [samostatné vydanie 1.0](https://github.com/ndxnraw/LabelDesigner/releases/tag/v1.0).
 
 | Verzia | Program a zdroje | Návod | Súbory C# v ZIP |
 |---|---|---|---|

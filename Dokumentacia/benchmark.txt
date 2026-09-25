@@ -1,0 +1,2 @@
+3.0.4: 2000 mouse messages with 45 text fields: 508,8949 ms; edits=2000; title changes=4000
+3.0.5: 2000 mouse messages with 45 text fields: 18,7342 ms; edits=1; title changes=1

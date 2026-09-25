@@ -1,0 +1,19 @@
+﻿using System;
+using System.IO;
+using System.Drawing;
+using System.Reflection;
+using System.Windows.Forms;
+using EanEtikety;
+class SymbolTests {
+ static string dir;static void Check(bool b,string m){if(!b)throw new Exception(m);}static object Get(object o,string n){return o.GetType().GetField(n,BindingFlags.NonPublic|BindingFlags.Instance).GetValue(o);}static object Call(object o,string n,params object[] args){return o.GetType().GetMethod(n,BindingFlags.NonPublic|BindingFlags.Instance).Invoke(o,args);}
+ static void Mouse(PreviewPanel p,string name,PointF pt){Call(p,name,new MouseEventArgs(MouseButtons.Left,1,(int)pt.X,(int)pt.Y,0));if(name=="OnMouseMove")Call(p,"FlushDragMove");}static void Drag(PreviewPanel p,PointF pt,float dx,float dy){Mouse(p,"OnMouseDown",pt);Mouse(p,"OnMouseMove",new PointF(pt.X+dx,pt.Y+dy));Mouse(p,"OnMouseUp",new PointF(pt.X+dx,pt.Y+dy));}
+ static void Export(LabelSettings s,string n){Engine.Svg(Path.Combine(dir,n+".svg"),s);Engine.Pdf(Path.Combine(dir,n+".pdf"),s);Engine.Docx(Path.Combine(dir,n+".docx"),s);Engine.Zpl(Path.Combine(dir,n+".zpl"),s);Engine.Save(Path.Combine(dir,n+".ean.xml"),s);using(var b=Engine.Render(s))b.Save(Path.Combine(dir,n+".png"));}
+ [STAThread]static void Main(string[] args){dir=args[0];Directory.CreateDirectory(dir);try{Run();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS: vector symbol, SVG/PDF/DOCX/ZPL/XML, symbol movement and eight handles, Escape, cached drag, mm/cm, delete, old project compatibility.");}catch(Exception e){File.WriteAllText(Path.Combine(dir,"failed.txt"),e.ToString());Environment.ExitCode=1;}}
+ static void Run(){var s=LabelSettings.Default();s.Width=90;s.Symbols.Add(new SymbolItem{X=65,Y=12,Width=16,Height=16*DepositArt.Aspect});Export(s,"symbol");Check(Engine.Load(Path.Combine(dir,"symbol.ean.xml")).Symbols.Count==1,"XML symbol");Check(ZplImport.Project(File.ReadAllText(Path.Combine(dir,"symbol.zpl"))).Symbols.Count==1,"ZPL symbol");Check(Engine.Load("Testy/Fixtures/work/qa-2.0.1/settings.ean.xml").Symbols.Count==0,"legacy XML");
+  Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);using(var f=new MainForm(Path.Combine(dir,"preferences.xml"))){f.StartPosition=FormStartPosition.Manual;f.Location=new Point(-20000,-20000);f.Show();Application.DoEvents();Call(f,"Apply",s);var p=(PreviewPanel)Get(f,"preview");p.SelectElement(-3);var r=p.ElementRectangle(-3);var old=p.Scene;Mouse(p,"OnMouseDown",new PointF(r.Left+r.Width/2,r.Top+r.Height/2));Mouse(p,"OnMouseMove",new PointF(r.Left+r.Width/2+10,r.Top+r.Height/2+10));Check(object.ReferenceEquals(old,p.Scene),"symbol move cache");var moved=(LabelSettings)Call(f,"Read");Check(moved.Symbols[0].X>s.Symbols[0].X,"symbol moved");Call(p,"ProcessCmdKey",new Message(),Keys.Escape);var back=(LabelSettings)Call(f,"Read");Check(Math.Abs(back.Symbols[0].X-s.Symbols[0].X)<.02,"Escape symbol");
+   for(int i=0;i<8;i++){Call(f,"Apply",s);p.SelectElement(-3);Drag(p,p.Handles()[i],i==0||i==6||i==7?-12:12,i<=2?-10:10);var changed=(LabelSettings)Call(f,"Read");Check(p.Scene!=null&&changed.Symbols[0].Width>=1&&changed.Symbols[0].Height>=1,"resize symbol "+i);if(i%2==0)Check(Math.Abs(changed.Symbols[0].Height/changed.Symbols[0].Width-DepositArt.Aspect)<.01,"corner aspect");}
+   Call(f,"Apply",s);((ComboBox)Get(f,"units")).SelectedItem="cm";Call(f,"EditElement",new ElementEdit{Index=-3,X=60,Y=15,Width=20,Height=20*DepositArt.Aspect,Font=10});var cm=(LabelSettings)Call(f,"Read");Check(cm.Symbols[0].X==60&&cm.Symbols[0].Width==20,"cm symbol units");Call(f,"UpdatePreview");p.SelectElement(-3);using(var b=new Bitmap(f.Width,f.Height)){f.DrawToBitmap(b,new Rectangle(Point.Empty,b.Size));b.Save(Path.Combine(dir,"app.png"));}Call(f,"RemoveText");Check(((LabelSettings)Call(f,"Read")).Symbols.Count==0&&((LabelSettings)Call(f,"Read")).Texts.Count==1,"remove symbol only");
+   Call(f,"Apply",LabelSettings.Default());f.Close();
+  }
+ }
+}

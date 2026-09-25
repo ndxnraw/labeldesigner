@@ -1,4 +1,4 @@
-using System;using System.IO;using System.Text;using System.Drawing;using System.Drawing.Imaging;using System.Collections.Generic;using System.Globalization;
+﻿using System;using System.IO;using System.Text;using System.Drawing;using System.Drawing.Imaging;using System.Collections.Generic;using System.Globalization;
 namespace EanEtikety {
 public class WordPart {public int Number;public string Svg;public byte[] Png;public RectangleF Bounds;}
 public static class WordParts {

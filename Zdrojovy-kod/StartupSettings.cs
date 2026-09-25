@@ -38,7 +38,7 @@ public partial class MainForm {
   options.Controls.Add(Btn(Loc.T("Uložiť nastavenia spustenia"),SaveStartup));header.Controls.Add(options,1,0);root.Controls.Add(header,0,0);
   language.SelectedIndexChanged+=delegate{if(loading||language.SelectedIndex<0)return;Loc.Language=Loc.Codes[language.SelectedIndex];Localize();};
  }
- void Localize(){bool old=loading;loading=true;try{Loc.Refresh(this);UpdateUnitLabels(this);ApplyTheme();Gs1State();Text=Loc.T(dirty?"ND LabelDesigner • neuložené zmeny":"ND LabelDesigner");}finally{loading=old;}UpdatePreview();Invalidate(true);}
+ void Localize(){bool old=loading;loading=true;try{Loc.Refresh(this);RefreshStudioMenus();UpdateUnitLabels(this);ApplyTheme();Gs1State();Text=Loc.T(dirty?"ND LabelDesigner • neuložené zmeny":"ND LabelDesigner");}finally{loading=old;}UpdatePreview();Invalidate(true);}
  void LoadStartup(){Loc.Language="sk";StartupProfile profile;string failure=null;try{profile=StartupStore.Load(startupPath);}catch(Exception ex){profile=new StartupProfile();failure=ex.Message;}
   Loc.Language=profile.Language;loading=true;language.SelectedIndex=Array.IndexOf(Loc.Codes,profile.Language);loading=false;
   try{Apply(StartupLayout.Create(profile));}catch(Exception ex){failure=ex.Message;Apply(LabelSettings.Default());}

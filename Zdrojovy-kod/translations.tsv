@@ -130,7 +130,7 @@ Neplatná kompresia ^GFA.	Invalid ^GFA compression.	Neplatná komprese ^GFA.	Ér
 Neplatné opakovanie riadka ^GFA.	Invalid ^GFA row repeat.	Neplatné opakování řádku ^GFA.	Érvénytelen ^GFA-sorismétlés.
 Neúplné dáta ^GFA.	Incomplete ^GFA data.	Neúplná data ^GFA.	Hiányos ^GFA-adatok.
 Nastavenia spustenia sa nepodarilo načítať. Použité sú predvolené hodnoty. 	Could not load startup settings. Defaults are in use. 	Nastavení spuštění se nepodařilo načíst. Použity výchozí hodnoty. 	Az indítási beállítások nem tölthetők be. Alapértékek használata. 
-Verzia 2.7.1	Version 2.7.1	Verze 2.7.1	Verzió: 2.7.1
+Verzia 3.0.5	Version 3.0.5	Verze 3.0.5	Verzió: 3.0.5
 Šírka	Width	Šířka	Szélesség
 Výška	Height	Výška	Magasság
 Upraviť textové pole	Edit text field	Upravit textové pole	Szövegmező szerkesztése
@@ -298,3 +298,37 @@ Späť do editora	Back to editor	Zpět do editoru	Vissza a szerkesztőbe
 Mierka tlače: 100 %	Print scale: 100 %	Měřítko tisku: 100 %	Nyomtatási méretarány: 100 %
 Tlač bola zrušená.	Printing was cancelled.	Tisk byl zrušen.	A nyomtatás megszakítva.
 Tlač sa nepodarila: 	Printing failed: 	Tisk se nezdařil: 	Sikertelen nyomtatás: 
+Nastavenia	Settings	Nastavení	Beállítások
+O aplikácii	About	O aplikaci	Névjegy
+Súbor	File	Soubor	Fájl
+Exportovať	Export	Exportovat	Exportálás
+Tabuľka	Table	Tabulka	Táblázat
+Ľavý panel	Left panel	Levý panel	Bal oldali panel
+Vlastnosti	Properties	Vlastnosti	Tulajdonságok
+Obnoviť rozloženie	Reset layout	Obnovit rozložení	Elrendezés visszaállítása
+Panely	Panels	Panely	Panelek
+Prispôsobiť	Fit	Přizpůsobit	Igazítás
+Prvky	Elements	Prvky	Elemek
+Čiarový kód	Barcode	Čárový kód	Vonalkód
+Kontrola dokumentu	Document check	Kontrola dokumentu	Dokumentum ellenőrzése
+Nová etiketa	New label	Nová etiketa	Új címke
+Zmeniť tému	Change theme	Změnit motiv	Téma váltása
+Zavrieť	Close	Zavřít	Bezárás
+Obnoviť tlačiarne	Refresh printers	Obnovit tiskárny	Nyomtatók frissítése
+Na šírku	Landscape	Na šířku	Fekvő
+Načítavam tlačiarne…	Loading printers…	Načítám tiskárny…	Nyomtatók betöltése…
+Pripravujem náhľad…	Preparing preview…	Připravuji náhled…	Előnézet készítése…
+Odosielam do tlačiarne…	Sending to printer…	Odesílám do tiskárny…	Küldés a nyomtatóra…
+Náhľad nie je dostupný: 	Preview unavailable: 	Náhled není dostupný: 	Az előnézet nem érhető el: 
+Odosielanie už prebieha. Úlohu môžete zrušiť vo fronte Windows.	Sending has started. Cancel the job in the Windows print queue.	Odesílání již probíhá. Úlohu můžete zrušit ve frontě Windows.	A küldés folyamatban van. A feladat a Windows nyomtatási sorában törölhető.
+Pripravené	Ready	Připraveno	Kész
+Skontrolujte upozornenia	Review warnings	Zkontrolujte upozornění	Figyelmeztetések ellenőrzése
+Náhľad prekročil limit 32 MB. Zjednodušte dokument.	Preview exceeds the 32 MB limit. Simplify the document.	Náhled překročil limit 32 MB. Zjednodušte dokument.	Az előnézet meghaladja a 32 MB-os korlátot. Egyszerűsítse a dokumentumot.
+
+Áno	Yes	Ano	Igen
+Nie	No	Ne	Nem
+
+Neplatný prvok v schránke.	Invalid clipboard element.	Neplatný prvek ve schránce.	Érvénytelen vágólapelem.
+Schránka je dočasne nedostupná. Skúste to znova.	The clipboard is temporarily unavailable. Please try again.	Schránka je dočasně nedostupná. Zkuste to znovu.	A vágólap átmenetileg nem érhető el. Próbálja újra.
+
+Priblíženie	Zoom	Přiblížení	Nagyítás
