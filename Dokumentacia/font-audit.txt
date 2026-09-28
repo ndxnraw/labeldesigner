@@ -9,8 +9,10 @@ UpDownEdit: Source Sans 3
 UpDownEdit: Source Sans 3
 UpDownEdit: Source Sans 3
 UpDownEdit: Source Sans 3
+UpDownEdit: Source Sans 3
 ModernComboBox: Source Sans 3
 TextBox: Source Sans 3
+UpDownEdit: Source Sans 3
 UpDownEdit: Source Sans 3
 UpDownEdit: Source Sans 3
 UpDownEdit: Source Sans 3

@@ -7,9 +7,9 @@ New-Item $testBin,$resultRoot -ItemType Directory -Force | Out-Null
 Copy-Item (Join-Path $packageRoot 'ND-LabelDesigner.exe') $testBin -Force
 Push-Location $packageRoot
 try {
-  foreach ($name in @('Revision305Tests','Revision304Tests','Revision303Tests','Revision302Tests','Revision301Tests','Revision12Tests','Revision22Tests','SymbolTests','Revision25Tests','Revision26Tests','ImportTests','OutputTests','V3Tests','UiPerf')) {
+  foreach ($name in @('RotationTests','Revision305Tests','Revision304Tests','Revision303Tests','Revision302Tests','Revision301Tests','Revision12Tests','Revision22Tests','SymbolTests','Revision25Tests','Revision26Tests','ImportTests','OutputTests','V3Tests','UiPerf')) {
     $testExe = Join-Path $testBin ($name + '.exe')
-    & $compiler /nologo /target:winexe "/out:$testExe" "/reference:$testBin\ND-LabelDesigner.exe" /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Join-Path $PSScriptRoot ($name + '.cs'))
+    & $compiler /nologo /target:winexe "/out:$testExe" "/reference:$testBin\ND-LabelDesigner.exe" /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Join-Path $PSScriptRoot ($name + '.cs'))
     if ($LASTEXITCODE -ne 0) { throw "Compilation failed: $name" }
     Copy-Item (Join-Path $packageRoot 'ND-LabelDesigner.exe.config') ($testExe + '.config') -Force
     $caseRoot = Join-Path $resultRoot $name

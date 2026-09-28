@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LabelSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <BarRotation>45</BarRotation>
+  <Ean>8580000000016</Ean>
+  <Unit>mm</Unit>
+  <DarkMode>true</DarkMode>
+  <Kind>13</Kind>
+  <Copies>1</Copies>
+  <Gs1Mode>false</Gs1Mode>
+  <ApplicationIdentifiers />
+  <Width>110</Width>
+  <Height>90</Height>
+  <Dpi>300</Dpi>
+  <BarX>48</BarX>
+  <BarY>35</BarY>
+  <BarWidth>45</BarWidth>
+  <BarHeight>23.5</BarHeight>
+  <DigitSize>8</DigitSize>
+  <Digits>true</Digits>
+  <Sheet>false</Sheet>
+  <UsePaper>false</UsePaper>
+  <PaperPreset>Label</PaperPreset>
+  <MarginRight>10</MarginRight>
+  <MarginBottom>10</MarginBottom>
+  <PageWidth>210</PageWidth>
+  <PageHeight>297</PageHeight>
+  <MarginX>10</MarginX>
+  <MarginY>10</MarginY>
+  <GapX>2</GapX>
+  <GapY>2</GapY>
+  <Texts>
+    <TextItem>
+      <Rotation>45</Rotation>
+      <Text>Rotácia ABC 123</Text>
+      <FontName>Arial</FontName>
+      <X>12</X>
+      <Y>18</Y>
+      <Width>30</Width>
+      <Height>9</Height>
+      <Size>12</Size>
+      <Bold>true</Bold>
+      <Center>true</Center>
+    </TextItem>
+  </Texts>
+  <Symbols>
+    <SymbolItem>
+      <Rotation>45</Rotation>
+      <X>12</X>
+      <Y>55</Y>
+      <Width>15</Width>
+      <Height>17.473419189453125</Height>
+    </SymbolItem>
+  </Symbols>
+</LabelSettings>

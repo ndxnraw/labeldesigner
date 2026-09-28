@@ -1,0 +1,2 @@
+const sharp=require('sharp');const fs=require('fs');const path=require('path');
+(async()=>{const dir=process.argv[2];for(const name of fs.readdirSync(dir).filter(x=>x.endsWith('.svg'))){const png=path.join(dir,name.replace('.svg','.png'));const {width,height}=await sharp(png).metadata();await sharp(path.join(dir,name),{density:300}).resize(width,height,{fit:'fill'}).flatten({background:'#fff'}).png().toFile(path.join(dir,name.replace('.svg','-svg.png')));}console.log('SVG rendered with librsvg');})();

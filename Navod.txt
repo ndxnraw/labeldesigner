@@ -1,19 +1,22 @@
-ND LabelDesigner 3.0.5 — Windows
-25. september 2026
+ND LabelDesigner 3.0.6 — Windows
+28. september 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
 ND-LabelDesigner.exe.config ponechajte vedľa EXE kvôli DPI.
 Potrebný je Windows s .NET Framework 4.8/4.8.1.
 
-NOVÉ
-Horný panel má iba ikony. Nastavenia (ozubené koleso), Návod (otáznik)
-a O aplikácii (i) sú samostatné. Súbor a duplicitné Uložiť ako boli odstránené.
-Lupa otvára priblíženie. Názvy ikon sa zobrazujú v tooltipoch.
-Rýchle pohyby sa zlučujú na aktuálnu polohu, aby nezahlcovali editor.
+OTÁČANIE PRVKOV
+Po označení uchopte kruhový rotačný úchyt nad prvkom. Shift prichytáva
+po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.
+Presný uhol zadáte vo vlastnostiach Rotácia (°). Pravé tlačidlo ponúka
+rýchle otočenie aj reset. Ctrl+] / Ctrl+[ otáčajú vybraný prvok o ±90°,
+keď nepíšete do textového vstupu. Rotácia sa ukladá s projektom.
+Staré projekty majú predvolený uhol 0°. Tlač aj exporty zachovávajú otočenie.
 
+Horný panel používa ikony s tooltipmi. Nastavenia sú pod ozubeným kolesom,
+návod pod otáznikom a informácie o programe pod ikonou i. Lupa mení zoom.
 Otvoriť: Ctrl+O. Uložiť: Ctrl+S. Uložiť ako: Ctrl+Shift+S.
-Tlačiť: Ctrl+P. Kopírovať/vložiť vybraný prvok: Ctrl+C/Ctrl+V.
-Textové vstupy používajú bežné kopírovanie označeného textu.
+Tlačiť: Ctrl+P. Kopírovať/vložiť prvok: Ctrl+C/Ctrl+V.
 
 EDITOR
 Vľavo nastavíte rozmery etikety, jednotky mm/cm, rozlíšenie a papier.
@@ -84,4 +87,4 @@ Náhľad má limit jednej strany a 32 MB dát metafilu.
 ZDROJE A OVERENIE
 Zdrojovy-kod/build.cmd zostaví aplikáciu bez nových závislostí.
 Testy/run-tests.ps1 spustí dostupné regresné testy.
-Zmeny, výsledky a manuálna kontrola: Dokumentacia/Revizia-3.0.5.md.
+Zmeny, výsledky a manuálna kontrola: Dokumentacia/Revizia-3.0.6.md.

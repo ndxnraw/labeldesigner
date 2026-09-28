@@ -21,8 +21,8 @@ public static class SmartGuides {
   result.Element.X+=dx;result.Element.Y+=dy;
   Extend(result.X,result.Element,targets,canvas);Extend(result.Y,result.Element,targets,canvas);return result;
  }
- static double Start(ElementEdit e,bool x){return x?e.X:e.Y;}
- static double Size(ElementEdit e,bool x){return x?e.Width:e.Height;}
+ static double Start(ElementEdit e,bool x){if(e.Rotation==0)return x?e.X:e.Y;var b=ElementTransform.Bounds(e);return x?b.X:b.Y;}
+ static double Size(ElementEdit e,bool x){if(e.Rotation==0)return x?e.Width:e.Height;var b=ElementTransform.Bounds(e);return x?b.Width:b.Height;}
  static AlignmentGuide Find(ElementEdit moving,IList<ElementEdit> targets,ElementEdit canvas,bool x,double tolerance,out double delta){
   delta=0;AlignmentGuide best=null;double distance=tolerance+1e-10;
   for(int i=-1;i<targets.Count;i++){var target=i<0?canvas:targets[i];if(target.Index==moving.Index)continue;

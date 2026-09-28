@@ -130,7 +130,7 @@ Neplatná kompresia ^GFA.	Invalid ^GFA compression.	Neplatná komprese ^GFA.	Ér
 Neplatné opakovanie riadka ^GFA.	Invalid ^GFA row repeat.	Neplatné opakování řádku ^GFA.	Érvénytelen ^GFA-sorismétlés.
 Neúplné dáta ^GFA.	Incomplete ^GFA data.	Neúplná data ^GFA.	Hiányos ^GFA-adatok.
 Nastavenia spustenia sa nepodarilo načítať. Použité sú predvolené hodnoty. 	Could not load startup settings. Defaults are in use. 	Nastavení spuštění se nepodařilo načíst. Použity výchozí hodnoty. 	Az indítási beállítások nem tölthetők be. Alapértékek használata. 
-Verzia 3.0.5	Version 3.0.5	Verze 3.0.5	Verzió: 3.0.5
+Verzia 3.0.6	Version 3.0.6	Verze 3.0.6	Verzió: 3.0.6
 Šírka	Width	Šířka	Szélesség
 Výška	Height	Výška	Magasság
 Upraviť textové pole	Edit text field	Upravit textové pole	Szövegmező szerkesztése
@@ -332,3 +332,13 @@ Neplatný prvok v schránke.	Invalid clipboard element.	Neplatný prvek ve schr�
 Schránka je dočasne nedostupná. Skúste to znova.	The clipboard is temporarily unavailable. Please try again.	Schránka je dočasně nedostupná. Zkuste to znovu.	A vágólap átmenetileg nem érhető el. Próbálja újra.
 
 Priblíženie	Zoom	Přiblížení	Nagyítás
+
+Rotácia	Rotation	Rotace	Forgatás
+90° doprava	90° clockwise	90° doprava	90° jobbra
+90° doľava	90° counterclockwise	90° doleva	90° balra
+Vlastný uhol...	Custom angle...	Vlastní úhel...	Egyéni szög...
+Resetovať rotáciu	Reset rotation	Resetovat rotaci	Forgatás visszaállítása
+
+Otáčanie: kruhový úchyt nad prvkom. Shift prichytáva po 15°. Esc zruší rozpracovanú zmenu. Uhol zadáte aj vo vlastnostiach alebo cez pravé tlačidlo myši. Ctrl+] a Ctrl+[ otáčajú o 90°.	Rotate using the round handle above an element. Shift snaps to 15°. Esc cancels the interaction. Enter an angle in properties or use the context menu. Ctrl+] and Ctrl+[ rotate by 90°.	Otáčení: kruhový úchyt nad prvkem. Shift přichytává po 15°. Esc zruší rozpracovanou změnu. Úhel zadáte i ve vlastnostech nebo pravým tlačítkem myši. Ctrl+] a Ctrl+[ otáčejí o 90°.	Forgatás a kijelölt elem feletti kerek fogantyúval. A Shift 15°-os lépésekre illeszt. Az Esc visszavonja a műveletet. A szög a tulajdonságoknál és a helyi menüben is megadható. Ctrl+] és Ctrl+[ 90°-kal forgat.
+
+Rotácia (°)	Rotation (°)	Rotace (°)	Forgatás (°)

@@ -13,6 +13,7 @@ using System.Xml.Serialization;
 
 namespace EanEtikety {
 public class TextItem {
+ public double Rotation {get;set;}
  public string Text {get;set;}
  public string FontName {get;set;}
  public double X {get;set;} public double Y {get;set;}
@@ -21,6 +22,7 @@ public class TextItem {
  public TextItem(){FontName="Arial";Text="";Width=54;Height=6;Size=11;}
 }
 public class LabelSettings {
+ public double BarRotation;
  public string Ean="8580000000016";
  public string Unit="mm";public bool DarkMode=true;
  public int Kind=13, Copies=1;
@@ -56,6 +58,7 @@ public static class Engine {
  }
  static void Range(double n,double min,double max,string field){if(double.IsNaN(n)||double.IsInfinity(n)||n<min||n>max)throw new Exception(field+Loc.T(": povolený rozsah ")+min+Loc.T(" až ")+max+".");}
  public static void Validate(LabelSettings s){
+ Range(s.BarRotation,0,359.999999999,"Rotácia");if(s.Texts!=null)foreach(var t in s.Texts)if(t!=null)Range(t.Rotation,0,359.999999999,"Rotácia");if(s.Symbols!=null)foreach(var t in s.Symbols)if(t!=null)Range(t.Rotation,0,359.999999999,"Rotácia");
   if(s.Gs1Mode&&s.Kind==128)Gs1.Payload(s.ApplicationIdentifiers);else Normalize(s.Ean,s.Kind);Range(s.Width,10,500,Loc.T("Šírka etikety"));Range(s.Height,10,500,Loc.T("Výška etikety"));Range(s.Dpi,150,610,Loc.T("Rozlíšenie"));Range(s.Copies,1,500,Loc.T("Počet kópií"));
   Range(s.BarX,-500,500,Loc.T("Poloha kódu X"));Range(s.BarY,-500,500,Loc.T("Poloha kódu Y"));Range(s.BarWidth,1,500,Loc.T("Šírka kódu"));Range(s.BarHeight,1,500,Loc.T("Výška čiar"));Range(s.DigitSize,4,72,Loc.T("Písmo kódu"));
   if(Module(s)<1)throw new Exception(Loc.T("Kód je pre zvolené rozlíšenie príliš úzky."));
@@ -78,13 +81,13 @@ public static class Engine {
  public static int Rows(LabelSettings s){return s.UsePaper?1:s.Sheet?(int)Math.Floor((s.PageHeight-2*s.MarginY+s.GapY)/(s.Height+s.GapY)+1e-7):1;}
  public static List<string> Warnings(LabelSettings s){
   var w=new List<string>();if(IsGs1(s))w.AddRange(Gs1.Warnings(s.ApplicationIdentifiers));double x=Module(s)*25.4/s.Dpi;
-  if(Outside(s,s.BarX,s.BarY,s.BarWidth,BarcodeHeight(s)))w.Add(Loc.T("Kód presahuje etiketu. Pri exporte sa časť mimo etikety oreže."));
-  foreach(var t in s.Texts)if(t.Text.Length>0&&Outside(s,t.X,t.Y,t.Width,t.Height))w.Add(Loc.T("Text presahuje etiketu a pri exporte sa oreže: ")+t.Text);
+  if(ElementTransform.Outside(s,ElementTransform.Get(s,-1)))w.Add(Loc.T("Kód presahuje etiketu. Pri exporte sa časť mimo etikety oreže."));
+  foreach(var t in s.Texts)if(t.Text.Length>0&&ElementTransform.Outside(s,new ElementEdit{X=t.X,Y=t.Y,Width=t.Width,Height=t.Height,Rotation=t.Rotation}))w.Add(Loc.T("Text presahuje etiketu a pri exporte sa oreže: ")+t.Text);
   if(s.Kind==14&&(x<.495||s.BarHeight<31.75))w.Add(Loc.T("ITF-14: skontrolujte rozmery pre distribučné balenia; odporúčaná úzka čiara aspoň 0,495 mm a výška čiar 31,75 mm."));
   if(x<.264)w.Add(Loc.T("Úzka čiara má iba ")+x.ToString("0.000")+Loc.T(" mm. Zväčšite šírku kódu pre spoľahlivejšie čítanie."));
   if((s.Kind==13||s.Kind==8||s.Kind==12)&&s.BarHeight<(s.Kind==8?18.23:22.85)*x/.33)w.Add(Loc.T("Výška čiar je nízka vzhľadom na ich šírku. Pred použitím overte čitateľnosť skenerom."));
   var bar=new RectangleF((float)s.BarX,(float)s.BarY,(float)s.BarWidth,(float)BarcodeHeight(s));
-  foreach(var symbol in s.Symbols){if(Outside(s,symbol.X,symbol.Y,symbol.Width,symbol.Height))w.Add(Loc.T("Symbol presahuje etiketu a pri exporte sa oreže."));if(symbol.Code==null&&symbol.Width<10)w.Add(Loc.T("Zálohované: šírka loga s textom je menšia než 10 mm."));if(symbol.Code==null&&Math.Abs(symbol.Height/symbol.Width-DepositArt.Aspect)>.025)w.Add(Loc.T("Zálohované: zmenený pomer strán. Obnovte ho dvojklikom na symbol."));if(bar.IntersectsWith(new RectangleF((float)symbol.X,(float)symbol.Y,(float)symbol.Width,(float)symbol.Height)))w.Add(Loc.T("Symbol zasahuje do oblasti kódu vrátane okrajov."));}
+  foreach(var symbol in s.Symbols){if(ElementTransform.Outside(s,new ElementEdit{X=symbol.X,Y=symbol.Y,Width=symbol.Width,Height=symbol.Height,Rotation=symbol.Rotation}))w.Add(Loc.T("Symbol presahuje etiketu a pri exporte sa oreže."));if(symbol.Code==null&&symbol.Width<10)w.Add(Loc.T("Zálohované: šírka loga s textom je menšia než 10 mm."));if(symbol.Code==null&&Math.Abs(symbol.Height/symbol.Width-DepositArt.Aspect)>.025)w.Add(Loc.T("Zálohované: zmenený pomer strán. Obnovte ho dvojklikom na symbol."));if(bar.IntersectsWith(new RectangleF((float)symbol.X,(float)symbol.Y,(float)symbol.Width,(float)symbol.Height)))w.Add(Loc.T("Symbol zasahuje do oblasti kódu vrátane okrajov."));}
   using(var bmp=new Bitmap(1,1))using(var g=Graphics.FromImage(bmp)){
    double k=s.Dpi/25.4;g.TextRenderingHint=TextRenderingHint.SingleBitPerPixelGridFit;
    if(s.Digits&&!CaptionFits(g,s))w.Add(Loc.T("Popis kódu je príliš široký a bude orezaný. Zmenšite jeho písmo alebo zväčšite kód."));
