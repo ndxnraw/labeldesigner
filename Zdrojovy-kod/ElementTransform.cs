@@ -3,7 +3,13 @@ namespace EanEtikety {
 // All element geometry remains in millimetres. Rotation never rewrites document X/Y.
 public static class ElementTransform {
  public static double Normalize(double angle){if(double.IsNaN(angle)||double.IsInfinity(angle))throw new ArgumentOutOfRangeException("angle");return (angle%360+360)%360;}
- public static double SnapAngle(double angle,bool shift){return Normalize(shift?Math.Round(angle/15,MidpointRounding.AwayFromZero)*15:angle);}
+ public const double RightAngleSnapTolerance=3;
+ public static double SnapAngle(double angle,bool shift){
+  double normalized=Normalize(angle);
+  if(shift)return Normalize(Math.Round(angle/15,MidpointRounding.AwayFromZero)*15);
+  double nearest=Math.Round(normalized/90,MidpointRounding.AwayFromZero)*90;
+  return Math.Abs(normalized-nearest)<=RightAngleSnapTolerance?Normalize(nearest):normalized;
+ }
  public static ElementEdit Get(LabelSettings s,int index){if(s==null)return null;if(index==-1)return new ElementEdit{Index=index,X=s.BarX,Y=s.BarY,Width=s.BarWidth,Height=Engine.BarcodeHeight(s),Font=s.DigitSize,Rotation=s.BarRotation};if(index>=0&&index<s.Texts.Count){var t=s.Texts[index];return new ElementEdit{Index=index,X=t.X,Y=t.Y,Width=t.Width,Height=t.Height,Font=t.Size,Rotation=t.Rotation};}if(index<=-3&&-3-index<s.Symbols.Count){var t=s.Symbols[-3-index];return new ElementEdit{Index=index,X=t.X,Y=t.Y,Width=t.Width,Height=t.Height,Font=10,Rotation=t.Rotation};}return null;}
  public static PointF Center(ElementEdit e){return new PointF((float)(e.X+e.Width/2),(float)(e.Y+e.Height/2));}
  public static Matrix Matrix(double rotation,PointF center){var m=new Matrix();m.RotateAt((float)rotation,center);return m;}

@@ -40,7 +40,7 @@ public static class UiMessageBox {
   DialogResult[] values=buttons==MessageBoxButtons.YesNoCancel?new[]{DialogResult.Cancel,DialogResult.No,DialogResult.Yes}:buttons==MessageBoxButtons.YesNo?new[]{DialogResult.No,DialogResult.Yes}:new[]{DialogResult.OK};
   foreach(var value in values){var button=new ModernButton{Text=Loc.T(value==DialogResult.Yes?"Áno":value==DialogResult.No?"Nie":value==DialogResult.Cancel?"Zrušiť":"OK"),DialogResult=value,TabIndex=value==DialogResult.Yes||value==DialogResult.OK?0:value==DialogResult.No?1:2,Size=new Size(100,36),FlatStyle=FlatStyle.Flat,BackColor=StudioTheme.Panel(dark),ForeColor=form.ForeColor};button.FlatAppearance.BorderColor=StudioTheme.Edge(dark);row.Controls.Add(button);if(value==DialogResult.Yes||value==DialogResult.OK)form.AcceptButton=button;if(value==DialogResult.Cancel||value==DialogResult.OK||buttons==MessageBoxButtons.YesNo&&value==DialogResult.No)form.CancelButton=button;}
   form.Shown+=delegate{if(form.AcceptButton is Control)((Control)form.AcceptButton).Select();};
-  if(icon==MessageBoxIcon.Error)form.Icon=SystemIcons.Error;else if(icon==MessageBoxIcon.Warning)form.Icon=SystemIcons.Warning;else if(icon==MessageBoxIcon.Information)form.Icon=SystemIcons.Information;return form;
+  WindowTheme.Apply(form,dark);return form;
  }
 }
 }

@@ -1,13 +1,18 @@
-ND LabelDesigner 3.0.6 — Windows
-28. september 2026
+ND LabelDesigner 3.0.8 — Windows
+29. september 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
 ND-LabelDesigner.exe.config ponechajte vedľa EXE kvôli DPI.
 Potrebný je Windows s .NET Framework 4.8/4.8.1.
 
+OKNÁ A TÉMA
+Vlastné okná a hlášky používajú logo ND LabelDesigner a titulok zladený
+s aktuálnou témou. Ovládanie okien zostáva natívne. Systémové dialógy
+a vlastnosti ovládačov tlačiarní spravuje Windows.
+
 OTÁČANIE PRVKOV
-Po označení uchopte kruhový rotačný úchyt nad prvkom. Shift prichytáva
-po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.
+Po označení uchopte kruhový rotačný úchyt nad prvkom. Uhly 0°, 90°, 180° a 270° sa prichytávajú v tolerancii 3°.
+Shift prichytáva po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.
 Presný uhol zadáte vo vlastnostiach Rotácia (°). Pravé tlačidlo ponúka
 rýchle otočenie aj reset. Ctrl+] / Ctrl+[ otáčajú vybraný prvok o ±90°,
 keď nepíšete do textového vstupu. Rotácia sa ukladá s projektom.
@@ -51,8 +56,7 @@ QR kódy nie sú súčasťou doterajšieho programu ani tejto revízie.
 
 Otvoriť podporuje projekty XML a ZPL/PRN. Vlastné ZPL s projektovými údajmi
 sa otvorí na editáciu; cudzí podporovaný ZPL sa zobrazí v samostatnom náhľade.
-Zobrazenie natívnych fontov cudzieho ZPL môže byť približné. Súbory .nlbl
-sa otvárajú cez priradený externý program NiceLabel; nejde o natívny import.
+Zobrazenie natívnych fontov cudzieho ZPL môže byť približné.
 Exportovať ponúka PDF, Word, ZPL a SVG. SVG má transparentné pozadie.
 Word obsahuje samostatné SVG časti s PNG alternatívami pre staršie čítačky.
 
@@ -87,4 +91,4 @@ Náhľad má limit jednej strany a 32 MB dát metafilu.
 ZDROJE A OVERENIE
 Zdrojovy-kod/build.cmd zostaví aplikáciu bez nových závislostí.
 Testy/run-tests.ps1 spustí dostupné regresné testy.
-Zmeny, výsledky a manuálna kontrola: Dokumentacia/Revizia-3.0.6.md.
+Zmeny, výsledky a manuálna kontrola: Dokumentacia/Revizia-3.0.8.md.

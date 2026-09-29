@@ -6,8 +6,6 @@ public partial class MainForm {
  readonly Timer captionDelay=new Timer{Interval=400};
  [StructLayout(LayoutKind.Sequential)]struct MouseTracking {public int Size,Flags;public IntPtr Window;public int Hover;}
  [DllImport("user32.dll")]static extern bool TrackMouseEvent(ref MouseTracking tracking);
- static int ColorRef(Color c){return c.R|(c.G<<8)|(c.B<<16);}
- void SetCaptionColors(){int background=SystemInformation.HighContrast?-1:ColorRef(StudioTheme.Panel(dark));int foreground=SystemInformation.HighContrast?-1:ColorRef(windowActive?StudioTheme.Text(dark):dark?Color.FromArgb(169,183,203):Color.FromArgb(86,99,116));DwmSetWindowAttribute(Handle,35,ref background,4);DwmSetWindowAttribute(Handle,36,ref foreground,4);}
  void UpdateWindowTitle(){if(studio==null||updatingTitle)return;updatingTitle=true;try{string document=settingsPath==null?Loc.T("Nová etiketa"):Path.GetFileName(settingsPath);string title="ND LabelDesigner  |  "+(dirty?"• ":"")+document;if(Text!=title)Text=title;AccessibleName=title+(dirty?" — "+Loc.T("ND LabelDesigner • neuložené zmeny").Replace("ND LabelDesigner • ",""):"");}finally{updatingTitle=false;}}
  void InitializeWindowHeader(){
   Shown+=delegate{ActiveControl=preview;preview.Focus();HideHeaderHints();UpdateToolbarLayout();};

@@ -28,7 +28,7 @@ public class LabelPrintDocument:PrintDocument {
 public partial class MainForm {
  Form CreatePrintWindow(LabelSettings settings){var panel=new PrintPanel(settings);
   var window=new Form{Text="ND LabelDesigner – "+Loc.T("Tlačiť"),Size=new Size(1050,760),MinimumSize=new Size(900,640),StartPosition=FormStartPosition.CenterParent,ShowInTaskbar=false,Font=Font,Icon=Icon,AutoScaleMode=AutoScaleMode.Dpi};
-  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);panel.BackRequested+=delegate{window.Close();};window.HandleCreated+=delegate{try{int value=dark?1:0;DwmSetWindowAttribute(window.Handle,20,ref value,4);}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}};return window;
+  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);panel.BackRequested+=delegate{window.Close();};return window;
  }
  void PrintLabel(){try{var settings=Read();timer.Stop();using(var window=CreatePrintWindow(settings))window.ShowDialog(this);}catch(Exception ex){Error(ex);}}
 }

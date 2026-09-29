@@ -5,7 +5,7 @@ using System.Windows.Forms;
 namespace EanEtikety {
 public partial class MainForm {
  void OpenImportedFile(string path){string extension=Path.GetExtension(path).ToLowerInvariant();
-  if(extension==".nlbl"){if(UiMessageBox.Show(this,Loc.T("Priamy import šablón NiceLabel (.nlbl) zatiaľ nie je podporovaný.\r\n\r\nOtvoriť súbor v aplikácii priradenej vo Windows (NiceLabel)? Na náhľad v tomto programe vyexportujte etiketu v NiceLabel do ZPL a otvorte výsledný .zpl súbor."),Loc.T("Šablóna NiceLabel"),MessageBoxButtons.YesNo,MessageBoxIcon.Information)==DialogResult.Yes){try{System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path){UseShellExecute=true});}catch(System.ComponentModel.Win32Exception){throw new Exception(Loc.T("Windows nemá dostupnú aplikáciu na otvorenie .nlbl. Otvorte súbor v NiceLabel a vyexportujte ZPL."));}}return;}
+  if(extension!=".xml"&&extension!=".zpl"&&extension!=".prn")throw new NotSupportedException(Loc.T("Nepodporovaný typ súboru. Otvorte projekt XML alebo súbor ZPL/PRN."));
   if((extension==".zpl"||extension==".prn")){string source=ZplImport.ReadFile(path);var project=ZplImport.Project(source);if(project!=null){if(Array.IndexOf(Dpis,project.Dpi)<0)throw new Exception(Loc.T("Nepodporované DPI projektu v ZPL."));Apply(project);settingsPath=null;Changed(this,EventArgs.Empty);status.Text=Loc.T("ZPL/PRN bol otvorený ako editovateľná etiketa. Uložiť vytvorí nový súbor .ean.xml.");}else ShowZpl(path,source);return;}
   var s=Engine.Load(path);if(Array.IndexOf(Dpis,s.Dpi)<0)throw new Exception(Loc.T("Nepodporované DPI v súbore."));Apply(s);settingsPath=path;UpdateWindowTitle();
  }

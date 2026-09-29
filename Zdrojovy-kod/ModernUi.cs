@@ -4,8 +4,7 @@ using System.Windows.Forms;
 namespace EanEtikety {
 public partial class MainForm {
  ComboBox units=new ModernComboBox();Button themeButton;bool dark=true;double unitFactor=1;
- [System.Runtime.InteropServices.DllImport("dwmapi.dll")]static extern int DwmSetWindowAttribute(IntPtr hwnd,int attribute,ref int value,int size);
- void SetTitleTheme(){try{int value=dark&&!SystemInformation.HighContrast?1:0;DwmSetWindowAttribute(Handle,20,ref value,4);SetCaptionColors();}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}}
+ void SetTitleTheme(){WindowTheme.Apply(this,dark);}
  protected override void OnHandleCreated(EventArgs e){base.OnHandleCreated(e);SetTitleTheme();}
  bool Dimension(string key){return key!="Copies"&&key!="DigitSize";}
  double Display(double mm){return mm/unitFactor;}
@@ -15,7 +14,7 @@ public partial class MainForm {
  void EnsureFont(string name){var col=(DataGridViewComboBoxColumn)grid.Columns[8];if(!col.Items.Contains(name))col.Items.Add(name);}
  void ToggleTheme(){dark=!dark;ApplyTheme();dirty=true;UpdateWindowTitle();}
  void ApplyTheme(){ApplyColors(this);StyleStudioMenus();if(IsHandleCreated)SetTitleTheme();themeButton.Text=dark?Loc.T("☀ Svetlý režim"):Loc.T("☾ Tmavý režim");preview.Dark=dark;preview.BackColor=dark?Color.FromArgb(14,21,32):Color.FromArgb(233,237,243);preview.Invalidate();RefreshHeaderSurface();}
- void ApplyColors(Control c){Color bg=StudioTheme.Bg(dark),panel=StudioTheme.Panel(dark),fg=StudioTheme.Text(dark),edge=StudioTheme.Edge(dark);c.BackColor=c is Form||c.Parent==this?bg:panel;c.ForeColor=fg;
+ void ApplyColors(Control c){if(c is Form)WindowTheme.Apply((Form)c,dark);Color bg=StudioTheme.Bg(dark),panel=StudioTheme.Panel(dark),fg=StudioTheme.Text(dark),edge=StudioTheme.Edge(dark);c.BackColor=c is Form||c.Parent==this?bg:panel;c.ForeColor=fg;
   var button=c as Button;if(button!=null){bool export=button==pdf||button==docx||button==zpl||button==svg||button==printPrimary;button.BackColor=export?StudioTheme.Accent:dark?Color.FromArgb(33,51,69):Color.FromArgb(227,237,249);button.ForeColor=export?Color.White:fg;button.FlatAppearance.BorderColor=export?Color.FromArgb(48,158,255):edge;button.FlatAppearance.MouseOverBackColor=Color.FromArgb(51,118,185);button.Cursor=Cursors.Hand;}
   var iconButton=c as HeaderActionButton;if(iconButton!=null)iconButton.RefreshPalette();
   var tab=c as ModernTabs;if(tab!=null)tab.Dark=dark;
