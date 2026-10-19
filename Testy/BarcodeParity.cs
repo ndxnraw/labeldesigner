@@ -1,2 +1,0 @@
-using System;using System.IO;using EanEtikety;
-class BarcodeParity{static void Main(string[] args){Directory.CreateDirectory(args[0]);int[] kinds={13,8,12,128,39,25,14};string[] values={"4006381333931","96385074","036000291452","ABC123","ND-123","12345678","10012345000017"};for(int i=0;i<kinds.Length;i++){var s=LabelSettings.Default();s.Kind=kinds[i];s.Ean=values[i];Engine.Validate(s);File.WriteAllText(Path.Combine(args[0],kinds[i]+".bits"),Engine.CodeBits(s));Engine.Svg(Path.Combine(args[0],kinds[i]+".svg"),s);}}}

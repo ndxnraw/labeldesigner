@@ -1,41 +1,57 @@
-# ND LabelDesigner
+# ND LabelDesigner — prelease
 
-ND LabelDesigner je desktopová aplikácia pre Windows na návrh a tlač produktových etikiet. Texty a údaje čiarových kódov zadávate ručne a rozloženie upravujete priamo v grafickom editore. Program pracuje lokálne a nevyžaduje internetové pripojenie.
+Desktopová aplikácia pre Windows na návrh, export a tlač produktových etikiet.
+Podporuje grafické úpravy textov, čiarových kódov a symbolov, import ZPL a export
+PDF, SVG, DOCX a ZPL. Projekty ukladá do `.ean.xml` a pracuje lokálne.
 
-## Čo program ponúka
+- **Owner:** Daniel Návojský / [@ndxnraw](https://github.com/ndxnraw)
+- **Repository:** [ndxnraw/LabelDesigner](https://github.com/ndxnraw/LabelDesigner)
+- **Project status / Version:** `prelease`
+- **Platforma a stack:** 64-bit Windows, C#, Windows Forms, .NET Framework 4.8/4.8.1.
 
-- **Grafický editor etikiet:** presúvanie, zmena veľkosti a ľubovoľné otáčanie textov, kódov a symbolov. Zarovnávacie vodiace čiary pomáhajú s umiestnením; rotácia sa prichytáva k pravým uhlom alebo s klávesom Shift po 15°.
-- **Textové polia:** úprava dvojklikom, výber fontu, veľkosti, tučného písma a zarovnania. Prvky možno kopírovať a vkladať cez Ctrl+C a Ctrl+V.
-- **Čiarové kódy:** EAN-13, EAN-8, UPC-A, ITF-14, Code 128, Code 39 a Interleaved 2 of 5. GS1-128 umožňuje zvoliť aplikačné identifikátory, ich poradie a dáta.
-- **Presné rozmery:** nastaviteľná etiketa, poloha a veľkosť prvkov v milimetroch alebo centimetroch; bežné aj vlastné formáty papiera a okraje.
-- **Symbol Zálohované:** vektorový symbol s možnosťou presunu, škálovania a rotácie.
-- **Priama tlač:** samostatné okno s náhľadom, výberom tlačiarne, papiera, orientácie a počtu kópií. Priblíženie náhľadu nemení fyzickú mierku tlače.
-- **Vzhľad a jazyk:** svetlá a tmavá téma, zladené titulky vlastných okien, slovenčina, angličtina, čeština a maďarčina. Nastavenia spustenia si možno uložiť.
+## Požiadavky a rýchly štart
 
-## Projekty, import a export
+Git for Windows, Windows PowerShell 5.1 a .NET Framework 4.8/4.8.1 s pribaleným C#
+kompilátorom. Pre kompletné testy zapnite Microsoft Print to PDF a službu Print Spooler.
+Visual Studio, NuGet ani staré ZIP balíky nie sú potrebné.
 
-Rozpracované etikety sa ukladajú do `.ean.xml`. Projekt uchováva obsah, rozmery, fonty, polohy a rotácie prvkov.
+```powershell
+git clone --branch main https://github.com/ndxnraw/LabelDesigner.git
+cd LabelDesigner
+.\scripts\build.cmd
+.\scripts\test.cmd
+.\scripts\package.cmd
+git status --short
+```
 
-| Formát | Použitie |
+Program: `build/app/ND-LabelDesigner.exe`. Balík:
+`build/packages/ND-LabelDesigner-prelease-Windows.zip`. Testovacie reporty:
+`build/test-results/`. Generované výstupy sa necommitujú; stav Git má zostať čistý.
+CI poskytuje balíky ako GitHub Actions artifacts. Projekt nemá stabilné vydanie.
+
+## Štruktúra
+
+| Priečinok | Obsah |
 | --- | --- |
-| PDF | Vektorový export pre tlač a zdieľanie. |
-| SVG | Vektorová etiketa s transparentným pozadím. |
-| Word / DOCX | Samostatné transparentné SVG objekty s PNG alternatívami pre staršie čítačky. |
-| ZPL | Grafický výstup pre kompatibilné tlačiarne pri zvolenom DPI. |
-| ZPL / PRN – import | Vlastný ZPL s projektovými údajmi sa otvorí na úpravu; podporovaný cudzí ZPL sa zobrazí v náhľade iba na čítanie. |
+| `src/LabelDesigner/` | Aktuálny production source |
+| `tests/` | Regresné, integračné a exportné testy, fixtures a pomocné nástroje |
+| `assets/` | Ikony, logá, fonty a ukážky |
+| `scripts/` | Build, test a package |
+| `docs/` | Aktuálna dokumentácia a handoff |
+| `build/` | Ignorované generované výstupy |
+| `archive/prelease/` | Historické vývojové snapshoty |
+| `.github/workflows/` | Windows CI |
 
-Import cudzieho ZPL nepokrýva všetky príkazy a natívne fonty tlačiarní sa môžu zobraziť približne. Súbory `.nlbl` a QR kódy nie sú podporované.
+## Dokumentácia a handoff
 
-## Stiahnutie a spustenie
+Na novom počítači postupujte podľa [HANDOFF](docs/HANDOFF.md): nainštalujte uvedené
+závislosti, naklonujte `main`, zostavte, otestujte a vytvorte balík. Repozitár obsahuje
+všetky zdroje a aktíva potrebné na pokračovanie bez pôvodného počítača.
 
-1. Otvorte [najnovšie vydanie](https://github.com/ndxnraw/LabelDesigner/releases/latest) a stiahnite Windows ZIP.
-2. Rozbaľte celý balík do priečinka.
-3. Spustite `ND-LabelDesigner.exe`. Súbor `ND-LabelDesigner.exe.config` ponechajte vedľa programu.
+- [Vývoj](docs/DEVELOPMENT.md), [build a balenie](docs/BUILD.md), [testovanie](docs/TESTING.md)
+- [Štruktúra projektu](docs/PROJECT_STRUCTURE.md), [návod aplikácie](docs/USER_GUIDE.txt)
+- [Pokyny pre agentov](AGENTS.md), [história vývoja](CHANGELOG.md), [archív](archive/README.md)
 
-Potrebný je Windows s **.NET Framework 4.8 alebo 4.8.1**. Balík obsahuje program, návod, zdrojový kód a regresné testy. Podrobný návod je v [Navod.txt](Navod.txt); staršie vydania nájdete v [Releases](https://github.com/ndxnraw/LabelDesigner/releases) a [archíve](Archive/README.md).
-
-## Zdrojový kód
-
-Aplikácia je napísaná v C# a používa Windows Forms. Zostavenie spustíte cez `Zdrojovy-kod/build.cmd`, regresné testy cez `Testy/run-tests.ps1`. Použité písmo Source Sans 3 je pribalené lokálne vrátane licencie v `Zdrojovy-kod/Fonts/OFL.txt`.
-
-Created by Daniel Návojský (ndxnraw) using Codex | 2026
+Jediné aktuálne produktové označenie je `prelease`. Historické tagy a názvy v archíve
+sú vývojové identifikátory. Import cudzieho ZPL je čiastočný; QR a `.nlbl` nie sú
+podporované. Pozrite [licenčný stav](LICENSE) a licenciu fontu v `assets/fonts/OFL.txt`.

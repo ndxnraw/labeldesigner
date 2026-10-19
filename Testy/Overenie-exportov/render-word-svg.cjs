@@ -1,2 +1,0 @@
-const sharp=require('sharp');const fs=require('fs'),path=require('path');
-(async()=>{const dir=process.argv[2];for(const name of fs.readdirSync(dir).filter(x=>x.endsWith('.svg'))){const {width,height}=await sharp(path.join(dir,name.replace('.svg','.png'))).metadata();await sharp(path.join(dir,name),{density:600}).resize(width,height,{fit:'fill'}).png().toFile(path.join(dir,name.replace('.svg','-svg.png')));}console.log('Word SVG parts rendered');})();

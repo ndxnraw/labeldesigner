@@ -1,0 +1,34 @@
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+namespace EanEtikety {
+public partial class MainForm {
+ ComboBox units=new ModernComboBox();Button themeButton;bool dark=true;double unitFactor=1;
+ void SetTitleTheme(){WindowTheme.Apply(this,dark);}
+ protected override void OnHandleCreated(EventArgs e){base.OnHandleCreated(e);SetTitleTheme();}
+ bool Dimension(string key){return key!="Copies"&&key!="DigitSize";}
+ double Display(double mm){return mm/unitFactor;}
+ void SetUnit(string unit){unitFactor=unit=="cm"?10:1;units.SelectedItem=unitFactor==10?"cm":"mm";foreach(var p in nums)if(Dimension(p.Key)){p.Value.Value=0>=p.Value.Minimum&&0<=p.Value.Maximum?0:p.Value.Minimum;p.Value.Minimum=(p.Key=="BarX"||p.Key=="BarY"?-500:p.Key=="Width"||p.Key=="Height"?10:p.Key=="PageWidth"||p.Key=="PageHeight"?10:p.Key=="BarWidth"||p.Key=="BarHeight"?1:0)/(decimal)unitFactor;p.Value.Maximum=(p.Key=="MarginX"||p.Key=="MarginY"||p.Key=="MarginRight"||p.Key=="MarginBottom"?250:p.Key=="GapX"||p.Key=="GapY"?100:500)/(decimal)unitFactor;p.Value.DecimalPlaces=unitFactor==10?3:2;p.Value.Increment=unitFactor==10?.05m:.5m;}UpdateUnitLabels(this);for(int i=1;i<=4;i++)grid.Columns[i].HeaderText=new[]{"","X","Y",Loc.T("Šírka"),Loc.T("Výška")}[i]+" ("+(unitFactor==10?"cm":"mm")+")";}
+ void UpdateUnitLabels(Control c){foreach(Control child in c.Controls){if(child is Label&&child.Text.Contains("(mm)")||child is Label&&child.Text.Contains("(cm)"))child.Text=child.Text.Replace("(mm)","("+(unitFactor==10?"cm":"mm")+")").Replace("(cm)","("+(unitFactor==10?"cm":"mm")+")");UpdateUnitLabels(child);}}
+ void ChangeUnit(){if(loading)return;string target=Convert.ToString(units.SelectedItem);try{var s=Read();s.Unit=target;bool wasDirty=dirty;Apply(s);dirty=wasDirty;Changed(this,EventArgs.Empty);}catch(Exception ex){loading=true;units.SelectedItem=unitFactor==10?"cm":"mm";loading=false;Error(ex);}}
+ void EnsureFont(string name){var col=(DataGridViewComboBoxColumn)grid.Columns[8];if(!col.Items.Contains(name))col.Items.Add(name);}
+ void ToggleTheme(){dark=!dark;ApplyTheme();dirty=true;UpdateWindowTitle();}
+ void ApplyTheme(){ApplyColors(this);StyleStudioMenus();if(IsHandleCreated)SetTitleTheme();themeButton.Text=dark?Loc.T("☀ Svetlý režim"):Loc.T("☾ Tmavý režim");preview.Dark=dark;preview.BackColor=dark?Color.FromArgb(14,21,32):Color.FromArgb(233,237,243);preview.Invalidate();RefreshHeaderSurface();}
+ void ApplyColors(Control c){if(c is Form)WindowTheme.Apply((Form)c,dark);Color bg=StudioTheme.Bg(dark),panel=StudioTheme.Panel(dark),fg=StudioTheme.Text(dark),edge=StudioTheme.Edge(dark);c.BackColor=c is Form||c.Parent==this?bg:panel;c.ForeColor=fg;
+  var button=c as Button;if(button!=null){bool export=button==pdf||button==docx||button==zpl||button==svg||button==printPrimary;button.BackColor=export?StudioTheme.Accent:dark?Color.FromArgb(33,51,69):Color.FromArgb(227,237,249);button.ForeColor=export?Color.White:fg;button.FlatAppearance.BorderColor=export?Color.FromArgb(48,158,255):edge;button.FlatAppearance.MouseOverBackColor=Color.FromArgb(51,118,185);button.Cursor=Cursors.Hand;}
+  var iconButton=c as HeaderActionButton;if(iconButton!=null)iconButton.RefreshPalette();
+  var tab=c as ModernTabs;if(tab!=null)tab.Dark=dark;
+  var table=c as DataGridView;if(table!=null){table.EnableHeadersVisualStyles=false;table.BackgroundColor=panel;table.GridColor=edge;table.DefaultCellStyle.BackColor=panel;table.DefaultCellStyle.ForeColor=fg;table.DefaultCellStyle.SelectionBackColor=Color.FromArgb(35,86,134);table.DefaultCellStyle.SelectionForeColor=Color.White;table.AlternatingRowsDefaultCellStyle.BackColor=dark?Color.FromArgb(22,34,46):Color.FromArgb(245,248,252);table.ColumnHeadersDefaultCellStyle.BackColor=dark?Color.FromArgb(20,33,46):Color.FromArgb(222,233,246);table.ColumnHeadersDefaultCellStyle.ForeColor=fg;table.RowHeadersDefaultCellStyle.BackColor=panel;table.RowHeadersDefaultCellStyle.ForeColor=fg;}
+  if(!(c is ComboBox)&&!(c is NumericUpDown)&&!(c is DataGridView))foreach(Control child in c.Controls)ApplyColors(child);if(tab!=null)tab.RefreshTabs();
+ }
+ void EditTextDialog(int index){if(index<0||index>=grid.Rows.Count)return;try{var s=Read();var t=s.Texts[index];using(var dialog=new Form{Text=Loc.T("Upraviť textové pole"),Size=new Size(590,425),MinimumSize=new Size(480,380),StartPosition=FormStartPosition.CenterParent,Font=Font,ShowInTaskbar=false,MinimizeBox=false,MaximizeBox=false}){
+   var layout=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(20),ColumnCount=2,RowCount=5};layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,110));layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));layout.RowStyles.Add(new RowStyle(SizeType.Percent,100));for(int i=1;i<5;i++)layout.RowStyles.Add(new RowStyle(SizeType.Absolute,44));dialog.Controls.Add(layout);
+   var text=new TextBox{Multiline=true,AcceptsReturn=true,ScrollBars=ScrollBars.Vertical,Text=t.Text,Dock=DockStyle.Fill,MaxLength=4000};layout.Controls.Add(new Label{Text=Loc.T("Text"),AutoSize=true},0,0);layout.Controls.Add(text,1,0);
+   var font=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList,Dock=DockStyle.Fill};foreach(var item in ((DataGridViewComboBoxColumn)grid.Columns[8]).Items)font.Items.Add(item);font.SelectedItem=t.FontName;layout.Controls.Add(new Label{Text=Loc.T("Font"),AutoSize=true},0,1);layout.Controls.Add(font,1,1);
+   var size=new NumericUpDown{Minimum=4,Maximum=144,DecimalPlaces=2,Value=(decimal)t.Size,Dock=DockStyle.Fill};layout.Controls.Add(new Label{Text=Loc.T("Veľkosť (pt)"),AutoSize=true},0,2);layout.Controls.Add(size,1,2);
+   var options=new FlowLayoutPanel{Dock=DockStyle.Fill};var bold=new CheckBox{Text=Loc.T("Tučné"),Checked=t.Bold,AutoSize=true};var center=new CheckBox{Text=Loc.T("Na stred"),Checked=t.Center,AutoSize=true};options.Controls.Add(bold);options.Controls.Add(center);layout.Controls.Add(options,1,3);
+   var buttons=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.RightToLeft};var ok=Btn(Loc.T("Použiť"),delegate{dialog.DialogResult=DialogResult.OK;});var cancel=Btn(Loc.T("Zrušiť"),delegate{dialog.DialogResult=DialogResult.Cancel;});buttons.Controls.Add(ok);buttons.Controls.Add(cancel);layout.Controls.Add(buttons,1,4);dialog.CancelButton=cancel;ApplyColors(dialog);
+   if(dialog.ShowDialog(this)==DialogResult.OK){loading=true;try{var row=grid.Rows[index];row.Cells[0].Value=text.Text;row.Cells[5].Value=(double)size.Value;row.Cells[6].Value=bold.Checked;row.Cells[7].Value=center.Checked;row.Cells[8].Value=Convert.ToString(font.SelectedItem);}finally{loading=false;}Changed(this,EventArgs.Empty);timer.Stop();UpdatePreview();}
+  }}catch(Exception ex){Error(ex);}}
+}
+}
