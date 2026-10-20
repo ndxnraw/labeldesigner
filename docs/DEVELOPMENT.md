@@ -16,12 +16,15 @@ new suites in `scripts/test.ps1`. Optional export analysis lives in `tests/expor
 Build scripts resolve paths relative to themselves, not a developer's home folder.
 
 The product version is always `prelease`. AssemblyVersion, AssemblyFileVersion
-and Windows manifest identity retain `3.0.8.0` as internal compatibility metadata.
+and Windows manifest identity retain `3.1.0.0` as internal compatibility metadata.
 AssemblyInformationalVersion and Windows ProductVersion are `prelease`.
 Do not bump numeric product versions or rewrite old commits/tags.
 
-This reorganization deliberately follows GitHub main at `0c413024`, not local
-uncommitted experiments. Do not copy unrelated local work over the canonical source.
+The owner identified the local development snapshot formerly called `3.1.0.test`
+as the latest source, and authorized its import on 2026-10-20. It is now the canonical
+prelease implementation. See `docs/LOCAL_SOURCE_IMPORT.md` for provenance.
+ZXing.Net source is vendored under `src/third-party/ZXing/` and rebuilt on every build.
+WindowsBase and PresentationCore are framework dependencies for vector graphics.
 Preserve existing functionality, update relevant docs, and verify a fresh clone
 after substantial layout/dependency changes. Licensing has not been changed to
 an open-source license; see the root LICENSE and font license.

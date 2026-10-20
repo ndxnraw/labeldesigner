@@ -1,11 +1,12 @@
-﻿using System.Reflection;
-[assembly: AssemblyTitle("ND LabelDesigner")]
+using System.Reflection;
+[assembly: AssemblyTitle("ND LabelDesigner — prelease")]
 [assembly: AssemblyDescription("Editor etikiet a ciarovych kodov pre Windows")]
-[assembly: AssemblyVersion("3.0.8.0")]
-[assembly: AssemblyFileVersion("3.0.8.0")]
+[assembly: AssemblyVersion("3.1.0.0")]
+[assembly: AssemblyFileVersion("3.1.0.0")]
 
-[assembly: AssemblyProduct("ND LabelDesigner")]
+[assembly: AssemblyProduct("ND LabelDesigner — prelease")]
 
 
 [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.8", FrameworkDisplayName=".NET Framework 4.8")]
+
 [assembly: AssemblyInformationalVersion("prelease")]

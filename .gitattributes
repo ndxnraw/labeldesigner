@@ -13,3 +13,4 @@
 *.zip binary
 *.exe binary
 archive/** -text
+src/third-party/ZXing/** -text

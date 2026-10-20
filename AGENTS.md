@@ -21,3 +21,7 @@
 - Every substantial change must preserve handoff from a clean GitHub clone and update
   relevant documentation. Follow `docs/HANDOFF.md` and verify a clean final git status.
 - Preserve functionality when reorganizing. Do not import unrelated local experiments.
+  The owner explicitly authorized importing the latest local snapshot on 2026-10-20;
+  this code is now canonical. See `docs/LOCAL_SOURCE_IMPORT.md`.
+- Build ZXing from `src/third-party/ZXing/` via `scripts/build-zxing.ps1`; never depend
+  on an untracked local DLL. The standard runner now contains 20 suites.

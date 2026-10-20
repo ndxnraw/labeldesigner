@@ -4,6 +4,10 @@ Desktopová aplikácia pre Windows na návrh, export a tlač produktových etiki
 Podporuje grafické úpravy textov, čiarových kódov a symbolov, import ZPL a export
 PDF, SVG, DOCX a ZPL. Projekty ukladá do `.ean.xml` a pracuje lokálne.
 
+Aktuálny kód zahŕňa aj Späť/Znova, obnovu práce, šablóny, CSV/XLSX dávky,
+skupiny a zarovnávanie, obrázky, premenné, profily tlačiarní, QR a Data Matrix.
+Pozrite [funkcie a obmedzenia](docs/FEATURES.md).
+
 - **Owner:** Daniel Návojský / [@ndxnraw](https://github.com/ndxnraw)
 - **Repository:** [ndxnraw/LabelDesigner](https://github.com/ndxnraw/LabelDesigner)
 - **Project status / Version:** `prelease`
@@ -53,5 +57,6 @@ všetky zdroje a aktíva potrebné na pokračovanie bez pôvodného počítača.
 - [Pokyny pre agentov](AGENTS.md), [história vývoja](CHANGELOG.md), [archív](archive/README.md)
 
 Jediné aktuálne produktové označenie je `prelease`. Historické tagy a názvy v archíve
-sú vývojové identifikátory. Import cudzieho ZPL je čiastočný; QR a `.nlbl` nie sú
-podporované. Pozrite [licenčný stav](LICENSE) a licenciu fontu v `assets/fonts/OFL.txt`.
+sú vývojové identifikátory. Import cudzieho ZPL je čiastočný; `.nlbl` a GS1 DataMatrix
+nie sú podporované. ZXing.Net sa zostavuje offline z priložených zdrojov.
+Pozrite [licenčný stav](LICENSE) a licencie v `assets/fonts/` a `src/third-party/ZXing/`.

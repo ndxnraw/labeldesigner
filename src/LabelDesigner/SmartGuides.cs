@@ -25,7 +25,7 @@ public static class SmartGuides {
  static double Size(ElementEdit e,bool x){if(e.Rotation==0)return x?e.Width:e.Height;var b=ElementTransform.Bounds(e);return x?b.Width:b.Height;}
  static AlignmentGuide Find(ElementEdit moving,IList<ElementEdit> targets,ElementEdit canvas,bool x,double tolerance,out double delta){
   delta=0;AlignmentGuide best=null;double distance=tolerance+1e-10;
-  for(int i=-1;i<targets.Count;i++){var target=i<0?canvas:targets[i];if(target.Index==moving.Index)continue;
+  for(int i=-1;i<targets.Count;i++){var target=i<0?canvas:targets[i];if(target==null||target.Index==moving.Index)continue;
    foreach(double ta in Anchors)foreach(double ma in Anchors){double axis=Start(target,x)+ta*Size(target,x),change=axis-(Start(moving,x)+ma*Size(moving,x));double absolute=Math.Abs(change),position=Start(moving,x)+change;
     if(position < -500||position > 500||absolute>tolerance+1e-10||absolute>=distance)continue;
     distance=absolute;delta=change;best=new AlignmentGuide{Vertical=x,Position=axis,Start=Start(target,!x),End=Start(target,!x)+Size(target,!x)};
@@ -33,7 +33,7 @@ public static class SmartGuides {
   }return best;
  }
  static void Extend(AlignmentGuide guide,ElementEdit moving,IList<ElementEdit> targets,ElementEdit canvas){if(guide==null)return;bool x=guide.Vertical;guide.Start=Math.Min(guide.Start,Start(moving,!x));guide.End=Math.Max(guide.End,Start(moving,!x)+Size(moving,!x));
-  for(int i=-1;i<targets.Count;i++){var target=i<0?canvas:targets[i];if(target.Index==moving.Index)continue;foreach(double a in Anchors)if(Math.Abs(Start(target,x)+a*Size(target,x)-guide.Position)<1e-8){guide.Start=Math.Min(guide.Start,Start(target,!x));guide.End=Math.Max(guide.End,Start(target,!x)+Size(target,!x));break;}}
+  for(int i=-1;i<targets.Count;i++){var target=i<0?canvas:targets[i];if(target==null||target.Index==moving.Index)continue;foreach(double a in Anchors)if(Math.Abs(Start(target,x)+a*Size(target,x)-guide.Position)<1e-8){guide.Start=Math.Min(guide.Start,Start(target,!x));guide.End=Math.Max(guide.End,Start(target,!x)+Size(target,!x));break;}}
  }
 }
 }

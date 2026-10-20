@@ -14,9 +14,13 @@ $path = Join-Path $output 'ND-LabelDesigner-prelease-Windows.zip'
 $entries = [ordered]@{
   'ND-LabelDesigner.exe' = 'build/app/ND-LabelDesigner.exe'
   'ND-LabelDesigner.exe.config' = 'build/app/ND-LabelDesigner.exe.config'
+  'zxing.dll' = 'build/app/zxing.dll'
   'USER_GUIDE.txt' = 'docs/USER_GUIDE.txt'
+  'FEATURES.md' = 'docs/FEATURES.md'
   'LICENSE' = 'LICENSE'
   'licenses/SourceSans3-OFL.txt' = 'assets/fonts/OFL.txt'
+  'licenses/ZXing-LICENSE.txt' = 'src/third-party/ZXing/ZXing-LICENSE.txt'
+  'licenses/ZXing-NOTICE.txt' = 'src/third-party/ZXing/THIRD-PARTY.txt'
 }
 $stream = [IO.File]::Open($path,[IO.FileMode]::Create)
 $zip = [IO.Compression.ZipArchive]::new($stream,[IO.Compression.ZipArchiveMode]::Create)

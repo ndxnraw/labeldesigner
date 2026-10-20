@@ -6,8 +6,8 @@ namespace EanEtikety {
 public partial class MainForm {
  void OpenImportedFile(string path){string extension=Path.GetExtension(path).ToLowerInvariant();
   if(extension!=".xml"&&extension!=".zpl"&&extension!=".prn")throw new NotSupportedException(Loc.T("Nepodporovaný typ súboru. Otvorte projekt XML alebo súbor ZPL/PRN."));
-  if((extension==".zpl"||extension==".prn")){string source=ZplImport.ReadFile(path);var project=ZplImport.Project(source);if(project!=null){if(Array.IndexOf(Dpis,project.Dpi)<0)throw new Exception(Loc.T("Nepodporované DPI projektu v ZPL."));Apply(project);settingsPath=null;Changed(this,EventArgs.Empty);status.Text=Loc.T("ZPL/PRN bol otvorený ako editovateľná etiketa. Uložiť vytvorí nový súbor .ean.xml.");}else ShowZpl(path,source);return;}
-  var s=Engine.Load(path);if(Array.IndexOf(Dpis,s.Dpi)<0)throw new Exception(Loc.T("Nepodporované DPI v súbore."));Apply(s);settingsPath=path;UpdateWindowTitle();
+  if((extension==".zpl"||extension==".prn")){string source=ZplImport.ReadFile(path);var project=ZplImport.Project(source);if(project!=null){if(Array.IndexOf(Dpis,project.Dpi)<0)throw new Exception(Loc.T("Nepodporované DPI projektu v ZPL."));Apply(project);settingsPath=null;ResetHistory(false);if(workspace!=null)workspace.Remember(path);Changed(this,EventArgs.Empty);status.Text=Loc.T("ZPL/PRN bol otvorený ako editovateľná etiketa. Uložiť vytvorí nový súbor .ean.xml.");}else ShowZpl(path,source);return;}
+  var s=Engine.Load(path);if(Array.IndexOf(Dpis,s.Dpi)<0)throw new Exception(Loc.T("Nepodporované DPI v súbore."));Apply(s);settingsPath=path;UpdateWindowTitle();DocumentOpened();
  }
  void ShowZpl(string path,string source){using(var dialog=new Form{Text="ZPL – "+Path.GetFileName(path),Size=new Size(1100,820),MinimumSize=new Size(780,600),Font=Font,StartPosition=FormStartPosition.CenterParent,MinimizeBox=false,ShowInTaskbar=false}){
   var root=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(14),RowCount=3,ColumnCount=1};root.RowStyles.Add(new RowStyle(SizeType.Absolute,54));root.RowStyles.Add(new RowStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.Absolute,94));dialog.Controls.Add(root);

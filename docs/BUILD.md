@@ -15,10 +15,15 @@ The application and configuration are written to `build/app/`. Packaging perform
 a new build and creates `build/packages/ND-LabelDesigner-prelease-Windows.zip`
 and `SHA256SUMS.txt`. It verifies every ZIP entry's SHA-256 against its input.
 The runtime package includes the application, configuration, user guide and license
-notices. Development sources and tests are obtained by cloning GitHub.
+notices and feature documentation. Development sources and tests are obtained by cloning GitHub.
+The build first compiles vendored ZXing.Net sources to `build/app/zxing.dll`;
+the runtime package includes this DLL and Apache license/provenance notices.
+There is no download or dependency on a prebuilt DLL. Two upstream obsolete-API
+compiler warnings are expected. WPF framework assemblies WindowsBase and
+PresentationCore are used by the application and supplied by .NET Framework.
 
 Run `build/app/ND-LabelDesigner.exe` or extract the whole ZIP. Keep the config next
-to the EXE. No installation, external package download, historical ZIP extraction,
+to the EXE, together with `zxing.dll`. No installation, external package download, historical ZIP extraction,
 old output, absolute machine-specific path, or `work/` directory is needed.
 All build dependencies are Windows framework components or committed source/assets.
 Reproducible here means a complete source build from a clean clone; legacy csc/ZIP

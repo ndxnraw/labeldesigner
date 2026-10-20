@@ -1,0 +1,21 @@
+ZXing.Net
+Upstream: https://github.com/micjahn/ZXing.Net
+License: Apache License 2.0; see ZXing-LICENSE.txt and source file notices.
+Vendored Source/lib files selected by upstream zxing.net4.0.csproj, downloaded
+6 October 2026. Upstream source assembly version: 0.17.0.0.
+The exact upstream commit was not retained; the supplied source files and
+SHA256SUMS.txt identify this vendored snapshot. No download is needed to build.
+
+Local compatibility changes for the .NET Framework C# 5 compiler:
+- GenericGF.cs: binary integer literals converted to decimal equivalents.
+- StringRenderer.cs: property initializers moved into constructor;
+  expression-bodied member converted to a method body.
+- QRCodeWriter.cs: nameof(code) replaced by the literal "code".
+- qrcode/encoder/Encoder.cs: null-conditional encoding.WebName access expanded.
+
+Build zxing.dll from the supplied source with scripts/build-zxing.ps1.
+ND LabelDesigner uses QR and ordinary Data Matrix encoding; GS1 DataMatrix
+is deliberately not offered. Barcode decoding is used by regression tests.
+
+Source Sans 3 is bundled separately under the SIL Open Font License:
+assets/fonts/OFL.txt. No fonts or resources are downloaded at application startup.

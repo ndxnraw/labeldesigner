@@ -1,9 +1,18 @@
 ND LabelDesigner — prelease — Windows
-29. september 2026
+7. október 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
-ND-LabelDesigner.exe.config ponechajte vedľa EXE kvôli DPI.
+ND-LabelDesigner.exe.config a zxing.dll ponechajte vedľa EXE.
 Potrebný je Windows s .NET Framework 4.8/4.8.1.
+
+NOVÉ FUNKCIE prelease
+Ponuka Nástroje: automatické ukladanie, šablóny a nedávne projekty,
+dávky CSV/XLSX a premenné, samolepiace hárky, vlastné obrázky,
+QR / Data Matrix, rozloženie a kontrola etikety.
+Späť/Znova: Ctrl+Z/Ctrl+Y alebo dve ikony na hornej lište.
+Ctrl/Shift pridáva prvky do výberu; ťahanie prázdnej plochy vytvorí výberový obdĺžnik.
+Podrobný postup a limity: docs/FEATURES.md.
+Počet etikiet v dávke/hárku a počet kópií celej tlačovej úlohy sú odlišné.
 
 OKNÁ A TÉMA
 Vlastné okná a hlášky používajú logo ND LabelDesigner a titulok zladený
@@ -52,7 +61,7 @@ KÓDY, IMPORT A EXPORT
 EAN-13, EAN-8, UPC-A, Code 128, Code 39, Interleaved 2 of 5 a ITF-14
 zostávajú dostupné. Pre Code 128 možno zapnúť GS1, vybrať identifikátory,
 zadať dáta a meniť ich poradie. Kontrolné číslice sa dopĺňajú alebo overujú.
-QR kódy nie sú súčasťou doterajšieho programu ani tejto revízie.
+QR a bežný Data Matrix sú podporované; GS1 DataMatrix sa neponúka.
 
 Otvoriť podporuje projekty XML a ZPL/PRN. Vlastné ZPL s projektovými údajmi
 sa otvorí na editáciu; cudzí podporovaný ZPL sa zobrazí v samostatnom náhľade.
@@ -91,4 +100,4 @@ Náhľad má limit jednej strany a 32 MB dát metafilu.
 ZDROJE A OVERENIE
 scripts/build.cmd zostaví aplikáciu bez nových závislostí.
 scripts/test.cmd spustí dostupné regresné testy.
-Vývoj, testovanie a handoff: docs/DEVELOPMENT.md, docs/TESTING.md a docs/HANDOFF.md.
+Funkcie a manuálna kontrola: FEATURES.md v balíku alebo docs/FEATURES.md v repozitári.

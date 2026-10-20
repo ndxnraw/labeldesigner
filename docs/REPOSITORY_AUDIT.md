@@ -1,5 +1,9 @@
 # Repository cleanup audit — 2026-10-19
 
+This document records the earlier reorganization baseline. The owner subsequently
+identified and authorized the latest local source import on 2026-10-20; see
+[LOCAL_SOURCE_IMPORT.md](LOCAL_SOURCE_IMPORT.md) for the current provenance and changes.
+
 Baseline: GitHub main `0c4130242fcc57570e091f69bb361ddd48d482b9` (162 tracked files).
 The old local workspace had unrelated uncommitted development work and was not
 overwritten or imported. This cleanup uses a separate clone of canonical main.

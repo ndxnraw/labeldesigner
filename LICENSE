@@ -7,3 +7,7 @@ Contact the repository owner @ndxnraw for licensing permission.
 
 Source Sans 3 is separately licensed under the SIL Open Font License in
 assets/fonts/OFL.txt. Historical snapshots retain their original notices.
+
+ZXing.Net is separately licensed under the Apache License 2.0 in
+src/third-party/ZXing/ZXing-LICENSE.txt. Its provenance and local compatibility
+changes are documented in src/third-party/ZXing/THIRD-PARTY.txt.

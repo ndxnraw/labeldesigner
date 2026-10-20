@@ -25,4 +25,3 @@ class Revision301Tests {
  var close=new Timer{Interval=100};bool checkedDialog=false;close.Tick+=delegate{close.Stop();foreach(Form d in Application.OpenForms)if(d!=f){Fonts(d,null);Snap(d,"text-dialog");checkedDialog=true;d.Close();break;}};close.Start();Call(f,"EditTextDialog",0);close.Dispose();Check(checkedDialog,"text dialog");Check(((LabelSettings)Call(f,"Read")).Texts[0].FontName=="Arial","label font preserved");Call(f,"Apply",LabelSettings.Default());f.Close();}
  using(var restart=new MainForm(Path.Combine(dir,"preferences.xml"))){Check(restart.Font.Name=="Source Sans 3","restart font");}}
 }
-

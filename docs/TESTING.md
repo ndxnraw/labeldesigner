@@ -6,13 +6,15 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds the app, compiles and runs all 17 registered suites. Each must exit
+This rebuilds ZXing and the app, compiles and runs all 20 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+The additional suites cover CSV/XLSX batch data, workspace dialogs, undo/redo,
+recovery, embedded images, QR/Data Matrix decoding and multipage export.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.

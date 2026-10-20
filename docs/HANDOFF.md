@@ -26,7 +26,7 @@ git status --short
 ```
 
 Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
-17 successful suites and reports in `build/test-results/`, validated
+20 successful suites and reports in `build/test-results/`, validated
 `build/packages/ND-LabelDesigner-prelease-Windows.zip`. `git status --short`
 must be empty. Work only from this clone when validating the handoff.
 
@@ -72,9 +72,11 @@ metadata remains valid for .NET/Windows; it is not a stable release designation.
 Old tags and archive contents retain historical identifiers to preserve references.
 Historical Releases represent development snapshots, not supported stable products.
 
-This cleanup starts from GitHub main at `0c413024`. Uncommitted experiments on an old
-computer are not part of this baseline. Application behavior remains unchanged except
-version labels. Foreign ZPL support is partial; native printer fonts are approximated,
-QR and `.nlbl` are unsupported. Physical printer and Word rendering need manual checks.
+The current prelease includes the owner's latest local development snapshot,
+imported on 2026-10-20; see `docs/LOCAL_SOURCE_IMPORT.md`. All its production sources,
+20 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
+no original local DLL is required. Keep the generated `zxing.dll` next to the EXE.
+Foreign ZPL support is partial; native printer fonts are approximated. QR and ordinary
+Data Matrix are supported; GS1 DataMatrix and `.nlbl` are not. Physical printer and Word rendering need manual checks.
 Optional raster comparison dependencies are described in [TESTING](TESTING.md).
 Builds are reproducible from source, but timestamped outputs are not byte-identical.

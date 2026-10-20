@@ -28,4 +28,3 @@ class Revision22Tests {
   }
  }
 }
-

@@ -340,3 +340,146 @@ Otáčanie: kruhový úchyt nad prvkom. Pri uhloch 0°, 90°, 180° a 270° sa p
 
 Rotácia (°)	Rotation (°)	Rotace (°)	Forgatás (°)
 Nepodporovaný typ súboru. Otvorte projekt XML alebo súbor ZPL/PRN.	Unsupported file type. Open an XML project or a ZPL/PRN file.	Nepodporovaný typ souboru. Otevřete projekt XML nebo soubor ZPL/PRN.	Nem támogatott fájltípus. Nyisson meg XML-projektet vagy ZPL/PRN-fájlt.
+Späť	Undo	Zpět	Visszavonás
+Znova	Redo	Znovu	Újra
+Nástroje	Tools	Nástroje	Eszközök
+Automatické ukladanie	Autosave	Automatické ukládání	Automatikus mentés
+Šablóny a nedávne projekty	Templates and recent projects	Šablony a nedávné projekty	Sablonok és legutóbbi projektek
+Šablóny	Templates	Šablony	Sablonok
+Dávka a premenné	Batch and variables	Dávka a proměnné	Köteg és változók
+Samolepiace hárky	Label sheets	Samolepicí archy	Öntapadós címkeívek
+Vložiť obrázok	Insert image	Vložit obrázek	Kép beszúrása
+Pridať QR / Data Matrix	Add QR / Data Matrix	Přidat QR / Data Matrix	QR / Data Matrix hozzáadása
+Rozloženie a výber	Arrange and select	Rozložení a výběr	Elrendezés és kijelölés
+Interval (sekundy)	Interval (seconds)	Interval (sekundy)	Időköz (másodperc)
+Obnoviť rozpracovaný projekt?	Recover unfinished project?	Obnovit rozpracovaný projekt?	Visszaállítja a félbehagyott projektet?
+Obnova práce	Work recovery	Obnova práce	Munka helyreállítása
+Obnovovaciu kópiu sa nepodarilo uložiť	Could not save recovery copy	Obnovovací kopii se nepodařilo uložit	A helyreállítási másolat mentése sikertelen
+Obnovovaciu kópiu sa nepodarilo načítať	Could not read recovery copy	Obnovovací kopii se nepodařilo načíst	A helyreállítási másolat beolvasása sikertelen
+Otvoriť šablónu	Open template	Otevřít šablonu	Sablon megnyitása
+Uložiť ako šablónu	Save as template	Uložit jako šablonu	Mentés sablonként
+Odstrániť šablónu	Delete template	Odstranit šablonu	Sablon törlése
+Odstrániť šablónu?	Delete template?	Odstranit šablonu?	Törli a sablont?
+Názov šablóny	Template name	Název šablony	Sablon neve
+Moja etiketa	My label	Moje etiketa	Saját címke
+Neplatný názov	Invalid name	Neplatný název	Érvénytelen név
+Názov už existuje	Name already exists	Název již existuje	A név már létezik
+Otvoriť nedávny projekt	Open recent project	Otevřít nedávný projekt	Legutóbbi projekt megnyitása
+Nedávne projekty	Recent projects	Nedávné projekty	Legutóbbi projektek
+Súbor sa nenašiel	File not found	Soubor nebyl nalezen	A fájl nem található
+Chyba	Error	Chyba	Hiba
+Upozornenie	Warning	Upozornění	Figyelmeztetés
+Bez problémov	No issues	Bez problémů	Nincs probléma
+Zoskupiť	Group	Seskupit	Csoportosítás
+Rozoskupiť	Ungroup	Oddělit skupinu	Csoport felbontása
+Zamknúť	Lock	Zamknout	Zárolás
+Odomknúť	Unlock	Odemknout	Feloldás
+Zarovnať vľavo	Align left	Zarovnat vlevo	Balra igazítás
+Zarovnať vpravo	Align right	Zarovnat vpravo	Jobbra igazítás
+Zarovnať hore	Align top	Zarovnat nahoru	Felülre igazítás
+Zarovnať dole	Align bottom	Zarovnat dolů	Alulra igazítás
+Vodorovné stredy	Horizontal centers	Vodorovné středy	Vízszintes középpontok
+Zvislé stredy	Vertical centers	Svislé středy	Függőleges középpontok
+Vodorovné rozostupy	Distribute horizontally	Vodorovné rozestupy	Vízszintes elosztás
+Zvislé rozostupy	Distribute vertically	Svislé rozestupy	Függőleges elosztás
+Na stred etikety vodorovne	Center on label horizontally	Na střed etikety vodorovně	Vízszintesen a címke közepére
+Na stred etikety zvisle	Center on label vertically	Na střed etikety svisle	Függőlegesen a címke közepére
+Do popredia	Bring to front	Do popředí	Előtérbe hozás
+Do pozadia	Send to back	Do pozadí	Háttérbe küldés
+Vyberte aspoň tri prvky	Select at least three elements	Vyberte alespoň tři prvky	Jelöljön ki legalább három elemet
+Ctrl/Shift: výber viacerých prvkov. Ťahanie na prázdnej ploche: výberový obdĺžnik.	Ctrl/Shift: select multiple elements. Drag empty space for a selection rectangle.	Ctrl/Shift: výběr více prvků. Tažení na prázdné ploše: výběrový obdélník.	Ctrl/Shift: több elem kijelölése. Húzás az üres területen: kijelölési téglalap.
+Viac etikiet na hárku	Multiple labels per sheet	Více etiket na archu	Több címke egy íven
+Stĺpce	Columns	Sloupce	Oszlopok
+Riadky	Rows	Řádky	Sorok
+Prvá voľná pozícia (od 1)	First free position (from 1)	První volná pozice (od 1)	Első szabad hely (1-től)
+Počet etikiet	Number of labels	Počet etiket	Címkék száma
+Premenné polia	Variable fields	Proměnná pole	Változó mezők
+Názov	Name	Název	Név
+Typ (Number/Date/Fixed)	Type (Number/Date/Fixed)	Typ (Number/Date/Fixed)	Típus (Number/Date/Fixed)
+Začiatok	Start	Začátek	Kezdőérték
+Krok	Step	Krok	Lépés
+Číslice	Digits	Číslice	Számjegyek
+Prefix	Prefix	Prefix	Előtag
+Suffix	Suffix	Suffix	Utótag
+Formát dátumu	Date format	Formát data	Dátumformátum
+Posun dní	Day offset	Posun dnů	Eltolás napokban
+Posun mesiacov	Month offset	Posun měsíců	Eltolás hónapokban
+Pevný dátum	Fixed date	Pevné datum	Rögzített dátum
+Dátum	Date	Datum	Dátum
+Pevná hodnota	Fixed value	Pevná hodnota	Rögzített érték
+Použitie v texte alebo kóde: {serial}. Typ: Number, Date alebo Fixed.	Use in text or barcode: {serial}. Type: Number, Date or Fixed.	Použití v textu nebo kódu: {serial}. Typ: Number, Date nebo Fixed.	Használat szövegben vagy kódban: {serial}. Típus: Number, Date vagy Fixed.
+Prvý riadok je hlavička	First row contains headers	První řádek je záhlaví	Az első sor a fejléc
+Prvok	Element	Prvek	Elem
+Stĺpec	Column	Sloupec	Oszlop
+Riadok	Row	Řádek	Sor
+Zahrnúť	Include	Zahrnout	Bevonás
+Neprepojené	Not mapped	Nepropojeno	Nincs hozzárendelés
+Import CSV / XLSX	Import CSV / XLSX	Import CSV / XLSX	CSV / XLSX importálása
+Pripraviť dávku	Prepare batch	Připravit dávku	Köteg előkészítése
+Vybrať všetko	Select all	Vybrat vše	Összes kijelölése
+Zrušiť výber	Clear selection	Zrušit výběr	Kijelölés törlése
+Exportovať vybrané	Export selected	Exportovat vybrané	Kijelöltek exportálása
+Tlačiť vybrané	Print selected	Tisknout vybrané	Kijelöltek nyomtatása
+Obsah kódu	Code content	Obsah kódu	Kód tartalma
+Bežný Data Matrix, nie GS1 DataMatrix. Premenné zapisujte ako {serial}.	Ordinary Data Matrix, not GS1 DataMatrix. Write variables as {serial}.	Běžný Data Matrix, nikoli GS1 DataMatrix. Proměnné zapisujte jako {serial}.	Hagyományos Data Matrix, nem GS1 DataMatrix. Változók: {serial}.
+Výrez X (%)	Crop X (%)	Ořez X (%)	Kivágás X (%)
+Výrez Y (%)	Crop Y (%)	Ořez Y (%)	Kivágás Y (%)
+Šírka výrezu (%)	Crop width (%)	Šířka ořezu (%)	Kivágás szélessége (%)
+Výška výrezu (%)	Crop height (%)	Výška ořezu (%)	Kivágás magassága (%)
+Zachovať pomer strán	Keep aspect ratio	Zachovat poměr stran	Képarány megtartása
+Korekcia X (mm)	X correction (mm)	Korekce X (mm)	X korrekció (mm)
+Korekcia Y (mm)	Y correction (mm)	Korekce Y (mm)	Y korrekció (mm)
+Uložiť profil tlačiarne	Save printer profile	Uložit profil tiskárny	Nyomtatóprofil mentése
+Profil tlačiarne uložený	Printer profile saved	Profil tiskárny uložen	Nyomtatóprofil mentve
+Profil tlačiarne sa nepodarilo načítať	Could not load printer profile	Profil tiskárny se nepodařilo načíst	A nyomtatóprofil betöltése sikertelen
+Kalibračná etiketa	Calibration label	Kalibrační etiketa	Kalibrációs címke
+Kalibrácia	Calibration	Kalibrace	Kalibráció
+Ak je výtlačok posunutý doprava alebo nadol, zadajte nameraný posun so záporným znamienkom. Rozmery zostanú nezmenené.	If the print is shifted right or down, enter the measured offset as a negative value. Dimensions remain unchanged.	Pokud je výtisk posunut doprava nebo dolů, zadejte naměřený posun se záporným znaménkem. Rozměry zůstanou nezměněné.	Ha a nyomat jobbra vagy lefelé tolódik, a mért eltolást negatív értékként adja meg. A méretek nem változnak.
+Papier uloženého profilu nie je dostupný. Vyberte dostupný papier.	The saved profile paper is unavailable. Select an available paper.	Papír uloženého profilu není dostupný. Vyberte dostupný papír.	A mentett profil papírja nem érhető el. Válasszon elérhető papírt.
+Prvok presahuje etiketu	Element extends beyond label	Prvek přesahuje etiketu	Az elem túlnyúlik a címkén
+Prvok zasahuje do voľného priestoru kódu	Element overlaps barcode quiet zone	Prvek zasahuje do volného prostoru kódu	Az elem a kód nyugalmi zónájába ér
+Text sa nezmestí do poľa	Text does not fit the field	Text se nevejde do pole	A szöveg nem fér a mezőbe
+Nízke rozlíšenie obrázka pri tlači	Low image resolution at print size	Nízké rozlišení obrázku při tisku	Alacsony képfelbontás a nyomtatási méretnél
+Neplatné rozmery 2D kódu	Invalid 2D code dimensions	Neplatné rozměry 2D kódu	Érvénytelen 2D kódméret
+QR a Data Matrix musia byť štvorcové	QR and Data Matrix must be square	QR a Data Matrix musí být čtvercové	A QR és Data Matrix kódnak négyzetesnek kell lennie
+Neplatné rozloženie hárka	Invalid sheet layout	Neplatné rozložení archu	Érvénytelen ívelrendezés
+Etikety presahujú papier	Labels exceed paper size	Etikety přesahují papír	A címkék túlnyúlnak a papíron
+Dávka obsahuje chyby	Batch contains errors	Dávka obsahuje chyby	A köteg hibákat tartalmaz
+Najviac 10000 etikiet	Maximum 10000 labels	Nejvýše 10000 etiket	Legfeljebb 10000 címke
+Najviac 10000 záznamov	Maximum 10000 records	Nejvýše 10000 záznamů	Legfeljebb 10000 rekord
+Neplatný počet etikiet	Invalid label quantity	Neplatný počet etiket	Érvénytelen címkeszám
+Príliš veľa údajov	Too much data	Příliš mnoho údajů	Túl sok adat
+Príliš veľa stĺpcov	Too many columns	Příliš mnoho sloupců	Túl sok oszlop
+Príliš veľa prvkov	Too many elements	Příliš mnoho prvků	Túl sok elem
+Neplatné úvodzovky CSV	Invalid CSV quotes	Neplatné uvozovky CSV	Érvénytelen CSV-idézőjelek
+Neuzavreté úvodzovky CSV	Unclosed CSV quotes	Neuzavřené uvozovky CSV	Lezáratlan CSV-idézőjelek
+Neplatné CSV	Invalid CSV	Neplatné CSV	Érvénytelen CSV
+Neplatný XLSX	Invalid XLSX	Neplatný XLSX	Érvénytelen XLSX
+Vzorec nemá uložený výsledok	Formula has no cached result	Vzorec nemá uložený výsledek	A képletnek nincs mentett eredménye
+Neplatný dátum	Invalid date	Neplatné datum	Érvénytelen dátum
+Neplatný alebo duplicitný názov premennej	Invalid or duplicate variable name	Neplatný nebo duplicitní název proměnné	Érvénytelen vagy ismétlődő változónév
+Neplatný počet číslic	Invalid digit count	Neplatný počet číslic	Érvénytelen számjegyszám
+Neplatný typ premennej	Invalid variable type	Neplatný typ proměnné	Érvénytelen változótípus
+Neznáma premenná	Unknown variable	Neznámá proměnná	Ismeretlen változó
+Obrázok je príliš veľký	Image is too large	Obrázek je příliš velký	A kép túl nagy
+Neplatný výrez	Invalid crop	Neplatný ořez	Érvénytelen kivágás
+Nepodporovaný obrázok	Unsupported image	Nepodporovaný obrázek	Nem támogatott kép
+Neplatné údaje kódu	Invalid code data	Neplatné údaje kódu	Érvénytelen kódadatok
+Nepodporovaný typ kódu	Unsupported code type	Nepodporovaný typ kódu	Nem támogatott kódtípus
+Neplatná hodnota SVG	Invalid SVG value	Neplatná hodnota SVG	Érvénytelen SVG-érték
+SVG je príliš veľké	SVG is too large	SVG je příliš velké	Az SVG túl nagy
+Neplatné SVG	Invalid SVG	Neplatné SVG	Érvénytelen SVG
+Neplatné rozmery SVG	Invalid SVG dimensions	Neplatné rozměry SVG	Érvénytelen SVG-méretek
+Nepodporovaná farba SVG	Unsupported SVG color	Nepodporovaná barva SVG	Nem támogatott SVG-szín
+Neplatná transformácia SVG	Invalid SVG transform	Neplatná transformace SVG	Érvénytelen SVG-transzformáció
+SVG je príliš zložité	SVG is too complex	SVG je příliš složité	Az SVG túl összetett
+SVG nesmie načítavať externé zdroje	SVG cannot load external resources	SVG nesmí načítat externí zdroje	Az SVG nem tölthet be külső erőforrásokat
+Nepodporovaná vlastnosť SVG	Unsupported SVG property	Nepodporovaná vlastnost SVG	Nem támogatott SVG-tulajdonság
+Nepodporovaný prvok SVG	Unsupported SVG element	Nepodporovaný prvek SVG	Nem támogatott SVG-elem
+Výstup je príliš veľký. Znížte DPI.	Output is too large. Reduce DPI.	Výstup je příliš velký. Snižte DPI.	A kimenet túl nagy. Csökkentse a DPI-t.
+Číslovanie	Numbering	Číslování	Számozás
+Pevný text	Fixed text	Pevný text	Rögzített szöveg
+Počet záznamov	Record count	Počet záznamů	Rekordok száma
+Pridať čiarový kód	Add barcode	Přidat čárový kód	Vonalkód hozzáadása
+Poradie riadkov určuje poradie identifikátorov GS1.	Row order defines the GS1 identifier order.	Pořadí řádků určuje pořadí identifikátorů GS1.	A sorok sorrendje határozza meg a GS1-azonosítók sorrendjét.
+Obrázok má príliš extrémny pomer strán.	The image aspect ratio exceeds the supported element dimensions.	Obrázek má příliš extrémní poměr stran.	A kép képaránya meghaladja a támogatott elemméreteket.
