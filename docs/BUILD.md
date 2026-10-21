@@ -1,4 +1,4 @@
-# Build and package — prelease
+# Build and package — pre-release
 
 Prerequisites: 64-bit Windows 10/11, Git, Windows PowerShell 5.1 and .NET Framework
 4.8/4.8.1 (including `%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe`).
@@ -12,7 +12,7 @@ From a repository checkout, in PowerShell:
 ```
 
 The application and configuration are written to `build/app/`. Packaging performs
-a new build and creates `build/packages/ND-LabelDesigner-prelease-Windows.zip`
+a new build and creates `build/packages/ND-LabelDesigner-pre-release-Windows.zip`
 and `SHA256SUMS.txt`. It verifies every ZIP entry's SHA-256 against its input.
 The runtime package includes the application, configuration, user guide and license
 notices and feature documentation. Development sources and tests are obtained by cloning GitHub.

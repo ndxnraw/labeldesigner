@@ -1,4 +1,4 @@
-name: Prelease validation
+name: Pre-release validation
 on:
   push:
     branches: [main]
@@ -20,7 +20,7 @@ jobs:
         run: scripts\package.cmd
       - uses: actions/upload-artifact@v4
         with:
-          name: ND-LabelDesigner-prelease-Windows
+          name: ND-LabelDesigner-pre-release-Windows
           path: build/packages/*
           if-no-files-found: error
       - uses: actions/upload-artifact@v4

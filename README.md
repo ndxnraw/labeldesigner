@@ -1,4 +1,4 @@
-# ND LabelDesigner — prelease
+# ND LabelDesigner — pre-release
 
 Desktopová aplikácia pre Windows na návrh, export a tlač produktových etikiet.
 Podporuje grafické úpravy textov, čiarových kódov a symbolov, import ZPL a export
@@ -10,7 +10,7 @@ Pozrite [funkcie a obmedzenia](docs/FEATURES.md).
 
 - **Owner:** Daniel Návojský / [@ndxnraw](https://github.com/ndxnraw)
 - **Repository:** [ndxnraw/LabelDesigner](https://github.com/ndxnraw/LabelDesigner)
-- **Project status / Version:** `prelease`
+- **Project status / Version:** `pre-release`
 - **Platforma a stack:** 64-bit Windows, C#, Windows Forms, .NET Framework 4.8/4.8.1.
 
 ## Požiadavky a rýchly štart
@@ -29,7 +29,7 @@ git status --short
 ```
 
 Program: `build/app/ND-LabelDesigner.exe`. Balík:
-`build/packages/ND-LabelDesigner-prelease-Windows.zip`. Testovacie reporty:
+`build/packages/ND-LabelDesigner-pre-release-Windows.zip`. Testovacie reporty:
 `build/test-results/`. Generované výstupy sa necommitujú; stav Git má zostať čistý.
 CI poskytuje balíky ako GitHub Actions artifacts. Projekt nemá stabilné vydanie.
 
@@ -43,7 +43,7 @@ CI poskytuje balíky ako GitHub Actions artifacts. Projekt nemá stabilné vydan
 | `scripts/` | Build, test a package |
 | `docs/` | Aktuálna dokumentácia a handoff |
 | `build/` | Ignorované generované výstupy |
-| `archive/prelease/` | Historické vývojové snapshoty |
+| `archive/pre-release/` | Historické vývojové snapshoty |
 | `.github/workflows/` | Windows CI |
 
 ## Dokumentácia a handoff
@@ -56,7 +56,7 @@ všetky zdroje a aktíva potrebné na pokračovanie bez pôvodného počítača.
 - [Štruktúra projektu](docs/PROJECT_STRUCTURE.md), [návod aplikácie](docs/USER_GUIDE.txt)
 - [Pokyny pre agentov](AGENTS.md), [história vývoja](CHANGELOG.md), [archív](archive/README.md)
 
-Jediné aktuálne produktové označenie je `prelease`. Historické tagy a názvy v archíve
+Jediné aktuálne produktové označenie je `pre-release`. Historické tagy a názvy v archíve
 sú vývojové identifikátory. Import cudzieho ZPL je čiastočný; `.nlbl` a GS1 DataMatrix
 nie sú podporované. ZXing.Net sa zostavuje offline z priložených zdrojov.
 Pozrite [licenčný stav](LICENSE) a licencie v `assets/fonts/` a `src/third-party/ZXing/`.

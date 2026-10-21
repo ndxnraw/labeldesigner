@@ -21,8 +21,8 @@ and `.github/workflows/` four workflows publishing prebuilt numbered packages.
 - Optional export verifiers → `tests/export/`; captures/benchmarks → `tests/tools/`.
 - Build/test entry points → `scripts/`; generated output → ignored `build/`.
 - Fonts, application icon, branding and examples → `assets/`.
-- Current user guide → `docs/USER_GUIDE.txt`; historical reports → prelease archive.
-- Historical numbered directories → unique `archive/prelease/snapshot-<original-tree-id>/`.
+- Current user guide → `docs/USER_GUIDE.txt`; historical reports → pre-release archive.
+- Historical numbered directories → unique `archive/pre-release/snapshot-<original-tree-id>/`.
   The complete directory mapping is in `archive/README.md`.
 
 ## Removed or replaced
@@ -45,7 +45,7 @@ The two original icons differ, so both are retained with explicit roles.
 
 The full-text pattern `\bv?[0-9]+\.[0-9]+(\.[0-9]+)?\b` was reviewed in active
 source, tests, scripts, workflows, current docs and assets. Product labels in the
-title, footer, About text and translations now use `prelease`; the package and
+title, footer, About text and translations now use `pre-release`; the package and
 AssemblyInformationalVersion do too. Remaining numerical strings are:
 
 - .NET/PowerShell prerequisites and compiler directory identifiers;

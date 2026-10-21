@@ -16,5 +16,5 @@ $arguments += (Get-ChildItem $source -Filter '*.cs' | Sort-Object Name).FullName
 if ($LASTEXITCODE -ne 0) { throw 'Application compilation failed.' }
 Copy-Item (Join-Path $source 'app.config') (Join-Path $output 'ND-LabelDesigner.exe.config') -Force
 $version = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $output 'ND-LabelDesigner.exe'))
-if ($version.ProductVersion -ne 'prelease') { throw 'Incorrect product version.' }
-Write-Host "Built ND LabelDesigner - prelease: $output"
+if ($version.ProductVersion -ne 'pre-release') { throw 'Incorrect product version.' }
+Write-Host "Built ND LabelDesigner - pre-release: $output"

@@ -10,7 +10,7 @@ $output = Join-Path $root 'build\packages'
 New-Item $output -ItemType Directory -Force | Out-Null
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$path = Join-Path $output 'ND-LabelDesigner-prelease-Windows.zip'
+$path = Join-Path $output 'ND-LabelDesigner-pre-release-Windows.zip'
 $entries = [ordered]@{
   'ND-LabelDesigner.exe' = 'build/app/ND-LabelDesigner.exe'
   'ND-LabelDesigner.exe.config' = 'build/app/ND-LabelDesigner.exe.config'

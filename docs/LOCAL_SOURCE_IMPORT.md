@@ -7,7 +7,7 @@ without importing this local work. This update corrects that omission.
 
 All production C# files, translations, manifest, configuration, application icon,
 font inputs and active test sources come from that local snapshot. Changes to these
-inputs are limited to product labeling (`prelease`) and repository paths.
+inputs are limited to product labeling (`pre-release`) and repository paths.
 The existing clean layout, CI, package name and attribution requirements remain.
 The internal numerical assembly/file/manifest identity is `3.1.0.0`; this is not a
 new official product version. The original local workspace is preserved.

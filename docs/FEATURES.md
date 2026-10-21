@@ -1,6 +1,6 @@
-# ND LabelDesigner — prelease
+# ND LabelDesigner — pre-release
 
-Aktuálny prelease pre Windows; lokálny vývojový stav zo 7. októbra 2026. Zachováva Windows Forms,
+Aktuálny pre-release pre Windows; lokálny vývojový stav zo 7. októbra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Nové možnosti
@@ -65,7 +65,7 @@ pre každú stranu. Jednotlivý pôvodný ZPL export si zachováva projektové m
 - Obnovovacie kópie, šablóny, profily tlačiarní a nedávne projekty sa ukladajú
   lokálne vedľa súboru nastavení do priečinka s príponou `.workspace`.
 - Staršie verzie programu nepoznajú nové typy objektov. Nové projekty upravujte
-  v aktuálnom prelease; pred otvorením v staršej verzii si ponechajte zálohu.
+  v aktuálnom pre-release; pred otvorením v staršej verzii si ponechajte zálohu.
 
 ## Overenie
 

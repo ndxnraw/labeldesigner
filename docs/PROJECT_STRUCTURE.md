@@ -16,8 +16,8 @@
 | `scripts/` | Build, test and package entry points |
 | `build/` | Ignored generated files; only README is tracked |
 | `docs/` | Current development, build, testing, handoff and user guides |
-| `archive/prelease/` | Historical snapshots; never build inputs |
-| `.github/workflows/prelease.yml` | Read-only Windows CI and artifacts |
+| `archive/pre-release/` | Historical snapshots; never build inputs |
+| `.github/workflows/pre-release.yml` | Read-only Windows CI and artifacts |
 
 The original tracked-file inventory is [ORIGINAL_TREE.txt](ORIGINAL_TREE.txt).
 Historical directory moves are recorded in [archive/README.md](../archive/README.md).

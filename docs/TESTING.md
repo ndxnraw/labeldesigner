@@ -1,4 +1,4 @@
-# Testing — prelease
+# Testing — pre-release
 
 From the checkout root:
 

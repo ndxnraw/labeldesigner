@@ -1,11 +1,11 @@
-ND LabelDesigner — prelease — Windows
+ND LabelDesigner — pre-release — Windows
 7. október 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
 ND-LabelDesigner.exe.config a zxing.dll ponechajte vedľa EXE.
 Potrebný je Windows s .NET Framework 4.8/4.8.1.
 
-NOVÉ FUNKCIE prelease
+NOVÉ FUNKCIE pre-release
 Ponuka Nástroje: automatické ukladanie, šablóny a nedávne projekty,
 dávky CSV/XLSX a premenné, samolepiace hárky, vlastné obrázky,
 QR / Data Matrix, rozloženie a kontrola etikety.

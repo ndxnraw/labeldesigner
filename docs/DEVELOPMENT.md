@@ -1,4 +1,4 @@
-# Development — prelease
+# Development — pre-release
 
 Owner: Daniel Návojský / [@ndxnraw](https://github.com/ndxnraw).
 The canonical source is `main` in `ndxnraw/LabelDesigner`.
@@ -15,14 +15,14 @@ Edit production C# in `src/LabelDesigner/`; add regression coverage in
 new suites in `scripts/test.ps1`. Optional export analysis lives in `tests/export/`.
 Build scripts resolve paths relative to themselves, not a developer's home folder.
 
-The product version is always `prelease`. AssemblyVersion, AssemblyFileVersion
+The product version is always `pre-release`. AssemblyVersion, AssemblyFileVersion
 and Windows manifest identity retain `3.1.0.0` as internal compatibility metadata.
-AssemblyInformationalVersion and Windows ProductVersion are `prelease`.
+AssemblyInformationalVersion and Windows ProductVersion are `pre-release`.
 Do not bump numeric product versions or rewrite old commits/tags.
 
 The owner identified the local development snapshot formerly called `3.1.0.test`
 as the latest source, and authorized its import on 2026-10-20. It is now the canonical
-prelease implementation. See `docs/LOCAL_SOURCE_IMPORT.md` for provenance.
+pre-release implementation. See `docs/LOCAL_SOURCE_IMPORT.md` for provenance.
 ZXing.Net source is vendored under `src/third-party/ZXing/` and rebuilt on every build.
 WindowsBase and PresentationCore are framework dependencies for vector graphics.
 Preserve existing functionality, update relevant docs, and verify a fresh clone
