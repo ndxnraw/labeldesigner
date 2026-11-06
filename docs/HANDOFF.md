@@ -1,6 +1,6 @@
 # Continue on another Windows computer
 
-Project: **ND LabelDesigner — pre-release**. Owner: **Daniel Návojský / @ndxnraw**.
+Project: **ND LabelDesigner — Pre-release**. Owner: **Daniel Návojský / @ndxnraw**.
 Canonical repository: https://github.com/ndxnraw/LabelDesigner, branch `main`.
 
 ## Install prerequisites
@@ -27,7 +27,7 @@ git status --short
 
 Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
 20 successful suites and reports in `build/test-results/`, validated
-`build/packages/ND-LabelDesigner-pre-release-Windows.zip`. `git status --short`
+`build/packages/ND-LabelDesigner-Pre-release-Windows.zip`. `git status --short`
 must be empty. Work only from this clone when validating the handoff.
 
 ## Continue development
@@ -67,12 +67,11 @@ protected, open a PR as ndxnraw and complete acceptance after it reaches main.
 
 ## Status and limitations
 
-The only current product version is `pre-release`. Internal numeric assembly/manifest
+The only current product version is `Pre-release`. Internal numeric assembly/manifest
 metadata remains valid for .NET/Windows; it is not a stable release designation.
-Old tags and archive contents retain historical identifiers to preserve references.
-Historical Releases represent development snapshots, not supported stable products.
+The published build and release tag are named `Pre-release`. Earlier source snapshots remain in Git history.
 
-The current pre-release includes the owner's latest local development snapshot,
+The current Pre-release includes the owner's latest local development snapshot,
 imported on 2026-10-20; see `docs/LOCAL_SOURCE_IMPORT.md`. All its production sources,
 20 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
 no original local DLL is required. Keep the generated `zxing.dll` next to the EXE.

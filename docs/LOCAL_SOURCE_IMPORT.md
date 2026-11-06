@@ -1,13 +1,13 @@
 # Latest local source import — 2026-10-20
 
-The owner confirmed that the local snapshot historically called `3.1.0.test` is
+The owner confirmed that the local snapshot is
 the newest implementation and requested it on GitHub. The preceding cleanup commit
 `6de69c728dfa02b2e25c5727461b2ba488a3b88b` had reorganized the older GitHub source
 without importing this local work. This update corrects that omission.
 
 All production C# files, translations, manifest, configuration, application icon,
 font inputs and active test sources come from that local snapshot. Changes to these
-inputs are limited to product labeling (`pre-release`) and repository paths.
+inputs are limited to product labeling (`Pre-release`) and repository paths.
 The existing clean layout, CI, package name and attribution requirements remain.
 The internal numerical assembly/file/manifest identity is `3.1.0.0`; this is not a
 new official product version. The original local workspace is preserved.

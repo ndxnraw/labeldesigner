@@ -1,28 +1,7 @@
-# Pre-release development history
+# Pre-release
 
-## 2026-10-21 — Correct project designation
+Program je vo vývoji. Obsahuje grafický editor etikiet, čiarové a QR kódy,
+import údajov z CSV/XLSX, dávkovú tlač a export do PDF, SVG, DOCX a ZPL.
 
-- Use `pre-release` consistently in the application, documentation, package and CI.
-- Rename the archive container without changing historical snapshot contents.
-
-## 2026-10-20 — Synchronize the latest local development snapshot
-
-- Import the owner's latest application and tests into the established repository layout.
-- Include undo/redo, recovery, templates, batch data, layout tools, images, variables,
-  printer profiles, QR and Data Matrix already implemented in the local snapshot.
-- Build ZXing offline from vendored sources; ship its DLL and license in the package.
-- Expand standard validation to 20 suites; retain the product designation `pre-release`.
-
-## 2026-10-19 — Reproducible development handoff
-
-- Canonical source, tests, assets, scripts and current documentation have explicit homes.
-- Build/test/package commands use only clone contents and Windows framework dependencies.
-- UI and package names consistently use `pre-release`; technical assembly metadata is retained.
-- Windows CI builds, tests and validates a package without publishing a stable release.
-- Historical snapshots and tags remain identifiable; no Git history was rewritten.
-
-## Earlier development
-
-Historical development notes and snapshots are preserved in [archive](archive/README.md).
-Their old numerical identifiers are not official product releases. Git history retains
-the original development chronology.
+Podporované funkcie a obmedzenia opisuje [prehľad funkcií](docs/FEATURES.md).
+Podrobné zmeny sú v histórii commitov.

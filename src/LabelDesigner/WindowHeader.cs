@@ -6,7 +6,7 @@ public partial class MainForm {
  readonly Timer captionDelay=new Timer{Interval=400};
  [StructLayout(LayoutKind.Sequential)]struct MouseTracking {public int Size,Flags;public IntPtr Window;public int Hover;}
  [DllImport("user32.dll")]static extern bool TrackMouseEvent(ref MouseTracking tracking);
- void UpdateWindowTitle(){if(studio==null||updatingTitle)return;updatingTitle=true;try{string document=settingsPath==null?Loc.T("Nová etiketa"):Path.GetFileName(settingsPath);string title="ND LabelDesigner — pre-release  |  "+(dirty?"• ":"")+document;if(Text!=title)Text=title;AccessibleName=title+(dirty?" — "+Loc.T("ND LabelDesigner — pre-release • neuložené zmeny").Replace("ND LabelDesigner — pre-release • ",""):"");}finally{updatingTitle=false;}}
+ void UpdateWindowTitle(){if(studio==null||updatingTitle)return;updatingTitle=true;try{string document=settingsPath==null?Loc.T("Nová etiketa"):Path.GetFileName(settingsPath);string title="ND LabelDesigner — Pre-release  |  "+(dirty?"• ":"")+document;if(Text!=title)Text=title;AccessibleName=title+(dirty?" — "+Loc.T("ND LabelDesigner — Pre-release • neuložené zmeny").Replace("ND LabelDesigner — Pre-release • ",""):"");}finally{updatingTitle=false;}}
  void InitializeWindowHeader(){
   Shown+=delegate{ActiveControl=preview;preview.Focus();HideHeaderHints();UpdateToolbarLayout();};
   Activated+=delegate{windowActive=true;RefreshHeaderSurface();};Deactivate+=delegate{windowActive=false;HideHeaderHints();RefreshHeaderSurface();};

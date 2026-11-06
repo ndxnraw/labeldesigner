@@ -1,62 +1,11 @@
-# ND LabelDesigner — pre-release
+# ND LabelDesigner
 
-Desktopová aplikácia pre Windows na návrh, export a tlač produktových etikiet.
-Podporuje grafické úpravy textov, čiarových kódov a symbolov, import ZPL a export
-PDF, SVG, DOCX a ZPL. Projekty ukladá do `.ean.xml` a pracuje lokálne.
+**Pre-release**
 
-Aktuálny kód zahŕňa aj Späť/Znova, obnovu práce, šablóny, CSV/XLSX dávky,
-skupiny a zarovnávanie, obrázky, premenné, profily tlačiarní, QR a Data Matrix.
-Pozrite [funkcie a obmedzenia](docs/FEATURES.md).
+Program pre Windows na návrh a tlač produktových etikiet. V grafickom editore môžete pridávať texty, obrázky, čiarové a QR kódy, upravovať rozmery a rozloženie etikety. Podporuje údaje z CSV/XLSX, dávkovú tlač a export do PDF, SVG, DOCX a ZPL. Pracuje lokálne.
 
-- **Owner:** Daniel Návojský / [@ndxnraw](https://github.com/ndxnraw)
-- **Repository:** [ndxnraw/LabelDesigner](https://github.com/ndxnraw/LabelDesigner)
-- **Project status / Version:** `pre-release`
-- **Platforma a stack:** 64-bit Windows, C#, Windows Forms, .NET Framework 4.8/4.8.1.
+[Stiahnuť Pre-release](https://github.com/ndxnraw/LabelDesigner/releases/tag/Pre-release) · [Návod](docs/USER_GUIDE.txt)
 
-## Požiadavky a rýchly štart
+Rozbaľte ZIP a spustite `ND-LabelDesigner.exe`. Potrebný je Windows s .NET Framework 4.8 alebo 4.8.1.
 
-Git for Windows, Windows PowerShell 5.1 a .NET Framework 4.8/4.8.1 s pribaleným C#
-kompilátorom. Pre kompletné testy zapnite Microsoft Print to PDF a službu Print Spooler.
-Visual Studio, NuGet ani staré ZIP balíky nie sú potrebné.
-
-```powershell
-git clone --branch main https://github.com/ndxnraw/LabelDesigner.git
-cd LabelDesigner
-.\scripts\build.cmd
-.\scripts\test.cmd
-.\scripts\package.cmd
-git status --short
-```
-
-Program: `build/app/ND-LabelDesigner.exe`. Balík:
-`build/packages/ND-LabelDesigner-pre-release-Windows.zip`. Testovacie reporty:
-`build/test-results/`. Generované výstupy sa necommitujú; stav Git má zostať čistý.
-CI poskytuje balíky ako GitHub Actions artifacts. Projekt nemá stabilné vydanie.
-
-## Štruktúra
-
-| Priečinok | Obsah |
-| --- | --- |
-| `src/LabelDesigner/` | Aktuálny production source |
-| `tests/` | Regresné, integračné a exportné testy, fixtures a pomocné nástroje |
-| `assets/` | Ikony, logá, fonty a ukážky |
-| `scripts/` | Build, test a package |
-| `docs/` | Aktuálna dokumentácia a handoff |
-| `build/` | Ignorované generované výstupy |
-| `archive/pre-release/` | Historické vývojové snapshoty |
-| `.github/workflows/` | Windows CI |
-
-## Dokumentácia a handoff
-
-Na novom počítači postupujte podľa [HANDOFF](docs/HANDOFF.md): nainštalujte uvedené
-závislosti, naklonujte `main`, zostavte, otestujte a vytvorte balík. Repozitár obsahuje
-všetky zdroje a aktíva potrebné na pokračovanie bez pôvodného počítača.
-
-- [Vývoj](docs/DEVELOPMENT.md), [build a balenie](docs/BUILD.md), [testovanie](docs/TESTING.md)
-- [Štruktúra projektu](docs/PROJECT_STRUCTURE.md), [návod aplikácie](docs/USER_GUIDE.txt)
-- [Pokyny pre agentov](AGENTS.md), [história vývoja](CHANGELOG.md), [archív](archive/README.md)
-
-Jediné aktuálne produktové označenie je `pre-release`. Historické tagy a názvy v archíve
-sú vývojové identifikátory. Import cudzieho ZPL je čiastočný; `.nlbl` a GS1 DataMatrix
-nie sú podporované. ZXing.Net sa zostavuje offline z priložených zdrojov.
-Pozrite [licenčný stav](LICENSE) a licencie v `assets/fonts/` a `src/third-party/ZXing/`.
+Zdrojový kód je v C# / Windows Forms. Zostavenie: `scripts\build.cmd`, testy: `scripts\test.cmd`. Podrobnosti sú v [dokumentácii](docs/BUILD.md).

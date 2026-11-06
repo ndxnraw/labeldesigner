@@ -4,8 +4,6 @@
 *.dll
 *.pdb
 *.zip
-!archive/**/*.exe
-!archive/**/*.zip
 **/bin/
 **/obj/
 .vs/

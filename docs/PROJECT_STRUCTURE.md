@@ -16,11 +16,6 @@
 | `scripts/` | Build, test and package entry points |
 | `build/` | Ignored generated files; only README is tracked |
 | `docs/` | Current development, build, testing, handoff and user guides |
-| `archive/pre-release/` | Historical snapshots; never build inputs |
 | `.github/workflows/pre-release.yml` | Read-only Windows CI and artifacts |
 
-The original tracked-file inventory is [ORIGINAL_TREE.txt](ORIGINAL_TREE.txt).
-Historical directory moves are recorded in [archive/README.md](../archive/README.md).
-Old source/test directories have been replaced, not duplicated as production code.
-Historical ZIPs are retained because they contain earlier source and development
-evidence. Old numerical strings inside archive documents/assets are historical only.
+Earlier source snapshots remain in Git history.

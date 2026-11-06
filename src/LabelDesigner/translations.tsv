@@ -46,7 +46,7 @@ Tučné	Bold	Tučné	Félkövér
 Na stred	Center	Na střed	Középre
 Font	Font	Písmo	Betűtípus
 Skontrolujte hodnotu v textovej tabuľke.	Check the value in the text table.	Zkontrolujte hodnotu v textové tabulce.	Ellenőrizze a szövegtáblázat értékét.
-ND LabelDesigner — pre-release • neuložené zmeny	ND LabelDesigner — pre-release • unsaved changes	ND LabelDesigner — pre-release • neuložené změny	ND LabelDesigner — pre-release • nem mentett módosítások
+ND LabelDesigner — Pre-release • neuložené zmeny	ND LabelDesigner — Pre-release • unsaved changes	ND LabelDesigner — Pre-release • neuložené změny	ND LabelDesigner — Pre-release • nem mentett módosítások
 Riadok 	Row 	Řádek 	Sor: 
 : zadajte číselnú hodnotu pre 	: enter a numeric value for 	: zadejte číselnou hodnotu pro 	: adjon meg számértéket ehhez: 
 Súbor obsahuje nepodporované DPI.	The file contains an unsupported DPI value.	Soubor obsahuje nepodporované DPI.	A fájl nem támogatott DPI-értéket tartalmaz.
@@ -127,7 +127,7 @@ Neplatná kompresia ^GFA.	Invalid ^GFA compression.	Neplatná komprese ^GFA.	Ér
 Neplatné opakovanie riadka ^GFA.	Invalid ^GFA row repeat.	Neplatné opakování řádku ^GFA.	Érvénytelen ^GFA-sorismétlés.
 Neúplné dáta ^GFA.	Incomplete ^GFA data.	Neúplná data ^GFA.	Hiányos ^GFA-adatok.
 Nastavenia spustenia sa nepodarilo načítať. Použité sú predvolené hodnoty. 	Could not load startup settings. Defaults are in use. 	Nastavení spuštění se nepodařilo načíst. Použity výchozí hodnoty. 	Az indítási beállítások nem tölthetők be. Alapértékek használata. 
-Verzia pre-release	Version pre-release	Verze pre-release	Verzió: pre-release
+Verzia Pre-release	Version Pre-release	Verze Pre-release	Verzió: Pre-release
 Šírka	Width	Šířka	Szélesség
 Výška	Height	Výška	Magasság
 Upraviť textové pole	Edit text field	Upravit textové pole	Szövegmező szerkesztése
