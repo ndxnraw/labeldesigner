@@ -14,9 +14,7 @@ namespace EanEtikety {
    WorkContext.Report("Pripravujem záznamy…",count,count);return result;
   }
   public static List<string> CheckOutput(OutputPlan plan){
-   var seen=new HashSet<LabelSettings>();var warnings=new List<string>();int index=0;
-   foreach(var placement in plan.Placements){WorkContext.Report("Kontrolujem výstup…",index++,plan.Placements.Count);if(seen.Add(placement.Label))foreach(var issue in LabelChecks.Inspect(placement.Label)){if(issue.Blocking)throw new InvalidOperationException(issue.ToString());if(!warnings.Contains(issue.ToString()))warnings.Add(issue.ToString());}}
-   WorkContext.Report("Kontrolujem výstup…",plan.Placements.Count,plan.Placements.Count);return warnings;
+   var report=PreflightReport.Inspect(plan);report.EnsureValid();return report.Messages();
   }
  }
  // One bounded STA worker per batch window. Rapid selection replaces pending

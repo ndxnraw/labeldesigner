@@ -26,7 +26,7 @@ git status --short
 ```
 
 Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
-23 successful suites and reports in `build/test-results/`, validated
+24 successful suites and reports in `build/test-results/`, validated
 `build/packages/ND-LabelDesigner-Pre-release-Windows.zip`. `git status --short`
 must be empty. Work only from this clone when validating the handoff.
 
@@ -73,7 +73,7 @@ The published build and release tag are named `Pre-release`. Earlier source snap
 
 The current Pre-release includes the owner's latest local development snapshot,
 imported on 2026-10-20; see `docs/LOCAL_SOURCE_IMPORT.md`. All its production sources,
-23 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
+24 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
 no original local DLL is required. Keep the generated `zxing.dll` next to the EXE.
 Foreign ZPL support is partial; native printer fonts are approximated. QR and ordinary
 Data Matrix are supported; GS1 DataMatrix and `.nlbl` are not. Physical printer and Word rendering need manual checks.

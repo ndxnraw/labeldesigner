@@ -11,7 +11,7 @@ namespace EanEtikety {
    readonly ModernComboBox sheet=new ModernComboBox(),separator=new ModernComboBox(),encoding=new ModernComboBox();
    readonly CheckBox header=new CheckBox();readonly NumericUpDown generated=new NumericUpDown();
    readonly DataGridView mapping=new DataGridView(),records=new DataGridView();readonly PictureBox view=new PictureBox();
-   readonly Label preparedInfo=new Label();readonly BatchPreview preview;
+   readonly Label selectionInfo=new Label();Button exportSelected,printSelected;readonly Label preparedInfo=new Label();readonly BatchPreview preview;
    readonly List<DataTableSource> tables=new List<DataTableSource>();readonly List<string> targets=new List<string>();
    List<BatchRecord> batch=new List<BatchRecord>();readonly List<bool> included=new List<bool>();
    string csvPath;char loadedSeparator;int loadedCodePage;bool updating;
@@ -29,7 +29,7 @@ namespace EanEtikety {
     records.Dock=DockStyle.Fill;records.VirtualMode=true;records.AllowUserToAddRows=records.AllowUserToDeleteRows=false;records.SelectionMode=DataGridViewSelectionMode.FullRowSelect;records.MultiSelect=false;records.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;
     records.Columns.Add(new DataGridViewCheckBoxColumn{Name="include",HeaderText=Loc.T("Zahrnúť")});records.Columns.Add("row",Loc.T("Riadok"));records.Columns.Add("count",Loc.T("Počet etikiet"));records.Columns.Add("error",Loc.T("Chyba"));for(int i=1;i<4;i++)records.Columns[i].ReadOnly=true;left.Panel2.Controls.Add(records);
     records.CellValueNeeded+=delegate(object sender,DataGridViewCellValueEventArgs e){if(e.RowIndex<0||e.RowIndex>=batch.Count)return;var record=batch[e.RowIndex];e.Value=e.ColumnIndex==0?(object)included[e.RowIndex]:e.ColumnIndex==1?(object)record.Row:e.ColumnIndex==2?(object)record.Count:record.Error??Loc.T("Pripravené");};
-    records.CellValuePushed+=delegate(object sender,DataGridViewCellValueEventArgs e){if(e.ColumnIndex==0&&e.RowIndex>=0&&e.RowIndex<included.Count)included[e.RowIndex]=Convert.ToBoolean(e.Value);};
+    records.CellValuePushed+=delegate(object sender,DataGridViewCellValueEventArgs e){if(e.ColumnIndex==0&&e.RowIndex>=0&&e.RowIndex<included.Count){included[e.RowIndex]=Convert.ToBoolean(e.Value);UpdateSelectionSummary();}};
     records.CurrentCellDirtyStateChanged+=delegate{if(records.IsCurrentCellDirty)records.CommitEdit(DataGridViewDataErrorContexts.Commit);};
     view.Dock=DockStyle.Fill;view.SizeMode=PictureBoxSizeMode.Zoom;view.BackColor=Color.White;root.Controls.Add(view,1,1);
 
@@ -38,12 +38,12 @@ namespace EanEtikety {
     toolbar.Controls.Add(owner.Btn(Loc.T("Premenné polia"),delegate{owner.EditVariables();Map();}));toolbar.Controls.Add(new Label{Text=Loc.T("Počet záznamov"),AutoSize=true,Margin=new Padding(3,8,3,0)});toolbar.Controls.Add(generated);toolbar.Controls.Add(owner.Btn(Loc.T("Pripraviť dávku"),Prepare));
     preparedInfo.AutoSize=true;preparedInfo.MaximumSize=new Size(400,0);preparedInfo.UseMnemonic=false;toolbar.Controls.Add(preparedInfo);
     var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(actions,0,2);root.SetColumnSpan(actions,2);
-    actions.Controls.Add(owner.Btn(Loc.T("Vybrať všetko"),delegate{SelectAll(true);}));actions.Controls.Add(owner.Btn(Loc.T("Zrušiť výber"),delegate{SelectAll(false);}));actions.Controls.Add(owner.Btn(Loc.T("Exportovať vybrané"),Export));actions.Controls.Add(owner.Btn(Loc.T("Tlačiť vybrané"),Print));
+    actions.Controls.Add(owner.Btn(Loc.T("Vybrať všetko"),delegate{SelectAll(true);}));actions.Controls.Add(owner.Btn(Loc.T("Zrušiť výber"),delegate{SelectAll(false);}));exportSelected=owner.Btn(Loc.T("Exportovať vybrané"),Export);printSelected=owner.Btn(Loc.T("Tlačiť vybrané"),Print);actions.Controls.Add(exportSelected);actions.Controls.Add(printSelected);selectionInfo.AutoSize=true;selectionInfo.UseMnemonic=false;selectionInfo.MaximumSize=new Size(360,0);actions.Controls.Add(selectionInfo);
     sheet.SelectedIndexChanged+=delegate{if(!updating)Map();};header.CheckedChanged+=delegate{if(!updating)Map();};mapping.CellValueChanged+=delegate{if(!updating)Clear();};generated.ValueChanged+=delegate{if(!updating)Clear();};separator.SelectedIndexChanged+=Reload;encoding.SelectedIndexChanged+=Reload;
     owner.ApplyColors(window);Map();preview=new BatchPreview(view,message=>preparedInfo.Text=message);
    }
    char Separator{get{return separator.SelectedIndex==2?'\t':separator.Text[0];}}int CodePage{get{return encoding.SelectedIndex==0?65001:1250;}}
-   void Clear(){if(preview!=null)preview.Request(null);records.RowCount=0;batch=new List<BatchRecord>();included.Clear();preparedInfo.Text="";}
+   void Clear(){if(preview!=null)preview.Request(null);records.RowCount=0;batch=new List<BatchRecord>();included.Clear();preparedInfo.Text="";UpdateSelectionSummary();}
    void Map(){
     Clear();updating=true;try{
      mapping.Rows.Clear();targets.Clear();generated.Enabled=tables.Count==0;var table=sheet.SelectedIndex>=0&&sheet.SelectedIndex<tables.Count?tables[sheet.SelectedIndex]:null;
@@ -70,12 +70,14 @@ namespace EanEtikety {
     candidate.Header=header.Checked;candidate.Separator=Separator;candidate.CodePage=CodePage;candidate.GeneratedCount=(int)generated.Value;candidate.SheetName=sheet.Text;
     var model=owner.Read();model.Batch=candidate;var table=sheet.SelectedIndex>=0&&sheet.SelectedIndex<tables.Count?tables[sheet.SelectedIndex]:null;DateTime instant=owner.currentTime();List<BatchRecord> prepared;
     if(!owner.RunWork(window,"prepare-batch","Pripravujem dávku…",()=>BatchProcessing.Prepare(model,table,candidate.Header,candidate.Bindings,candidate.QuantityColumn,candidate.GeneratedCount,instant),out prepared))return;
-    owner.ChangeDocument(s=>s.Batch=candidate);setup=candidate;Clear();batch=prepared;foreach(var item in batch)included.Add(true);records.RowCount=batch.Count;preparedInfo.Text=Loc.T("Údaje pripravené")+": "+instant.ToString("g");if(batch.Count>0){records.CurrentCell=records.Rows[0].Cells[0];preview.Request(batch[0].Label);}
+    owner.ChangeDocument(s=>s.Batch=candidate);setup=candidate;Clear();batch=prepared;foreach(var item in batch)included.Add(true);records.RowCount=batch.Count;UpdateSelectionSummary();preparedInfo.Text=Loc.T("Údaje pripravené")+": "+instant.ToString("g");if(batch.Count>0){records.CurrentCell=records.Rows[0].Cells[0];preview.Request(batch[0].Label);}
    }catch(Exception ex){owner.Error(ex);}}
-   void SelectAll(bool selected){records.EndEdit();for(int i=0;i<included.Count;i++)included[i]=selected;records.Invalidate();}
+   void SelectAll(bool selected){records.EndEdit();for(int i=0;i<included.Count;i++)included[i]=selected;records.Invalidate();UpdateSelectionSummary();}
    bool Plan(out OutputPlan result,out LabelSettings model){records.EndEdit();var selected=new List<BatchRecord>();for(int i=0;i<batch.Count;i++)if(included[i])selected.Add(batch[i]);var format=owner.Read();model=format;return owner.RunWork(window,"plan-batch","Pripravujem tlačovú úlohu…",()=>OutputPlan.Create(selected,format),out result);}
-   void Export(){try{OutputPlan plan;LabelSettings model;if(Plan(out plan,out model))owner.ExportJob(plan,model.Dpi,null,window);}catch(Exception ex){owner.Error(ex);}}
-   void Print(){try{OutputPlan plan;LabelSettings model;if(Plan(out plan,out model))using(var form=owner.CreateJobPrintWindow(model,plan))form.ShowDialog(window);}catch(Exception ex){owner.Error(ex);}}
+   void NavigateIssue(LabelIssue issue){int index=batch.FindIndex(r=>r.Row==issue.Record);if(index>=0){records.CurrentCell=records.Rows[index].Cells[3];records.Focus();}}
+   void UpdateSelectionSummary(){int selected=0,errors=0;long labels=0;for(int i=0;i<batch.Count;i++)if(included[i]){selected++;labels+=batch[i].Count;if(batch[i].Error!=null)errors++;}selectionInfo.Text=Loc.T("Vybrané záznamy")+": "+selected+"  •  "+Loc.T("Etikety spolu")+": "+labels+"  •  "+Loc.T("Chyby")+": "+errors;exportSelected.Enabled=printSelected.Enabled=selected>0&&errors==0;}
+   void Export(){try{OutputPlan plan;LabelSettings model;if(Plan(out plan,out model))owner.ExportJob(plan,model.Dpi,null,window,NavigateIssue);}catch(Exception ex){owner.Error(ex);}}
+   void Print(){try{OutputPlan plan;LabelSettings model;if(Plan(out plan,out model))using(var form=owner.CreateJobPrintWindow(model,plan,NavigateIssue))form.ShowDialog(window);}catch(Exception ex){owner.Error(ex);}}
    public void Show(){window.ShowDialog(owner);}
    public void Dispose(){preview.Dispose();window.Dispose();}
   }

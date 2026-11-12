@@ -516,3 +516,30 @@ Diagnostický záznam	Diagnostic reference	Diagnostický záznam	Diagnosztikai a
 Diagnostika	Diagnostics	Diagnostika	Diagnosztika
 Uložiť diagnostiku…	Save diagnostics…	Uložit diagnostiku…	Diagnosztika mentése…
 Načítavam riadky XLSX…	Reading XLSX rows…	Načítám řádky XLSX…	XLSX-sorok beolvasása…
+Kontrola výstupu	Output review	Kontrola výstupu	Kimenet ellenőrzése
+Etikety v úlohe	Labels in job	Etikety v úloze	Címkék a feladatban
+Strany v úlohe	Pages in job	Strany v úloze	Oldalak a feladatban
+Opakovania celej úlohy	Whole job repetitions	Opakování celé úlohy	Teljes feladat ismétlései
+Etikety spolu	Total labels	Etikety celkem	Címkék összesen
+Strany spolu	Total pages	Strany celkem	Oldalak összesen
+Všetky problémy	All issues	Všechny problémy	Összes probléma
+Chyby	Errors	Chyby	Hibák
+Upozornenia	Warnings	Upozornění	Figyelmeztetések
+Filter problémov	Issue filter	Filtr problémů	Problémaszűrő
+Žiadne problémy pre tento filter	No issues for this filter	Žádné problémy pro tento filtr	Nincs probléma ehhez a szűrőhöz
+Upozornenia som skontroloval(a)	I have reviewed the warnings	Upozornění jsem zkontroloval(a)	Ellenőriztem a figyelmeztetéseket
+Späť na úpravy	Back to editing	Zpět k úpravám	Vissza a szerkesztéshez
+Vybrané prvky	Selected elements	Vybrané prvky	Kijelölt elemek
+Nie je vybraný prvok	No element selected	Není vybrán prvek	Nincs kijelölt elem
+Zamknuté	Locked	Zamčeno	Zárolva
+Skupina	Group	Skupina	Csoport
+Zamknúť / odomknúť	Lock / unlock	Zamknout / odemknout	Zárolás / feloldás
+Upraviť prvok	Edit element	Upravit prvek	Elem szerkesztése
+Vybrané záznamy	Selected records	Vybrané záznamy	Kijelölt rekordok
+Súhrn výstupu	Output summary	Souhrn výstupu	Kimenet összesítése
+Nastavenia alebo upozornenia sa zmenili. Skontrolujte výstup znova.	Settings or warnings changed. Review the output again.	Nastavení nebo upozornění se změnila. Zkontrolujte výstup znovu.	A beállítások vagy figyelmeztetések megváltoztak. Ellenőrizze újra a kimenetet.
+Záznam	Record	Záznam	Rekord
+Strana	Page	Strana	Oldal
+Záznamy	Records	Záznamy	Rekordok
+Kontrola	Review	Kontrola	Ellenőrzés
+Výstup blokujú chyby	Errors block output	Výstup blokují chyby	A hibák blokkolják a kimenetet

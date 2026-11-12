@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing and the app, compiles and runs all 23 registered suites. Each must exit
+This rebuilds ZXing and the app, compiles and runs all 24 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -29,6 +29,13 @@ preparation, cancellation of PDF/DOCX/SVG/ZPL export with atomic target preserva
 progress delivery, STA execution and UI heartbeat, close and commit races, a 2,000-record
 virtual grid and cancelled re-preparation, and bounded diagnostics that exclude exception
 messages and paths. Synthetic diagnostic failures use a test-local directory.
+`PreflightUiTests` covers shared print/export rules, explicit warning consent,
+blocking errors hidden by filters, stale print approval rejected before submission,
+source row/page navigation, counts across partially filled sheets and whole-job
+repetitions, synchronized layer selection, group locks, protected multi-selection
+properties, layer undo, keyboard panel access, export cancellation, and batch gates.
+It captures the minimum-size editor, both themes and the review in all four languages.
+No print job is submitted; preview/media capabilities use Microsoft Print to PDF.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.

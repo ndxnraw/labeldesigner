@@ -1,12 +1,29 @@
 # ND LabelDesigner — Pre-release
 
 Aktuálny Pre-release pre Windows; vychádza z vývojového stavu zo 7. októbra 2026
-a obsahuje úpravy tlače, konceptov, dátumových premenných a dávok na pozadí
+a obsahuje úpravy tlače, konceptov, dátumových premenných, dávok na pozadí
+a zjednoteného ovládania a predvýstupnej kontroly
 z 12. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Nové možnosti
 
+- **Prvky a Kontrola:** trvalé karty pod nastaveniami etikety a papiera.
+  Prvky sú zoradené od popredia po pozadie; výber sa synchronizuje s plátnom.
+  Zoznam označuje skupiny a zámky a ponúka spoločné príkazy pre vrstvy,
+  zamknutie a úpravu. Viacnásobný výber má samostatný panel spoločných akcií.
+  F2 upraví vybraný odomknutý prvok zo zoznamu, F4 otvorí vlastnosti,
+  F8 kontrolu; Ctrl+PageUp/PageDown prepína karty vo vybranom paneli.
+- **Spoločná kontrola výstupu:** tlač aj jednotlivý, hárkový a dávkový export
+  používajú rovnaký zoznam chýb a upozornení a súhrn záznamov, etikiet,
+  strán, opakovaní celej úlohy a výsledných počtov. Filter nemení platnosť
+  kontroly. Chyby nemožno potvrdiť; upozornenia vyžadujú výslovné zaškrtnutie.
+  Nesúlad papiera ostáva upozornením. Pred odoslaním tlače sa kontrola opakuje;
+  zmena nastavení alebo upozornení vyžiada nové potvrdenie. Tlačí sa v 100 % mierke.
+  Problém dávky uvádza pôvodný riadok, prvú dotknutú stranu a zachováva väzbu
+  na prvok. Späť na úpravy sa pri vybranej položke vráti na prvok alebo riadok.
+  Dávkové okno priebežne ukazuje vybrané záznamy, etikety a chyby;
+  prázdny výber alebo zahrnutý chybný riadok vypne obe výstupné tlačidlá.
 - **Späť a Znova:** ikony a Ctrl+Z/Ctrl+Y, história obsahu, vlastností a rozmerov;
   súvislé ťahanie je jeden krok. V textovom poli zostáva skratka textovému editoru.
 - **Obnova práce:** samostatné obnovovacie kópie, nastaviteľný interval 10–3600 s,

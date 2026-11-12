@@ -1,5 +1,5 @@
 ND LabelDesigner — Pre-release — Windows
-7. október 2026
+Aktualizované 12. novembra 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
 ND-LabelDesigner.exe.config a zxing.dll ponechajte vedľa EXE.
@@ -18,6 +18,26 @@ OKNÁ A TÉMA
 Vlastné okná a hlášky používajú logo ND LabelDesigner a titulok zladený
 s aktuálnou témou. Ovládanie okien zostáva natívne. Systémové dialógy
 a vlastnosti ovládačov tlačiarní spravuje Windows.
+
+PRVKY A KONTROLA PRED VÝSTUPOM
+Pod nastaveniami etikety a papiera sú trvalé karty Prvky a Kontrola.
+Prvky sú zoradené od popredia a zdieľajú výber s plátnom. Zoznam označuje
+skupiny a zamknuté prvky; tlačidlá menia poradie, zámok alebo otvoria úpravu.
+Viacnásobný výber ukazuje spoločné akcie, aby sa omylom neupravoval iba prvý prvok.
+F2 v zozname upraví odomknutý prvok, F4 otvorí vlastnosti, F8 kontrolu.
+Ctrl+PageUp/PageDown prepína karty vo vybranom paneli.
+
+Pred tlačou aj exportom sa otvorí Kontrola výstupu. Rozlišuje počet záznamov,
+etikiet, strán a opakovaní celej úlohy a uvádza výsledné celkové počty.
+V tlačovom okne zmena opakovaní upraví súhrn bez znásobovania náhľadov.
+Chyby výstup zastavia. Pri upozorneniach treba zaškrtnúť, že boli skontrolované.
+Nesprávne hlásený papier je stále upozornenie a možno vedome pokračovať.
+Filter zoznamu neskrýva chyby pred kontrolou a neumožňuje ich obísť.
+Pred odoslaním sa tlač znovu overí; zmena nastavení alebo upozornení vyžaduje
+nové potvrdenie. Návrat na úpravy pri vybranej položke označí dotknutý prvok
+alebo pôvodný riadok dávky. Záznam dávky uvádza aj prvú dotknutú stranu.
+Výber prázdnej dávky alebo zahrnutého chybného riadka vypne tlač aj export;
+chybný riadok možno opraviť v zdroji a dávku znova pripraviť alebo ho vynechať.
 
 OTÁČANIE PRVKOV
 Po označení uchopte kruhový rotačný úchyt nad prvkom. Uhly 0°, 90°, 180° a 270° sa prichytávajú v tolerancii 3°.

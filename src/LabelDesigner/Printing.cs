@@ -29,16 +29,17 @@ public class LabelPrintDocument:PrintDocument {
  protected override void OnPrintPage(PrintPageEventArgs e){RenderPrinterPage(e.Graphics,page++,e.PageSettings.PrintableArea,e.PageSettings.HardMarginX,e.PageSettings.HardMarginY,PrintController.IsPreview);e.HasMorePages=page<PageCount&&!(PrintController.IsPreview&&PreviewPageIndex>=0);base.OnPrintPage(e);}
  public void ValidatePrinter(){if(!PrinterSettings.IsValid)throw new InvalidOperationException(Loc.T("Vybraná tlačiareň nie je dostupná."));}
  public System.Collections.Generic.List<string> MediaWarnings(Rectangle paper,RectangleF printable){var warnings=new System.Collections.Generic.List<string>();if(!FitsPaper(paper)||paper.Width*.254+.3<WidthMm||paper.Height*.254+.3<HeightMm)warnings.Add(Loc.T("Ovládač hlási menší papier než dokument. Skontrolujte vložené médium; môžete pokračovať v mierke 100 %."));if(IgnoreDriverMargins)warnings.Add(Loc.T("Tlačiteľná oblasť ovládača sa ignoruje. Fyzické okraje tlačiarne môžu obsah orezať."));else if(!ContentFits(printable))warnings.Add(Loc.T("Časť obsahu je mimo tlačiteľnej oblasti tlačiarne a môže byť orezaná."));return warnings;}
- public System.Collections.Generic.List<string> PrintWarnings(){var warnings=new System.Collections.Generic.List<string>();var seen=new System.Collections.Generic.HashSet<LabelSettings>();foreach(var placement in plan.Placements)if(seen.Add(placement.Label))foreach(var issue in LabelChecks.Inspect(placement.Label))if(!warnings.Contains(issue.ToString()))warnings.Add(issue.ToString());warnings.AddRange(MediaWarnings(DefaultPageSettings.Bounds,DefaultPageSettings.PrintableArea));return warnings;}
+ public PreflightReport InspectOutput(){var report=PreflightReport.Inspect(plan);foreach(var message in MediaWarnings(DefaultPageSettings.Bounds,DefaultPageSettings.PrintableArea))report.AddWarning(message);report.Context=PrinterSettings.PrinterName+"|"+DefaultPageSettings.Bounds+"|"+DefaultPageSettings.PrintableArea+"|"+DefaultPageSettings.Landscape+"|"+OffsetX+"|"+OffsetY+"|"+IgnoreDriverMargins;return report;}
+ public System.Collections.Generic.List<string> PrintWarnings(){return InspectOutput().Messages();}
  protected override void OnEndPrint(PrintEventArgs e){base.OnEndPrint(e);Cancelled=Cancelled||e.Cancel;}
  protected override void Dispose(bool disposing){base.Dispose(disposing);}
 }
 public partial class MainForm {
  Form CreatePrintWindow(LabelSettings settings){return CreateJobPrintWindow(settings,null);}
- Form CreateJobPrintWindow(LabelSettings settings,OutputPlan plan){var panel=new PrintPanel(settings,plan);if(workspace!=null)panel.LoadProfiles(System.IO.Path.Combine(workspace.DirectoryPath,"printers.xml"));
+ Form CreateJobPrintWindow(LabelSettings settings,OutputPlan plan,Action<LabelIssue> navigate=null){var panel=new PrintPanel(settings,plan);if(workspace!=null)panel.LoadProfiles(System.IO.Path.Combine(workspace.DirectoryPath,"printers.xml"));
   var window=new Form{Text="ND LabelDesigner – "+Loc.T("Tlačiť"),Size=new Size(1050,760),MinimumSize=new Size(900,640),StartPosition=FormStartPosition.CenterParent,ShowInTaskbar=false,Font=Font,Icon=Icon,AutoScaleMode=AutoScaleMode.Dpi};
-  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);panel.BackRequested+=delegate{window.Close();};return window;
+  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);panel.BackRequested+=delegate{window.Close();};panel.EditIssueRequested+=issue=>{if(navigate!=null)navigate(issue);else{SelectEditorIssue(issue);FocusProblems();}};return window;
  }
- void PrintLabel(){try{var settings=Read();timer.Stop();using(var window=CreatePrintWindow(settings))window.ShowDialog(this);}catch(Exception ex){Error(ex);}}
+ void PrintLabel(){try{CommitInspectorIfFocused();UpdatePreview();if(labelIssues.Exists(i=>i.Blocking)){FocusProblems();return;}var settings=Read();timer.Stop();using(var window=CreatePrintWindow(settings))window.ShowDialog(this);}catch(Exception ex){Error(ex);}}
 }
 }
