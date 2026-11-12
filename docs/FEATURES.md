@@ -1,7 +1,8 @@
 # ND LabelDesigner — Pre-release
 
 Aktuálny Pre-release pre Windows; vychádza z vývojového stavu zo 7. októbra 2026
-a obsahuje úpravy tlače, konceptov a dátumových premenných z 12. novembra 2026. Zachováva Windows Forms,
+a obsahuje úpravy tlače, konceptov, dátumových premenných a dávok na pozadí
+z 12. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Nové možnosti
@@ -20,6 +21,20 @@ a obsahuje úpravy tlače, konceptov a dátumových premenných z 12. novembra 2
   projekt. Zoznam posledných 15 projektov upozorní na chýbajúci súbor.
 - **Dávky:** CSV a XLSX, výber hárka a hlavičky, mapovanie textov, kódov a počtu
   etikiet; náhľad záznamu, označenie chýb a výber záznamov na tlač alebo export.
+  Import, príprava záznamov a tlačového plánu, kontrola výstupu aj export
+  bežia na pozadí. Okno priebehu uvádza aktuálny krok a dostupný počet položiek;
+  tlačidlo Zrušiť aj zavretie okna požiadajú o bezpečné ukončenie operácie.
+  Tabuľka výsledkov používa virtuálne riadky. Náhľad vybraného záznamu
+  sa pripravuje samostatne a zastarané požiadavky sa zahadzujú.
+- **Bezpečné zrušenie:** výsledok nahradí predchádzajúcu tabuľku alebo dávku
+  až po úspešnom dokončení. Export sa zapisuje do dočasného súboru;
+  pri chybe alebo zrušení sa cieľový súbor nenahradí. Zrušenie po dokončenom
+  nahradení súboru sa nepovažuje za zrušený export.
+- **Diagnostika:** Nástroje → Diagnostika zobrazí posledné lokálne záznamy
+  a umožní ich uložiť do textového súboru. Chyby dostanú identifikátor,
+  typ výnimky, miesto zlyhania a identifikátor zostavy. Správy výnimiek,
+  cesty k súborom, názvy tlačiarní ani obsah dokumentov sa do logu nezapisujú.
+  Denník rotuje najviac do troch súborov po približne 1 MB.
 - **Výber a rozloženie:** Ctrl/Shift, výberový obdĺžnik, spoločný presun,
   kopírovanie, odstránenie, skupiny, zamknutie, zarovnanie, rozostupy a vrstvy.
 - **Samolepiace hárky:** riadky, stĺpce, štyri okraje, medzery a prvá voľná pozícia.

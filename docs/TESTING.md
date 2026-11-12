@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing and the app, compiles and runs all 22 registered suites. Each must exit
+This rebuilds ZXing and the app, compiles and runs all 23 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -24,6 +24,11 @@ retention of a readable backup after corruption, failed-save preservation, recov
 strict output validation, frozen job dates and serial ranges, midnight transitions,
 fixed-date offsets, variable template persistence, and print-window recalculation.
 Dates are controlled in tests; the computer clock is never changed.
+`BackgroundBatchTests` exercises cooperative cancellation of CSV/XLSX and record
+preparation, cancellation of PDF/DOCX/SVG/ZPL export with atomic target preservation,
+progress delivery, STA execution and UI heartbeat, close and commit races, a 2,000-record
+virtual grid and cancelled re-preparation, and bounded diagnostics that exclude exception
+messages and paths. Synthetic diagnostic failures use a test-local directory.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.

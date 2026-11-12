@@ -85,6 +85,36 @@ po záznamoch podľa nastaveného začiatku a kroku; tlač sama začiatok neprep
 Pevné dátumy sa nemenia. Uložený projekt zachová vzorce a definície premenných.
 Editor aktualizuje dynamický dátum po zmene dňa do 30 sekúnd bez zmeny projektu.
 
+DÁVKY NA POZADÍ, PRIEBEH A ZRUŠENIE
+Import CSV/XLSX, príprava dávky a tlačového plánu, kontrola výstupu a export
+sa vykonávajú na pozadí. Okno priebehu zobrazuje aktuálny krok a pri známom
+rozsahu aj počet spracovaných položiek. Počas práce môžete operáciu zrušiť
+tlačidlom Zrušiť, klávesom Esc alebo zavretím okna priebehu.
+Program počká na bezpečné ukončenie aktuálnej časti práce. Prebiehajúce
+natívne volanie alebo čítanie zo zariadenia môže ukončenie oddialiť.
+
+Zrušený alebo chybný import nenahradí už načítanú tabuľku. Pri opakovanej
+príprave s rovnakým nastavením zostáva predchádzajúca dávka zachovaná,
+kým sa nová príprava nedokončí. Zmena mapovania, vstupu či počtu záznamov
+naďalej zneplatní staré výsledky, aby sa omylom nepoužili nesprávne údaje.
+Výsledky v tabuľke sa načítavajú podľa potreby; náhľad záznamu sa pripravuje
+samostatne a pri rýchlom prepínaní sa staršie požiadavky zahodia.
+
+Export sa najprv zapíše do dočasného súboru. Pri chybe alebo zrušení sa
+dočasný súbor odstráni a existujúci cieľ zostane zachovaný. Po úspešnom
+nahradení cieľa je export dokončený; neskoré stlačenie Zrušiť ho nevráti späť.
+Už odoslanú fyzickú tlačovú úlohu rušte vo fronte tlačiarne vo Windows.
+
+DIAGNOSTIKA
+Nástroje → Diagnostika otvorí posledné lokálne záznamy chýb.
+Uložiť diagnostiku vytvorí textovú kópiu zobrazených záznamov.
+Pri chybe je uvedený identifikátor záznamu na dohľadanie udalosti.
+Log obsahuje UTC čas, druh operácie, typ a miesto chyby a identifikátor
+zostavy. Neobsahuje správy výnimiek, obsah etikiet, importované dáta,
+cesty k súborom ani názvy tlačiarní. Bežné zrušenie nie je chyba.
+Súbory sú v lokálnom AppData/NDLabelMaker/Diagnostics; udržiavajú sa
+najviac tri súbory po približne 1 MB. Zlyhanie zápisu logu nezakryje pôvodnú chybu.
+
 KÓDY, IMPORT A EXPORT
 EAN-13, EAN-8, UPC-A, Code 128, Code 39, Interleaved 2 of 5 a ITF-14
 zostávajú dostupné. Pre Code 128 možno zapnúť GS1, vybrať identifikátory,

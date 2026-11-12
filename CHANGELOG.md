@@ -1,5 +1,14 @@
 # Pre-release
 
+Spracovanie dávok na pozadí:
+- Import, príprava záznamov a tlačových plánov, kontrola a export používajú
+  pracovné vlákno s priebehom a bezpečným zrušením.
+- Virtuálna tabuľka a samostatný náhľad záznamu s rušením zastaraných požiadaviek.
+- Atómové výstupy zachovajú pôvodný súbor pri chybe alebo zrušení.
+- Index strán obmedzuje opakované prechádzanie celej dávky pri vykresľovaní.
+- Lokálna diagnostika s identifikátorom zostavy a chýb, rotáciou a exportom;
+  obsah dokumentov, správy výnimiek a cesty sa do logu neukladajú.
+
 Ukladanie konceptov a príprava údajov:
 - Rozpracované kódy, premenné a rozloženia možno uložiť a znova otvoriť;
   overenie výstupu zostáva prísne.
