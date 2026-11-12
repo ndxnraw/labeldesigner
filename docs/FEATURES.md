@@ -1,7 +1,7 @@
 # ND LabelDesigner — Pre-release
 
 Aktuálny Pre-release pre Windows; vychádza z vývojového stavu zo 7. októbra 2026
-a obsahuje úpravy tlače a profilov médií z 12. novembra 2026. Zachováva Windows Forms,
+a obsahuje úpravy tlače, konceptov a dátumových premenných z 12. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Nové možnosti
@@ -10,6 +10,12 @@ a obsahuje úpravy tlače a profilov médií z 12. novembra 2026. Zachováva Win
   súvislé ťahanie je jeden krok. V textovom poli zostáva skratka textovému editoru.
 - **Obnova práce:** samostatné obnovovacie kópie, nastaviteľný interval 10–3600 s,
   ponuka obnovy po nečakanom ukončení. Uložený projekt sa neprepisuje.
+- **Rozpracované koncepty:** chybný alebo prázdny kód, nedokončené premenné
+  a nevyhovujúce rozloženie možno uložiť a znova otvoriť na opravu.
+  Chyby naďalej blokujú tlač a export. Štruktúra a limity súboru, geometria
+  a bezpečnosť vložených obrázkov sa kontrolujú aj pri ukladaní konceptu.
+  Prepísanie čitateľného projektu uchová predchádzajúci obsah v `.ean.xml.bak`.
+  Nečitateľný prepisovaný súbor nenahradí existujúcu zálohu.
 - **Šablóny:** galéria s náhľadmi, vlastné šablóny, odstránenie a otvorenie ako nový
   projekt. Zoznam posledných 15 projektov upozorní na chýbajúci súbor.
 - **Dávky:** CSV a XLSX, výber hárka a hlavičky, mapovanie textov, kódov a počtu
@@ -36,6 +42,13 @@ a obsahuje úpravy tlače a profilov médií z 12. novembra 2026. Zachováva Win
   v projekte, rotácia, presun, veľkosť, pomer strán a percentuálny výrez.
 - **Premenné:** číslovanie, prefix/suffix, nulovanie, pevný text a dátum,
   posuny dní/mesiacov. Zápis `{serial}` funguje v textoch a kódoch.
+  Jedna úloha vyhodnotí údaje pri príprave a uchová ich pre náhľad aj výstup.
+  Zmena tlačiarne, orientácie, počtu kópií alebo priblíženia ich neprepočíta.
+  Tlačové okno ukazuje čas prípravy a hodnoty premenných; pri jednej etikete
+  ich aktualizuje tlačidlo **Prepočítať údaje**, pri dávke **Pripraviť dávku**.
+  Dátum v editore sa po zmene dňa obnoví do 30 sekúnd bez označenia projektu
+  za zmenený. Pevné dátumy zostávajú pevné. Projekt uchová definície premenných,
+  nie posledné vypočítané hodnoty.
 - **QR a Data Matrix:** viac samostatných kódov, vektorová geometria, tiché zóny,
   editovanie dvojklikom a všetky existujúce výstupy. GS1 DataMatrix sa neponúka.
 

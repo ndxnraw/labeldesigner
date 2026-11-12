@@ -1,5 +1,14 @@
 # Pre-release
 
+Ukladanie konceptov a príprava údajov:
+- Rozpracované kódy, premenné a rozloženia možno uložiť a znova otvoriť;
+  overenie výstupu zostáva prísne.
+- Atómové ukladanie s jednou zálohou predchádzajúceho čitateľného projektu.
+- Dátumy a číslovanie sa vyhodnotia pri príprave úlohy a zostávajú rovnaké
+  pri náhľade, tlači aj exporte; tlačové okno umožňuje výslovný prepočet.
+- Čas prípravy a hodnoty premenných sú viditeľné, dátum editora sa obnovuje po polnoci.
+- Testy obnovy, zlyhaní ukladania, zmien dátumu a zachovania definícií premenných.
+
 Úpravy tlače a médií:
 - Nesúlad rozmerov papiera je upozornenie s potvrdením pokračovania.
 - Nezávislý vektorový náhľad zobrazí celý dokument aj pri chybných údajoch ovládača.

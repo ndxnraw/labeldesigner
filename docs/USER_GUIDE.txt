@@ -57,6 +57,34 @@ Delete odstráni vybraný text/symbol, keď je fokus na plátne alebo zozname.
 Pri písaní textu funguje Delete bežným spôsobom.
 Krátky stavový riadok dole otvára kliknutím podrobnosti kontroly etikety.
 
+UKLADANIE KONCEPTOV A ZÁLOHY
+Projekt možno uložiť aj s prázdnym alebo chybným čiarovým kódom,
+nedokončenými premennými či rozpracovaným rozložením papiera.
+Pri opätovnom otvorení zostávajú údaje dostupné na opravu a problémy sú
+označené v editore. Chybný výstup zostáva zablokovaný.
+Kontroly bezpečnej štruktúry, rozmerov a vložených obrázkov zostávajú aktívne.
+
+Pri prepísaní čitateľného projektu sa jeho predchádzajúci obsah uloží
+vedľa neho s príponou .bak, napríklad Moja etiketa.ean.xml.bak.
+Je to jedna predchádzajúca čitateľná verzia vrátane rozpracovaných konceptov.
+Ak je prepisovaný súbor poškodený, existujúca záloha sa zachová.
+Na ručné obnovenie skopírujte .bak pod nový názov končiaci .ean.xml
+a otvorte túto kópiu. Automatické obnovovacie kópie fungujú samostatne.
+Neúspešné uloženie nesmie zmeniť pôvodný projekt ani cieľ pri Uložiť ako.
+
+DÁTUMY A PRÍPRAVA ÚLOHY
+Dynamický dátum sa určí pri príprave jednej tlačovej alebo exportnej úlohy.
+Náhľad a všetky strany tejto úlohy používajú rovnaké vypočítané údaje.
+Zmena tlačiarne, orientácie, priblíženia alebo kópií dátum ani číslovanie nemení.
+Tlačové okno uvádza čas prípravy a konkrétne hodnoty premenných.
+Prepočítať údaje vytvorí nový prepočet pôvodnej etikety podľa aktuálneho dátumu.
+Ak prepočet zlyhá, staré údaje nemožno omylom odoslať do tlače.
+Pri dávke použite znova Pripraviť dávku; jej záznamy zdieľajú jeden okamih prípravy.
+Počet kópií opakuje úlohu s rovnakými údajmi. Číslovanie v dávke postupuje
+po záznamoch podľa nastaveného začiatku a kroku; tlač sama začiatok neprepisuje.
+Pevné dátumy sa nemenia. Uložený projekt zachová vzorce a definície premenných.
+Editor aktualizuje dynamický dátum po zmene dňa do 30 sekúnd bez zmeny projektu.
+
 KÓDY, IMPORT A EXPORT
 EAN-13, EAN-8, UPC-A, Code 128, Code 39, Interleaved 2 of 5 a ITF-14
 zostávajú dostupné. Pre Code 128 možno zapnúť GS1, vybrať identifikátory,

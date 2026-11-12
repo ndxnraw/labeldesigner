@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing and the app, compiles and runs all 21 registered suites. Each must exit
+This rebuilds ZXing and the app, compiles and runs all 22 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -19,6 +19,11 @@ recovery, embedded images, QR/Data Matrix decoding and multipage export.
 optional application clipping (preserving device clipping), physical dimensions,
 legacy profile migration, multiple media per printer, and real UI profile switching.
 It uses Microsoft Print to PDF capabilities and bitmap rendering; no print job is submitted.
+`DraftJobTests` covers editable invalid projects, atomic saving and backup rotation,
+retention of a readable backup after corruption, failed-save preservation, recovery,
+strict output validation, frozen job dates and serial ranges, midnight transitions,
+fixed-date offsets, variable template persistence, and print-window recalculation.
+Dates are controlled in tests; the computer clock is never changed.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.

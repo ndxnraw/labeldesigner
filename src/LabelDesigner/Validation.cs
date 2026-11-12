@@ -11,8 +11,10 @@ public static class LabelChecks {
  }
 }
 public partial class MainForm {
- List<LabelIssue> labelIssues=new List<LabelIssue>();readonly DateTime previewInstant=DateTime.Now;
- LabelSettings PreparedLabel(LabelSettings s){if(s.Variables.Count==0)return s;var record=BatchData.Record(s,new string[0],new List<ColumnBinding>(),-1,0,1,previewInstant);if(record.Error!=null)throw new InvalidOperationException(record.Error);return record.Label;}
+ List<LabelIssue> labelIssues=new List<LabelIssue>();Func<DateTime> currentTime=delegate{return DateTime.Now;};DateTime previewDay;
+ readonly System.Windows.Forms.Timer datePreviewTimer=new System.Windows.Forms.Timer{Interval=30000};
+ LabelSettings PreparedLabel(LabelSettings s){var instant=currentTime();previewDay=instant.Date;return s.Variables.Count==0?s:JobPreparation.Resolve(s,instant);}
+ void RefreshDatePreview(){if(!loading&&!preview.IsDragging&&currentTime().Date!=previewDay&&variables.Exists(v=>v.Type=="Date"&&!v.FixedDate))UpdatePreview();}
  void ShowChecks(){UpdatePreview();using(var f=FeatureForm("Kontrola etikety",760,480)){var list=new ListBox{Dock=DockStyle.Fill,HorizontalScrollbar=true};f.Controls.Add(list);foreach(var issue in labelIssues)list.Items.Add(issue);if(list.Items.Count==0)list.Items.Add(Loc.T("Bez problémov"));list.SelectedIndexChanged+=delegate{var issue=list.SelectedItem as LabelIssue;if(issue!=null){preview.SelectElement(issue.Element);preview.ProblemElements.Clear();if(issue.Element!=-2)preview.ProblemElements.Add(issue.Element);preview.Invalidate();}};f.FormClosed+=delegate{UpdatePreview();};ApplyColors(f);f.ShowDialog(this);}}
 }
 }
