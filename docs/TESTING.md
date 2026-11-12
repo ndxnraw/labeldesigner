@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing and the app, compiles and runs all 20 registered suites. Each must exit
+This rebuilds ZXing and the app, compiles and runs all 21 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -15,6 +15,10 @@ go to `build/tests/`; timestamped reports, screenshots and generated exports go 
 and compatibility. `tests/integration/` covers import and output formats.
 The additional suites cover CSV/XLSX batch data, workspace dialogs, undo/redo,
 recovery, embedded images, QR/Data Matrix decoding and multipage export.
+`PrintMediaTests` covers nonblocking media mismatch, independent vector previews,
+optional application clipping (preserving device clipping), physical dimensions,
+legacy profile migration, multiple media per printer, and real UI profile switching.
+It uses Microsoft Print to PDF capabilities and bitmap rendering; no print job is submitted.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.

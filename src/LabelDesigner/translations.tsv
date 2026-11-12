@@ -483,3 +483,16 @@ Počet záznamov	Record count	Počet záznamů	Rekordok száma
 Pridať čiarový kód	Add barcode	Přidat čárový kód	Vonalkód hozzáadása
 Poradie riadkov určuje poradie identifikátorov GS1.	Row order defines the GS1 identifier order.	Pořadí řádků určuje pořadí identifikátorů GS1.	A sorok sorrendje határozza meg a GS1-azonosítók sorrendjét.
 Obrázok má príliš extrémny pomer strán.	The image aspect ratio exceeds the supported element dimensions.	Obrázek má příliš extrémní poměr stran.	A kép képaránya meghaladja a támogatott elemméreteket.
+Ovládač hlási menší papier než dokument. Skontrolujte vložené médium; môžete pokračovať v mierke 100 %.	The driver reports paper smaller than the document. Check the loaded media; you can continue at 100% scale.	Ovladač hlásí menší papír než dokument. Zkontrolujte vložené médium; můžete pokračovat v měřítku 100 %.	Az illesztőprogram a dokumentumnál kisebb papírt jelez. Ellenőrizze a betöltött médiát; 100%-os méretben folytathatja.
+Tlačiteľná oblasť ovládača sa ignoruje. Fyzické okraje tlačiarne môžu obsah orezať.	The driver's printable area is ignored. Physical printer margins may still clip content.	Tisknutelná oblast ovladače se ignoruje. Fyzické okraje tiskárny mohou obsah oříznout.	Az illesztőprogram nyomtatható területe figyelmen kívül marad. A nyomtató fizikai margói levághatják a tartalmat.
+Profil média	Media profile	Profil média	Médiaprofil
+Neplatný profil média.	Invalid media profile.	Neplatný profil média.	Érvénytelen médiaprofil.
+Rozmery dokumentu	Document dimensions	Rozměry dokumentu	Dokumentumméretek
+Ignorovať tlačiteľnú oblasť ovládača	Ignore the driver's printable area	Ignorovat tisknutelnou oblast ovladače	Az illesztőprogram nyomtatható területének figyelmen kívül hagyása
+Použiť rozmery dokumentu	Use document dimensions	Použít rozměry dokumentu	Dokumentumméretek használata
+Názov profilu média	Media profile name	Název profilu média	Médiaprofil neve
+Odstrániť profil média	Delete media profile	Odstranit profil média	Médiaprofil törlése
+Odstrániť profil média?	Delete media profile?	Odstranit profil média?	Törli a médiaprofilt?
+Profil používa vlastné rozmery média. Overte ich v nastavení ovládača.	The profile uses custom media dimensions. Check them in the driver settings.	Profil používá vlastní rozměry média. Ověřte je v nastavení ovladače.	A profil egyéni médiaméreteket használ. Ellenőrizze őket az illesztőprogram beállításaiban.
+Dokument	Document	Dokument	Dokumentum
+Papier podľa ovládača	Paper reported by driver	Papír podle ovladače	Az illesztőprogram által jelzett papír

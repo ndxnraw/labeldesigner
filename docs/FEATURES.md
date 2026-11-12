@@ -1,6 +1,7 @@
 # ND LabelDesigner — Pre-release
 
-Aktuálny Pre-release pre Windows; lokálny vývojový stav zo 7. októbra 2026. Zachováva Windows Forms,
+Aktuálny Pre-release pre Windows; vychádza z vývojového stavu zo 7. októbra 2026
+a obsahuje úpravy tlače a profilov médií z 12. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Nové možnosti
@@ -19,6 +20,15 @@ Aktuálny Pre-release pre Windows; lokálny vývojový stav zo 7. októbra 2026.
   Spoločné rozloženie strán používajú tlač, náhľad aj dávkové exporty.
 - **Profily tlačiarní:** formát papiera, orientácia a korekcia X/Y v mm;
   kalibračná etiketa sa otvorí v náhľade a tlačí sa až po stlačení Tlačiť.
+  Jedna tlačiareň môže mať viac pomenovaných profilov pre rôzne médiá.
+  Profil uchováva aj režim ignorovania tlačiteľnej oblasti ovládača.
+- **Nesúlad papiera:** menší formát hlásený ovládačom je upozornenie;
+  používateľ môže potvrdiť pokračovanie v mierke 100 %. Náhľad je nezávislý
+  od orezania ovládača a zobrazí celý dokument. Rozmery dokumentu a údaj
+  ovládača sa zobrazujú samostatne. V rozšírených nastaveniach možno použiť
+  rozmery dokumentu ako vlastné médium alebo ignorovať dodatočné orezanie
+  podľa ovládača. Fyzické limity zariadenia a orezanie samotného ovládača
+  nemožno týmto režimom odstrániť.
 - **Kontrola etikety:** chyby a upozornenia, výber dotknutého prvku kliknutím,
   presahy, text, údaje kódov, voľný priestor kódov a rozlíšenie obrázkov.
   Kontrolné rámčeky sa neexportujú.

@@ -9,7 +9,7 @@ Copy-Item (Join-Path $packageRoot 'build\app\ND-LabelDesigner.exe') $testBin -Fo
 Copy-Item (Join-Path $packageRoot 'build\app\zxing.dll') $testBin -Force
 Push-Location $packageRoot
 try {
-  foreach ($name in @('BatchImportTests','WorkspaceUiTests','Revision310Tests','Revision308Tests','Revision307Tests','RotationTests','Revision305Tests','Revision304Tests','Revision303Tests','Revision302Tests','Revision301Tests','Revision12Tests','Revision22Tests','SymbolTests','Revision25Tests','Revision26Tests','ImportTests','OutputTests','V3Tests','UiPerf')) {
+  foreach ($name in @('PrintMediaTests','BatchImportTests','WorkspaceUiTests','Revision310Tests','Revision308Tests','Revision307Tests','RotationTests','Revision305Tests','Revision304Tests','Revision303Tests','Revision302Tests','Revision301Tests','Revision12Tests','Revision22Tests','SymbolTests','Revision25Tests','Revision26Tests','ImportTests','OutputTests','V3Tests','UiPerf')) {
     if ($Suites -and $name -notin $Suites) { continue }
     $testExe = Join-Path $testBin ($name + '.exe')
     & $compiler /nologo /target:winexe "/out:$testExe" "/reference:$testBin\ND-LabelDesigner.exe" "/reference:$testBin\zxing.dll" /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Get-ChildItem (Join-Path $packageRoot 'tests') -Recurse -Filter ($name + '.cs')).FullName

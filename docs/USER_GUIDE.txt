@@ -76,18 +76,34 @@ zariadenia je pod rozbaľovacím zoznamom aj v bubline. Obnoviť tlačiarne
 znovu načíta dostupné zariadenia. Vlastnosti tlačiarne sú pod rozšírenými
 nastaveniami a systémový dialóg sa otvorí len na vyžiadanie.
 
-Náhľad zobrazuje skutočný papier z ovládača. Na veľkom papieri môže byť
-etiketa prirodzene malá. Priblíženie nemení tlač: fyzická mierka je 100 %.
-Pri zmene zariadenia sa použije jeho predvolený papier. Papier z editora
-určuje rozloženie exportov a okraje; papier v tlačovom okne určuje skutočné
-médium tlačiarne. Obidve nastavenia musia zodpovedať zamýšľanému výsledku.
+Náhľad zobrazuje celý dokument, aj keď ovládač hlási menší papier.
+Rozmery dokumentu a papier podľa ovládača sú uvedené samostatne;
+program priamo nezisťuje rozmer skutočne vloženého papiera.
+Na veľkom papieri môže byť etiketa prirodzene malá.
+Priblíženie nemení tlač: fyzická mierka je 100 %.
+Pri zmene zariadenia sa použije jeho naposledy uložený profil alebo
+predvolený papier. Papier z editora určuje rozloženie exportov a okraje.
 Štandardné rozmery sa v ovládači zaokrúhľujú na stotiny palca.
 
 Náhľad aj tlač používajú spoločný vektorový obsah a rovnaké umiestnenie.
-Malý papier je odmietnutý, obsah mimo tlačiteľnej oblasti má upozornenie.
+Menší hlásený papier a obsah mimo tlačiteľnej oblasti majú upozornenie.
+Po kontrole skutočného média môžete potvrdiť pokračovanie v tlači.
+V rozšírených nastaveniach voľba Použiť rozmery dokumentu nastaví vlastné
+médium s rozmermi dokumentu. Voľba Ignorovať tlačiteľnú oblasť ovládača
+odstráni dodatočné softvérové orezanie podľa údajov ovládača.
+Použite ju pri nesprávnom hlásení ovládača. Neodstráni fyzické okraje
+zariadenia ani prípadné orezanie vykonané samotným ovládačom.
 Mierku a automatické prispôsobovanie v externých ovládačoch nemeňte.
 Stránkovanie sa ukáže iba pri viacstranovom dokumente. Počet kópií neznásobuje
 počet obrázkov v náhľade. Bežný editor vytvára jednu etiketu na stránku.
+
+Profily médií sú samostatné pre každú tlačiareň. V rozšírených nastaveniach
+zadajte Názov profilu média a stlačte Uložiť profil tlačiarne.
+Iný názov vytvorí ďalší profil; rovnaký názov aktualizuje existujúci.
+Ukladá sa papier, orientácia, korekcia X/Y a ignorovanie tlačiteľnej oblasti.
+Profil vyberiete zo zoznamu Profil média; odstrániť ho možno samostatne
+po potvrdení. Staršie profily sa načítajú automaticky pod názvom média
+a jeho rozmerov. Vlastné rozmery musí podporovať aj ovládač tlačiarne.
 
 Načítavanie tlačiarní a príprava náhľadu bežia mimo ovládania okna.
 Späť do editora alebo Esc zavrie náhľad bez straty návrhu. Po odoslaní úlohy
