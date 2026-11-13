@@ -60,6 +60,8 @@ when run from SDK build output. Use the published folder or ZIP for standalone u
 and `SHA256SUMS-NET10.txt`. It bundles the Windows x64 runtime, validates every ZIP
 entry against its source and includes Microsoft runtime notices. Trimming and
 single-file bundling are disabled to preserve reflection, XML and embedded resources.
+Packaging supports Windows PowerShell 5.1 and PowerShell 7; both compression
+assemblies are loaded explicitly so ZIP creation also works in a fresh 5.1 process.
 The compatible ZIP and its `SHA256SUMS.txt` keep their original names.
 
 Do not mix files between the two builds. Extract either entire ZIP into a separate

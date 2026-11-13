@@ -32,7 +32,7 @@ function Runtime-Notice($package,$version,$name){
 $entries['licenses/DOTNET-LICENSE.txt']=Runtime-Notice 'microsoft.netcore.app.runtime.win-x64' $coreVersion 'LICENSE.TXT'
 $entries['licenses/DOTNET-NOTICES.txt']=Runtime-Notice 'microsoft.netcore.app.runtime.win-x64' $coreVersion 'THIRD-PARTY-NOTICES.TXT'
 $entries['licenses/WINDOWSDESKTOP-LICENSE.txt']=Runtime-Notice 'microsoft.windowsdesktop.app.runtime.win-x64' $desktopVersion 'LICENSE'
-Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -AssemblyName System.IO.Compression,System.IO.Compression.FileSystem
 $path=Join-Path $output 'ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip'
 $stream=[IO.File]::Open($path,[IO.FileMode]::Create);$zip=New-Object IO.Compression.ZipArchive($stream,[IO.Compression.ZipArchiveMode]::Create)
 try{foreach($entry in $entries.GetEnumerator()){[IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$entry.Value,$entry.Key)|Out-Null}}finally{$zip.Dispose();$stream.Dispose()}
