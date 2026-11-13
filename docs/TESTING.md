@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing and the app, compiles and runs all 24 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 25 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -36,6 +36,20 @@ repetitions, synchronized layer selection, group locks, protected multi-selectio
 properties, layer undo, keyboard panel access, export cancellation, and batch gates.
 It captures the minimum-size editor, both themes and the review in all four languages.
 No print job is submitted; preview/media capabilities use Microsoft Print to PDF.
+`PlatformMigrationTests` verifies a core without dependencies on the app or Windows
+Forms, old XML and variable-template round trips, frozen job values, Windows-1250
+CSV, fresh-process CP850 ZPL import, shared PDF/DOCX/SVG/ZPL outputs with exact page
+dimensions, minimum editor size and a contained properties panel. Framework retains
+its original physical minimum; modern WinForms preserves the logical minimum across
+DPI transitions. The same suite
+sources are compiled on both runtimes; `scripts/test-suites.json` is their single list.
+
+Run `scripts/test-sdk.ps1` for the complete modern .NET 10 suite and
+`scripts/test-sdk.ps1 -Framework net48` for SDK-compiled Framework tests. Both accept
+`-Suites` like the legacy runner and reject unknown names. Results are separated under
+`build/sdk-test-results/<target>/<timestamp>/`. SDK tests use a small STA host with the
+product's DPI mode and locate fixture/source files independently of binary-directory
+depth. A failing suite is never silently skipped. No test requires a physical print job.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.

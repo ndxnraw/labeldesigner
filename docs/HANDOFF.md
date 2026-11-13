@@ -26,13 +26,19 @@ git status --short
 ```
 
 Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
-24 successful suites and reports in `build/test-results/`, validated
+25 successful suites and reports in `build/test-results/`, validated
 `build/packages/ND-LabelDesigner-Pre-release-Windows.zip`. `git status --short`
 must be empty. Work only from this clone when validating the handoff.
 
 ## Continue development
 
-Production source is `src/LabelDesigner/`; tests are under `tests/`.
+For the parallel .NET 10 Windows target, install the SDK specified in `global.json`,
+run `scripts/build-sdk.ps1`, `scripts/test-sdk.ps1` and `scripts/publish-modern.ps1`.
+The compatible commands above do not require the SDK. Keep the two ZIPs in separate
+folders; the modern x64 ZIP contains its runtime. See [BUILD](BUILD.md) for exact
+output paths, restore prerequisites and checksum files.
+
+Production sources are `src/LabelDesigner/` and `src/LabelDesigner.Core/`; tests are under `tests/`.
 Use a `codex/<description>` branch for ordinary new work unless instructed otherwise.
 Read root AGENTS.md and [DEVELOPMENT](DEVELOPMENT.md) before editing.
 Update relevant documentation and preserve clean-clone validation with major changes.
@@ -73,7 +79,7 @@ The published build and release tag are named `Pre-release`. Earlier source snap
 
 The current Pre-release includes the owner's latest local development snapshot,
 imported on 2026-10-20; see `docs/LOCAL_SOURCE_IMPORT.md`. All its production sources,
-24 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
+25 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
 no original local DLL is required. Keep the generated `zxing.dll` next to the EXE.
 Foreign ZPL support is partial; native printer fonts are approximated. QR and ordinary
 Data Matrix are supported; GS1 DataMatrix and `.nlbl` are not. Physical printer and Word rendering need manual checks.

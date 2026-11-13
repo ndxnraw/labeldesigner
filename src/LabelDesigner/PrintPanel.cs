@@ -16,7 +16,7 @@ internal static class PrintWorker {
  static void Run(){while(true){wake.WaitOne();Action action;lock(gate){action=pending;pending=null;owner=null;}if(action!=null)try{action();}catch(Exception ex){System.Diagnostics.Trace.WriteLine(ex);}}}
 }
 public class PrintCanvas:ScrollableControl {
- Image image;public double Zoom;public int Page;public SizeF Paper{get;set;}public RectangleF Printable{get;set;}
+ Image image;public double Zoom;public int Page;[System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public SizeF Paper{get;set;}[System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public RectangleF Printable{get;set;}
  public PrintCanvas(){DoubleBuffered=true;AutoScroll=true;TabStop=true;Resize+=delegate{Invalidate();};}
  public void SetPage(Image next,SizeF paper,RectangleF printable){var old=image;image=next;Paper=paper;Printable=printable;if(old!=null)old.Dispose();Invalidate();}
  public void ClearPages(){SetPage(null,SizeF.Empty,RectangleF.Empty);}

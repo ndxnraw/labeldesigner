@@ -45,7 +45,17 @@ public partial class MainForm:Form {
   grid.CellEnter+=delegate(object sender,DataGridViewCellEventArgs args){if(!loading&&args.RowIndex>=0)preview.SelectElement(args.RowIndex,false);};
   grid.CellClick+=delegate(object sender,DataGridViewCellEventArgs args){if(!loading&&args.RowIndex>=0)preview.SelectElement(args.RowIndex,false);};
   preview.DragStarted+=delegate{timer.Stop();if(history!=null){history.Record(Read());RefreshHistory();}};preview.ElementEdited+=EditElement;preview.EditFinished+=delegate{timer.Stop();UpdatePreview();if(history!=null&&ProjectXml.Encode(Read())==savedDocument){dirty=false;UpdateWindowTitle();}};preview.TextEditRequested+=EditTextDialog;preview.SymbolEditRequested+=EditSymbol;
-  timer.Interval=300;timer.Tick+=delegate{timer.Stop();if(!preview.IsDragging)UpdatePreview();};AddPreferences(root);LoadStartup();BuildStudio();InitializeWorkspace();FormClosing+=delegate(object sender,FormClosingEventArgs args){if(!CanDiscard())args.Cancel=true;};
+  timer.Interval=300;timer.Tick+=delegate{timer.Stop();if(!preview.IsDragging)UpdatePreview();};AddPreferences(root);LoadStartup();BuildStudio();InitializeWorkspace();
+#if NETCOREAPP
+// The handwritten layout uses 96-DPI logical sizes. Complete its initial scale
+// before modern WinForms applies a later monitor-DPI transition.
+AutoScaleDimensions=new SizeF(96,96);PerformAutoScale();
+// Top-level non-client rounding can otherwise reduce the minimum after a DPI change.
+EventHandler restoreMinimum=delegate{if(!IsDisposed&&!Disposing)MinimumSize=LogicalToDeviceUnits(new Size(1024,640));};
+Shown+=restoreMinimum;
+DpiChanged+=delegate{if(IsHandleCreated&&!IsDisposed&&!Disposing)BeginInvoke((Action)delegate{restoreMinimum(this,EventArgs.Empty);});};
+#endif
+FormClosing+=delegate(object sender,FormClosingEventArgs args){if(!CanDiscard())args.Cancel=true;};
  }
  void CenterBarcode(){if(elementMetadata.Exists(m=>m.Index==-1&&m.Locked))return;nums["BarX"].Value=(decimal)Display((N("Width")-N("BarWidth"))/2);preview.SelectElement(-1);timer.Stop();UpdatePreview();}
  void EditElement(ElementEdit edit){if(elementMetadata.Exists(m=>m.Index==edit.Index&&m.Locked)&&!preview.Restoring)return;StoreRotation(edit.Index,edit.Rotation);if(FastMove(edit)||EditSymbolGeometry(edit))return;loading=true;try{if(edit.Index<0){nums["BarX"].Value=(decimal)Display(edit.X);nums["BarY"].Value=(decimal)Display(edit.Y);nums["BarWidth"].Value=(decimal)Display(edit.Width);nums["DigitSize"].Value=(decimal)edit.Font;var settings=Read();double height=Math.Round(Math.Max(1,Math.Min(500,edit.Height-Engine.ExtraHeight(settings,edit.Width,edit.Font))),2);nums["BarHeight"].Value=(decimal)Display(height);}else if(edit.Index<grid.Rows.Count){var row=grid.Rows[edit.Index];row.Cells[1].Value=Display(edit.X);row.Cells[2].Value=Display(edit.Y);row.Cells[3].Value=Display(edit.Width);row.Cells[4].Value=Display(edit.Height);row.Cells[5].Value=edit.Font;}}finally{loading=false;}dirty=true;Text=Loc.T("ND LabelDesigner — Pre-release • neuložené zmeny");timer.Stop();UpdatePreview();}
@@ -86,7 +96,11 @@ public partial class MainForm:Form {
  public void CapturePreview(string path){Size=new Size(1320,930);Show();Application.DoEvents();using(var b=new Bitmap(Width,Height)){DrawToBitmap(b,new Rectangle(0,0,Width,Height));b.Save(path);}dirty=false;Close();}
 }
 public static class Program {
- [STAThread]public static void Main(string[] args){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);if(args.Length==2&&args[0]=="--self-test"){try{SelfTest(args[1]);Environment.ExitCode=0;}catch(Exception ex){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"failure.txt"),ex.ToString());Environment.ExitCode=1;}return;}Application.Run(new MainForm());}
+ [STAThread]public static void Main(string[] args){
+#if NETCOREAPP
+Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+#endif
+Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);if(args.Length==2&&args[0]=="--self-test"){try{SelfTest(args[1]);Environment.ExitCode=0;}catch(Exception ex){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"failure.txt"),ex.ToString());Environment.ExitCode=1;}return;}Application.Run(new MainForm());}
  static void Assert(bool val,string what){if(!val)throw new Exception("Test zlyhal: "+what);}
  static void Reject(Action a,string what){bool rejected=false;try{a();}catch{rejected=true;}Assert(rejected,what);}
  static void SelfTest(string folder){Directory.CreateDirectory(folder);Assert(Engine.Normalize("400638133393",13)=="4006381333931","EAN13 checksum");Assert(Engine.Normalize("9638507",8)=="96385074","EAN8 checksum");Assert(Engine.Normalize("000000000000",13)=="0000000000000","leading zeros");Reject(delegate{Engine.Normalize("4006381333932",13);},"wrong checksum");Reject(delegate{Engine.Normalize("123A567",8);},"letters");Reject(delegate{Engine.Normalize("１２３４５６７",8);},"unicode digits");Assert(Engine.Bits("4006381333931",13).Length==95,"95 modules");Assert(Engine.Bits("96385074",8).Length==67,"67 modules");var s=LabelSettings.Default();Assert(Engine.Normalize(s.Ean,13)==s.Ean,"default valid");

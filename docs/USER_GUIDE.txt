@@ -2,8 +2,8 @@ ND LabelDesigner — Pre-release — Windows
 Aktualizované 12. novembra 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
-ND-LabelDesigner.exe.config a zxing.dll ponechajte vedľa EXE.
-Potrebný je Windows s .NET Framework 4.8/4.8.1.
+Pri kompatibilnom balíku ponechajte vedľa EXE konfiguráciu, zxing.dll a LabelDesigner.Core.dll.
+Kompatibilný balík potrebuje .NET Framework 4.8/4.8.1. Moderný balík Windows-NET10-x64 obsahuje runtime a nepotrebuje jeho inštaláciu. Oba sú určené pre Windows 10/11. Rozbaľte celý vybraný ZIP do vlastného priečinka; súbory rôznych balíkov nemiešajte.
 
 NOVÉ FUNKCIE Pre-release
 Ponuka Nástroje: automatické ukladanie, šablóny a nedávne projekty,

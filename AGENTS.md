@@ -10,7 +10,8 @@
   Text-only `Daniel Návojský` without actual profile attribution is insufficient.
 - The product is **Pre-release**. Do not create numeric product versions or stable releases.
   Keep technical assembly/manifest versions valid; product informational version is Pre-release.
-- Canonical production source: `src/LabelDesigner/`. Active tests: `tests/regression/`
+- Canonical production source: `src/LabelDesigner/` (Windows UI) and
+  `src/LabelDesigner.Core/` (shared document/rendering/output). Active tests: `tests/regression/`
   and `tests/integration/`; inputs: `tests/fixtures/`; optional tools: `tests/export/`, `tests/tools/`.
 - Build: `scripts\build.cmd`. Tests (including build): `scripts\test.cmd`.
   Package: `scripts\package.cmd`. See `docs/BUILD.md` and `docs/TESTING.md` for prerequisites.
@@ -24,4 +25,7 @@
   The owner explicitly authorized importing the latest local snapshot on 2026-10-20;
   this code is now canonical. See `docs/LOCAL_SOURCE_IMPORT.md`.
 - Build ZXing from `src/third-party/ZXing/` via `scripts/build-zxing.ps1`; never depend
-  on an untracked local DLL. The standard runner now contains 24 suites.
+  on an untracked local DLL. The shared standard runner now contains 25 suites.
+- Preserve the offline .NET Framework 4.8 path and parallel .NET 10 Windows target.
+  SDK builds use `global.json`, `LabelDesigner.sln`, `scripts/build-sdk.ps1` and
+  `scripts/test-sdk.ps1`; modern self-contained packaging uses `scripts/publish-modern.ps1`.

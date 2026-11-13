@@ -10,7 +10,13 @@ New-Item $output -ItemType Directory -Force | Out-Null
 $arguments = @('/nologo','/target:winexe','/optimize+',"/win32manifest:$source\app.manifest","/win32icon:$assets\app.ico","/out:$output\ND-LabelDesigner.exe",'/reference:System.Drawing.dll','/reference:System.Windows.Forms.dll','/reference:System.IO.Compression.dll','/reference:System.IO.Compression.FileSystem.dll',"/resource:$assets\app.ico,AppLogo.ico","/resource:$source\translations.tsv,translations.tsv")
 $framework = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319'
 $arguments += @("/reference:$output\zxing.dll", "/reference:$framework\WPF\WindowsBase.dll", "/reference:$framework\WPF\PresentationCore.dll")
-foreach ($font in @('SourceSans3-Regular.ttf','SourceSans3-Bold.ttf','OFL.txt')) { $arguments += "/resource:$assets\fonts\$font,Fonts.$font" }
+$coreSource=Join-Path $root 'src\LabelDesigner.Core'
+$coreArguments=@('/nologo','/target:library','/optimize+',"/out:$output\LabelDesigner.Core.dll",'/reference:System.Drawing.dll','/reference:System.IO.Compression.dll','/reference:System.IO.Compression.FileSystem.dll',"/reference:$output\zxing.dll","/reference:$framework\WPF\WindowsBase.dll","/reference:$framework\WPF\PresentationCore.dll","/resource:$source\translations.tsv,translations.tsv")
+foreach ($font in @('SourceSans3-Regular.ttf','SourceSans3-Bold.ttf','OFL.txt')) { $coreArguments += "/resource:$assets\fonts\$font,Fonts.$font" }
+$coreArguments+=(Get-ChildItem $coreSource -Filter '*.cs' | Sort-Object Name).FullName
+& $compiler $coreArguments
+if($LASTEXITCODE -ne 0){throw 'Core compilation failed.'}
+$arguments+="/reference:$output\LabelDesigner.Core.dll"
 $arguments += (Get-ChildItem $source -Filter '*.cs' | Sort-Object Name).FullName
 & $compiler $arguments
 if ($LASTEXITCODE -ne 0) { throw 'Application compilation failed.' }

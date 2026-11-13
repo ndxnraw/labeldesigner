@@ -50,7 +50,7 @@ class Revision307Tests {
   }
   Call(form,"OpenImportedFile",path);Near(preview.Element(0).Rotation,89.25,"XML still opens");
   var zpl=Path.Combine(dir,"editable.prn");Engine.Zpl(zpl,(LabelSettings)Call(form,"Read"));Call(form,"OpenImportedFile",zpl);Near(preview.Element(0).Rotation,89.25,"PRN still opens editable metadata");
-  string source=File.ReadAllText(Path.Combine(Path.GetDirectoryName(typeof(MainForm).Assembly.Location),@"..\..\src\LabelDesigner\App.cs"));
+  string source=File.ReadAllText(Path.Combine(TestPaths.RepositoryRoot,"src","LabelDesigner","App.cs"));
   Check(source.IndexOf("nlbl",StringComparison.OrdinalIgnoreCase)<0,"open filter and help omit NLBL");
   string key="Podporované súbory (*.ean.xml;*.xml;*.zpl;*.prn)|*.ean.xml;*.xml;*.zpl;*.prn|Nastavenie etikety (*.ean.xml)|*.ean.xml|ZPL / PRN (*.zpl;*.prn)|*.zpl;*.prn|XML (*.xml)|*.xml";
   foreach(string language in Loc.Codes){Loc.Language=language;string filter=Loc.T(key);Check(filter.IndexOf("nlbl",StringComparison.OrdinalIgnoreCase)<0&&filter.Contains("*.prn"),"localized filter formats");if(language!="sk")Check(filter!=key,"filter translation exists");}Loc.Language="sk";

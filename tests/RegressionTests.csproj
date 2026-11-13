@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>$(SuiteName)</AssemblyName><StartupObject>MigrationTestHost</StartupObject>
+    <AppConfig Condition="'$(TargetFramework)' == 'net48'">../src/LabelDesigner/app.config</AppConfig>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="regression/$(SuiteName).cs" Condition="Exists('regression/$(SuiteName).cs')"/>
+    <Compile Include="integration/$(SuiteName).cs" Condition="Exists('integration/$(SuiteName).cs')"/>
+    <Compile Include="tools/MigrationTestHost.cs"/>
+    <Compile Include="tools/TestPaths.cs"/>
+    <ProjectReference Include="../src/LabelDesigner/LabelDesigner.csproj"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'"><Reference Include="System.IO.Compression"/><Reference Include="System.IO.Compression.FileSystem"/></ItemGroup>
+</Project>

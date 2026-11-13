@@ -6,6 +6,15 @@ a zjednoteného ovládania a predvýstupnej kontroly
 z 12. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
+## Postupný prechod platformy
+
+Aplikácia má spoločné jadro pre dokumenty, kontrolu, vykresľovanie a exporty.
+Kompatibilné zostavenie pre .NET Framework 4.8 zostáva zachované vrátane pôvodného
+offline zostavovania. Paralelné zostavenie pre .NET 10 LTS používa rovnaké zdroje
+a projekty etikiet. Moderný Windows x64 ZIP obsahuje vlastný runtime; používateľ
+ho nemusí inštalovať. K dispozícii sú štandardné projekty a spoločné testy oboch cieľov.
+Názov produktu je naďalej Pre-release.
+
 ## Nové možnosti
 
 - **Prvky a Kontrola:** trvalé karty pod nastaveniami etikety a papiera.

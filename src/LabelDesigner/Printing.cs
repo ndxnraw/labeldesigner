@@ -2,7 +2,7 @@ using System;using System.Drawing;using System.Drawing.Printing;using System.Win
 namespace EanEtikety {
 public class LabelPrintDocument:PrintDocument {
  readonly LabelSettings label;readonly OutputPlan plan;int page;public double OffsetX,OffsetY;
- public bool IgnoreDriverMargins {get;set;}
+ [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public bool IgnoreDriverMargins {get;set;}
  public int PageCount {get{return plan.PageCount;}}
  public int PreviewPageIndex=-1;
  public bool Cancelled {get;private set;}

@@ -18,14 +18,37 @@ jobs:
       - name: Build and validate package
         shell: cmd
         run: scripts\package.cmd
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Build both SDK targets
+        shell: powershell
+        run: .\scripts\build-sdk.ps1
+      - name: Test modern Windows runtime
+        shell: powershell
+        run: .\scripts\test-sdk.ps1
+      - name: Publish and validate self-contained modern package
+        shell: powershell
+        run: .\scripts\publish-modern.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: ND-LabelDesigner-Pre-release-Windows
-          path: build/packages/*
+          path: |
+            build/packages/ND-LabelDesigner-Pre-release-Windows.zip
+            build/packages/SHA256SUMS.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ND-LabelDesigner-Pre-release-Windows-NET10-x64
+          path: |
+            build/packages/ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip
+            build/packages/SHA256SUMS-NET10.txt
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
-          path: build/test-results/
+          path: |
+            build/test-results/
+            build/sdk-test-results/
           if-no-files-found: ignore
