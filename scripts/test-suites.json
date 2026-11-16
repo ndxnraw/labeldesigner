@@ -1,6 +1,6 @@
 [
   "PlatformMigrationTests", "PreflightUiTests", "BackgroundBatchTests", "DraftJobTests",
-  "PrintMediaTests", "BatchImportTests", "WorkspaceUiTests", "Revision310Tests",
+  "PrintCalibrationTests", "PrintMediaTests", "BatchImportTests", "WorkspaceUiTests", "Revision310Tests",
   "Revision308Tests", "Revision307Tests", "RotationTests", "Revision305Tests",
   "Revision304Tests", "Revision303Tests", "Revision302Tests", "Revision301Tests",
   "Revision12Tests", "Revision22Tests", "SymbolTests", "Revision25Tests",

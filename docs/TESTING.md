@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 25 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 26 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -19,6 +19,13 @@ recovery, embedded images, QR/Data Matrix decoding and multipage export.
 optional application clipping (preserving device clipping), physical dimensions,
 legacy profile migration, multiple media per printer, and real UI profile switching.
 It uses Microsoft Print to PDF capabilities and bitmap rendering; no print job is submitted.
+`PrintCalibrationTests` covers measured baseline recovery, adaptive crosshair targets,
+legacy scale defaults, validation and independent profiles, corrected raster geometry
+and hard-margin order, output-approval invalidation, real profile UI integration,
+wizard confirmation/invalid measurement behavior, scrolling at 100/125/150/200%
+synthetic layout scales in all four languages, diagnostic privacy, invariant numeric
+output, bounded rotation and failure-safe logging. Synthetic layout scaling is not a
+physical monitor DPI transition. No physical print job is submitted.
 `DraftJobTests` covers editable invalid projects, atomic saving and backup rotation,
 retention of a readable backup after corruption, failed-save preservation, recovery,
 strict output validation, frozen job dates and serial ranges, midnight transitions,

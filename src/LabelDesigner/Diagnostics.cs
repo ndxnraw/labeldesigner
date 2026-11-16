@@ -10,7 +10,9 @@ namespace EanEtikety {
   static readonly object gate=new object();public const int MaxBytes=1024*1024;
   public static string DirectoryPath{get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"NDLabelMaker","Diagnostics");}}
   public static string Write(string operation,Exception error){return WriteTo(DirectoryPath,operation,error);}
-  public static string WriteTo(string directory,string operation,Exception error){
+  public static string WriteTo(string directory,string operation,Exception error){return WriteCore(directory,operation,error,null); }
+  public static string WritePrintTo(string directory,PrintDiagnostics snapshot,string status,Exception error){try{if(status!="submit"&&status!="submitted"&&status!="cancelled"&&status!="review-required"&&status!="failed")status="failed";return WriteCore(directory,"print-"+status,error,snapshot==null?null:snapshot.Format());}catch{return null;}}
+  static string WriteCore(string directory,string operation,Exception error,string context){
    string id=DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N").Substring(0,8);
    // Exception messages, file paths, printer names and document data are omitted.
    var text=new StringBuilder();text.AppendLine("ID="+id);text.AppendLine("UTC="+DateTime.UtcNow.ToString("o"));
@@ -19,7 +21,7 @@ namespace EanEtikety {
     text.AppendLine("Exception="+error.GetType().FullName+" HResult="+error.HResult.ToString("X8"));
     var frames=new StackTrace(error,false).GetFrames();if(frames!=null)for(int i=0;i<Math.Min(24,frames.Length);i++){var method=frames[i].GetMethod();text.AppendLine(" at "+(method.DeclaringType==null?"":method.DeclaringType.FullName+".")+method.Name);}
    }
-   text.AppendLine();
+   if(context!=null)text.Append(context);text.AppendLine();
    try{lock(gate){Directory.CreateDirectory(directory);string path=Path.Combine(directory,"application.log");if(File.Exists(path)&&new FileInfo(path).Length+Encoding.UTF8.GetByteCount(text.ToString())>MaxBytes){string oldest=path+".2",recent=path+".1";if(File.Exists(oldest))File.Delete(oldest);if(File.Exists(recent))File.Move(recent,oldest);File.Move(path,recent);}File.AppendAllText(path,text.ToString(),new UTF8Encoding(false));}return id;}
    catch{ return null; /* Diagnostics must never hide the original failure. */ }
   }

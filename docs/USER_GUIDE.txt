@@ -158,7 +158,8 @@ Náhľad zobrazuje celý dokument, aj keď ovládač hlási menší papier.
 Rozmery dokumentu a papier podľa ovládača sú uvedené samostatne;
 program priamo nezisťuje rozmer skutočne vloženého papiera.
 Na veľkom papieri môže byť etiketa prirodzene malá.
-Priblíženie nemení tlač: fyzická mierka je 100 %.
+Priblíženie nemení tlač. Bez kalibrácie je fyzická mierka 100 %;
+voliteľná mierka X/Y sa nastavuje osobitne pre médium. Papier sa automaticky neprispôsobuje.
 Pri zmene zariadenia sa použije jeho naposledy uložený profil alebo
 predvolený papier. Papier z editora určuje rozloženie exportov a okraje.
 Štandardné rozmery sa v ovládači zaokrúhľujú na stotiny palca.
@@ -178,10 +179,32 @@ počet obrázkov v náhľade. Bežný editor vytvára jednu etiketu na stránku.
 Profily médií sú samostatné pre každú tlačiareň. V rozšírených nastaveniach
 zadajte Názov profilu média a stlačte Uložiť profil tlačiarne.
 Iný názov vytvorí ďalší profil; rovnaký názov aktualizuje existujúci.
-Ukladá sa papier, orientácia, korekcia X/Y a ignorovanie tlačiteľnej oblasti.
+Ukladá sa papier, orientácia, korekcia X/Y, mierka X/Y a ignorovanie tlačiteľnej oblasti.
 Profil vyberiete zo zoznamu Profil média; odstrániť ho možno samostatne
 po potvrdení. Staršie profily sa načítajú automaticky pod názvom média
 a jeho rozmerov. Vlastné rozmery musí podporovať aj ovládač tlačiarne.
+
+Sprievodca kalibráciou je v rozšírených nastaveniach. Najprv vytlačte skúšobnú
+stranu cez bežnú kontrolu výstupu. Táto strana má vždy nulové korekcie a mierku
+100 %, aj keď médium už má kalibráciu. Automatické prispôsobenie vypnite
+vo Vlastnostiach tlačiarne v pôvodnom tlačovom okne ešte pred otvorením sprievodcu.
+Skúšobná strana prevezme celé aktuálne nastavenie ovládača. Jej tlačiareň, médium,
+orientáciu a korekcie nemožno meniť; tak sa meranie vzťahuje na správny profil.
+Zmerajte vzdialenosti medzi stredmi horných krížikov (X) a ľavých krížikov (Y),
+potom vzdialenosť ľavého horného krížika od ľavého a horného okraja papiera.
+Zadajte skutočne namerané hodnoty v mm a potvrďte meranie. Použiť a uložiť profil
+uloží vypočítaný posun a mierku iba pre toto médium. Opakované meranie nahradí
+predchádzajúcu kalibráciu. Korekcie sa nesčítavajú. Overte výsledok ďalším výtlačkom
+bežného dokumentu. Mierka musí byť 80–120 %, posun najviac ±100 mm; pri väčšej
+odchýlke najprv opravte nastavenie ovládača. Skúšobná strana vyžaduje rozmery
+aspoň 12 × 12 mm. Kalibrácia nemení projekty etikiet ani PDF/DOCX/SVG/ZPL exporty.
+
+Diagnostika tlače uvádza rozmery dokumentu, médium nastavené v ovládači,
+tlačiteľnú oblasť, hardvérové okraje, mierku, posun, počty a runtime. Skutočne
+vložené médium program neoveruje. Výpis možno uložiť do textového súboru;
+neobsahuje obsah etikiet, názvy zariadení/profilov ani cesty. Denník diagnostiky
+zaznamenáva pokus o odoslanie, odoslanie do Windows, zrušenie alebo chybu.
+Úspešné odoslanie do Windows nepotvrdzuje dokončenie fyzickej tlače.
 
 Načítavanie tlačiarní a príprava náhľadu bežia mimo ovládania okna.
 Späť do editora alebo Esc zavrie náhľad bez straty návrhu. Po odoslaní úlohy

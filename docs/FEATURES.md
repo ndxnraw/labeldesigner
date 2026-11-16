@@ -28,7 +28,8 @@ Názov produktu je naďalej Pre-release.
   strán, opakovaní celej úlohy a výsledných počtov. Filter nemení platnosť
   kontroly. Chyby nemožno potvrdiť; upozornenia vyžadujú výslovné zaškrtnutie.
   Nesúlad papiera ostáva upozornením. Pred odoslaním tlače sa kontrola opakuje;
-  zmena nastavení alebo upozornení vyžiada nové potvrdenie. Tlačí sa v 100 % mierke.
+  zmena nastavení alebo upozornení vyžiada nové potvrdenie. Papier sa automaticky
+  neprispôsobuje; voliteľná kalibrácia média upraví mierku a posun.
   Problém dávky uvádza pôvodný riadok, prvú dotknutú stranu a zachováva väzbu
   na prvok. Späť na úpravy sa pri vybranej položke vráti na prvok alebo riadok.
   Dávkové okno priebežne ukazuje vybrané záznamy, etikety a chyby;
@@ -65,17 +66,24 @@ Názov produktu je naďalej Pre-release.
   kopírovanie, odstránenie, skupiny, zamknutie, zarovnanie, rozostupy a vrstvy.
 - **Samolepiace hárky:** riadky, stĺpce, štyri okraje, medzery a prvá voľná pozícia.
   Spoločné rozloženie strán používajú tlač, náhľad aj dávkové exporty.
-- **Profily tlačiarní:** formát papiera, orientácia a korekcia X/Y v mm;
-  kalibračná etiketa sa otvorí v náhľade a tlačí sa až po stlačení Tlačiť.
+- **Profily tlačiarní:** formát papiera, orientácia, korekcia X/Y v mm a samostatná
+  mierka X/Y 80–120 %. Sprievodca vytvorí nekorigovanú skúšobnú stranu s tromi
+  krížikmi; tlačí sa až po kontrole a stlačení Tlačiť. Z nameraných vzdialeností
+  vypočíta a po potvrdení uloží korekciu len pre vybrané médium.
+  Opakované meranie nahradí kalibráciu. Staré profily majú mierku 100 %.
   Jedna tlačiareň môže mať viac pomenovaných profilov pre rôzne médiá.
   Profil uchováva aj režim ignorovania tlačiteľnej oblasti ovládača.
 - **Nesúlad papiera:** menší formát hlásený ovládačom je upozornenie;
-  používateľ môže potvrdiť pokračovanie v mierke 100 %. Náhľad je nezávislý
+  používateľ môže potvrdiť pokračovanie bez automatického prispôsobenia. Náhľad je nezávislý
   od orezania ovládača a zobrazí celý dokument. Rozmery dokumentu a údaj
   ovládača sa zobrazujú samostatne. V rozšírených nastaveniach možno použiť
   rozmery dokumentu ako vlastné médium alebo ignorovať dodatočné orezanie
   podľa ovládača. Fyzické limity zariadenia a orezanie samotného ovládača
   nemožno týmto režimom odstrániť.
+- **Diagnostika tlače:** samostatný výpis uvádza nastavené médium, tlačiteľnú
+  oblasť, hardvérové okraje, korekcie a runtime. Skutočne vložené médium je
+  výslovne neoverené. Výpis možno uložiť; neobsahuje názvy tlačiarní/profilov,
+  obsah etikiet ani cesty. Odoslanie do Windows sa nepovažuje za potvrdený výtlačok.
 - **Kontrola etikety:** chyby a upozornenia, výber dotknutého prvku kliknutím,
   presahy, text, údaje kódov, voľný priestor kódov a rozlíšenie obrázkov.
   Kontrolné rámčeky sa neexportujú.
@@ -101,7 +109,8 @@ výsledky, aby sa omylom nevytlačili staré údaje. Chybné označené riadky b
 výstup; možno ich opraviť v zdroji alebo vedome zrušiť ich zahrnutie.
 
 Počet etikiet určuje položky a strany výstupu. Počet kópií v okne tlače opakuje
-celú tlačovú úlohu. Priblíženie náhľadu ani kalibračný posun nemenia mierku.
+celú tlačovú úlohu. Priblíženie náhľadu ani kalibračný posun nemenia mierku;
+meniť ju môžu iba výslovne nastavené kalibračné faktory média.
 Korekcia profilu sa aplikuje na tlač a jej náhľad, nie na exportované súbory.
 Mapovanie stĺpcov, hlavička, oddeľovač a voľby dávky sa pri príprave dávky
 uložia do projektu. Samotný CSV/XLSX zdroj znova vyberte pri ďalšom otvorení
@@ -148,7 +157,8 @@ ovládačov tlačiarní vyžadujú kontrolu na cieľovom počítači.
    označeného riadka.
 4. Vyberte Microsoft Print to PDF; overte A4/A5, orientáciu a prvú voľnú
    pozíciu hárka. PDF tlačte v 100 % mierke. Pri fyzickej tlačiarni odmerajte
-   kalibračnú etiketu a nastavte korekciu X/Y.
+   skúšobnú stranu sprievodcu, zadajte namerané vzdialenosti a polohu krížika,
+   potvrďte meranie a uložte profil. Overte ďalším skúšobným výtlačkom.
 5. Prejdite obe témy, štyri jazyky a 100/125/150/200 % DPI na cieľovom monitore.
    V editore aj nových oknách skontrolujte klávesnicu, čitateľnosť a dostupnosť
    dolných tlačidiel cez posúvanie. Otvorte DOCX v cieľovej verzii Wordu.

@@ -543,3 +543,29 @@ Strana	Page	Strana	Oldal
 Záznamy	Records	Záznamy	Rekordok
 Kontrola	Review	Kontrola	Ellenőrzés
 Výstup blokujú chyby	Errors block output	Výstup blokují chyby	A hibák blokkolják a kimenetet
+
+Neplatná kalibrácia: posun ±100 mm, mierka 80–120 %.	Invalid calibration: offset ±100 mm, scale 80–120%.	Neplatná kalibrace: posun ±100 mm, měřítko 80–120 %.	Érvénytelen kalibráció: eltolás ±100 mm, méretarány 80–120%.
+Namerané vzdialenosti musia byť kladné.	Measured distances must be positive.	Naměřené vzdálenosti musí být kladné.	A mért távolságoknak pozitívnak kell lenniük.
+Kalibračná strana musí mať rozmery 12–2000 mm.	Calibration page dimensions must be 12–2000 mm.	Kalibrační strana musí mít rozměry 12–2000 mm.	A kalibrációs oldal mérete 12–2000 mm lehet.
+Sprievodca kalibráciou…	Calibration wizard…	Průvodce kalibrací…	Kalibrációs varázsló…
+Mierka X (%)	X scale (%)	Měřítko X (%)	X méretarány (%)
+Mierka Y (%)	Y scale (%)	Měřítko Y (%)	Y méretarány (%)
+1. Vytlačte skúšobnú stranu bez korekcií. V ovládači vypnite prispôsobenie veľkosti.	1. Print the test page without corrections. Disable size fitting in the driver.	1. Vytiskněte zkušební stranu bez korekcí. V ovladači vypněte přizpůsobení velikosti.	1. Nyomtassa ki a tesztoldalt korrekciók nélkül. Kapcsolja ki a méretillesztést az illesztőprogramban.
+Vytlačiť skúšobnú stranu…	Print test page…	Vytisknout zkušební stranu…	Tesztoldal nyomtatása…
+2. Zmerajte vzdialenosti medzi stredmi krížikov a polohu ľavého horného krížika od okrajov papiera.	2. Measure the distances between crosshair centres and the top-left crosshair position from the paper edges.	2. Změřte vzdálenosti mezi středy křížků a polohu levého horního křížku od okrajů papíru.	2. Mérje meg a célkeresztek középpontjai közötti távolságot, valamint a bal felső célkereszt helyzetét a papír széleitől.
+Nameraná vodorovná vzdialenosť (mm)	Measured horizontal distance (mm)	Naměřená vodorovná vzdálenost (mm)	Mért vízszintes távolság (mm)
+Nameraná zvislá vzdialenosť (mm)	Measured vertical distance (mm)	Naměřená svislá vzdálenost (mm)	Mért függőleges távolság (mm)
+Krížik od ľavého okraja papiera (mm)	Crosshair from left paper edge (mm)	Křížek od levého okraje papíru (mm)	Célkereszt a papír bal szélétől (mm)
+Krížik od horného okraja papiera (mm)	Crosshair from top paper edge (mm)	Křížek od horního okraje papíru (mm)	Célkereszt a papír felső szélétől (mm)
+Zmeral som nekorigovaný skúšobný výtlačok.	I measured the uncorrected test print.	Změřil jsem nekorigovaný zkušební výtisk.	Megmértem a korrekció nélküli tesztnyomatot.
+Korekcia sa uloží len pre toto médium. Opakované meranie nahradí predchádzajúcu kalibráciu.	Corrections are saved only for this medium. Remeasuring replaces the previous calibration.	Korekce se uloží jen pro toto médium. Opakované měření nahradí předchozí kalibraci.	A korrekció csak ehhez a médiához lesz mentve. Az új mérés felülírja az előző kalibrációt.
+Výsledok kalibrácie	Calibration result	Výsledek kalibrace	Kalibráció eredménye
+Použiť a uložiť profil	Apply and save profile	Použít a uložit profil	Alkalmazás és profil mentése
+Profily médií nie sú dostupné.	Media profiles are unavailable.	Profily médií nejsou dostupné.	A médiaprofilok nem érhetők el.
+Diagnostika tlače…	Print diagnostics…	Diagnostika tisku…	Nyomtatási diagnosztika…
+Médium nastavené v ovládači	Media configured in driver	Médium nastavené v ovladači	Az illesztőprogramban beállított média
+Skutočne vložené médium: neoverené.	Actual loaded media: unverified.	Skutečně vložené médium: neověřeno.	Ténylegesen behelyezett média: nincs ellenőrizve.
+Ak je výtlačok posunutý doprava alebo nadol, zadajte nameraný posun so záporným znamienkom. Mierku upravujte len podľa nameraného výtlačku.	If the print shifts right or down, enter the measured offset with a negative sign. Adjust scale only from a measured print.	Pokud je výtisk posunut doprava nebo dolů, zadejte naměřený posun se záporným znaménkem. Měřítko upravujte pouze podle změřeného výtisku.	Ha a nyomat jobbra vagy lefelé tolódik, adja meg a mért eltolást negatív előjellel. A méretarányt csak mért nyomat alapján módosítsa.
+Ovládač hlási menší papier než dokument. Skontrolujte vložené médium; môžete pokračovať bez automatického prispôsobenia.	The driver reports paper smaller than the document. Check the loaded media; you can continue without automatic fitting.	Ovladač hlásí menší papír než dokument. Zkontrolujte vložené médium; můžete pokračovat bez automatického přizpůsobení.	Az illesztőprogram a dokumentumnál kisebb papírt jelez. Ellenőrizze a behelyezett médiát; automatikus illesztés nélkül folytathatja.
+1. Vytlačte skúšobnú stranu bez korekcií. Použije sa aktuálne nastavenie tlačiarne a média.	1. Print the test page without corrections. The current printer and media setup will be used.	1. Vytiskněte zkušební stranu bez korekcí. Použije se aktuální nastavení tiskárny a média.	1. Nyomtassa ki a tesztoldalt korrekciók nélkül. Az aktuális nyomtató- és médiabeállításokat használjuk.
+Ak je výtlačok posunutý doprava alebo nadol, zadajte nameraný posun so záporným znamienkom. Mierku upravujte len podľa nameraného výtlačku. Automatické prispôsobenie vypnite vo vlastnostiach tlačiarne pred otvorením sprievodcu.	If the print shifts right or down, enter the measured offset with a negative sign. Adjust scale only from a measured print. Disable fitting in printer properties before opening the wizard.	Pokud je výtisk posunut doprava nebo dolů, zadejte naměřený posun se záporným znaménkem. Měřítko upravujte jen podle změřeného výtisku. Automatické přizpůsobení vypněte ve vlastnostech tiskárny před otevřením průvodce.	Ha a nyomat jobbra vagy lefelé tolódik, adja meg a mért eltolást negatív előjellel. A méretarányt csak mért nyomat alapján módosítsa. A varázsló megnyitása előtt kapcsolja ki az automatikus illesztést a nyomtató tulajdonságainál.
