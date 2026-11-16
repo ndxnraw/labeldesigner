@@ -10,6 +10,9 @@ Riadené aktualizácie sa kontrolujú na požiadanie a spúšťajú až po potvr
 Podporujú návrat k predchádzajúcej verzii aj ručný import bez internetu;
 podrobnosti sú v [návode na aktualizácie](docs/UPDATES.md).
 
+Klávesnicové ovládanie, čitateľnosť dialógov a rozsah overenia opisuje
+[prístupnosť rozhrania](docs/ACCESSIBILITY.md).
+
 Rozbaľte ZIP a spustite `ND-LabelDesigner.exe`. Potrebný je Windows s .NET Framework 4.8 alebo 4.8.1.
 
 Zdrojový kód je v C# / Windows Forms. Zostavenie: `scripts\build.cmd`, testy: `scripts\test.cmd`. Podrobnosti sú v [dokumentácii](docs/BUILD.md).

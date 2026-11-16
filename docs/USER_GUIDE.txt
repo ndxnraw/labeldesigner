@@ -233,3 +233,10 @@ pri spustení pôvodného EXE alebo použite --no-update-redirect. Ďalšie info
 scripts/build.cmd zostaví aplikáciu bez nových závislostí.
 scripts/test.cmd spustí dostupné regresné testy.
 Funkcie a manuálna kontrola: FEATURES.md v balíku alebo docs/FEATURES.md v repozitári.
+
+PRÍSTUPNOSŤ ROZHRANIA
+F6 / Shift+F6 prepína oblasti editora, F4 otvorí vlastnosti, F8 kontrolu.
+V hlavičke kariet fungujú šípky a Home/End; Ctrl+PageUp/PageDown prepína karty.
+Text hlásení je dostupný cez Tab a možno ho označiť alebo kopírovať.
+Nastavenia a úprava textu majú posúvateľný obsah a samostatné akcie.
+Podrobnosti a obmedzenia overenia: pribalený ACCESSIBILITY.md.

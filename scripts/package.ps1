@@ -20,6 +20,7 @@ $entries = [ordered]@{
   'FEATURES.md' = 'docs/FEATURES.md'
   'PREVIEW_PERFORMANCE.md' = 'docs/PREVIEW_PERFORMANCE.md'
   'UPDATES.md' = 'docs/UPDATES.md'
+  'ACCESSIBILITY.md' = 'docs/ACCESSIBILITY.md'
   'LICENSE' = 'LICENSE'
   'licenses/SourceSans3-OFL.txt' = 'assets/fonts/OFL.txt'
   'licenses/ZXing-LICENSE.txt' = 'src/third-party/ZXing/ZXing-LICENSE.txt'

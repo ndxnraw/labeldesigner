@@ -13,7 +13,7 @@ namespace EanEtikety {
    StackAdd(stack,workspaceTabs);workspaceTabs.Dock=DockStyle.Fill;left.AutoScroll=false;stack.AutoSize=false;stack.Dock=DockStyle.Fill;stack.RowStyles[0]=new RowStyle(SizeType.Percent,55);stack.RowStyles[1]=new RowStyle(SizeType.Percent,45);documentTabs.Dock=DockStyle.Fill;
   }
   void AddLayerAction(TableLayoutPanel panel,string text,Action action){var button=Btn(Loc.T(text),delegate{try{action();}catch(Exception ex){Error(ex);}});button.AutoSize=false;button.Dock=DockStyle.Fill;button.Margin=new Padding(2);button.MinimumSize=Size.Empty;button.AccessibleName=Loc.T(text);int index=panel.Controls.Count;panel.Controls.Add(button,index%2,index/2);}
-  void InitializeSelectionInspector(){selectionInspector=Stack();inspectorHost.Controls.Add(selectionInspector);selectionOverview=new Label{AutoSize=true,UseMnemonic=false,Font=new Font(Font,FontStyle.Bold)};StackAdd(selectionInspector,selectionOverview);
+  void InitializeSelectionInspector(){selectionInspector=Stack();inspectorHost.Controls.Add(selectionInspector);selectionOverview=new FocusText{AutoSize=true,UseMnemonic=false,Font=new Font(Font,FontStyle.Bold)};StackAdd(selectionInspector,selectionOverview);
    string[] names={"Zoskupiť","Rozoskupiť","Rozloženie a výber","Odstrániť prvok"};
    for(int i=0;i<names.Length;i++){int command=i;var button=Btn(Loc.T(names[i]),delegate{try{if(command==0)Arrange("group");else if(command==1)Arrange("ungroup");else if(command==2)ShowArrange();else RemoveSelected();}catch(Exception ex){Error(ex);}});selectionActions.Add(button);StackAdd(selectionInspector,button);}
   }
@@ -43,6 +43,10 @@ namespace EanEtikety {
   void SelectEditorIssue(LabelIssue issue){if(issue==null||issue.Element==-2)return;preview.SelectElement(issue.Element);preview.ProblemElements.Clear();preview.ProblemElements.Add(issue.Element);preview.Invalidate();}
   void SyncIssueViews(){if(problemView==null)return;problemView.SetIssues(labelIssues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+" ("+labelIssues.Count+")");}
   void FocusProblems(){if(workspaceTabs==null)return;if(studioBody.ColumnStyles[0].Width==0)studioBody.ColumnStyles[0].Width=240;workspaceTabs.SelectedIndex=1;problemView.FocusList();}
-  void FocusInspector(){if(studioBody.ColumnStyles[2].Width==0)studioBody.ColumnStyles[2].Width=300;if(preview.Selection.Count!=1){selectionInspector.Focus();return;}if(preview.SelectedIndex==-1)ean.Focus();else if(preview.SelectedIndex>=0)inspectText.Focus();else inspectNumbers[0].Focus();}
+  void FocusInspector(){if(studioBody.ColumnStyles[2].Width==0)studioBody.ColumnStyles[2].Width=300;if(preview.Selection.Count!=1){selectionOverview.Focus();return;}if(preview.SelectedIndex==-1)ean.Focus();else if(preview.SelectedIndex>=0)inspectText.Focus();else inspectNumbers[0].Focus();}
+  void CycleEditorSection(bool backwards){
+   if(studioBody==null)return;var left=studioBody.GetControlFromPosition(0,0);Control[] sections={left,preview,inspectorHost};int current=preview.ContainsFocus?1:inspectorHost.ContainsFocus?2:left.ContainsFocus?0:backwards?0:2;
+   for(int step=1;step<=sections.Length;step++){int next=(current+(backwards?sections.Length-step:step))%sections.Length;if(next==0&&studioBody.ColumnStyles[0].Width==0||next==2&&studioBody.ColumnStyles[2].Width==0)continue;var target=sections[next];if(next==1){if(preview.Focus())return;}else if(target.SelectNextControl(null,true,true,true,false))return;}
+  }
  }
 }

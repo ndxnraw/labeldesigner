@@ -6,13 +6,20 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 28 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 29 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+`AccessibilityUiTests` covers wrapped accessible tabs, arrow/Home/End and section
+navigation, localized field names, focus repaint, safe tiny bounds, scrollable
+keyboard-reachable messages, DPI-aware preferences/text dialogs and actionable
+errors retaining diagnostic detail. It exercises four languages, both themes and
+100/125/150/200% synthetic bounds/font scaling; physical monitor transitions,
+screen readers and Windows contrast themes still require manual verification.
+See [ACCESSIBILITY](ACCESSIBILITY.md).
 `UpdateTests` covers bounded package validation, fake GitHub transport, offline
 operation, cancellation, exact inventories, settings backup, activation/rollback,
 failed-launch recovery and explicit consent, including unsaved-document cancellation

@@ -599,3 +599,17 @@ Táto zostava je už pripravená.	This build is already prepared.	Toto sestaven�
 Novú verziu sa nepodarilo spustiť.	Could not start the new version.	Novou verzi se nepodařilo spustit.	Az új verzió nem indítható.
 Predchádzajúca verzia nie je dostupná.	The previous version is unavailable.	Předchozí verze není dostupná.	Az előző verzió nem érhető el.
 Predchádzajúcu verziu sa nepodarilo spustiť.	Could not start the previous version.	Předchozí verzi se nepodařilo spustit.	Az előző verzió nem indítható.
+
+Vybrať	Select	Vybrat	Kiválasztás
+Text hlásenia	Message text	Text hlášení	Üzenet szövege
+Informácia	Information	Informace	Tájékoztatás
+Otázka	Question	Otázka	Kérdés
+Podrobnosti	Details	Podrobnosti	Részletek
+Nemáte oprávnenie na prístup k súboru alebo priečinku.	You do not have permission to access the file or folder.	Nemáte oprávnění k přístupu k souboru nebo složce.	Nincs jogosultsága a fájl vagy mappa eléréséhez.
+Vyberte priečinok, do ktorého môžete zapisovať, alebo skontrolujte prístupové práva.	Choose a folder you can write to, or check access permissions.	Vyberte složku, do které můžete zapisovat, nebo zkontrolujte přístupová práva.	Válasszon írható mappát, vagy ellenőrizze a hozzáférési jogosultságokat.
+Údaje sa nepodarilo spracovať.	The data could not be processed.	Data se nepodařilo zpracovat.	Az adatok feldolgozása nem sikerült.
+Skontrolujte zadané hodnoty a formát súboru. Rozpracovaný projekt môžete ďalej upravovať.	Check the entered values and file format. You can continue editing the current project.	Zkontrolujte zadané hodnoty a formát souboru. Rozpracovaný projekt můžete dále upravovat.	Ellenőrizze a megadott értékeket és a fájlformátumot. Az aktuális projekt tovább szerkeszthető.
+Súbor alebo zariadenie nie je dostupné.	The file or device is unavailable.	Soubor nebo zařízení není dostupné.	A fájl vagy eszköz nem érhető el.
+Skontrolujte umiestnenie, pripojenie a či súbor nepoužíva iný program. Potom skúste operáciu znova.	Check the location, connection, and whether another program is using the file. Then try again.	Zkontrolujte umístění, připojení a zda soubor nepoužívá jiný program. Potom zkuste operaci znovu.	Ellenőrizze a helyet, a kapcsolatot és azt, hogy más program használja-e a fájlt. Ezután próbálja újra.
+Operáciu sa nepodarilo dokončiť.	The operation could not be completed.	Operaci se nepodařilo dokončit.	A művelet nem fejezhető be.
+Skúste operáciu zopakovať. Ak problém pretrváva, použite podrobnosti a diagnostický záznam.	Try again. If the problem persists, use the details and diagnostic reference.	Zkuste operaci zopakovat. Pokud problém přetrvává, použijte podrobnosti a diagnostický záznam.	Próbálja újra. Ha a probléma továbbra is fennáll, használja a részleteket és a diagnosztikai azonosítót.

@@ -3,7 +3,8 @@
 Aktuálny Pre-release pre Windows; vychádza z vývojového stavu zo 7. októbra 2026
 a obsahuje úpravy tlače, konceptov, dátumových premenných, dávok na pozadí
 a zjednoteného ovládania a predvýstupnej kontroly
-z 12. novembra 2026 a riadených aktualizácií zo 16. novembra 2026. Zachováva Windows Forms,
+z 12. novembra 2026, riadených aktualizácií a prístupnejšieho rozhrania
+zo 16. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Postupný prechod platformy
@@ -17,6 +18,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Prístupnejšie rozhranie:** zalamované hlavičky kariet, prístupné názvy a stav
+  výberu, viditeľný klávesnicový výber a F6/Shift+F6 medzi oblasťami editora.
+  Dlhé hlásenia sú dostupné klávesnicou; nastavenia a úprava textu majú posúvanie
+  so samostatnými akciami. Chyby pridávajú ďalší postup a zachovávajú podrobnosti.
+  Rozsah a obmedzenia overenia opisuje pribalený ACCESSIBILITY.md.
 - **Riadené aktualizácie:** Nástroje → Aktualizácie, kontrola verejného vydania
   iba na vyžiadanie, správny balík podľa runtime, overenie súčtov a obsahu,
   samostatná príprava a spustenie až po potvrdení. Rozpracovaný dokument možno
