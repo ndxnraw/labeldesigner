@@ -17,6 +17,7 @@ foreach($file in Get-ChildItem $published -File -Recurse){$relative=$file.FullNa
 $entries['USER_GUIDE.txt']=Join-Path $repoRoot 'docs/USER_GUIDE.txt'
 $entries['FEATURES.md']=Join-Path $repoRoot 'docs/FEATURES.md'
 $entries['PREVIEW_PERFORMANCE.md']=Join-Path $repoRoot 'docs/PREVIEW_PERFORMANCE.md'
+$entries['UPDATES.md']=Join-Path $repoRoot 'docs/UPDATES.md'
 $entries['LICENSE']=Join-Path $repoRoot 'LICENSE'
 $entries['licenses/SourceSans3-OFL.txt']=Join-Path $repoRoot 'assets/fonts/OFL.txt'
 $entries['licenses/ZXing-LICENSE.txt']=Join-Path $repoRoot 'src/third-party/ZXing/ZXing-LICENSE.txt'
@@ -34,6 +35,8 @@ $entries['licenses/DOTNET-LICENSE.txt']=Runtime-Notice 'microsoft.netcore.app.ru
 $entries['licenses/DOTNET-NOTICES.txt']=Runtime-Notice 'microsoft.netcore.app.runtime.win-x64' $coreVersion 'THIRD-PARTY-NOTICES.TXT'
 $entries['licenses/WINDOWSDESKTOP-LICENSE.txt']=Runtime-Notice 'microsoft.windowsdesktop.app.runtime.win-x64' $desktopVersion 'LICENSE'
 Add-Type -AssemblyName System.IO.Compression,System.IO.Compression.FileSystem
+. (Join-Path $PSScriptRoot 'update-metadata.ps1')
+$entries['package-manifest.xml']=Write-PackageManifest $entries 'net10-x64' $repoRoot
 $path=Join-Path $output 'ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip'
 $stream=[IO.File]::Open($path,[IO.FileMode]::Create);$zip=New-Object IO.Compression.ZipArchive($stream,[IO.Compression.ZipArchiveMode]::Create)
 try{foreach($entry in $entries.GetEnumerator()){[IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$entry.Value,$entry.Key)|Out-Null}}finally{$zip.Dispose();$stream.Dispose()}
@@ -50,3 +53,4 @@ try{
 $hash=(Get-FileHash $path -Algorithm SHA256).Hash.ToLowerInvariant()
 [IO.File]::WriteAllText((Join-Path $output 'SHA256SUMS-NET10.txt'),$hash+'  '+[IO.Path]::GetFileName($path)+"`n")
 Write-Host "Validated self-contained modern package: $path"
+& (Join-Path $PSScriptRoot 'write-update-index.ps1')

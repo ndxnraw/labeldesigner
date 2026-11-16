@@ -15,7 +15,7 @@ try {
   foreach ($name in $names) {
     if ($Suites -and $name -notin $Suites) { continue }
     $testExe = Join-Path $testBin ($name + '.exe')
-    & $compiler /nologo /target:winexe "/out:$testExe" "/reference:$testBin\ND-LabelDesigner.exe" "/reference:$testBin\zxing.dll" "/reference:$testBin\LabelDesigner.Core.dll" /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Get-ChildItem (Join-Path $packageRoot 'tests') -Recurse -Filter ($name + '.cs')).FullName (Join-Path $packageRoot 'tests/tools/TestPaths.cs')
+    & $compiler /nologo /target:winexe "/out:$testExe" "/reference:$testBin\ND-LabelDesigner.exe" "/reference:$testBin\zxing.dll" "/reference:$testBin\LabelDesigner.Core.dll" /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll /reference:System.Net.Http.dll /reference:System.Runtime.Serialization.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll (Get-ChildItem (Join-Path $packageRoot 'tests') -Recurse -Filter ($name + '.cs')).FullName (Join-Path $packageRoot 'tests/tools/TestPaths.cs')
     if ($LASTEXITCODE -ne 0) { throw "Compilation failed: $name" }
     Copy-Item (Join-Path $packageRoot 'build\app\ND-LabelDesigner.exe.config') ($testExe + '.config') -Force
     $caseRoot = Join-Path $resultRoot $name

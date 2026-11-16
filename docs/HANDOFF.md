@@ -26,7 +26,7 @@ git status --short
 ```
 
 Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
-27 successful suites and reports in `build/test-results/`, validated
+28 successful suites and reports in `build/test-results/`, validated
 `build/packages/ND-LabelDesigner-Pre-release-Windows.zip`. `git status --short`
 must be empty. Work only from this clone when validating the handoff.
 
@@ -37,6 +37,12 @@ run `scripts/build-sdk.ps1`, `scripts/test-sdk.ps1` and `scripts/publish-modern.
 The compatible commands above do not require the SDK. Keep the two ZIPs in separate
 folders; the modern x64 ZIP contains its runtime. See [BUILD](BUILD.md) for exact
 output paths, restore prerequisites and checksum files.
+
+After both packages, run `scripts/test-update-packages.ps1` to verify their managed
+update protocol and extracted self-tests. Publish both ZIPs, both checksum files and
+`UPDATE-INDEX.xml` together. See [UPDATES](UPDATES.md) for the explicit-confirmation
+workflow and offline import. The update manager itself first needs manual adoption
+from the new ZIP; older packages have no update manifest.
 
 Production sources are `src/LabelDesigner/` and `src/LabelDesigner.Core/`; tests are under `tests/`.
 Use a `codex/<description>` branch for ordinary new work unless instructed otherwise.
@@ -79,7 +85,7 @@ The published build and release tag are named `Pre-release`. Earlier source snap
 
 The current Pre-release includes the owner's latest local development snapshot,
 imported on 2026-10-20; see `docs/LOCAL_SOURCE_IMPORT.md`. All its production sources,
-27 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
+28 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
 no original local DLL is required. Keep the generated `zxing.dll` next to the EXE.
 Foreign ZPL support is partial; native printer fonts are approximated. QR and ordinary
 Data Matrix are supported; GS1 DataMatrix and `.nlbl` are not. Physical printer and Word rendering need manual checks.

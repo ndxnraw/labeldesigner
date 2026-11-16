@@ -68,3 +68,15 @@ Do not mix files between the two builds. Extract either entire ZIP into a separa
 directory and launch its `ND-LabelDesigner.exe`. The modern ZIP does not require
 installing .NET; the compatible ZIP still requires Framework 4.8/4.8.1. Both require
 supported 64-bit Windows 10/11 and the Windows print system for printer features.
+
+Both ZIPs include `package-manifest.xml` with exact payload hashes and the current
+Git commit. Packaging generates `UPDATE-INDEX.xml` only when both manifests have
+the same source commit. For managed updates publish five assets together: both ZIPs,
+both checksum files and the index. See [UPDATES](UPDATES.md) for offline import,
+consent, rollback and the initial manual adoption of the update manager.
+
+After testing and committing, refresh package metadata without rebuilding tested
+binaries: run `scripts/package.ps1` directly (the `.cmd` wrapper rebuilds), then
+`scripts/publish-modern.ps1 -SkipPublish`. Run `scripts/test-update-packages.ps1`
+against these final files. Package only binaries built from that committed source;
+the source-commit field alone cannot prove a binary matches its source.

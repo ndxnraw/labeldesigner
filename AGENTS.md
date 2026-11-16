@@ -25,7 +25,7 @@
   The owner explicitly authorized importing the latest local snapshot on 2026-10-20;
   this code is now canonical. See `docs/LOCAL_SOURCE_IMPORT.md`.
 - Build ZXing from `src/third-party/ZXing/` via `scripts/build-zxing.ps1`; never depend
-  on an untracked local DLL. The shared standard runner now contains 27 suites.
+  on an untracked local DLL. The shared standard runner now contains 28 suites.
 - Preserve the offline .NET Framework 4.8 path and parallel .NET 10 Windows target.
   SDK builds use `global.json`, `LabelDesigner.sln`, `scripts/build-sdk.ps1` and
   `scripts/test-sdk.ps1`; modern self-contained packaging uses `scripts/publish-modern.ps1`.

@@ -19,11 +19,15 @@ $entries = [ordered]@{
   'USER_GUIDE.txt' = 'docs/USER_GUIDE.txt'
   'FEATURES.md' = 'docs/FEATURES.md'
   'PREVIEW_PERFORMANCE.md' = 'docs/PREVIEW_PERFORMANCE.md'
+  'UPDATES.md' = 'docs/UPDATES.md'
   'LICENSE' = 'LICENSE'
   'licenses/SourceSans3-OFL.txt' = 'assets/fonts/OFL.txt'
   'licenses/ZXing-LICENSE.txt' = 'src/third-party/ZXing/ZXing-LICENSE.txt'
   'licenses/ZXing-NOTICE.txt' = 'src/third-party/ZXing/THIRD-PARTY.txt'
 }
+. (Join-Path $PSScriptRoot 'update-metadata.ps1')
+$manifest=Write-PackageManifest $entries 'framework' $root
+$entries['package-manifest.xml']=$manifest.Substring($root.Length+1)
 $stream = [IO.File]::Open($path,[IO.FileMode]::Create)
 $zip = [IO.Compression.ZipArchive]::new($stream,[IO.Compression.ZipArchiveMode]::Create)
 try {
@@ -46,3 +50,4 @@ try {
 $hash = (File-Hash $path).ToLowerInvariant()
 [IO.File]::WriteAllText((Join-Path $output 'SHA256SUMS.txt'),"$hash  $([IO.Path]::GetFileName($path))`n")
 Write-Host "Validated package: $path"
+& (Join-Path $PSScriptRoot 'write-update-index.ps1')

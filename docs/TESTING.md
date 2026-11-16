@@ -6,13 +6,20 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 27 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 28 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+`UpdateTests` covers bounded package validation, fake GitHub transport, offline
+operation, cancellation, exact inventories, settings backup, activation/rollback,
+failed-launch recovery and explicit consent, including unsaved-document cancellation
+in the real editor. No production update is activated. After packaging both variants,
+run `scripts/test-update-packages.ps1` to validate the actual ZIPs/index through the
+production preparer and run both extracted programs' self-tests. Reports are under
+`build/update-package-results/`; modern self-tests disable installed-runtime lookup.
 The additional suites cover CSV/XLSX batch data, workspace dialogs, undo/redo,
 recovery, embedded images, QR/Data Matrix decoding and multipage export.
 `PrintMediaTests` covers nonblocking media mismatch, independent vector previews,

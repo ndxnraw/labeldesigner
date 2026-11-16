@@ -222,6 +222,14 @@ vyprázdni pomocnú pamäť. Pred odoslaním tlače sa údaje ovládača vždy n
 nanovo a skontroluje sa celý dokument. Zmenené údaje vyžiadajú nové potvrdenie.
 
 ZDROJE A OVERENIE
+Nástroje → Aktualizácie skontroluje verejné vydanie iba po stlačení tlačidla.
+Stiahnutie a príprava program neprepíšu. Spustenie vyžaduje potvrdenie;
+neuložený dokument môžete uložiť alebo prechod zrušiť. Profily, kalibrácie
+a šablóny zostávajú zachované a pred prechodom sa vytvorí lokálna záloha.
+Bez internetu možno použiť dôveryhodný ZIP s príslušným SHA256SUMS súborom.
+Návrat na predchádzajúcu verziu je v rovnakom okne. Pri probléme podržte Shift
+pri spustení pôvodného EXE alebo použite --no-update-redirect. Ďalšie informácie: UPDATES.md.
+
 scripts/build.cmd zostaví aplikáciu bez nových závislostí.
 scripts/test.cmd spustí dostupné regresné testy.
 Funkcie a manuálna kontrola: FEATURES.md v balíku alebo docs/FEATURES.md v repozitári.

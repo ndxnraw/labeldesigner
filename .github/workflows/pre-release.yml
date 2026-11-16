@@ -30,12 +30,16 @@ jobs:
       - name: Publish and validate self-contained modern package
         shell: powershell
         run: .\scripts\publish-modern.ps1
+      - name: Verify managed update packages and extracted applications
+        shell: powershell
+        run: .\scripts\test-update-packages.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: ND-LabelDesigner-Pre-release-Windows
           path: |
             build/packages/ND-LabelDesigner-Pre-release-Windows.zip
             build/packages/SHA256SUMS.txt
+            build/packages/UPDATE-INDEX.xml
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
@@ -43,6 +47,7 @@ jobs:
           path: |
             build/packages/ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip
             build/packages/SHA256SUMS-NET10.txt
+            build/packages/UPDATE-INDEX.xml
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
@@ -51,4 +56,5 @@ jobs:
           path: |
             build/test-results/
             build/sdk-test-results/
+            build/update-package-results/
           if-no-files-found: ignore

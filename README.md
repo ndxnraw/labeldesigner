@@ -6,6 +6,10 @@ Program pre Windows na návrh a tlač produktových etikiet. V grafickom editore
 
 [Stiahnuť Pre-release](https://github.com/ndxnraw/LabelDesigner/releases/tag/Pre-release) · [Návod](docs/USER_GUIDE.txt)
 
+Riadené aktualizácie sa kontrolujú na požiadanie a spúšťajú až po potvrdení.
+Podporujú návrat k predchádzajúcej verzii aj ručný import bez internetu;
+podrobnosti sú v [návode na aktualizácie](docs/UPDATES.md).
+
 Rozbaľte ZIP a spustite `ND-LabelDesigner.exe`. Potrebný je Windows s .NET Framework 4.8 alebo 4.8.1.
 
 Zdrojový kód je v C# / Windows Forms. Zostavenie: `scripts\build.cmd`, testy: `scripts\test.cmd`. Podrobnosti sú v [dokumentácii](docs/BUILD.md).

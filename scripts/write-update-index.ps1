@@ -1,0 +1,13 @@
+$ErrorActionPreference='Stop';$repoRoot=Split-Path $PSScriptRoot -Parent;$output=Join-Path $repoRoot 'build/packages';$target=Join-Path $output 'UPDATE-INDEX.xml'
+Add-Type -AssemblyName System.IO.Compression,System.IO.Compression.FileSystem
+$packages=@();foreach($name in @('ND-LabelDesigner-Pre-release-Windows.zip','ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip')){
+ $path=Join-Path $output $name;if(!(Test-Path -LiteralPath $path)){if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target};return};$zip=[IO.Compression.ZipFile]::OpenRead($path)
+ try{$entry=$zip.GetEntry('package-manifest.xml');if(!$entry){if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target};return};$input=$entry.Open();$settings=New-Object Xml.XmlReaderSettings;$settings.DtdProcessing=[Xml.DtdProcessing]::Prohibit;$settings.XmlResolver=$null;$settings.MaxCharactersInDocument=524288;$reader=[Xml.XmlReader]::Create($input,$settings);try{$doc=New-Object Xml.XmlDocument;$doc.XmlResolver=$null;$doc.Load($reader)}finally{$reader.Dispose();$input.Dispose()}}finally{$zip.Dispose()}
+ $m=$doc.LabelDesignerPackage;if(!$m -or $m.Product -cne 'Pre-release' -or $m.SourceCommit -cnotmatch '^[a-f0-9]{40}$' -or $m.PackageId -cnotmatch '^[a-f0-9]{64}$'){throw 'Invalid packaged update identity'}
+ $packages+=@{Family=[string]$m.Family;SourceCommit=[string]$m.SourceCommit;PackageId=[string]$m.PackageId;AssetName=$name;Size=(Get-Item -LiteralPath $path).Length;Sha256=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()}
+}
+if($packages[0].SourceCommit -cne $packages[1].SourceCommit){if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target};Write-Host 'Update index deferred: package commits differ.';return}
+if($packages[0].Family -cne 'framework' -or $packages[1].Family -cne 'net10-x64'){throw 'Package platform mismatch'}
+$settings=New-Object Xml.XmlWriterSettings;$settings.Indent=$true;$settings.Encoding=New-Object Text.UTF8Encoding($false);$temp=$target+'.tmp';$writer=[Xml.XmlWriter]::Create($temp,$settings)
+try{$writer.WriteStartDocument();$writer.WriteStartElement('LabelDesignerUpdates');$writer.WriteElementString('Format','1');$writer.WriteElementString('Product','Pre-release');$writer.WriteElementString('SourceCommit',$packages[0].SourceCommit);$writer.WriteStartElement('Packages');foreach($p in $packages){$writer.WriteStartElement('UpdateOffer');foreach($key in @('Family','SourceCommit','PackageId','AssetName','Sha256','Size')){$writer.WriteElementString($key,[string]$p[$key])};$writer.WriteEndElement()};$writer.WriteEndElement();$writer.WriteEndElement();$writer.WriteEndDocument()}finally{$writer.Dispose()}
+Move-Item -LiteralPath $temp -Destination $target -Force;Write-Host "Validated update index: $target"
