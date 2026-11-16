@@ -214,6 +214,13 @@ zoznam. Zaseknuté natívne volanie ovládača nemožno bezpečne násilne ukon�
 pri pretrvávajúcom probléme opravte dostupnosť zariadenia a reštartujte program.
 Náhľad má limit jednej strany a 32 MB dát metafilu.
 
+Opakovaný náhľad môže znova použiť už vykreslenú stranu. Pomocná pamäť je
+obmedzená na štyri strany / 32 MB a pri zatvorení okna sa uvoľní. Údaje o
+tlačiteľnej oblasti sa pri nezmenenom nastavení môžu používať najviac päť sekúnd.
+Obnoviť tlačiarne ich načíta znova. Zmena vlastností ovládača alebo profilu
+vyprázdni pomocnú pamäť. Pred odoslaním tlače sa údaje ovládača vždy načítajú
+nanovo a skontroluje sa celý dokument. Zmenené údaje vyžiadajú nové potvrdenie.
+
 ZDROJE A OVERENIE
 scripts/build.cmd zostaví aplikáciu bez nových závislostí.
 scripts/test.cmd spustí dostupné regresné testy.

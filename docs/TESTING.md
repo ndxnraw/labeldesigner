@@ -6,7 +6,7 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 26 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 27 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
@@ -26,6 +26,12 @@ wizard confirmation/invalid measurement behavior, scrolling at 100/125/150/200%
 synthetic layout scales in all four languages, diagnostic privacy, invariant numeric
 output, bounded rotation and failure-safe logging. Synthetic layout scaling is not a
 physical monitor DPI transition. No physical print job is submitted.
+`PrintPreviewTests` covers bounded session artwork/geometry reuse, five-second
+expiry, printer refresh and opaque driver-property invalidation, independent image
+ownership, exact cached/uncached raster equivalence, plan recalculation and mutable
+external plans, allocation-failure fallback, UI heartbeat under a blocked driver,
+stale delivery and closing during driver work. Actual-submit checks bypass cached
+driver facts; a changed hard margin invalidates consent before any print job.
 `DraftJobTests` covers editable invalid projects, atomic saving and backup rotation,
 retention of a readable backup after corruption, failed-save preservation, recovery,
 strict output validation, frozen job dates and serial ranges, midnight transitions,
@@ -66,6 +72,17 @@ Enable Windows' **Microsoft Print to PDF** printer and the Print Spooler service
 the print-preview suite uses its A5 paper capabilities. No physical printing occurs.
 The print-preview stress suite opens many windows and may take several minutes.
 Do not run competing test suites in the same output directory.
+
+## Preview performance comparison
+
+`scripts/measure-preview.ps1 -Runtime compatible -Results build/preview-compatible`
+and `-Runtime modern -Results build/preview-modern` run the optional benchmark
+sequentially against Microsoft Print to PDF; no jobs are submitted. The modern
+command requires the SDK. `-Executable` can measure an archived benchmark build
+without rebuilding it. Reports include stage timings, UI tick gaps and whole-process
+resource observations. Use the same benchmark source, machine and driver for both
+sides; do not run other suites concurrently. See [PREVIEW_PERFORMANCE](PREVIEW_PERFORMANCE.md)
+for the baseline instrumentation and the measured seventh-package comparison.
 
 `tests/tools/` contains the original optional benchmark, screenshot and barcode-data
 utilities. They are not pass/fail regression suites and are not run by the standard

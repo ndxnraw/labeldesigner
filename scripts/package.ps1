@@ -18,6 +18,7 @@ $entries = [ordered]@{
   'LabelDesigner.Core.dll' = 'build/app/LabelDesigner.Core.dll'
   'USER_GUIDE.txt' = 'docs/USER_GUIDE.txt'
   'FEATURES.md' = 'docs/FEATURES.md'
+  'PREVIEW_PERFORMANCE.md' = 'docs/PREVIEW_PERFORMANCE.md'
   'LICENSE' = 'LICENSE'
   'licenses/SourceSans3-OFL.txt' = 'assets/fonts/OFL.txt'
   'licenses/ZXing-LICENSE.txt' = 'src/third-party/ZXing/ZXing-LICENSE.txt'

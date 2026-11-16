@@ -16,6 +16,7 @@ $entries=[ordered]@{}
 foreach($file in Get-ChildItem $published -File -Recurse){$relative=$file.FullName.Substring($published.Length+1).Replace('\','/');$entries[$relative]=$file.FullName}
 $entries['USER_GUIDE.txt']=Join-Path $repoRoot 'docs/USER_GUIDE.txt'
 $entries['FEATURES.md']=Join-Path $repoRoot 'docs/FEATURES.md'
+$entries['PREVIEW_PERFORMANCE.md']=Join-Path $repoRoot 'docs/PREVIEW_PERFORMANCE.md'
 $entries['LICENSE']=Join-Path $repoRoot 'LICENSE'
 $entries['licenses/SourceSans3-OFL.txt']=Join-Path $repoRoot 'assets/fonts/OFL.txt'
 $entries['licenses/ZXing-LICENSE.txt']=Join-Path $repoRoot 'src/third-party/ZXing/ZXing-LICENSE.txt'

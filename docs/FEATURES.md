@@ -17,6 +17,12 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Rýchlejší tlačový náhľad:** aktuálny papier a orientácia sa načítajú len raz
+  pri príprave nastavenia. Opakované náhľady používajú krátkodobé údaje ovládača
+  a obmedzenú pamäť už vykreslených strán. Zmena nastavení, profilov, dokumentu
+  alebo prepočítanie údajov zachovajú správnu väzbu na nový výstup.
+  Obnoviť tlačiarne vyprázdni pamäť; pred odoslaním tlače sa údaje ovládača aj
+  kontrola celého dokumentu overia znova. Časy a metodika sú v PREVIEW_PERFORMANCE.md.
 - **Prvky a Kontrola:** trvalé karty pod nastaveniami etikety a papiera.
   Prvky sú zoradené od popredia po pozadie; výber sa synchronizuje s plátnom.
   Zoznam označuje skupiny a zámky a ponúka spoločné príkazy pre vrstvy,
