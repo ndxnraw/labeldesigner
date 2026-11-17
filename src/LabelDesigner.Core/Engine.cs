@@ -17,6 +17,7 @@ public static class Engine {
  static readonly string[] G={"0100111","0110011","0011011","0100001","0011101","0111001","0000101","0010001","0001001","0010111"};
  static readonly string[] Parity={"LLLLLL","LLGLGG","LLGGLG","LLGGGL","LGLLGG","LGGLLG","LGGGLL","LGLGLG","LGLGGL","LGGLGL"};
  public static string Normalize(string input,int kind){
+  if(kind==114)return Normalize(input,14);
   if(kind!=8&&kind!=13&&kind!=12&&kind!=14)return MoreBarcodes.Validate(input,kind);
   string s=(input??"").Trim();
   if(s.Length!=kind&&s.Length!=kind-1)throw new Exception(Loc.T("Číselný kód musí obsahovať ")+(kind-1)+Loc.T(" číslic bez kontrolnej číslice alebo ")+kind+Loc.T(" číslic s kontrolnou číslicou."));
@@ -28,6 +29,7 @@ public static class Engine {
   return s;
  }
  public static string Bits(string value,int kind){
+  if(kind==114)return MoreBarcodes.Gs1Bits("01"+Normalize(value,14));
   string s=Normalize(value,kind);if(kind==12)return Bits("0"+s,13);if(kind==14)return MoreBarcodes.Bits(s,25);if(kind!=8&&kind!=13)return MoreBarcodes.Bits(s,kind);var b=new StringBuilder("101");int half=kind==13?6:4,start=kind==13?1:0;
   for(int i=0;i<half;i++){int n=s[start+i]-'0';b.Append(kind==13&&Parity[s[0]-'0'][i]=='G'?G[n]:L[n]);}
   b.Append("01010");for(int i=start+half;i<kind;i++)foreach(char c in L[s[i]-'0'])b.Append(c=='0'?'1':'0');b.Append("101");return b.ToString();
@@ -62,7 +64,7 @@ public static class Engine {
  public static double BarcodeHeight(LabelSettings s){return s.BarHeight+ExtraHeight(s,s.BarWidth,s.DigitSize);}
  public static bool Outside(LabelSettings s,double x,double y,double w,double h){return x<0||y<0||x+w>s.Width+.001||y+h>s.Height+.001;}
  public static bool IsGs1(LabelSettings s){return s.Kind==128&&s.Gs1Mode;}
- public static string Caption(LabelSettings s){return s.HideBarcode?"":IsGs1(s)?Gs1.Human(s.ApplicationIdentifiers):Normalize(s.Ean,s.Kind);}
+ public static string Caption(LabelSettings s){return s.HideBarcode?"":s.Kind==114?"(01)"+Normalize(s.Ean,14):IsGs1(s)?Gs1.Human(s.ApplicationIdentifiers):Normalize(s.Ean,s.Kind);}
  public static string CodeBits(LabelSettings s){return IsGs1(s)?MoreBarcodes.Gs1Bits(Gs1.Payload(s.ApplicationIdentifiers)):Bits(s.Ean,s.Kind);}
  public static int Modules(LabelSettings s){return CodeBits(s).Length+Quiet(s.Kind)+(s.Kind==13?7:Quiet(s.Kind));}
  public static int Module(LabelSettings s){return (int)Math.Floor(s.BarWidth*s.Dpi/25.4/Modules(s)+1e-7);}
@@ -88,6 +90,7 @@ public static class Engine {
    }
   }return w;
  }
+ public static bool CaptionFits(LabelSettings s){using(var b=new Bitmap(1,1))using(var g=Graphics.FromImage(b))return CaptionFits(g,s);}
  static bool CaptionFits(Graphics g,LabelSettings s){string value=Caption(s);int m=Module(s);string[] parts;int[] widths;
   if(s.Kind==13){parts=new[]{value.Substring(0,1),value.Substring(1,6),value.Substring(7,6)};widths=new[]{10*m,42*m,42*m};}
   else if(s.Kind==8){parts=new[]{value.Substring(0,4),value.Substring(4,4)};widths=new[]{28*m,28*m};}

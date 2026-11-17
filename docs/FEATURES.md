@@ -4,7 +4,7 @@ Aktuálny Pre-release pre Windows; vychádza z vývojového stavu zo 7. októbra
 a obsahuje úpravy tlače, konceptov, dátumových premenných, dávok na pozadí
 a zjednoteného ovládania a predvýstupnej kontroly
 z 12. novembra 2026, riadených aktualizácií a prístupnejšieho rozhrania
-zo 16. novembra 2026. Zachováva Windows Forms,
+zo 16. novembra 2026 a úprav EAN/Zebra zo 17. novembra 2026. Zachováva Windows Forms,
 .NET Framework 4.8, lokálne písmo Source Sans 3 a staršie projekty `.ean.xml`.
 
 ## Postupný prechod platformy
@@ -18,6 +18,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **EAN a Zebra:** väčší predvolený popis nových kódov, samostatný ITF-14 a
+  EAN-14 / GS1-128 s `(01)`, voliteľná priama ZPL tlač s DPI a tmavosťou
+  uloženými podľa média. Staršie veľkosti a bežná tlač Windows zostávajú zachované.
+  Postup a rozsah overenia opisuje pribalený BARCODES_ZEBRA.md.
 - **Prístupnejšie rozhranie:** zalamované hlavičky kariet, prístupné názvy a stav
   výberu, viditeľný klávesnicový výber a F6/Shift+F6 medzi oblasťami editora.
   Dlhé hlásenia sú dostupné klávesnicou; nastavenia a úprava textu majú posúvanie

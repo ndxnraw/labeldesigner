@@ -240,3 +240,9 @@ V hlavičke kariet fungujú šípky a Home/End; Ctrl+PageUp/PageDown prepína ka
 Text hlásení je dostupný cez Tab a možno ho označiť alebo kopírovať.
 Nastavenia a úprava textu majú posúvateľný obsah a samostatné akcie.
 Podrobnosti a obmedzenia overenia: pribalený ACCESSIBILITY.md.
+
+EAN A TLAČ ZEBRA
+Nové etikety majú väčší popis kódu; staršie uložené veľkosti sa nemenia.
+ITF-14 a EAN-14 / GS1-128 (01) sú samostatné voľby. Identifikátor (01) sa doplní automaticky.
+V rozšírených nastaveniach tlače možno zapnúť priamu Zebra ZPL tlač a uložiť DPI aj voliteľnú tmavosť 0–30 do profilu média.
+Podrobnosti, obmedzenia a skúšobné doladenie: pribalený BARCODES_ZEBRA.md.

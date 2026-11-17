@@ -20,3 +20,6 @@ Zdrojový kód je v C# / Windows Forms. Zostavenie: `scripts\build.cmd`, testy: 
 Zdroj podporuje aj paralelné zostavenie pre .NET 10 LTS so spoločným jadrom.
 Moderný balík `Windows-NET10-x64` obsahuje potrebný runtime; kompatibilný balík
 naďalej používa .NET Framework 4.8. Oba používajú rovnaké projekty etikiet.
+
+Čitateľnejší popis EAN, samostatný GTIN-14 / GS1-128 a nastavenie tmavosti Zebra
+opisuje [návod EAN a Zebra](docs/BARCODES_ZEBRA.md).

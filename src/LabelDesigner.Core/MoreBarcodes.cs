@@ -4,10 +4,10 @@ using System.Collections.Generic;
 
 namespace EanEtikety {
 public static partial class MoreBarcodes {
- public static readonly int[] Kinds={13,8,12,128,39,25,14};
- public static readonly string[] Names={"EAN-13","EAN-8","UPC-A","Code 128","Code 39","ITF (2 z 5)","EAN14 / ITF-14"};
+ public static readonly int[] Kinds={13,8,12,128,39,25,14,114};
+ public static readonly string[] Names={"EAN-13","EAN-8","UPC-A","Code 128","Code 39","ITF (2 z 5)","ITF-14","EAN-14 / GS1-128 (01)"};
  public static string Name(int kind){int i=Array.IndexOf(Kinds,kind);return i<0?Loc.T("Neznámy kód"):Names[i];}
- public static string Hint(int kind){switch(kind){case 14:return Loc.T("GTIN-14: 13 alebo 14 číslic, kód ITF-14 s ochrannými pásmi.");case 13:return Loc.T("12 alebo 13 číslic; kontrolná číslica sa doplní alebo overí.");case 8:return Loc.T("7 alebo 8 číslic; kontrolná číslica sa doplní alebo overí.");case 12:return Loc.T("11 alebo 12 číslic; kontrolná číslica sa doplní alebo overí.");case 128:return Loc.T("1–80 znakov ASCII: písmená, číslice, medzery a symboly. Bez diakritiky.");case 39:return Loc.T("1–40 znakov: A–Z, 0–9, medzera a - . $ / + %. Bez kontrolnej číslice.");case 25:return Loc.T("Párny počet číslic (2–80). Bez kontrolnej číslice; nejde o ITF-14.");default:return "";}}
+ public static string Hint(int kind){switch(kind){case 114:return Loc.T("GTIN-14: 13 alebo 14 číslic, GS1-128 s FNC1 a identifikátorom (01).");case 14:return Loc.T("GTIN-14: 13 alebo 14 číslic, kód ITF-14 s ochrannými pásmi.");case 13:return Loc.T("12 alebo 13 číslic; kontrolná číslica sa doplní alebo overí.");case 8:return Loc.T("7 alebo 8 číslic; kontrolná číslica sa doplní alebo overí.");case 12:return Loc.T("11 alebo 12 číslic; kontrolná číslica sa doplní alebo overí.");case 128:return Loc.T("1–80 znakov ASCII: písmená, číslice, medzery a symboly. Bez diakritiky.");case 39:return Loc.T("1–40 znakov: A–Z, 0–9, medzera a - . $ / + %. Bez kontrolnej číslice.");case 25:return Loc.T("Párny počet číslic (2–80). Bez kontrolnej číslice; nejde o ITF-14.");default:return "";}}
  public static string Validate(string value,int kind){
   string s=value??"";int max=kind==39?40:80;
   if(kind!=128&&kind!=39&&kind!=25)throw new Exception(Loc.T("Nepodporovaný typ čiarového kódu."));

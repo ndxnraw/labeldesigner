@@ -23,6 +23,7 @@ public class LabelSettings {
  public double PageWidth=210, PageHeight=297, MarginX=10, MarginY=10, GapX=2, GapY=2;
  public List<TextItem> Texts=new List<TextItem>();
  public List<SymbolItem> Symbols=new List<SymbolItem>();
- public static LabelSettings Default(){var s=new LabelSettings();s.Texts.Add(new TextItem{Text=Loc.T("Názov produktu"),X=3,Y=3,Bold=true,Center=true});return s;}
+ // Keep the constructor's missing-field XML default; only new documents opt in.
+ public static LabelSettings Default(){var s=new LabelSettings{DigitSize=10};s.Texts.Add(new TextItem{Text=Loc.T("Názov produktu"),X=3,Y=3,Bold=true,Center=true});return s;}
 }
 }

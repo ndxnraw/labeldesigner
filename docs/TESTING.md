@@ -6,13 +6,21 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 29 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 30 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+`BarcodeZebraTests` covers larger new captions with legacy XML defaults preserved,
+GTIN-14 GS1-128 decoding/FNC1/AI (01) separately from old ITF-14 bearer bars,
+bounded ZPL rendering and unit resets, invariant/default/zero darkness, partial
+writes, cancellation/failure disposal, whole-job repetitions, profile persistence,
+UI approval invalidation, correct early printer selection and locked calibration
+settings. Native RAW printer APIs are not invoked: both the transport and UI send
+are replaced with test doubles. DPI/darkness diagnostics contain no label content.
+Physical darkness/readability still require a user-controlled trial on the Zebra.
 `AccessibilityUiTests` covers wrapped accessible tabs, arrow/Home/End and section
 navigation, localized field names, focus repaint, safe tiny bounds, scrollable
 keyboard-reachable messages, DPI-aware preferences/text dialogs and actionable
