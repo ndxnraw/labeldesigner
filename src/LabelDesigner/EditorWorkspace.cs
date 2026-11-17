@@ -39,7 +39,7 @@ namespace EanEtikety {
   }
   bool ShowSelectionInspector(){int count=preview.Selection.Count;bool show=count!=1||preview.SelectedIndex==-2;selectionInspector.Visible=show;if(!show)return false;selectionOverview.Text=count==0?Loc.T("Nie je vybraný prvok"):Loc.T("Vybrané prvky")+": "+count;foreach(var button in selectionActions)button.Enabled=count>0;codeInspector.Visible=textInspector.Visible=false;return true;}
   void ToggleSelectionLock(){var selected=SelectedElements();bool unlock=selected.Count>0&&selected.TrueForAll(index=>elementMetadata.Exists(m=>m.Index==index&&m.Locked));Arrange(unlock?"unlock":"lock");}
-  void EditSelection(){if(preview.Selection.Count!=1)return;int index=preview.SelectedIndex;if(elementMetadata.Exists(m=>m.Index==index&&m.Locked))return;if(index==-1){FocusInspector();return;}if(index>=0)EditTextDialog(index);else if(index<=-3)EditSymbol(index);}
+  void EditSelection(){if(preview.Selection.Count!=1)return;int index=preview.SelectedIndex;if(elementMetadata.Exists(m=>m.Index==index&&m.Locked))return;if(index==-1){FocusInspector();return;}if(index>=0)BeginInlineText(index);else if(index<=-3)EditSymbol(index);}
   void SelectEditorIssue(LabelIssue issue){if(issue==null||issue.Element==-2)return;preview.SelectElement(issue.Element);preview.ProblemElements.Clear();preview.ProblemElements.Add(issue.Element);preview.Invalidate();}
   void SyncIssueViews(){if(problemView==null)return;problemView.SetIssues(labelIssues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+" ("+labelIssues.Count+")");}
   void FocusProblems(){if(workspaceTabs==null)return;if(studioBody.ColumnStyles[0].Width==0)studioBody.ColumnStyles[0].Width=240;workspaceTabs.SelectedIndex=1;problemView.FocusList();}

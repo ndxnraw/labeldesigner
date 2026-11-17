@@ -1,6 +1,7 @@
 using System;using System.Collections.Generic;
 namespace EanEtikety {
 public class TextItem {
+ public bool AutoWidth {get;set;}
  public double Rotation {get;set;}
  public string Text {get;set;}
  public string FontName {get;set;}
@@ -24,6 +25,6 @@ public class LabelSettings {
  public List<TextItem> Texts=new List<TextItem>();
  public List<SymbolItem> Symbols=new List<SymbolItem>();
  // Keep the constructor's missing-field XML default; only new documents opt in.
- public static LabelSettings Default(){var s=new LabelSettings{DigitSize=10};s.Texts.Add(new TextItem{Text=Loc.T("Názov produktu"),X=3,Y=3,Bold=true,Center=true});return s;}
+ public static LabelSettings Default(){var s=new LabelSettings{DigitSize=12};s.Texts.Add(new TextItem{Text=Loc.T("Názov produktu"),X=3,Y=3,Bold=true,Center=true,AutoWidth=true});TextAutoLayout.Apply(s);return s;}
 }
 }

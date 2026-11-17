@@ -647,3 +647,11 @@ ASCII 32–126, najviac 80 rozšírených symbolov. Bez kontrolnej číslice.	AS
 1–80 znakov 0–9 a A–F. Plessey s CRC.	1–80 characters 0–9 and A–F. Plessey with CRC.	1–80 znaků 0–9 a A–F. Plessey s CRC.	1–80 karakter: 0–9 és A–F. Plessey CRC ellenőrzéssel.
 Text alebo URL (UTF-8). Premenné zapisujte ako {serial}.	Text or URL (UTF-8). Use {serial} for variables.	Text nebo URL (UTF-8). Proměnné zapisujte jako {serial}.	Szöveg vagy URL (UTF-8). Változók: {serial}.
 GS1: (01)12345678901231(10)LOT(21)SERIAL. Použite podporované AI v zátvorkách; FNC1 sa vloží automaticky.	GS1: (01)12345678901231(10)LOT(21)SERIAL. Use supported AIs in parentheses; FNC1 is inserted automatically.	GS1: (01)12345678901231(10)LOT(21)SERIAL. Použijte podporované AI v závorkách; FNC1 se vloží automaticky.	GS1: (01)12345678901231(10)LOT(21)SERIAL. Támogatott AI-k zárójelben; az FNC1 automatikusan bekerül.
+
+Šírka podľa textu	Width follows text	Šířka podle textu	Szöveghez igazodó szélesség
+Text na etikete	Text on label	Text na etiketě	Szöveg a címkén
+Enter: potvrdiť. Shift+Enter: nový riadok. Esc: zrušiť.	Enter: confirm. Shift+Enter: new line. Esc: cancel.	Enter: potvrdit. Shift+Enter: nový řádek. Esc: zrušit.	Enter: megerősítés. Shift+Enter: új sor. Esc: megszakítás.
+Nastavenia tlače	Print settings	Nastavení tisku	Nyomtatási beállítások
+Médium	Media	Médium	Média
+Detaily	Details	Podrobnosti	Részletek
+Diagnostika popisuje aktuálnu tlačovú úlohu a nastavenia výstupu.	Diagnostics describe the current print job and output settings.	Diagnostika popisuje aktuální tiskovou úlohu a nastavení výstupu.	A diagnosztika az aktuális nyomtatási feladatot és a kimeneti beállításokat írja le.

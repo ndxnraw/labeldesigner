@@ -26,3 +26,6 @@ opisuje [návod EAN a Zebra](docs/BARCODES_ZEBRA.md).
 
 Výber 21 možností 1D, 2D a GS1 vrátane vyhľadávania, príkladov a pravidiel
 údajov opisuje [katalóg kódov](docs/BARCODE_CATALOG.md).
+
+Priame písanie dvojklikom, automatickú šírku textu, väčšie číslice a usporiadanie
+tlačového okna opisuje [návod úprav editora](docs/EDITOR_REFINEMENT.md).

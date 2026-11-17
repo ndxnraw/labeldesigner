@@ -1,5 +1,5 @@
 ND LabelDesigner — Pre-release — Windows
-Aktualizované 12. novembra 2026
+Aktualizované 17. novembra 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
 Pri kompatibilnom balíku ponechajte vedľa EXE konfiguráciu, zxing.dll a LabelDesigner.Core.dll.
@@ -58,7 +58,7 @@ Pod nastaveniami je zoznam prvkov. Veľké biele plátno zobrazuje etiketu.
 Vpravo upravujete vlastnosti vybraného kódu, textu alebo symbolu.
 Kliknutím na prvok ho vyberiete; myšou ho presuniete. Rohy menia veľkosť
 aj písmo, hrany šírku/výšku. Esc zruší rozpracovaný presun alebo zmenu.
-Text otvoríte aj dvojklikom. Font, veľkosť, tučné písmo a centrovanie
+Dvojklik otvorí textový vstup priamo na plátne. Font, veľkosť, tučné písmo a centrovanie
 sú vo vlastnostiach textu. Symbol Zálohované si zachováva vektorovú kvalitu.
 
 Tabuľku otvoríte tlačidlom Tabuľka; jej výšku zmeníte ťahaním predelu.
@@ -153,8 +153,7 @@ TLAČ
 Tlačiť otvorí samostatné okno. Návrh zostáva zachovaný v editore.
 Vľavo zvoľte tlačiareň, počet kópií, papier a orientáciu. Plný názov
 zariadenia je pod rozbaľovacím zoznamom aj v bubline. Obnoviť tlačiarne
-znovu načíta dostupné zariadenia. Vlastnosti tlačiarne sú pod rozšírenými
-nastaveniami a systémový dialóg sa otvorí len na vyžiadanie.
+znovu načíta dostupné zariadenia. Vlastnosti tlačiarne sú v karte Médium; systémový dialóg sa otvorí len na vyžiadanie.
 
 Náhľad zobrazuje celý dokument, aj keď ovládač hlási menší papier.
 Rozmery dokumentu a papier podľa ovládača sú uvedené samostatne;
@@ -169,7 +168,7 @@ predvolený papier. Papier z editora určuje rozloženie exportov a okraje.
 Náhľad aj tlač používajú spoločný vektorový obsah a rovnaké umiestnenie.
 Menší hlásený papier a obsah mimo tlačiteľnej oblasti majú upozornenie.
 Po kontrole skutočného média môžete potvrdiť pokračovanie v tlači.
-V rozšírených nastaveniach voľba Použiť rozmery dokumentu nastaví vlastné
+V karte Médium voľba Použiť rozmery dokumentu nastaví vlastné
 médium s rozmermi dokumentu. Voľba Ignorovať tlačiteľnú oblasť ovládača
 odstráni dodatočné softvérové orezanie podľa údajov ovládača.
 Použite ju pri nesprávnom hlásení ovládača. Neodstráni fyzické okraje
@@ -178,7 +177,7 @@ Mierku a automatické prispôsobovanie v externých ovládačoch nemeňte.
 Stránkovanie sa ukáže iba pri viacstranovom dokumente. Počet kópií neznásobuje
 počet obrázkov v náhľade. Bežný editor vytvára jednu etiketu na stránku.
 
-Profily médií sú samostatné pre každú tlačiareň. V rozšírených nastaveniach
+Profily médií sú samostatné pre každú tlačiareň. V karte Médium
 zadajte Názov profilu média a stlačte Uložiť profil tlačiarne.
 Iný názov vytvorí ďalší profil; rovnaký názov aktualizuje existujúci.
 Ukladá sa papier, orientácia, korekcia X/Y, mierka X/Y a ignorovanie tlačiteľnej oblasti.
@@ -186,7 +185,7 @@ Profil vyberiete zo zoznamu Profil média; odstrániť ho možno samostatne
 po potvrdení. Staršie profily sa načítajú automaticky pod názvom média
 a jeho rozmerov. Vlastné rozmery musí podporovať aj ovládač tlačiarne.
 
-Sprievodca kalibráciou je v rozšírených nastaveniach. Najprv vytlačte skúšobnú
+Sprievodca kalibráciou je v karte Kalibrácia. Najprv vytlačte skúšobnú
 stranu cez bežnú kontrolu výstupu. Táto strana má vždy nulové korekcie a mierku
 100 %, aj keď médium už má kalibráciu. Automatické prispôsobenie vypnite
 vo Vlastnostiach tlačiarne v pôvodnom tlačovom okne ešte pred otvorením sprievodcu.
@@ -246,5 +245,11 @@ Podrobnosti a obmedzenia overenia: pribalený ACCESSIBILITY.md.
 EAN A TLAČ ZEBRA
 Nové etikety majú väčší popis kódu; staršie uložené veľkosti sa nemenia.
 ITF-14 a EAN-14 / GS1-128 (01) sú samostatné voľby. Identifikátor (01) sa doplní automaticky.
-V rozšírených nastaveniach tlače možno zapnúť priamu Zebra ZPL tlač a uložiť DPI aj voliteľnú tmavosť 0–30 do profilu média.
+V karte Zebra možno zapnúť priamu Zebra ZPL tlač a uložiť DPI aj voliteľnú tmavosť 0–30 do profilu média.
 Podrobnosti, obmedzenia a skúšobné doladenie: pribalený BARCODES_ZEBRA.md.
+
+PRIAMA ÚPRAVA TEXTU
+Dvojklik otvorí vstup priamo na etikete. Písanie sa zobrazuje priebežne.
+Enter potvrdí, Shift+Enter vloží nový riadok, Esc obnoví pôvodný obsah.
+Šírka podľa textu prispôsobuje nové texty; ručná zmena rozmerov ju vypne.
+Úplný postup, kompatibilita a karty tlače: EDITOR_REFINEMENT.md.

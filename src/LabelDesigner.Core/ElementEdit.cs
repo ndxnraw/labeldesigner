@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 
 namespace EanEtikety {
 public class ElementEdit {
+ public bool? AutoWidth;
  public int Index;
  public double X,Y,Width,Height,Font,Rotation;
  public ElementEdit Copy(){return (ElementEdit)MemberwiseClone();}

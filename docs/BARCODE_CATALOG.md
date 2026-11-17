@@ -2,7 +2,7 @@
 
 V ponuke **Pridať kód…** vyhľadajte typ alebo zvoľte kategóriu EAN/UPC,
 1D, 2D či GS1. Zadajte vlastný obsah; **Vložiť príklad** ho na požiadanie
-nahradí platným príkladom. Zmena výberu obsah neprepisuje. **Vybrať typ…**
+nahradí platným príkladom. Zmena výberu obsah neprepisuje. Rozbaľovacia ponuka
 v inšpektore hlavného kódu vyberá jeho lineárny typ; 2D kódy sú samostatné
 prvky. Dvojklik otvorí ich editor. Existujúce rozbaľovacie ponuky zostávajú.
 
@@ -50,7 +50,7 @@ aplikácia nepoužíva jeho službu ani obrázky.
 typov, FNC1 metadáta, percentá a oddeľovače GS1, Unicode, geometriu a predtlačovú
 kontrolu PDF417, XML/schránku, SVG a vyhľadávanie/aplikovanie/zrušenie dialógu
 vo všetkých štyroch jazykoch. Plessey má známu testovaciu sekvenciu s CRC;
-nemá dekódovací test. Celý štandardný runner obsahuje 31 sád pre oba runtime.
+nemá dekódovací test. Celý štandardný runner obsahuje 32 sád pre oba runtime.
 Skutočnú kvalitu na konkrétnom médiu a čítačke treba overiť vytlačenou etiketou.
 
 Pribalený ZXing `DataMatrixWriter` má lokálnu úpravu vetvy GS1: používa ECC200

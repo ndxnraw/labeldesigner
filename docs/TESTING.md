@@ -6,13 +6,18 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 31 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 32 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+`EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
+legacy geometry and captions, batch expansion, focused live inspector edits,
+actual Enter/Escape command routing, grouped undo, cancellation/clean state,
+autosave without losing inline focus, resize cancellation and all four print
+sections. Screenshots cover the styled print window and minimum window size.
 `BarcodeCatalogTests` adds 281 checks of the expanded offline catalogue: actual
 decoded content and GS1 FNC1 metadata, percent/field separators, capacity boundaries,
 checksums, invalid data, Unicode 2D content, PDF417 geometry/preflight, XML and

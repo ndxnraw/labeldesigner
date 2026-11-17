@@ -2,8 +2,8 @@
 
 ## Veľkosť číslic
 
-Nový dokument používa popis kódu **10 bodov**. Úvodné rozloženie už pri zmenšení
-etikety neklesá až na 4 body; používa najmenej **8 bodov**. Ak je na etikete miesto,
+Nový dokument používa popis kódu **12 bodov**. Úvodné rozloženie už pri zmenšení
+etikety neklesá až na 4 body; používa najmenej **10 bodov**. Ak je na etikete miesto,
 rozšíri kód tak, aby sa väčší popis zmestil. Pri príliš úzkej etikete zostáva
 upozornenie na orezanie: zväčšite kód alebo médium. Samotné väčšie písmo nedokáže
 zabezpečiť čitateľný a správne široký EAN na ľubovoľne malej etikete.
@@ -28,7 +28,7 @@ Samostatná voľba nemení všeobecný editor ďalších GS1 identifikátorov pr
 
 ## Tmavosť tlače Zebra
 
-V tlačovom okne vyberte správnu tlačiareň a médium. V **Rozšírených nastaveniach**:
+V tlačovom okne vyberte správnu tlačiareň a médium. Na karte **Zebra**:
 
 1. Zapnite **Priama tlač Zebra (ZPL)** iba pre tlačiareň, ktorá rozumie ZPL.
 2. Nastavte **Rozlíšenie ZPL tlačiarne (DPI)** podľa skutočnej konfigurácie

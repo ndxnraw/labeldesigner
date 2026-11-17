@@ -98,7 +98,7 @@ Názov produktu je naďalej Pre-release.
 - **Nesúlad papiera:** menší formát hlásený ovládačom je upozornenie;
   používateľ môže potvrdiť pokračovanie bez automatického prispôsobenia. Náhľad je nezávislý
   od orezania ovládača a zobrazí celý dokument. Rozmery dokumentu a údaj
-  ovládača sa zobrazujú samostatne. V rozšírených nastaveniach možno použiť
+  ovládača sa zobrazujú samostatne. V karte Médium možno použiť
   rozmery dokumentu ako vlastné médium alebo ignorovať dodatočné orezanie
   podľa ovládača. Fyzické limity zariadenia a orezanie samotného ovládača
   nemožno týmto režimom odstrániť.
@@ -185,3 +185,7 @@ ovládačov tlačiarní vyžadujú kontrolu na cieľovom počítači.
 5. Prejdite obe témy, štyri jazyky a 100/125/150/200 % DPI na cieľovom monitore.
    V editore aj nových oknách skontrolujte klávesnicu, čitateľnosť a dostupnosť
    dolných tlačidiel cez posúvanie. Otvorte DOCX v cieľovej verzii Wordu.
+
+## Priama úprava textu
+
+Dvojklik upravuje text na plátne, zmeny sa zobrazujú počas písania. Enter potvrdí, Shift+Enter vloží riadok a Esc obnoví pôvodný stav. Nové texty používajú šírku podľa obsahu; staré ručné rozmery sú zachované. Tlač má karty Médium, Kalibrácia, Zebra a Detaily. Podrobnosti: [EDITOR_REFINEMENT](EDITOR_REFINEMENT.md).
