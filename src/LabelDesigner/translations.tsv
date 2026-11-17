@@ -626,3 +626,24 @@ Použite iba na tlačiarni so ZPL. Rozlíšenie musí zodpovedať tlačiarni. Po
 Priama tlač ZPL: overte kompatibilitu tlačiarne a zadané DPI. Ostatné nastavenia ovládača sa nepoužijú.	Direct ZPL printing: verify printer compatibility and DPI. Other driver settings do not apply.	Přímý tisk ZPL: ověřte kompatibilitu tiskárny a zadané DPI. Ostatní nastavení ovladače se nepoužijí.	Közvetlen ZPL nyomtatás: ellenőrizze a kompatibilitást és a DPI-t. Más illesztőprogram-beállítások nem érvényesek.
 Tmavosť ZPL sa nastaví na tlačiarni a môže platiť aj pre ďalšie úlohy.	ZPL darkness is set on the printer and may apply to later jobs.	Tmavost ZPL se nastaví na tiskárně a může platit i pro další úlohy.	A ZPL sötétség a nyomtatón állítódik be, és későbbi feladatokra is érvényes lehet.
 DPI dokumentu a ZPL tlačiarne sa líšia. Pre najlepšiu ostrosť zosúlaďte rozlíšenie kódu s tlačiarňou.	Document and ZPL printer DPI differ. Match barcode resolution to the printer for the sharpest output.	DPI dokumentu a ZPL tiskárny se liší. Pro nejlepší ostrost slaďte rozlišení kódu s tiskárnou.	A dokumentum és a ZPL nyomtató DPI-je eltér. A legélesebb eredményhez egyeztesse a vonalkód felbontását a nyomtatóéval.
+
+Pridať kód…	Add code…	Přidat kód…	Kód hozzáadása…
+Pridať kód	Add code	Přidat kód	Kód hozzáadása
+Pridať 2D kód	Add 2D code	Přidat 2D kód	2D kód hozzáadása
+2D kód	2D code	2D kód	2D kód
+Vybrať typ…	Choose type…	Vybrat typ…	Típus kiválasztása…
+Typ čiarového kódu	Barcode type	Typ čárového kódu	Vonalkód típusa
+Vyhľadať typ kódu	Search code type	Vyhledat typ kódu	Kódtípus keresése
+Kategória	Category	Kategorie	Kategória
+Všetky	All	Všechny	Mind
+Vložiť príklad	Insert example	Vložit příklad	Példa beszúrása
+Vyberte typ kódu.	Select a code type.	Vyberte typ kódu.	Válasszon kódtípust.
+MSI (bez kontrolnej číslice)	MSI (no check digit)	MSI (bez kontrolní číslice)	MSI (ellenőrző számjegy nélkül)
+7 alebo 8 číslic; číselný systém 0 alebo 1, kontrolná číslica UPC-A.	7 or 8 digits; number system 0 or 1, UPC-A check digit.	7 nebo 8 číslic; číselný systém 0 nebo 1, kontrolní číslice UPC-A.	7 vagy 8 számjegy; 0 vagy 1 számrendszer, UPC-A ellenőrző számjegy.
+1–80 tlačiteľných ASCII znakov. Kontrolné znaky C a K sa doplnia.	1–80 printable ASCII characters. C and K checks are added.	1–80 tisknutelných ASCII znaků. Kontrolní znaky C a K se doplní.	1–80 nyomtatható ASCII karakter. A C és K ellenőrző karakterek automatikusak.
+ASCII 32–126, najviac 80 rozšírených symbolov. Bez kontrolnej číslice.	ASCII 32–126, at most 80 expanded symbols. No check digit.	ASCII 32–126, nejvýše 80 rozšířených symbolů. Bez kontrolní číslice.	ASCII 32–126, legfeljebb 80 kiterjesztett szimbólum. Ellenőrző számjegy nélkül.
+Číslice a - $ : / . +; voliteľné párové značky A–D, inak sa doplní A.	Digits and - $ : / . +; optional paired A–D guards, otherwise A is added.	Číslice a - $ : / . +; volitelné párové značky A–D, jinak se doplní A.	Számjegyek és - $ : / . +; páros A–D határolók, ezek nélkül A kerül hozzáadásra.
+1–80 číslic. MSI bez kontrolnej číslice.	1–80 digits. MSI without a check digit.	1–80 číslic. MSI bez kontrolní číslice.	1–80 számjegy. MSI ellenőrző számjegy nélkül.
+1–80 znakov 0–9 a A–F. Plessey s CRC.	1–80 characters 0–9 and A–F. Plessey with CRC.	1–80 znaků 0–9 a A–F. Plessey s CRC.	1–80 karakter: 0–9 és A–F. Plessey CRC ellenőrzéssel.
+Text alebo URL (UTF-8). Premenné zapisujte ako {serial}.	Text or URL (UTF-8). Use {serial} for variables.	Text nebo URL (UTF-8). Proměnné zapisujte jako {serial}.	Szöveg vagy URL (UTF-8). Változók: {serial}.
+GS1: (01)12345678901231(10)LOT(21)SERIAL. Použite podporované AI v zátvorkách; FNC1 sa vloží automaticky.	GS1: (01)12345678901231(10)LOT(21)SERIAL. Use supported AIs in parentheses; FNC1 is inserted automatically.	GS1: (01)12345678901231(10)LOT(21)SERIAL. Použijte podporované AI v závorkách; FNC1 se vloží automaticky.	GS1: (01)12345678901231(10)LOT(21)SERIAL. Támogatott AI-k zárójelben; az FNC1 automatikusan bekerül.

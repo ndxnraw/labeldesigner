@@ -22,6 +22,7 @@ $entries = [ordered]@{
   'UPDATES.md' = 'docs/UPDATES.md'
   'ACCESSIBILITY.md' = 'docs/ACCESSIBILITY.md'
   'BARCODES_ZEBRA.md' = 'docs/BARCODES_ZEBRA.md'
+  'BARCODE_CATALOG.md' = 'docs/BARCODE_CATALOG.md'
   'LICENSE' = 'LICENSE'
   'licenses/SourceSans3-OFL.txt' = 'assets/fonts/OFL.txt'
   'licenses/ZXing-LICENSE.txt' = 'src/third-party/ZXing/ZXing-LICENSE.txt'

@@ -85,9 +85,9 @@ The published build and release tag are named `Pre-release`. Earlier source snap
 
 The current Pre-release includes the owner's latest local development snapshot,
 imported on 2026-10-20; see `docs/LOCAL_SOURCE_IMPORT.md`. All its production sources,
-30 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
+31 suites and vendored ZXing sources are in Git. The build recompiles ZXing offline;
 no original local DLL is required. Keep the generated `zxing.dll` next to the EXE.
-Foreign ZPL support is partial; native printer fonts are approximated. QR and ordinary
-Data Matrix are supported; GS1 DataMatrix and `.nlbl` are not. Physical printer and Word rendering need manual checks.
+Foreign ZPL support is partial; native printer fonts are approximated. QR, Data Matrix, Aztec, PDF417 and GS1 QR/Data Matrix are supported; see
+[BARCODE_CATALOG](BARCODE_CATALOG.md). `.nlbl` is not supported. Physical printer and Word rendering need manual checks.
 Optional raster comparison dependencies are described in [TESTING](TESTING.md).
 Builds are reproducible from source, but timestamped outputs are not byte-identical.

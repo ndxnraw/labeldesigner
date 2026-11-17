@@ -141,7 +141,11 @@ namespace ZXing.Datamatrix
             {
                 var hasGS1FormatHint = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.GS1_FORMAT);
 
-                encoded = MinimalEncoder.encodeHighLevel(contents, encoding, hasGS1FormatHint ? 0x1D : -1, shape);
+                // LabelDesigner: use deterministic ECC200 ASCII for GS1. The
+                // compact encoder's implicit unlatch decisions can add garbage
+                // after short GS1 fields when the leading FNC1 changes capacity.
+                encoded = hasGS1FormatHint ? encodeGs1Ascii(contents, shape) :
+                    MinimalEncoder.encodeHighLevel(contents, encoding, -1, shape);
             }
             else
             {
@@ -171,6 +175,35 @@ namespace ZXing.Datamatrix
         /// <param name="height"></param>
         /// <param name="margin"></param>
         /// <returns>The bit matrix generated.</returns>
+        private static string encodeGs1Ascii(string contents, SymbolShapeHint shape)
+        {
+            var words = new System.Text.StringBuilder();
+            words.Append((char)232); // FNC1 in first position
+            for (int i = 0; i < contents.Length; i++)
+            {
+                char c = contents[i];
+                if (c == 0x1D) words.Append((char)232);
+                else if (c >= '0' && c <= '9' && i + 1 < contents.Length &&
+                         contents[i + 1] >= '0' && contents[i + 1] <= '9')
+                {
+                    words.Append((char)(130 + (c - '0') * 10 + contents[++i] - '0'));
+                }
+                else
+                {
+                    if (c < 32 || c > 126) throw new ArgumentException("GS1 ASCII 32-126 required");
+                    words.Append((char)(c + 1));
+                }
+            }
+            int capacity = SymbolInfo.lookup(words.Length, shape, null, null, true).dataCapacity;
+            if (words.Length < capacity) words.Append((char)129);
+            while (words.Length < capacity)
+            {
+                int value = 129 + (149 * (words.Length + 1) % 253) + 1;
+                words.Append((char)(value <= 254 ? value : value - 254));
+            }
+            return words.ToString();
+        }
+
         private static BitMatrix encodeLowLevel(DefaultPlacement placement, SymbolInfo symbolInfo, int width, int height, int margin, bool noPadding)
         {
             int symbolWidth = symbolInfo.getSymbolDataWidth();

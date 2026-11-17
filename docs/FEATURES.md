@@ -121,7 +121,8 @@ Názov produktu je naďalej Pre-release.
   za zmenený. Pevné dátumy zostávajú pevné. Projekt uchová definície premenných,
   nie posledné vypočítané hodnoty.
 - **QR a Data Matrix:** viac samostatných kódov, vektorová geometria, tiché zóny,
-  editovanie dvojklikom a všetky existujúce výstupy. GS1 DataMatrix sa neponúka.
+  editovanie dvojklikom a všetky existujúce výstupy. Katalóg dopĺňa Aztec,
+  PDF417, GS1 QR a GS1 Data Matrix; pozri [BARCODE_CATALOG](BARCODE_CATALOG.md).
 
 ## Ovládanie
 

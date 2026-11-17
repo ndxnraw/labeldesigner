@@ -6,13 +6,19 @@ From the checkout root:
 .\scripts\test.cmd
 ```
 
-This rebuilds ZXing, shared Core and the app, compiles and runs all 30 registered suites. Each must exit
+This rebuilds ZXing, shared Core and the app, compiles and runs all 31 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
 go to `build/tests/`; timestamped reports, screenshots and generated exports go to
 `build/test-results/`. These are ignored, not source fixtures.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+`BarcodeCatalogTests` adds 281 checks of the expanded offline catalogue: actual
+decoded content and GS1 FNC1 metadata, percent/field separators, capacity boundaries,
+checksums, invalid data, Unicode 2D content, PDF417 geometry/preflight, XML and
+clipboard round trips, SVG and real modal chooser actions in four languages.
+Plessey uses a known zero-data/CRC vector because the vendored reader lacks this
+format. See [BARCODE_CATALOG](BARCODE_CATALOG.md) for limits and local ZXing changes.
 `BarcodeZebraTests` covers larger new captions with legacy XML defaults preserved,
 GTIN-14 GS1-128 decoding/FNC1/AI (01) separately from old ITF-14 bearer bars,
 bounded ZPL rendering and unit resets, invariant/default/zero darkness, partial

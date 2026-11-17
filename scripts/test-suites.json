@@ -1,5 +1,5 @@
 [
-  "BarcodeZebraTests", "AccessibilityUiTests", "UpdateTests", "PlatformMigrationTests", "PreflightUiTests", "BackgroundBatchTests", "DraftJobTests",
+  "BarcodeCatalogTests", "BarcodeZebraTests", "AccessibilityUiTests", "UpdateTests", "PlatformMigrationTests", "PreflightUiTests", "BackgroundBatchTests", "DraftJobTests",
   "PrintPreviewTests", "PrintCalibrationTests", "PrintMediaTests", "BatchImportTests", "WorkspaceUiTests", "Revision310Tests",
   "Revision308Tests", "Revision307Tests", "RotationTests", "Revision305Tests",
   "Revision304Tests", "Revision303Tests", "Revision302Tests", "Revision301Tests",

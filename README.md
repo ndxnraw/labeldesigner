@@ -23,3 +23,6 @@ naďalej používa .NET Framework 4.8. Oba používajú rovnaké projekty etikie
 
 Čitateľnejší popis EAN, samostatný GTIN-14 / GS1-128 a nastavenie tmavosti Zebra
 opisuje [návod EAN a Zebra](docs/BARCODES_ZEBRA.md).
+
+Výber 21 možností 1D, 2D a GS1 vrátane vyhľadávania, príkladov a pravidiel
+údajov opisuje [katalóg kódov](docs/BARCODE_CATALOG.md).

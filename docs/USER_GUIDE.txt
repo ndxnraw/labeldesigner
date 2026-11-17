@@ -8,7 +8,7 @@ Kompatibilný balík potrebuje .NET Framework 4.8/4.8.1. Moderný balík Windows
 NOVÉ FUNKCIE Pre-release
 Ponuka Nástroje: automatické ukladanie, šablóny a nedávne projekty,
 dávky CSV/XLSX a premenné, samolepiace hárky, vlastné obrázky,
-QR / Data Matrix, rozloženie a kontrola etikety.
+výber 1D / 2D / GS1 kódov, rozloženie a kontrola etikety.
 Späť/Znova: Ctrl+Z/Ctrl+Y alebo dve ikony na hornej lište.
 Ctrl/Shift pridáva prvky do výberu; ťahanie prázdnej plochy vytvorí výberový obdĺžnik.
 Podrobný postup a limity: docs/FEATURES.md.
@@ -139,7 +139,9 @@ KÓDY, IMPORT A EXPORT
 EAN-13, EAN-8, UPC-A, Code 128, Code 39, Interleaved 2 of 5 a ITF-14
 zostávajú dostupné. Pre Code 128 možno zapnúť GS1, vybrať identifikátory,
 zadať dáta a meniť ich poradie. Kontrolné číslice sa dopĺňajú alebo overujú.
-QR a bežný Data Matrix sú podporované; GS1 DataMatrix sa neponúka.
+QR, Data Matrix, Aztec, PDF417, GS1 QR a GS1 Data Matrix sú podporované.
+Pridať kód… otvorí katalóg s vyhľadávaním, kategóriami a príkladmi.
+Podrobné pravidlá a limity údajov nájdete v BARCODE_CATALOG.md.
 
 Otvoriť podporuje projekty XML a ZPL/PRN. Vlastné ZPL s projektovými údajmi
 sa otvorí na editáciu; cudzí podporovaný ZPL sa zobrazí v samostatnom náhľade.

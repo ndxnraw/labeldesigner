@@ -14,8 +14,13 @@ Local compatibility changes for the .NET Framework C# 5 compiler:
 - qrcode/encoder/Encoder.cs: null-conditional encoding.WebName access expanded.
 
 Build zxing.dll from the supplied source with scripts/build-zxing.ps1.
-ND LabelDesigner uses QR and ordinary Data Matrix encoding; GS1 DataMatrix
-is deliberately not offered. Barcode decoding is used by regression tests.
+ND LabelDesigner uses offline 1D, QR, Data Matrix, Aztec, PDF417 and GS1 encoding.
+Local functional change (2026-11-17): DataMatrixWriter.cs uses ECC200 ASCII
+encoding for GS1 compact-mode requests, with leading/separator FNC1 and digit
+pairs. This avoids implicit-unlatch corruption on short GS1 fields in the
+vendored minimal encoder. Ordinary Data Matrix encoding is unchanged.
+See docs/BARCODE_CATALOG.md for limits. Barcode decoding is used by tests;
+the bundled library does not provide a Plessey decoder.
 
 Source Sans 3 is bundled separately under the SIL Open Font License:
 assets/fonts/OFL.txt. No fonts or resources are downloaded at application startup.
