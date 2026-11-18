@@ -18,6 +18,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Prehľadnejšie príkazy a GS1:** Nástroje sú v piatich skupinách s ikonami.
+  Lišta už nemá Vybrať kód, Tabuľka ani Centrovať kód; tabuľka je v ponuke Panely
+  a centrovanie vo vlastnostiach hlavného kódu. Panely po opätovnom zobrazení
+  zachovávajú šírku. GS1 editor ponúka pomenované polia, rýchle voľby, vyhľadávanie,
+  formáty a chyby pri poli, náhľad, zmenu poradia a bezpečné zrušenie.
 - **Ochrana ovládania kolieskom:** číselné polia a zatvorené rozbaľovacie ponuky
   vyžadujú kliknutie a zameranie; samotný hover alebo prechod klávesom Tab nemení
   hodnotu. Otvorené zoznamy a klávesnicový výber zostávajú dostupné. Tlačové
@@ -32,7 +37,7 @@ Názov produktu je naďalej Pre-release.
   Dlhé hlásenia sú dostupné klávesnicou; nastavenia a úprava textu majú posúvanie
   so samostatnými akciami. Chyby pridávajú ďalší postup a zachovávajú podrobnosti.
   Rozsah a obmedzenia overenia opisuje pribalený ACCESSIBILITY.md.
-- **Riadené aktualizácie:** Nástroje → Aktualizácie, kontrola verejného vydania
+- **Riadené aktualizácie:** Nástroje → Kontrola a údržba → Aktualizácie, kontrola verejného vydania
   iba na vyžiadanie, správny balík podľa runtime, overenie súčtov a obsahu,
   samostatná príprava a spustenie až po potvrdení. Rozpracovaný dokument možno
   pred prechodom uložiť alebo prechod zrušiť. Nastavenia sa zálohujú; dostupný
@@ -84,7 +89,7 @@ Názov produktu je naďalej Pre-release.
   až po úspešnom dokončení. Export sa zapisuje do dočasného súboru;
   pri chybe alebo zrušení sa cieľový súbor nenahradí. Zrušenie po dokončenom
   nahradení súboru sa nepovažuje za zrušený export.
-- **Diagnostika:** Nástroje → Diagnostika zobrazí posledné lokálne záznamy
+- **Diagnostika:** Nástroje → Kontrola a údržba → Diagnostika zobrazí posledné lokálne záznamy
   a umožní ich uložiť do textového súboru. Chyby dostanú identifikátor,
   typ výnimky, miesto zlyhania a identifikátor zostavy. Správy výnimiek,
   cesty k súborom, názvy tlačiarní ani obsah dokumentov sa do logu nezapisujú.

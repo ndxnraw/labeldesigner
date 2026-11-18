@@ -31,6 +31,14 @@ and both footer actions are measured in all four languages at 100/150/200% fonts
 using the actual 980x680 outer minimum window size. This synthetic font-size test
 does not represent a physical monitor DPI transition. Accessible setting descriptions
 must have matching inline text and all four translations.
+PDF workspace checks also cover grouped icon menus, removed toolbar actions,
+contextual/locked centering, repeated panel hide/show without horizontal overflow,
+remembered logical widths across restart and legacy four-line layout files.
+Guided GS1 tests cover working-copy cancel, ordering/data, duplicate prevention,
+date day 00, invalid dates/checksums, catalogue search, rebuild theming and minimum
+viewport/footer containment at 100/150/200% fonts in all four languages.
+`Revision22Tests` retains its payload/FNC1/checksum/XML/ZPL/PRN/rendering assertions
+and exercises editing/order/cancel through the guided fields instead of the old grid.
 `BarcodeCatalogTests` adds 281 checks of the expanded offline catalogue: actual
 decoded content and GS1 FNC1 metadata, percent/field separators, capacity boundaries,
 checksums, invalid data, Unicode 2D content, PDF417 geometry/preflight, XML and

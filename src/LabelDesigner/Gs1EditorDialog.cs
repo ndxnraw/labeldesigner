@@ -1,0 +1,52 @@
+using System;using System.Collections.Generic;using System.Drawing;using System.Globalization;using System.Text;using System.Windows.Forms;
+namespace EanEtikety {
+// Edits a private working copy. Encoding and validation remain in the shared core.
+public sealed class Gs1EditorDialog:Form {
+ readonly List<AiValue> values=new List<AiValue>();readonly List<FieldView> fields=new List<FieldView>();
+ readonly ModernComboBox catalogue=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList,Width=440,Name="gs1-catalog"};
+ readonly TextBox search=new TextBox{Name="gs1-search",Width=220},report=new TextBox{Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Vertical,Dock=DockStyle.Fill};
+ readonly Panel viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};readonly TableLayoutPanel cards=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1};
+ readonly ModernButton apply=new ModernButton();readonly List<Button> addButtons=new List<Button>();Action<Control> themeStyler;
+ sealed class FieldView {public AiValue Item;public TextBox Input;public Label Error;public string Hint;}
+ public void UseTheme(Action<Control> styler){themeStyler=styler;if(themeStyler!=null)themeStyler(this);ValidateFields();}
+ public List<AiValue> Values{get{return Clone(values);}}
+ static List<AiValue> Clone(List<AiValue> source){var result=new List<AiValue>();if(source!=null)foreach(var item in source)result.Add(new AiValue{AI=item==null?"":item.AI,Data=item==null?"":item.Data});return result;}
+ static ModernButton ActionButton(string text,Action action){var b=new ModernButton{Text=Loc.T(text),AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,MinimumSize=new Size(0,36),Padding=new Padding(6,2,6,2),Margin=new Padding(0,3,8,3),FlatStyle=FlatStyle.Flat};b.Click+=delegate{action();};return b;}
+ static Label TextLabel(string text){return new Label{Text=text,AutoSize=true,UseMnemonic=false,Dock=DockStyle.Top,Margin=new Padding(0,4,0,5)};}
+ static void Stack(TableLayoutPanel parent,Control child){child.Dock=DockStyle.Top;parent.Controls.Add(child,0,parent.RowCount++);parent.RowStyles.Add(new RowStyle(SizeType.AutoSize));}
+ public Gs1EditorDialog(List<AiValue> source){
+  values.AddRange(Clone(source));Text=Loc.T("GS1-128 – aplikačné identifikátory");Font=UiFonts.Default;AutoScaleMode=AutoScaleMode.Dpi;AutoScaleDimensions=new SizeF(96,96);Size=new Size(960,740);MinimumSize=new Size(760,540);StartPosition=FormStartPosition.CenterParent;ShowInTaskbar=false;
+  var root=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(16),ColumnCount=1,RowCount=4};root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.Absolute,104));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));Controls.Add(root);
+  var top=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1};top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));var overview=new Panel{Dock=DockStyle.Fill,AutoScroll=true};overview.Controls.Add(top);root.Controls.Add(overview,0,0);
+  var intro=TextLabel(Loc.T("Pridajte potrebné údaje a vyplňte pomenované polia. Identifikátory a oddeľovače sa doplnia automaticky."));Stack(top,intro);
+  var common=new FlowLayoutPanel{AutoSize=true,WrapContents=true};common.Controls.Add(TextLabel(Loc.T("Bežné polia:")));foreach(string ai in new[]{"01","10","17","21"}){string code=ai;var b=ActionButton(Gs1.Find(code).ToString(),delegate{AddIdentifier(code);});b.Name="gs1-quick-"+code;common.Controls.Add(b);addButtons.Add(b);}Stack(top,common);
+  var filter=new FlowLayoutPanel{AutoSize=true,WrapContents=true};var caption=TextLabel(Loc.T("Vyhľadať identifikátor"));filter.Controls.Add(caption);search.AccessibleName=caption.Text;filter.Controls.Add(search);Stack(top,filter);
+  var selection=new FlowLayoutPanel{AutoSize=true,WrapContents=true};catalogue.AccessibleName=Loc.T("Identifikátor GS1");selection.Controls.Add(catalogue);var add=ActionButton("Pridať",delegate{var d=catalogue.SelectedItem as AiDefinition;if(d!=null)AddIdentifier(d.Code);});add.Name="gs1-add";selection.Controls.Add(add);addButtons.Add(add);Stack(top,selection);
+  cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));viewport.Controls.Add(cards);root.Controls.Add(viewport,0,1);
+  report.AccessibleName=Loc.T("Údaje a kontrola GS1");root.Controls.Add(report,0,2);
+  var footer=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill,WrapContents=true};apply.Text=Loc.T("Použiť");apply.Name="gs1-apply";apply.AutoSize=true;apply.MinimumSize=new Size(100,38);apply.Click+=delegate{if(ValidateFields()){DialogResult=DialogResult.OK;Close();}};footer.Controls.Add(apply);var cancel=ActionButton("Zrušiť",delegate{DialogResult=DialogResult.Cancel;Close();});cancel.Name="gs1-cancel";footer.Controls.Add(cancel);root.Controls.Add(footer,0,3);AcceptButton=apply;CancelButton=cancel;
+  search.TextChanged+=delegate{FilterCatalogue();};top.SizeChanged+=delegate{intro.MaximumSize=new Size(Math.Max(100,top.ClientSize.Width-8),0);catalogue.Width=Math.Min(480,Math.Max(180,top.ClientSize.Width-120));};
+  bool fitting=false;Action fit=delegate{if(fitting)return;fitting=true;try{int wanted=Math.Min(top.PreferredSize.Height,Math.Max(100,root.ClientSize.Height-root.Padding.Vertical-104-footer.PreferredSize.Height-140));root.RowStyles[0].SizeType=SizeType.Absolute;if(root.RowStyles[0].Height!=wanted)root.RowStyles[0].Height=wanted;}finally{fitting=false;}};root.SizeChanged+=delegate{fit();};top.SizeChanged+=delegate{fit();};footer.SizeChanged+=delegate{fit();};Shown+=delegate{fit();};
+  FilterCatalogue();Rebuild(null);
+ }
+ void FilterCatalogue(){string selected=(catalogue.SelectedItem as AiDefinition)==null?"01":((AiDefinition)catalogue.SelectedItem).Code;catalogue.BeginUpdate();try{catalogue.Items.Clear();foreach(var d in Gs1.Catalog){string text=d.ToString();if(CultureInfo.CurrentCulture.CompareInfo.IndexOf(text,search.Text,CompareOptions.IgnoreCase|CompareOptions.IgnoreNonSpace)>=0){catalogue.Items.Add(d);if(d.Code==selected)catalogue.SelectedItem=d;}}if(catalogue.SelectedIndex<0&&catalogue.Items.Count>0)catalogue.SelectedIndex=0;}finally{catalogue.EndUpdate();}addButtons[addButtons.Count-1].Enabled=values.Count<20&&catalogue.SelectedItem!=null;}
+ void AddIdentifier(string code){foreach(var field in fields)if(field.Item.AI==code){viewport.ScrollControlIntoView(field.Input);field.Input.Focus();return;}if(values.Count>=20)return;var item=new AiValue{AI=code,Data=""};values.Add(item);Rebuild(item);}
+ void MoveField(AiValue item,int delta){int i=values.IndexOf(item),j=i+delta;if(i<0||j<0||j>=values.Count)return;values.RemoveAt(i);values.Insert(j,item);Rebuild(item);}
+ static string Format(AiDefinition d){if(d==null)return Loc.T("Nepodporovaný GS1 identifikátor: ");string hint=(d.Variable?"1–":"")+d.Length+Loc.T(d.Numeric?" číslic":" znakov");if(d.Date)hint+=" · "+Loc.T("RRMMDD, napr. 271231. Deň 00 označuje koniec mesiaca.");else if(d.Checksum)hint+=" · "+Loc.T("Vrátane kontrolnej číslice.");return hint;}
+ void Rebuild(AiValue focus){
+  viewport.SuspendLayout();cards.SuspendLayout();try{while(cards.Controls.Count>0){var old=cards.Controls[0];cards.Controls.RemoveAt(0);old.Dispose();}cards.RowStyles.Clear();cards.RowCount=0;fields.Clear();
+   foreach(var item in values){AiDefinition definition=null;try{definition=Gs1.Find(item.AI);}catch{}var card=new TableLayoutPanel{AutoSize=true,ColumnCount=1,Padding=new Padding(10),Margin=new Padding(0,4,0,10),BorderStyle=BorderStyle.FixedSingle};card.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+    var title=TextLabel("("+item.AI+") "+(definition==null?Loc.T("Neplatné pole GS1."):Loc.AiName(definition.Name)));title.Font=UiFonts.Get(Font.Size,FontStyle.Bold);Stack(card,title);
+    var actions=new FlowLayoutPanel{AutoSize=true,WrapContents=true};var up=ActionButton("↑ Vyššie",delegate{MoveField(item,-1);});up.Name="gs1-up-"+item.AI;up.Enabled=values.IndexOf(item)>0;actions.Controls.Add(up);var down=ActionButton("↓ Nižšie",delegate{MoveField(item,1);});down.Name="gs1-down-"+item.AI;down.Enabled=values.IndexOf(item)<values.Count-1;actions.Controls.Add(down);var remove=ActionButton("Odstrániť",delegate{int index=values.IndexOf(item);values.Remove(item);Rebuild(values.Count==0?null:values[Math.Min(index,values.Count-1)]);});remove.Name="gs1-remove-"+item.AI;actions.Controls.Add(remove);Stack(card,actions);
+    var input=new TextBox{Text=item.Data??"",Name="gs1-data-"+item.AI,MaxLength=2000,AccessibleName=title.Text,AccessibleDescription=Format(definition)};Stack(card,input);var format=TextLabel(Format(definition));Stack(card,format);var error=TextLabel("");error.Name="gs1-error-"+item.AI;error.ForeColor=Color.Firebrick;Stack(card,error);var view=new FieldView{Item=item,Input=input,Error=error,Hint=Format(definition)};fields.Add(view);input.TextChanged+=delegate{item.Data=input.Text;ValidateFields();};
+    card.SizeChanged+=delegate{int width=Math.Max(80,card.ClientSize.Width-card.Padding.Horizontal-8);title.MaximumSize=format.MaximumSize=error.MaximumSize=new Size(width,0);};Stack(cards,card);
+   }
+  }finally{cards.ResumeLayout(true);viewport.ResumeLayout(true);}if(themeStyler!=null)themeStyler(this);ValidateFields();foreach(var field in fields)if(field.Item==focus){viewport.ScrollControlIntoView(field.Input);field.Input.Focus();if(field.Input.Parent.Height<=viewport.ClientSize.Height)viewport.ScrollControlIntoView(field.Input.Parent);break;}
+ }
+ bool ValidateFields(){
+  var human=new StringBuilder();foreach(var field in fields){human.Append('(').Append(field.Item.AI).Append(')').Append(field.Item.Data);try{Gs1.Payload(new List<AiValue>{field.Item},2000);field.Error.Text="";}catch(Exception ex){field.Error.Text=ex.Message;}field.Error.ForeColor=SystemInformation.HighContrast?SystemColors.WindowText:BackColor.GetBrightness()<.5f?Color.Salmon:Color.Firebrick;field.Error.Visible=field.Error.Text.Length>0;field.Input.AccessibleDescription=field.Hint+(field.Error.Text.Length==0?"":" "+field.Error.Text);}
+  bool valid;string message;try{Gs1.Payload(values);message=string.Join(" ",Gs1.Warnings(values).ToArray());valid=true;}catch(Exception ex){message=ex.Message;valid=false;}
+  report.Text=human+Environment.NewLine+message;apply.Enabled=valid;foreach(var button in addButtons)button.Enabled=values.Count<20;if(catalogue.SelectedItem==null)addButtons[addButtons.Count-1].Enabled=false;return valid;
+ }
+}
+}

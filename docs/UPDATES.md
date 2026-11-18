@@ -1,6 +1,6 @@
 # Riadené aktualizácie — Pre-release
 
-Nástroje → Aktualizácie ponúka kontrolu a prípravu nového balíka. Pri štarte,
+Nástroje → Kontrola a údržba → Aktualizácie ponúka kontrolu a prípravu nového balíka. Pri štarte,
 časovačom ani na pozadí editora sa internet nekontroluje. Verejný repozitár
 `ndxnraw/labeldesigner` nevyžaduje účet ani token. Bez internetu zostáva editor,
 tlač, export aj spustenie už pripravenej verzie použiteľné.

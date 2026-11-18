@@ -70,6 +70,52 @@ prístupný opis ovládacieho prvku. Objasňujú smer posunu, východiskovú mie
 význam DPI, odlišnosť vypnutej tmavosti od hodnoty 0 a fyzické limity tlačiarne.
 Samotné nastavenia tlače ani predtlačové potvrdenie sa tým nemenia.
 
+## Lišta, obnova panelov a editor GS1
+
+Ďalší balík vychádza zo štyroch bodov trojstranového používateľského PDF
+„Labeldesigner“ z 18. novembra 2026.
+
+- Ponuka **Nástroje** má skupiny **Projekt**, **Vložiť**, **Dáta**,
+  **Rozloženie** a **Kontrola a údržba**. Príkazy aj skupiny používajú rovnaké
+  vektorové predlohy ikon ako horná lišta; všetky pôvodné funkcie zostávajú dostupné.
+- Z lišty sú odstránené **Vybrať kód**, **Tabuľka** a **Centrovať kód**.
+  Hlavný kód vyberiete na plátne alebo v zozname prvkov. Centrovanie je vo
+  vlastnostiach vybraného hlavného kódu, rešpektuje zámok. Tabuľka zostáva cez
+  **Panely → Tabuľka** a zachováva svoj pôvodný editor aj deliacu priečku.
+- Skrytie panela skryje aj jeho obsah. Opätovné zobrazenie používa zapamätanú
+  logickú šírku, vyčistí zastaraný vodorovný posun a obnoví rozloženie potomkov.
+  Rovnaký postup používa ponuka, F4/F8 aj obnova uloženého stavu. Reset rozloženia
+  obnoví základné šírky. Prvé štyri riadky súboru `.layout` zostávajú kompatibilné;
+  dva voliteľné riadky pridávajú logické šírky. Starý súbor má pôvodné predvolené šírky.
+  Po načítaní sa šírky nastavia po dokončení úvodného DPI škálovania okna, aby
+  moderný runtime neprepočítal už prepočítaný rozmer druhýkrát.
+  Spodné príkazy zoznamu Prvky majú výšku podľa skutočného textu a šírky stĺpca;
+  pri nedostatku priestoru sa obsah posúva, takže sa neoreže ani dlhší preklad.
+- **Identifikátory…** pre GS1-128 otvoria pomenované polia, rýchle voľby GTIN,
+  šarže, exspirácie a sériového čísla a lokálne vyhľadávanie katalógu. Každé pole
+  ukazuje formát a svoju chybu, výsledný zápis a upozornenia sa obnovujú priebežne.
+  Opakovaný výber AI presunie zameranie na existujúce pole. Poradie menia šípky,
+  odstránenie je pri poli; **Použiť** je dostupné až po platnej kontrole.
+  Dátum zostáva presne v zadanom formáte RRMMDD vrátane dňa 00. Kontrolné číslice
+  sa nemenia bez súhlasu. **Zrušiť** neprepíše pôvodné údaje. Existujúce limity
+  20 AI, 48 dátových znakov GS1-128, oddelenie FNC1, upozornenia a XML ostávajú.
+
+Horné voľby aj polia GS1 sú pri malom okne alebo veľkom písme posúvateľné.
+Oba motívy zostávajú zachované po pridaní, presune a odstránení poľa; chybové
+informácie sú aj v prístupnom opise vstupu. Nové texty majú všetky štyri preklady.
+Katalóg a kontrola fungujú lokálne bez nových knižníc alebo internetového pripojenia.
+
+Overenie tohto balíka 18. novembra 2026: všetkých 32 sád prešlo na oboch runtime,
+vrátane 1 545 kontrol editora na každom. SDK zostavenie oboch cieľov má 0 chýb
+a 0 varovaní. Kompatibilné výsledky sú zhrnuté v
+`build/test-results/pdf-workspace-framework-complete` so súborom `run-map.json`,
+ktorý zachováva pôvod jednotlivých úspešných behov; cielená kontrola finálnej DPI
+obnovy je v `build/test-results/20261118-114356`. Moderné výsledky sú v
+`build/sdk-test-results/net10.0-windows/20261118-114523`. Overené sú motívy,
+obnova panelov a rozloženia, zámok centrovania, GS1 dáta a poradie, zrušenie,
+neplatné údaje a minimálny priestor pri zväčšenom písme. Fyzický presun medzi
+monitormi s odlišným DPI ani fyzické tlačenie tým nie sú nahradené.
+
 ## Platformy a overenie
 
 Funkcie sú lokálne a nevyžadujú internet ani nové knižnice. Rovnaké projekty

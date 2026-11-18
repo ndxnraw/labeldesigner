@@ -1,11 +1,16 @@
 ND LabelDesigner — Pre-release — Windows
-Aktualizované 17. novembra 2026
+Aktualizované 18. novembra 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
 Pri kompatibilnom balíku ponechajte vedľa EXE konfiguráciu, zxing.dll a LabelDesigner.Core.dll.
 Kompatibilný balík potrebuje .NET Framework 4.8/4.8.1. Moderný balík Windows-NET10-x64 obsahuje runtime a nepotrebuje jeho inštaláciu. Oba sú určené pre Windows 10/11. Rozbaľte celý vybraný ZIP do vlastného priečinka; súbory rôznych balíkov nemiešajte.
 
 NOVÉ FUNKCIE Pre-release
+Nástroje sú zoskupené: Projekt (šablóny, automatické ukladanie), Vložiť (text, obrázky,
+kódy), Dáta (dávky a premenné), Rozloženie (výber a hárky), Kontrola a údržba
+(kontrola etikety, diagnostika, aktualizácie). Skupiny aj príkazy majú ikony.
+Centrovať kód je vo vlastnostiach vybraného hlavného kódu; zamknutý kód sa nemení.
+Panely si po skrytí a opätovnom otvorení zachovávajú šírku aj po reštarte.
 Ponuka Nástroje: automatické ukladanie, šablóny a nedávne projekty,
 dávky CSV/XLSX a premenné, samolepiace hárky, vlastné obrázky,
 výber 1D / 2D / GS1 kódov, rozloženie a kontrola etikety.
@@ -61,7 +66,7 @@ aj písmo, hrany šírku/výšku. Esc zruší rozpracovaný presun alebo zmenu.
 Dvojklik otvorí textový vstup priamo na plátne. Font, veľkosť, tučné písmo a centrovanie
 sú vo vlastnostiach textu. Symbol Zálohované si zachováva vektorovú kvalitu.
 
-Tabuľku otvoríte tlačidlom Tabuľka; jej výšku zmeníte ťahaním predelu.
+Tabuľku otvoríte cez Panely → Tabuľka; jej výšku zmeníte ťahaním predelu.
 Ponuka Panely skryje bočné panely alebo obnoví rozloženie. Rozloženie sa
 pamätá samostatne od dokumentu. Menšie okná umožňujú rolovanie nastavení.
 Priblíženie sa týka len obrazovky. Voľba Prispôsobiť ukáže celú etiketu.
@@ -126,7 +131,7 @@ nahradení cieľa je export dokončený; neskoré stlačenie Zrušiť ho nevrát
 Už odoslanú fyzickú tlačovú úlohu rušte vo fronte tlačiarne vo Windows.
 
 DIAGNOSTIKA
-Nástroje → Diagnostika otvorí posledné lokálne záznamy chýb.
+Nástroje → Kontrola a údržba → Diagnostika otvorí posledné lokálne záznamy chýb.
 Uložiť diagnostiku vytvorí textovú kópiu zobrazených záznamov.
 Pri chybe je uvedený identifikátor záznamu na dohľadanie udalosti.
 Log obsahuje UTC čas, druh operácie, typ a miesto chyby a identifikátor
@@ -139,6 +144,9 @@ KÓDY, IMPORT A EXPORT
 EAN-13, EAN-8, UPC-A, Code 128, Code 39, Interleaved 2 of 5 a ITF-14
 zostávajú dostupné. Pre Code 128 možno zapnúť GS1, vybrať identifikátory,
 zadať dáta a meniť ich poradie. Kontrolné číslice sa dopĺňajú alebo overujú.
+Identifikátory… otvoria pomenované polia s formátom, priebežnou kontrolou a náhľadom.
+Bežné AI pridáte rýchlou voľbou; ďalšie vyhľadáte podľa čísla alebo názvu.
+Šípky pri poli menia poradie. Zrušiť ponechá pôvodné dáta; Použiť vyžaduje platné údaje.
 QR, Data Matrix, Aztec, PDF417, GS1 QR a GS1 Data Matrix sú podporované.
 Pridať kód… otvorí katalóg s vyhľadávaním, kategóriami a príkladmi.
 Podrobné pravidlá a limity údajov nájdete v BARCODE_CATALOG.md.
@@ -223,7 +231,7 @@ vyprázdni pomocnú pamäť. Pred odoslaním tlače sa údaje ovládača vždy n
 nanovo a skontroluje sa celý dokument. Zmenené údaje vyžiadajú nové potvrdenie.
 
 ZDROJE A OVERENIE
-Nástroje → Aktualizácie skontroluje verejné vydanie iba po stlačení tlačidla.
+Nástroje → Kontrola a údržba → Aktualizácie skontroluje verejné vydanie iba po stlačení tlačidla.
 Stiahnutie a príprava program neprepíšu. Spustenie vyžaduje potvrdenie;
 neuložený dokument môžete uložiť alebo prechod zrušiť. Profily, kalibrácie
 a šablóny zostávajú zachované a pred prechodom sa vytvorí lokálna záloha.
