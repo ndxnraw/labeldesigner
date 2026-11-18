@@ -18,6 +18,11 @@ legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,
 autosave without losing inline focus, resize cancellation and all four print
 sections. Screenshots cover the styled print window and minimum window size.
+The menu tests check that child items inherit readable colors and the same
+renderer as the parent menu. `BarcodeZebraTests` uses a fake sender to check
+logging only after approval, optional content retention, persisted printer
+settings, range selection with unchanged sheet positions and fresh confirmation
+before repeating a saved job.
 It also tests deliberate numeric wheel editing through both managed events and
 native child-window messages: hover and keyboard focus, click activation, focus
 loss, readonly values, bounds, spinner buttons and enclosing-panel scrolling.

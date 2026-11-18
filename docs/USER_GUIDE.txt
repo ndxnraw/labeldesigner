@@ -269,3 +269,9 @@ hodnotu nezmení; posúva sa nadradený panel. Po opustení poľa treba opäť k
 Otvorený zoznam možno posúvať aj po otvorení klávesnicou. Písanie a šípky fungujú.
 Pri malom okne a veľkom písme sú horné tlačové nastavenia aj obsah kariet posúvateľné.
 Korekcie, mierka, DPI, tmavosť Zebra a ignorovanie okrajov majú vysvetlenia priamo v okne.
+
+HISTÓRIA TLAČE
+Nástroje → Dáta → História tlače zobrazí pokusy o odoslanie tlače.
+Ak chcete použiť opakovanie, v tlačovom okne na karte Detaily zapnite uloženie obsahu úlohy.
+Pri opakovaní môžete vybrať strany alebo záznamy dávky. Tlač až po náhľade a novom potvrdení.
+Podrobný postup a limity sú v PRINT_HISTORY.md.

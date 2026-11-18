@@ -26,7 +26,7 @@ namespace EanEtikety {
  public sealed class OutputReviewDialog:Form {
   readonly PreflightReport report;readonly CheckBox acknowledge=new CheckBox();readonly ModernButton proceed=new ModernButton();readonly IssueView issues=new IssueView();
   public LabelIssue EditIssue{get;private set;}
-  public OutputReviewDialog(PreflightReport value,int copies,string action,string target,Font font,Icon icon){
+  public OutputReviewDialog(PreflightReport value,int copies,string action,string target,Font font,Icon icon,bool allowEdit=true){
    report=value;Text=Loc.T("Kontrola výstupu");Font=font;Icon=icon;ClientSize=new Size(760,600);MinimumSize=new Size(560,480);AutoScaleMode=AutoScaleMode.Dpi;StartPosition=FormStartPosition.CenterParent;ShowInTaskbar=false;
    var root=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(14),ColumnCount=1,RowCount=5};root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));Controls.Add(root);
    root.Controls.Add(new Label{AutoSize=true,UseMnemonic=false,Text=action+"  •  "+target,MaximumSize=new Size(700,0)});
@@ -35,7 +35,7 @@ namespace EanEtikety {
    var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,FlowDirection=FlowDirection.RightToLeft};root.Controls.Add(actions);
    proceed.Text=action;proceed.AutoSize=true;proceed.Enabled=value.CanProceed(false);proceed.DialogResult=DialogResult.OK;actions.Controls.Add(proceed);AcceptButton=proceed;
    var cancel=new ModernButton{Text=Loc.T("Zrušiť"),AutoSize=true,DialogResult=DialogResult.Cancel};actions.Controls.Add(cancel);CancelButton=cancel;
-   var edit=new ModernButton{Text=Loc.T("Späť na úpravy"),AutoSize=true};edit.Click+=delegate{EditIssue=issues.SelectedIssue;DialogResult=DialogResult.Cancel;Close();};actions.Controls.Add(edit);
+   if(allowEdit){var edit=new ModernButton{Text=Loc.T("Späť na úpravy"),AutoSize=true};edit.Click+=delegate{EditIssue=issues.SelectedIssue;DialogResult=DialogResult.Cancel;Close();};actions.Controls.Add(edit);}
   }
   protected override void OnFormClosing(FormClosingEventArgs e){if(DialogResult==DialogResult.OK&&!report.CanProceed(acknowledge.Checked)){e.Cancel=true;DialogResult=DialogResult.None;}base.OnFormClosing(e);}
  }

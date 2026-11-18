@@ -18,6 +18,13 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **História tlače:** cez **Nástroje → Dáta → História tlače** sa zobrazia
+  odoslané, zrušené a neúspešné pokusy o tlač. Ak bolo v karte **Detaily**
+  zapnuté uloženie obsahu úlohy, z histórie sa dá pripraviť opakovanie celku,
+  vybraných strán alebo pôvodných záznamov dávky. Pred tlačou sa otvorí náhľad
+  s uloženými nastaveniami a vyžiada sa nové predtlačové potvrdenie. Pozri
+  [História tlače](PRINT_HISTORY.md).
+
 - **Prehľadnejšie príkazy a GS1:** Nástroje sú v piatich skupinách s ikonami.
   Lišta už nemá Vybrať kód, Tabuľka ani Centrovať kód; tabuľka je v ponuke Panely
   a centrovanie vo vlastnostiach hlavného kódu. Panely po opätovnom zobrazení

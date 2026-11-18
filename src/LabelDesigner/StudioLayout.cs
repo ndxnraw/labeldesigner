@@ -14,6 +14,11 @@ public sealed class StudioMenuColors:ProfessionalColorTable {
  public override Color ImageMarginGradientMiddle{get{return StudioTheme.Panel(dark);}}
  public override Color ImageMarginGradientEnd{get{return StudioTheme.Panel(dark);}}
  public override Color MenuItemSelected{get{return dark?Color.FromArgb(35,65,110):Color.FromArgb(214,228,255);}}
+ public override Color MenuItemSelectedGradientBegin{get{return MenuItemSelected;}}
+ public override Color MenuItemSelectedGradientEnd{get{return MenuItemSelected;}}
+ public override Color MenuItemPressedGradientBegin{get{return MenuItemSelected;}}
+ public override Color MenuItemPressedGradientMiddle{get{return MenuItemSelected;}}
+ public override Color MenuItemPressedGradientEnd{get{return MenuItemSelected;}}
  public override Color MenuItemBorder{get{return StudioTheme.Accent;}}
  public override Color MenuBorder{get{return StudioTheme.Edge(dark);}}
 }

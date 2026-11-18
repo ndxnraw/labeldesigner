@@ -672,3 +672,29 @@ Identifikátor GS1	GS1 identifier	Identifikátor GS1	GS1-azonosító
 Údaje a kontrola GS1	GS1 data and validation	Údaje a kontrola GS1	GS1-adatok és ellenőrzés
 RRMMDD, napr. 271231. Deň 00 označuje koniec mesiaca.	YYMMDD, e.g. 271231. Day 00 means the end of the month.	RRMMDD, např. 271231. Den 00 označuje konec měsíce.	ÉÉHHNN, pl. 271231. A 00 nap a hónap végét jelenti.
 Vrátane kontrolnej číslice.	Including the check digit.	Včetně kontrolní číslice.	Az ellenőrző számjeggyel együtt.
+Uložiť obsah úlohy lokálne na opakovanie	Save job content locally for reprinting	Uložit obsah úlohy lokálně pro opakování	Feladattartalom helyi mentése újranyomtatáshoz
+Obsah etikiet sa uloží lokálne a bude dostupný v histórii tlače.	Label content is stored locally and available in print history.	Obsah etiket se uloží lokálně a bude dostupný v historii tisku.	A címkék tartalma helyben tárolódik, és elérhető a nyomtatási előzményekben.
+Uložená tlačová úloha je neplatná.	The saved print job is invalid.	Uložená tisková úloha je neplatná.	A mentett nyomtatási feladat érvénytelen.
+Zadajte dostupné čísla alebo rozsahy, napríklad 1,3-5.	Enter available numbers or ranges, for example 1,3-5.	Zadejte dostupná čísla nebo rozsahy, například 1,3-5.	Adjon meg elérhető számokat vagy tartományokat, például 1,3-5.
+Obsah úlohy sa do histórie nepodarilo uložiť.	The job content could not be saved to history.	Obsah úlohy se nepodařilo uložit do historie.	A feladat tartalmát nem sikerült menteni az előzményekbe.
+Záznam do histórie tlače sa nepodarilo uložiť.	The print history entry could not be saved.	Záznam se nepodařilo uložit do historie tisku.	A nyomtatási előzmény bejegyzését nem sikerült menteni.
+História tlače	Print history	Historie tisku	Nyomtatási előzmények
+Odoslané	Submitted	Odesláno	Elküldve
+Tlač zrušená	Print cancelled	Tisk zrušen	Nyomtatás megszakítva
+Chyba odoslania	Submission failed	Chyba odeslání	Küldési hiba
+Odoslané znamená prijatie úlohy tlačovým systémom.	Submitted means the print system accepted the job.	Odesláno znamená, že tiskový systém úlohu přijal.	Az Elküldve azt jelenti, hogy a nyomtatási rendszer elfogadta a feladatot.
+Čas	Time	Čas	Idő
+Strany	Pages	Strany	Oldalak
+Etikety	Labels	Etikety	Címkék
+Stav	Status	Stav	Állapot
+Uložený obsah	Saved content	Uložený obsah	Mentett tartalom
+Pripraviť opakovanie…	Prepare reprint…	Připravit opakování…	Újranyomtatás előkészítése…
+Odstrániť tento záznam a jeho uložený obsah?	Delete this entry and its saved content?	Odstranit tento záznam a jeho uložený obsah?	Törli ezt a bejegyzést és a mentett tartalmát?
+Načítavam tlačovú úlohu…	Loading print job…	Načítám tiskovou úlohu…	Nyomtatási feladat betöltése…
+Vybrať podľa	Select by	Vybrat podle	Kiválasztás alapja
+Záznamy dávky	Batch records	Záznamy dávky	Köteg rekordjai
+Výber, napríklad 1,3-5. Prázdne znamená všetko.	Selection, for example 1,3-5. Leave blank for all.	Výběr, například 1,3-5. Prázdné znamená vše.	Kiválasztás, például 1,3-5. Az üres mező mindet kiválasztja.
+Dostupné čísla	Available numbers	Dostupná čísla	Elérhető számok
+Otvoriť náhľad	Open preview	Otevřít náhled	Előnézet megnyitása
+Späť do histórie tlače	Back to print history	Zpět do historie tisku	Vissza a nyomtatási előzményekhez
+Históriu tlače práve používa iná inštancia. Skúste to znova.	Another instance is using print history. Try again.	Historii tisku právě používá jiná instance. Zkuste to znovu.	A nyomtatási előzményeket egy másik példány használja. Próbálja újra.
