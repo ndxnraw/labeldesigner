@@ -23,6 +23,14 @@ native child-window messages: hover and keyboard focus, click activation, focus
 loss, readonly values, bounds, spinner buttons and enclosing-panel scrolling.
 Translated tab captions are checked at 100%, 150% and 200% font sizes; the
 standalone review button is absent while `PreflightUiTests` verifies approval.
+The same suite covers native wheel routing for list-only and editable dropdowns,
+focus-only versus click activation, focus loss, keyboard selection, open lists,
+parent scrolling, expanded item lists and current-value tooltips. Combo rows must
+grow and shrink with fonts. Print captions, checkbox wrapping, inline explanations
+and both footer actions are measured in all four languages at 100/150/200% fonts
+using the actual 980x680 outer minimum window size. This synthetic font-size test
+does not represent a physical monitor DPI transition. Accessible setting descriptions
+must have matching inline text and all four translations.
 `BarcodeCatalogTests` adds 281 checks of the expanded offline catalogue: actual
 decoded content and GS1 FNC1 metadata, percent/field separators, capacity boundaries,
 checksums, invalid data, Unicode 2D content, PDF417 geometry/preflight, XML and

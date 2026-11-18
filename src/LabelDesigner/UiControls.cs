@@ -12,6 +12,16 @@ public class FocusText:Label {
  protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(Focused&&Width>4&&Height>4)ControlPaint.DrawFocusRectangle(e.Graphics,new Rectangle(1,1,Width-3,Height-3),ForeColor,BackColor);}
 }
 public class ModernComboBox:ComboBox {
+ readonly ToolTip valueTip=new UiToolTip();
+ protected override void OnDropDown(EventArgs e){int width=Width;foreach(var item in Items)width=Math.Max(width,TextRenderer.MeasureText(GetItemText(item),Font).Width+SystemInformation.VerticalScrollBarWidth+24);DropDownWidth=Math.Min(Screen.FromControl(this).WorkingArea.Width,width);base.OnDropDown(e);}
+ protected override void OnMouseEnter(EventArgs e){valueTip.SetToolTip(this,Text);base.OnMouseEnter(e);}
+ protected override void Dispose(bool disposing){if(disposing)valueTip.Dispose();base.Dispose(disposing);}
+ bool wheelArmed;
+ bool WheelAllowed{get{return Enabled&&ContainsFocus&&(wheelArmed||DroppedDown);}}
+ protected override void OnMouseDown(MouseEventArgs e){base.OnMouseDown(e);if(e.Button==MouseButtons.Left&&Enabled)wheelArmed=true;}
+ protected override void OnLeave(EventArgs e){wheelArmed=false;base.OnLeave(e);}
+ protected override void OnMouseWheel(MouseEventArgs e){if(WheelAllowed)base.OnMouseWheel(e);else WheelInput.ScrollParent(this,e);}
+ protected override void WndProc(ref Message m){if(m.Msg==0x20a&&!WheelAllowed){WheelInput.ScrollParent(this,new HandledMouseEventArgs(MouseButtons.None,0,0,0,unchecked((short)((long)m.WParam>>16))));m.Result=IntPtr.Zero;return;}base.WndProc(ref m);}
  IntPtr nativeFont;
  [System.Runtime.InteropServices.DllImport("user32.dll")]static extern IntPtr SendMessage(IntPtr h,int message,IntPtr w,IntPtr l);
  [System.Runtime.InteropServices.DllImport("gdi32.dll")]static extern bool DeleteObject(IntPtr handle);
@@ -22,15 +32,24 @@ public class ModernComboBox:ComboBox {
  protected override void OnHandleCreated(EventArgs e){base.OnHandleCreated(e);SyncNativeFont();}
  protected override void OnHandleDestroyed(EventArgs e){base.OnHandleDestroyed(e);if(nativeFont!=IntPtr.Zero){DeleteObject(nativeFont);nativeFont=IntPtr.Zero;}}
 
- public ModernComboBox(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer,true);FlatStyle=FlatStyle.Flat;}
+ public ModernComboBox(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer,true);FlatStyle=FlatStyle.Flat;AutoSize=true;}
  protected override void OnPaint(PaintEventArgs e){bool hc=SystemInformation.HighContrast;Color back=hc?SystemColors.Window:BackColor,ink=!Enabled?SystemColors.GrayText:hc?SystemColors.WindowText:ForeColor;e.Graphics.Clear(back);if(Width<4||Height<4)return;using(var pen=new Pen(hc?SystemColors.WindowText:Color.FromArgb(85,107,128)))e.Graphics.DrawRectangle(pen,0,0,Width-1,Height-1);if(Width>32)TextRenderer.DrawText(e.Graphics,Text,Font,new Rectangle(9,1,Width-32,Height-2),ink,TextFormatFlags.Left|TextFormatFlags.VerticalCenter|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);if(Width>24)using(var pen=new Pen(ink,1.5f)){int x=Width-17,y=Height/2;e.Graphics.DrawLines(pen,new[]{new Point(x-4,y-2),new Point(x,y+2),new Point(x+4,y-2)});}if(Focused&&Width>32&&Height>6)ControlPaint.DrawFocusRectangle(e.Graphics,new Rectangle(3,3,Width-27,Height-6),ink,back);}
- protected override void OnSelectedIndexChanged(EventArgs e){base.OnSelectedIndexChanged(e);Invalidate();}
+ protected override void OnSelectedIndexChanged(EventArgs e){base.OnSelectedIndexChanged(e);if(valueTip!=null)valueTip.SetToolTip(this,Text);Invalidate();}
+ protected override void OnTextChanged(EventArgs e){base.OnTextChanged(e);if(valueTip!=null)valueTip.SetToolTip(this,Text);}
  protected override void OnGotFocus(EventArgs e){base.OnGotFocus(e);Invalidate();}
  protected override void OnLostFocus(EventArgs e){base.OnLostFocus(e);Invalidate();}
  protected override void OnEnabledChanged(EventArgs e){base.OnEnabledChanged(e);Invalidate();}
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);Invalidate();}
 }
 public class ModernButton:Button {
+ public override Size GetPreferredSize(Size proposedSize){
+  if(!AutoSize)return base.GetPreferredSize(proposedSize);
+  int width=TextRenderer.MeasureText(Text,Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16+Padding.Horizontal;
+  if((Dock==DockStyle.Top||Dock==DockStyle.Bottom)&&Parent!=null)width=Parent.ClientSize.Width-Parent.Padding.Horizontal-Margin.Horizontal;
+  if(width<=0||width>100000)width=TextRenderer.MeasureText(Text,Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16+Padding.Horizontal;
+  int height=TextRenderer.MeasureText(Text,Font,new Size(Math.Max(1,width-16-Padding.Horizontal),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+12+Padding.Vertical;
+  return new Size(Math.Max(MinimumSize.Width,width),Math.Max(MinimumSize.Height,height));
+ }
  protected virtual bool SelectedVisual{get{return false;}}
  public ModernButton(){SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);}
  protected override void OnPaint(PaintEventArgs e){

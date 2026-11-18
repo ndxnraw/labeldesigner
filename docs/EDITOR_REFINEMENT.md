@@ -29,6 +29,12 @@
   zamerania. Samotný hover ani prechod klávesom Tab hodnotu nemenia; koliesko
   vtedy posúva nadradený panel. Po opustení poľa treba opäť kliknúť. Písanie,
   klávesy šípok a tlačidlá číselníka zostávajú dostupné.
+- Rovnaká ochrana platí pre samostatné rozbaľovacie ponuky v editore, nastaveniach
+  a tlači: zatvorený výber sa kolieskom zmení až po kliknutí a počas zamerania.
+  Otvorený zoznam možno posúvať aj po otvorení klávesnicou. Po opustení poľa
+  ochrana opäť zabráni zmene. Písanie a výber klávesmi zostávajú dostupné.
+  Otvorená ponuka prispôsobí šírku položkám v medziach obrazovky; celý aktuálny
+  názov je dostupný aj v bubline pri podržaní myši.
 
 ## Tlačové okno
 
@@ -51,6 +57,19 @@ Samostatné tlačidlo „Kontrola výstupu“ je odstránené; kontrolu otvorí 
 Tlačiť. Šírka názvov kariet sa riadi prekladom a veľkosťou písma. Pri nedostatku
 miesta sa karty rozložia do viacerých riadkov, aby sa názov Kalibrácia neorezával.
 
+Tlačidlá rastú podľa preloženého textu a písma. Dlhé zaškrtávacie popisy a
+vysvetlenia sa zalamujú podľa dostupnej šírky. Pri malom okne alebo veľkom písme
+majú horné nastavenia tlačiarne a opakovaní vlastné posúvanie, aby zostal priestor
+aj pre obsah kariet. Oba spodné príkazy zostávajú v okne; dlhý súhrn možno posúvať.
+Rozbaľovacie ponuky poskytujú rodičovskému rozloženiu skutočnú výšku natívneho
+poľa, vrátane zmien písma oboma smermi.
+
+Pri korekciách, mierke, ignorovaní okrajov ovládača, DPI a tmavosti Zebra sú
+stručné lokálne vysvetlenia v štyroch jazykoch. Tie isté texty sú dostupné ako
+prístupný opis ovládacieho prvku. Objasňujú smer posunu, východiskovú mierku,
+význam DPI, odlišnosť vypnutej tmavosti od hodnoty 0 a fyzické limity tlačiarne.
+Samotné nastavenia tlače ani predtlačové potvrdenie sa tým nemenia.
+
 ## Platformy a overenie
 
 Funkcie sú lokálne a nevyžadujú internet ani nové knižnice. Rovnaké projekty
@@ -71,6 +90,16 @@ vnútorného číselného vstupu a overujú preklady kariet pri 100/150/200 % ve
 písma. SDK zostavenie oboch cieľov skončilo s 0 chybami a 0 varovaniami.
 Výsledky sú v `build/test-results/20261118-065226` a
 `build/sdk-test-results/net10.0-windows/20261118-065809`.
+
+Balík ochrany ponúk, čitateľnosti a vysvetlení bol overený 18. novembra 2026:
+32/32 sád na oboch runtime vrátane 1 360 kontrol `EditorRefinementTests` na každom.
+Overuje aj natívne správy pevných a editovateľných ponúk, zachovanie klávesnice,
+šírky otvorených zoznamov, aktuálnu bublinu hodnoty, výšku riadkov po zmene písma
+oboma smermi, zalamovanie zaškrtávacích popisov a oba spodné príkazy v skutočnej
+minimálnej vonkajšej veľkosti okna 980 × 680. SDK zostavenie oboch cieľov má
+0 chýb a 0 varovaní. Výsledky: `build/test-results/20261118-080409` a
+`build/sdk-test-results/net10.0-windows/20261118-081654`. Vizuálne bol overený
+aj dlhý maďarský zaškrtávací popis pri 200 % písme; nejde o fyzickú zmenu DPI monitora.
 
 Overenie 17. novembra 2026: všetkých 32 sád prešlo na oboch runtime, vrátane
 87 kontrol tejto úpravy na každom z nich. Finálne SDK zostavenie oboch cieľov

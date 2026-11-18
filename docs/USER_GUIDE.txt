@@ -253,3 +253,11 @@ Dvojklik otvorí vstup priamo na etikete. Písanie sa zobrazuje priebežne.
 Enter potvrdí, Shift+Enter vloží nový riadok, Esc obnoví pôvodný obsah.
 Šírka podľa textu prispôsobuje nové texty; ručná zmena rozmerov ju vypne.
 Úplný postup, kompatibilita a karty tlače: EDITOR_REFINEMENT.md.
+
+BEZPEČNÉ POSÚVANIE A ČITATEĽNÉ NASTAVENIA
+Koliesko mení číselné pole alebo zatvorenú rozbaľovaciu ponuku až po kliknutí
+do poľa a počas jeho zamerania. Samotné prejdenie myšou alebo klávesom Tab
+hodnotu nezmení; posúva sa nadradený panel. Po opustení poľa treba opäť kliknúť.
+Otvorený zoznam možno posúvať aj po otvorení klávesnicou. Písanie a šípky fungujú.
+Pri malom okne a veľkom písme sú horné tlačové nastavenia aj obsah kariet posúvateľné.
+Korekcie, mierka, DPI, tmavosť Zebra a ignorovanie okrajov majú vysvetlenia priamo v okne.

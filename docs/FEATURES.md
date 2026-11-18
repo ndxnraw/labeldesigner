@@ -18,6 +18,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Ochrana ovládania kolieskom:** číselné polia a zatvorené rozbaľovacie ponuky
+  vyžadujú kliknutie a zameranie; samotný hover alebo prechod klávesom Tab nemení
+  hodnotu. Otvorené zoznamy a klávesnicový výber zostávajú dostupné. Tlačové
+  tlačidlá a dlhé popisy sa prispôsobujú písmu a šírke; pri nedostatku miesta je
+  obsah posúvateľný. Dôležité korekcie majú preložené vysvetlenia aj prístupné opisy.
 - **EAN a Zebra:** väčší predvolený popis nových kódov, samostatný ITF-14 a
   EAN-14 / GS1-128 s `(01)`, voliteľná priama ZPL tlač s DPI a tmavosťou
   uloženými podľa média. Staršie veľkosti a bežná tlač Windows zostávajú zachované.

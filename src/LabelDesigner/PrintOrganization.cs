@@ -1,6 +1,14 @@
 using System.Drawing;using System.Windows.Forms;
 namespace EanEtikety {
 public partial class PrintPanel {
+ void FitCommonSettings(TableLayoutPanel side,TableLayoutPanel fields){
+  bool fitting=false;System.Action fit=delegate{if(fitting||side.IsDisposed)return;fitting=true;try{
+   int settings=(int)printSections.RowStyles[0].Height+System.Math.Max(100,Font.Height*4);
+   int height=System.Math.Min(fields.PreferredSize.Height,System.Math.Max(70,side.ClientSize.Height-settings));
+   if(side.RowStyles[0].SizeType!=SizeType.Absolute||side.RowStyles[0].Height!=height){side.RowStyles[0].SizeType=SizeType.Absolute;side.RowStyles[0].Height=height;}
+  }finally{fitting=false;}};
+  side.SizeChanged+=delegate{fit();};fields.SizeChanged+=delegate{fit();};printSections.Layout+=delegate{fit();};FontChanged+=delegate{fit();};
+ }
  bool summaryLayout,summaryLayoutPending;TableLayoutPanel printDetails;
  void LayoutPrintSummary(){if(summaryLayout||jobSummary.Parent==null)return;summaryLayout=true;try{var container=(TableLayoutPanel)jobSummary.Parent;int width=System.Math.Max(100,container.ClientSize.Width-container.Padding.Horizontal-12);jobSummary.MaximumSize=new Size(width,0);jobInfo.MaximumSize=new Size(290,0);jobSummary.AutoSize=false;jobSummary.Height=TextRenderer.MeasureText(jobSummary.Text,jobSummary.Font,new Size(width,0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+4;int height=container.Padding.Vertical+jobSummary.Height+jobSummary.Margin.Vertical;foreach(Control child in container.Controls)if(child!=jobSummary&&child.Visible)height+=child.GetPreferredSize(new Size(width,0)).Height+child.Margin.Vertical;var parent=container.Parent as TableLayoutPanel;if(parent!=null){int row=parent.GetRow(container);if(row<0||row>=parent.RowStyles.Count)return;parent.RowStyles[row].SizeType=SizeType.Absolute;parent.RowStyles[row].Height=System.Math.Min(150,height);container.AutoSize=false;container.Dock=DockStyle.Fill;if(parent.IsHandleCreated&&!summaryLayoutPending&&parent.GetRowHeights()[row]<(int)parent.RowStyles[row].Height){summaryLayoutPending=true;parent.BeginInvoke((System.Action)delegate{summaryLayoutPending=false;if(!parent.IsDisposed)parent.PerformLayout(container,"Height");});}}}finally{summaryLayout=false;}}
  readonly ModernTabs printSections=new ModernTabs{Dock=DockStyle.Fill,Name="printSections",AccessibleName=Loc.T("Nastavenia tlače")};
