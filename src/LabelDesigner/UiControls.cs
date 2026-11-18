@@ -77,9 +77,13 @@ public class ModernTabs:TableLayoutPanel {
  protected override void OnFontChanged(EventArgs e){base.OnFontChanged(e);RefreshTabs();}
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);RefreshTabs();}
  public void RefreshTabs(){if(refreshing||header==null||buttons==null||buttons.Count==0)return;refreshing=true;try{
-  int width=Math.Max(1,header.ClientSize.Width/buttons.Count-5),height=Math.Max(43,(int)Math.Ceiling(43*Font.Height/(double)UiFonts.Default.Height));
-  foreach(var b in buttons){b.Width=width;height=Math.Max(height,TextRenderer.MeasureText(b.Text,b.Font,new Size(Math.Max(1,width-16),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+12);}
-  RowStyles[0].Height=height+4;bool hc=SystemInformation.HighContrast;
+  int available=Math.Max(1,header.ClientSize.Width-header.Padding.Horizontal),height=Math.Max(43,(int)Math.Ceiling(43*Font.Height/(double)UiFonts.Default.Height));
+  var widths=new int[buttons.Count];int total=0;bool oversized=false;
+  for(int i=0;i<buttons.Count;i++){widths[i]=TextRenderer.MeasureText(buttons[i].Text,buttons[i].Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16;total+=widths[i]+5;oversized|=widths[i]>available;}
+  int extra=total<=available?(available-total)/buttons.Count:0,rows=1,rowWidth=0;
+  header.WrapContents=!oversized;header.AutoScroll=oversized;
+  for(int i=0;i<buttons.Count;i++){var b=buttons[i];b.Width=widths[i]+extra;b.Margin=new Padding(0,0,5,4);if(!oversized&&rowWidth>0&&rowWidth+b.Width+5>available){rows++;rowWidth=0;}rowWidth+=b.Width+5;height=Math.Max(height,TextRenderer.MeasureText(b.Text,b.Font,new Size(Math.Max(1,b.Width-16),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+12);}
+  RowStyles[0].Height=rows*(height+4)+(oversized?SystemInformation.HorizontalScrollBarHeight:0);bool hc=SystemInformation.HighContrast;
   for(int i=0;i<pages.Count;i++){var b=buttons[i];b.Height=height;pages[i].Visible=i==selected;b.BackColor=i==selected?(hc?SystemColors.Highlight:Color.FromArgb(25,80,131)):BackColor;b.ForeColor=i==selected?(hc?SystemColors.HighlightText:Color.White):ForeColor;b.FlatAppearance.BorderColor=hc?SystemColors.WindowText:i==selected?Color.FromArgb(0,143,255):Dark?Color.FromArgb(56,75,92):Color.FromArgb(190,204,219);}
   Invalidate(true);
  }finally{refreshing=false;}}

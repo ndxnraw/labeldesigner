@@ -26,7 +26,7 @@ git status --short
 ```
 
 Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
-30 successful suites and reports in `build/test-results/`, validated
+32 successful suites and reports in `build/test-results/`, validated
 `build/packages/ND-LabelDesigner-Pre-release-Windows.zip`. `git status --short`
 must be empty. Work only from this clone when validating the handoff.
 

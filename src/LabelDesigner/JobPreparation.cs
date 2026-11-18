@@ -27,7 +27,7 @@ namespace EanEtikety {
     snapshot=CloneLabel(job.Label);outputPlan=job.Plan;jobError=null;UpdateJobInfo();UpdateOutputSummary();
     updating=true;try{page.Value=1;}finally{updating=false;}
     Schedule();
-   }catch(Exception ex){jobError=ex.Message;currentReport=null;review.Enabled=false;version++;debounce.Stop();print.Enabled=false;preview.ClearPages();info.Text=jobError;}
+   }catch(Exception ex){jobError=ex.Message;currentReport=null;version++;debounce.Stop();print.Enabled=false;preview.ClearPages();info.Text=jobError;}
   }
  }
 }

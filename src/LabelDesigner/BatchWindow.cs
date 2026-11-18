@@ -9,7 +9,7 @@ namespace EanEtikety {
   sealed class BatchWindow:IDisposable {
    readonly MainForm owner;readonly Form window;BatchSetup setup;
    readonly ModernComboBox sheet=new ModernComboBox(),separator=new ModernComboBox(),encoding=new ModernComboBox();
-   readonly CheckBox header=new CheckBox();readonly NumericUpDown generated=new NumericUpDown();
+   readonly CheckBox header=new CheckBox();readonly NumericUpDown generated=new ClickWheelNumericUpDown();
    readonly DataGridView mapping=new DataGridView(),records=new DataGridView();readonly PictureBox view=new PictureBox();
    readonly Label selectionInfo=new Label();Button exportSelected,printSelected;readonly Label preparedInfo=new Label();readonly BatchPreview preview;
    readonly List<DataTableSource> tables=new List<DataTableSource>();readonly List<string> targets=new List<string>();

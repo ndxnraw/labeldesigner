@@ -25,6 +25,10 @@
   obnoví aj toto nastavenie. Staré projekty bez `AutoWidth` majú ručné rozmery.
 - Písanie tvorí jeden krok Späť/Znova po potvrdení. Automatické uloženie uchová
   rozpracovaný obsah bez zatvorenia vstupu a bez straty kurzora.
+- Koliesko mení číselnú hodnotu až po kliknutí do jej poľa a len počas jeho
+  zamerania. Samotný hover ani prechod klávesom Tab hodnotu nemenia; koliesko
+  vtedy posúva nadradený panel. Po opustení poľa treba opäť kliknúť. Písanie,
+  klávesy šípok a tlačidlá číselníka zostávajú dostupné.
 
 ## Tlačové okno
 
@@ -43,6 +47,10 @@ používateľa, profily, zrušenie a obmedzenia kalibračného režimu zostávaj
 Prepnutie karty nemení nastavenia ani nevytvára nový náhľad. Neodosiela sa žiadna
 úloha bez pôvodnej predtlačovej kontroly.
 
+Samostatné tlačidlo „Kontrola výstupu“ je odstránené; kontrolu otvorí tlačidlo
+Tlačiť. Šírka názvov kariet sa riadi prekladom a veľkosťou písma. Pri nedostatku
+miesta sa karty rozložia do viacerých riadkov, aby sa názov Kalibrácia neorezával.
+
 ## Platformy a overenie
 
 Funkcie sú lokálne a nevyžadujú internet ani nové knižnice. Rovnaké projekty
@@ -55,6 +63,14 @@ spracovanie klávesov Enter/Esc, undo/redo, obnovenie stavu po zrušení, autosa
 zámok, nové texty, prístupnosť vstupu a úplnosť tlačových kariet. Obrázky zachytávajú
 skutočné naštýlované tlačové okno aj jeho minimálnu veľkosť. Štandardný runner má
 32 sád; fyzické tlačenie na konkrétnom zariadení zostáva manuálnym overením.
+
+Overenie úprav kolieska a tlačových ovládacích prvkov 18. novembra 2026:
+všetkých 32 sád prešlo na kompatibilnom aj modernom runtime, vrátane 215 kontrol
+`EditorRefinementTests` na každom z nich. Testy používajú aj natívne správy Windows
+vnútorného číselného vstupu a overujú preklady kariet pri 100/150/200 % veľkosti
+písma. SDK zostavenie oboch cieľov skončilo s 0 chybami a 0 varovaniami.
+Výsledky sú v `build/test-results/20261118-065226` a
+`build/sdk-test-results/net10.0-windows/20261118-065809`.
 
 Overenie 17. novembra 2026: všetkých 32 sád prešlo na oboch runtime, vrátane
 87 kontrol tejto úpravy na každom z nich. Finálne SDK zostavenie oboch cieľov

@@ -18,6 +18,11 @@ legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,
 autosave without losing inline focus, resize cancellation and all four print
 sections. Screenshots cover the styled print window and minimum window size.
+It also tests deliberate numeric wheel editing through both managed events and
+native child-window messages: hover and keyboard focus, click activation, focus
+loss, readonly values, bounds, spinner buttons and enclosing-panel scrolling.
+Translated tab captions are checked at 100%, 150% and 200% font sizes; the
+standalone review button is absent while `PreflightUiTests` verifies approval.
 `BarcodeCatalogTests` adds 281 checks of the expanded offline catalogue: actual
 decoded content and GS1 FNC1 metadata, percent/field separators, capacity boundaries,
 checksums, invalid data, Unicode 2D content, PDF417 geometry/preflight, XML and

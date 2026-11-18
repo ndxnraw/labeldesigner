@@ -2,7 +2,7 @@ using System;using System.Drawing;using System.Drawing.Printing;using System.Win
 namespace EanEtikety {
 public sealed class PrintCalibrationDialog:Form {
  readonly CalibrationTarget target;readonly Action<PrintCalibration> save;
- readonly NumericUpDown measuredX=new NumericUpDown(),measuredY=new NumericUpDown(),measuredWidth=new NumericUpDown(),measuredHeight=new NumericUpDown();
+ readonly NumericUpDown measuredX=new ClickWheelNumericUpDown(),measuredY=new ClickWheelNumericUpDown(),measuredWidth=new ClickWheelNumericUpDown(),measuredHeight=new ClickWheelNumericUpDown();
  readonly CheckBox confirmed=new CheckBox();readonly Label error=new Label();readonly ModernButton apply=new ModernButton();
  public PrintCalibrationDialog(CalibrationTarget target,Action printTarget,Action<PrintCalibration> save){
   if(target==null)throw new ArgumentNullException("target");this.target=target;this.save=save;

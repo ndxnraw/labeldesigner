@@ -1,7 +1,7 @@
 using System;using System.Drawing;using System.Windows.Forms;
 namespace EanEtikety {
  public partial class PrintPanel {
-  readonly CheckBox zebraZpl=new CheckBox(),zebraDarknessOverride=new CheckBox();readonly NumericUpDown zebraDpi=new NumericUpDown(),zebraDarkness=new NumericUpDown();
+  readonly CheckBox zebraZpl=new CheckBox(),zebraDarknessOverride=new CheckBox();readonly NumericUpDown zebraDpi=new ClickWheelNumericUpDown(),zebraDarkness=new ClickWheelNumericUpDown();
   Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int> zebraSender=(doc,geometry,settings,copies)=>ZebraPrint.Send(doc,geometry,settings,copies);
   ZebraSettings ReadZebra(){var value=new ZebraSettings{Enabled=zebraZpl.Checked,Dpi=(double)zebraDpi.Value,Darkness=zebraZpl.Checked&&zebraDarknessOverride.Checked?(decimal?)zebraDarkness.Value:null};value.Validate();return value;}
   static ZebraSettings ProfileZebra(PrinterProfile profile){var value=new ZebraSettings{Enabled=profile.ZebraZpl,Dpi=profile.ZplDpi,Darkness=profile.Darkness};value.Validate();return value;}
