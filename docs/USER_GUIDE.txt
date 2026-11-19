@@ -275,3 +275,9 @@ Nástroje → Dáta → História tlače zobrazí pokusy o odoslanie tlače.
 Ak chcete použiť opakovanie, v tlačovom okne na karte Detaily zapnite uloženie obsahu úlohy.
 Pri opakovaní môžete vybrať strany alebo záznamy dávky. Tlač až po náhľade a novom potvrdení.
 Podrobný postup a limity sú v PRINT_HISTORY.md.
+
+ČITATEĽNOSŤ KÓDOV PRED TLAČOU
+V tlačovom okne otvorte Detaily → Čitateľnosť kódov… pre výsledky EAN-13,
+ITF-14, GS1-128, QR a Data Matrix. Výberom položky označíte kód v náhľade.
+Pri veľkej dávke môžete spustiť celú kontrolu na pozadí. Zistenia sú upozornenia
+v predtlačovej kontrole. Podrobnosti sú v BARCODE_READABILITY.md.

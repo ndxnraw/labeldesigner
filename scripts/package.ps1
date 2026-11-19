@@ -25,6 +25,7 @@ $entries = [ordered]@{
   'BARCODE_CATALOG.md' = 'docs/BARCODE_CATALOG.md'
   'EDITOR_REFINEMENT.md' = 'docs/EDITOR_REFINEMENT.md'
   'PRINT_HISTORY.md' = 'docs/PRINT_HISTORY.md'
+  'BARCODE_READABILITY.md' = 'docs/BARCODE_READABILITY.md'
   'LICENSE' = 'LICENSE'
   'licenses/SourceSans3-OFL.txt' = 'assets/fonts/OFL.txt'
   'licenses/ZXing-LICENSE.txt' = 'src/third-party/ZXing/ZXing-LICENSE.txt'

@@ -698,3 +698,30 @@ Dostupné čísla	Available numbers	Dostupná čísla	Elérhető számok
 Otvoriť náhľad	Open preview	Otevřít náhled	Előnézet megnyitása
 Späť do histórie tlače	Back to print history	Zpět do historie tisku	Vissza a nyomtatási előzményekhez
 Históriu tlače práve používa iná inštancia. Skúste to znova.	Another instance is using print history. Try again.	Historii tisku právě používá jiná instance. Zkuste to znovu.	A nyomtatási előzményeket egy másik példány használja. Próbálja újra.
+Modul má menej než dva body tlačiarne. Zväčšite kód alebo použite vyššie DPI.	The module is narrower than two printer dots. Enlarge the code or use a higher DPI.	Modul má méně než dva body tiskárny. Zvětšete kód nebo použijte vyšší DPI.	A modul két nyomtatópontnál keskenyebb. Nagyítsa a kódot vagy használjon nagyobb DPI-t.
+Kód môže byť orezaný. Posuňte ho dovnútra etikety alebo overte médium a kalibráciu.	The code may be clipped. Move it inside the label or check media and calibration.	Kód může být oříznut. Posuňte ho dovnitř etikety nebo ověřte médium a kalibraci.	A kód levágódhat. Mozgassa a címkén belülre, vagy ellenőrizze a hordozót és a kalibrálást.
+Voľný okraj kódu je orezaný alebo obsadený. Pridajte voľný okraj alebo posuňte susedný prvok.	The code’s quiet zone is clipped or obstructed. Add space or move the neighboring element.	Volný okraj kódu je oříznutý nebo zakrytý. Přidejte volný prostor nebo posuňte sousední prvek.	A kód üres margója le van vágva vagy takarásban van. Növelje a helyet, vagy mozgassa a szomszédos elemet.
+Skúšobné načítanie nepotvrdilo pôvodné údaje. Skontrolujte veľkosť, voľné okraje a prekrytie.	The test scan did not confirm the original data. Check the size, quiet zones, and overlapping elements.	Zkušební načtení nepotvrdilo původní údaje. Zkontrolujte velikost, volné okraje a překrytí.	A próbaolvasás nem igazolta az eredeti adatokat. Ellenőrizze a méretet, az üres margókat és az átfedéseket.
+Výrez je príliš veľký na skúšobné načítanie pri tomto DPI.	The crop is too large for a test scan at this DPI.	Výřez je při tomto DPI příliš velký pro zkušební načtení.	A kivágás ezen a DPI-n túl nagy a próbaolvasáshoz.
+Automatická kontrola čitateľnosti preverila časť úlohy. Úplnú kontrolu spustíte v okne Čitateľnosť kódov.	The automatic readability check covered part of the job. Run the full check from Code readability.	Automatická kontrola čitelnosti prověřila část úlohy. Úplnou kontrolu spustíte v okně Čitelnost kódů.	Az automatikus olvashatósági ellenőrzés a feladat egy részét vizsgálta. A teljes ellenőrzés a Kódolvashatóság ablakból indítható.
+Kontrolujem čitateľnosť kódov…	Checking code readability…	Kontroluji čitelnost kódů…	Kódolvashatóság ellenőrzése…
+Kontrola čitateľnosti sa nepodarila. Skontrolujte kód na skúšobnom výtlačku.	The readability check could not finish. Check the code on a test print.	Kontrolu čitelnosti se nepodařilo dokončit. Zkontrolujte kód na zkušebním výtisku.	Az olvashatósági ellenőrzés nem fejeződött be. Ellenőrizze a kódot próbanyomaton.
+Čitateľnosť kódov…	Code readability…	Čitelnost kódů…	Kódolvashatóság…
+Údaje sa zhodujú	Data matches	Údaje se shodují	Az adatok egyeznek
+Nenačítané	Unreadable	Nenačteno	Nem olvasható
+Údaje sa nezhodujú	Data differs	Údaje se neshodují	Az adatok eltérnek
+Príliš veľký výrez	Crop too large	Příliš velký výřez	Túl nagy kivágás
+Nevykonané	Not run	Neprovedeno	Nem futott le
+Odhadované DPI	Estimated DPI	Odhadované DPI	Becsült DPI
+DPI výstupu	Output DPI	DPI výstupu	Kimeneti DPI
+Skontrolované kódy	Codes checked	Zkontrolované kódy	Ellenőrzött kódok
+Čiastočná kontrola	Partial check	Částečná kontrola	Részleges ellenőrzés
+Pozícia etikety	Label position	Pozice etikety	Címkepozíció
+Modul (body)	Module (dots)	Modul (body)	Modul (pont)
+Navrhnutý okraj Ľ/P/H/D (body)	Design quiet zone L/R/T/B (dots)	Návrh okraje L/P/H/D (body)	Tervezett üres margó B/J/F/A (pont)
+Skúšobné načítanie	Test scan	Zkušební načtení	Próbaolvasás
+Odporúčanie	Recommended action	Doporučení	Javaslat
+Označiť v náhľade	Highlight in preview	Označit v náhledu	Kiemelés az előnézetben
+Skontrolovať celú úlohu	Check the whole job	Zkontrolovat celou úlohu	Teljes feladat ellenőrzése
+Skúšobné načítanie je digitálna kontrola. Čitateľnosť výtlačku overte skenerom.	The test scan is a digital check. Verify the printed label with a scanner.	Zkušební načtení je digitální kontrola. Čitelnost výtisku ověřte skenerem.	A próbaolvasás digitális ellenőrzés. A nyomat olvashatóságát szkennerrel ellenőrizze.
+Ďalšie upozornenia na čitateľnosť nájdete v okne Čitateľnosť kódov.	See Code readability for additional warnings.	Další upozornění na čitelnost najdete v okně Čitelnost kódů.	További figyelmeztetések a Kódolvashatóság ablakban találhatók.

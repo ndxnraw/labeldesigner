@@ -18,6 +18,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Čitateľnosť kódov pred tlačou** je v tlačovom náhľade pod **Detaily →
+  Čitateľnosť kódov…**. Pre EAN-13, ITF-14, GS1-128, QR a Data Matrix
+  kontroluje modul, voľné okraje, orez a skúšobné načítanie pri rozlíšení
+  tlačiarne. Pozri [Kontrola čitateľnosti pred tlačou](BARCODE_READABILITY.md).
+
 - **História tlače:** cez **Nástroje → Dáta → História tlače** sa zobrazia
   odoslané, zrušené a neúspešné pokusy o tlač. Ak bolo v karte **Detaily**
   zapnuté uloženie obsahu úlohy, z histórie sa dá pripraviť opakovanie celku,

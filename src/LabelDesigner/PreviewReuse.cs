@@ -8,7 +8,7 @@ public partial class PrintPanel {
  void InvalidatePreviewCache(){driverRevision++;previewCache.Clear();}
  static PaperSize[] ReadPreviewPapers(PrinterSettings printer,PreviewTrace trace){var sizes=new System.Collections.Generic.List<PaperSize>();if(printer.IsValid){trace.CapabilityReads++;foreach(PaperSize size in printer.PaperSizes)sizes.Add(size);}return sizes.ToArray();}
  string GeometryKey(PrinterSettings printer,PageSettings page,int revision){var size=page.PaperSize;return revision.ToString(CultureInfo.InvariantCulture)+"|"+printer.PrinterName+"|"+size.PaperName+"|"+size.RawKind+"|"+size.Width+"|"+size.Height+"|"+page.Landscape;}
- PrinterPageGeometry PreviewGeometry(string key,PageSettings page,bool fresh,PreviewTrace trace){var geometry=fresh?null:previewCache.GetGeometry(key,PreviewClock);if(geometry==null){geometry=geometryReader(page);trace.DriverGeometryReads+=3;previewCache.StoreGeometry(key,geometry,PreviewClock);}return geometry;}
+ PrinterPageGeometry PreviewGeometry(string key,PageSettings page,bool fresh,PreviewTrace trace){var geometry=fresh?null:previewCache.GetGeometry(key,PreviewClock);if(geometry==null){geometry=geometryReader(page);trace.DriverGeometryReads+=4;previewCache.StoreGeometry(key,geometry,PreviewClock);}return geometry;}
  Image PreviewImage(LabelPrintDocument document,OutputPlan plan,int index,SizeF paper,PreviewTrace trace){
   // Externally supplied OutputPlans have public mutable labels/placements. Do not
   // cache their artwork; only our internally prepared, frozen job is reusable.

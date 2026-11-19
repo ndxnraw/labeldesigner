@@ -22,7 +22,7 @@ namespace EanEtikety {
  }
 
  public sealed class ArchivedPlacement {
-  public int Page, Record, LabelIndex;
+  public int Page, Record, LabelIndex, Slot;
   public RectangleF Bounds;
  }
 
@@ -56,7 +56,7 @@ namespace EanEtikety {
      job.Labels.Add(placement.Label);
     }
     job.Placements.Add(new ArchivedPlacement {
-     Page = placement.Page, Record = placement.Record, LabelIndex = index, Bounds = placement.Bounds
+     Page = placement.Page, Record = placement.Record, Slot = placement.Slot, LabelIndex = index, Bounds = placement.Bounds
     });
    }
    return job;
@@ -94,7 +94,7 @@ namespace EanEtikety {
     if (!selected.Contains(byRecord ? item.Record : item.Page + 1)) continue;
     if (item.Page != originalPage) { originalPage = item.Page; outputPage++; }
     plan.Placements.Add(new OutputPlacement {
-     Page = outputPage, Record = item.Record, Bounds = item.Bounds, Label = Labels[item.LabelIndex]
+     Page = outputPage, Record = item.Record, Slot = item.Slot, Bounds = item.Bounds, Label = Labels[item.LabelIndex]
     });
     records.Add(item.Record);
    }

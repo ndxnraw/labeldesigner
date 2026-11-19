@@ -50,6 +50,11 @@ checksums, invalid data, Unicode 2D content, PDF417 geometry/preflight, XML and
 clipboard round trips, SVG and real modal chooser actions in four languages.
 Plessey uses a known zero-data/CRC vector because the vendored reader lacks this
 format. See [BARCODE_CATALOG](BARCODE_CATALOG.md) for limits and local ZXing changes.
+The same suite verifies offline print-raster decoding for EAN-13, ITF-14,
+GS1-128, QR and Data Matrix, including calibrated geometry, clipping,
+quiet-zone obstruction, batch record and sheet positions, scan limits and
+cancellation. `BarcodeZebraTests` selects a finding and verifies the highlight
+on the correct preview page. See [BARCODE_READABILITY](BARCODE_READABILITY.md).
 `BarcodeZebraTests` covers larger new captions with legacy XML defaults preserved,
 GTIN-14 GS1-128 decoding/FNC1/AI (01) separately from old ITF-14 bearer bars,
 bounded ZPL rendering and unit resets, invariant/default/zero darkness, partial
