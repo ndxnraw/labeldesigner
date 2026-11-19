@@ -18,6 +18,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Prenosná záloha a obnova** prenesie šablóny s predvoľbami dávok a profily
+  médií medzi inštaláciami cez ZIP. Náhľad ukáže konflikty a priradenie tlačiarní.
+  Pred obnovou vznikne lokálna záloha aktuálnych údajov.
+
 - **Predvoľby dávky** ukladajú nastavenia CSV, hárok XLSX a mapovanie v projekte.
   Pri ďalšom importe vyhľadajú stĺpce podľa hlavičiek. Ukážka prvých piatich
   záznamov zobrazí zdroj stĺpca a jeho hodnoty aj pri mapovaní podľa pozície.

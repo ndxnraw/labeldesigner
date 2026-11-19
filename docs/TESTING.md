@@ -23,6 +23,10 @@ and missing headers, preserve quantity and uniqueness mappings, round-trip
 saved presets and verify that deleting an element remaps surviving bindings.
 The batch dialog test saves multiple presets, checks actual sample values and
 verifies positional confirmation, cancellation and invalidation.
+The portable workspace tests verify ZIP inventory, offline transfer of a
+template with a saved batch preset, multiple media profiles and calibration,
+printer reassignment, default conflict handling, checkpoint backup, stale
+preview detection and rollback when a later write fails.
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,

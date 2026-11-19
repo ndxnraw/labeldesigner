@@ -78,6 +78,23 @@ stĺpcov pre prvých päť dátových záznamov. Pri tabuľke bez hlavičky potv
 pozície pred prípravou dávky. Nový import alebo zmena priradenia vyžiada nové
 potvrdenie. Funkcie sú dostupné offline na .NET Framework 4.8 aj .NET 10.
 
+PRENOSNÁ ZÁLOHA ŠABLÓN A PROFILOV
+Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
+profily médií alebo obe kategórie a použite Exportovať zálohu do ZIPu….
+Šablóny obsahujú uložené predvoľby dávok. Profily obsahujú nastavenia média,
+kalibráciu a nastavenia Zebra vrátane tmavosti.
+
+Na cieľovom počítači vyberte Otvoriť ZIP na obnovu…. V náhľade skontrolujte
+položky a podľa potreby vyberte cieľovú tlačiareň. Zhodné názvy sa predvolene
+ponechajú. Voľba Nahradiť položky s rovnakým názvom zmení výsledok v náhľade.
+Po presune profilu na inú tlačiareň overte kalibráciu skúšobným výtlačkom.
+
+Po potvrdení obnovy vznikne pred zápisom ZIP v susednom priečinku .workspace.backups.
+Jeho umiestnenie sa zobrazí po obnove. Otvorením tohto ZIPu sa dajú obnoviť
+nahradené položky. Poškodené šablóny sú v náhľade označené a preskočia sa.
+Pre presný návrat odstráňte aj položky pridané pôvodnou
+obnovou. Zálohy fungujú offline na .NET Framework 4.8 aj .NET 10.
+
 OTÁČANIE PRVKOV
 Po označení uchopte kruhový rotačný úchyt nad prvkom. Uhly 0°, 90°, 180° a 270° sa prichytávajú v tolerancii 3°.
 Shift prichytáva po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.

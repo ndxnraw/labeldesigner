@@ -760,3 +760,36 @@ Odstrániť vybranú predvoľbu dávky?	Delete the selected batch preset?	Odstra
 Tabuľka nemá hlavičku. Pred prípravou dávky potvrďte poradie namapovaných stĺpcov.	The table has no headers. Confirm the mapped column order before preparing the batch.	Tabulka nemá záhlaví. Před přípravou dávky potvrďte pořadí namapovaných sloupců.	A táblázatnak nincs fejléce. Előkészítés előtt erősítse meg a hozzárendelt oszlopok sorrendjét.
 Ukážka najviac piatich záznamov s hodnotami zo zdrojovej tabuľky.	Up to five records with values from the source table.	Ukázka nejvýše pěti záznamů s hodnotami ze zdrojové tabulky.	Legfeljebb öt rekord a forrástáblázat értékeivel.
 Potvrdiť mapovanie	Confirm mapping	Potvrdit mapování	Hozzárendelés megerősítése
+Prenosná záloha a obnova…	Portable backup and restore…	Přenosná záloha a obnova…	Hordozható mentés és visszaállítás…
+Náhľad obnovy pracovných údajov	Workspace restore preview	Náhled obnovy pracovních dat	Munkaterület visszaállításának előnézete
+Profily médií	Media profiles	Profily médií	Médiaprofilok
+Exportovať zálohu do ZIPu…	Export backup to ZIP…	Exportovat zálohu do ZIPu…	Mentés exportálása ZIP-fájlba…
+Otvoriť ZIP na obnovu…	Open ZIP to restore…	Otevřít ZIP k obnově…	ZIP megnyitása visszaállításhoz…
+Záloha bola uložená:	Backup saved at:	Záloha byla uložena:	Mentés helye:
+Záloha pred obnovou:	Pre-restore backup:	Záloha před obnovou:	Visszaállítás előtti mentés:
+Obnovené položky: {0}	Restored items: {0}	Obnovené položky: {0}	Visszaállított elemek: {0}
+Vytváram zálohu…	Creating backup…	Vytvářím zálohu…	Mentés készítése…
+Overujem zálohu…	Verifying backup…	Ověřuji zálohu…	Mentés ellenőrzése…
+Čítam pracovné údaje…	Reading workspace data…	Načítám pracovní data…	Munkaterület adatainak olvasása…
+Obnovujem pracovné údaje…	Restoring workspace data…	Obnovuji pracovní data…	Munkaterület adatainak visszaállítása…
+Priradenie tlačiarní	Printer mapping	Přiřazení tiskáren	Nyomtatók hozzárendelése
+Vyberte cieľovú tlačiareň alebo ponechajte pôvodný názov. Pri zmene tlačiarne overte kalibráciu skúšobnou tlačou.	Select a target printer or keep the original name. When changing printers, verify calibration with a test print.	Vyberte cílovou tiskárnu nebo ponechte původní název. Při změně tiskárny ověřte kalibraci zkušebním tiskem.	Válasszon célnyomtatót vagy tartsa meg az eredeti nevet. Nyomtatóváltáskor próbanyomtatással ellenőrizze a kalibrálást.
+Pôvodná tlačiareň	Source printer	Původní tiskárna	Eredeti nyomtató
+Cieľová tlačiareň	Target printer	Cílová tiskárna	Célnyomtató
+Nahradiť položky s rovnakým názvom	Replace items with matching names	Nahradit položky se stejným názvem	Az azonos nevű elemek cseréje
+Akcia	Action	Akce	Művelet
+Šablóna	Template	Šablona	Sablon
+Nahradiť	Replace	Nahradit	Csere
+Ponechať	Keep	Ponechat	Megtartás
+Obnoviť pracovné údaje	Restore workspace data	Obnovit pracovní data	Munkaterület adatainak visszaállítása
+{0} pridať, {1} nahradiť, {2} ponechať.	Add {0}, replace {1}, keep {2}.	{0} přidat, {1} nahradit, {2} ponechat.	{0} hozzáadása, {1} cseréje, {2} megtartása.
+Priradenie tlačiarní vytvára dva profily s rovnakým názvom.	Printer mapping creates two profiles with the same name.	Přiřazení tiskáren vytváří dva profily se stejným názvem.	A nyomtatók hozzárendelése két azonos nevű profilt eredményez.
+Neplatná alebo príliš veľká záloha pracovných údajov.	Invalid or oversized workspace backup.	Neplatná nebo příliš velká záloha pracovních dat.	Érvénytelen vagy túl nagy munkaterület-mentés.
+Pracovné údaje sa od náhľadu zmenili. Otvorte zálohu znova.	Workspace data changed after the preview. Open the backup again.	Pracovní data se od náhledu změnila. Otevřete zálohu znovu.	A munkaterület adatai megváltoztak az előnézet óta. Nyissa meg újra a mentést.
+Pracovné údaje sa práve zálohujú alebo obnovujú.	Workspace data is being backed up or restored.	Pracovní data se právě zálohují nebo obnovují.	A munkaterület adatainak mentése vagy visszaállítása folyamatban van.
+Obnova sa nedokončila. Záloha je uložená tu:	Restore did not complete. The backup is stored here:	Obnova se nedokončila. Záloha je uložena zde:	A visszaállítás nem fejeződött be. A mentés itt található:
+Zálohu uložte ako súbor ZIP.	Save the backup as a ZIP file.	Uložte zálohu jako soubor ZIP.	A mentést ZIP-fájlként mentse.
+Poškodená šablóna:	Damaged template:	Poškozená šablona:	Sérült sablon:
+Poškodená šablóna	Damaged template	Poškozená šablona	Sérült sablon
+Poškodené šablóny sa pri obnove preskočia: {0}	Damaged templates to skip: {0}	Poškozené šablony budou při obnově přeskočeny: {0}	A visszaállításból kihagyott sérült sablonok: {0}
+Cestu pracovných údajov už používa iná položka:	The workspace path is already used by another item:	Cestu pracovních dat již používá jiná položka:	A munkaterület útvonalát már más elem használja:

@@ -9,12 +9,23 @@ public class PrinterProfile {
 }
 public class PrinterProfileStore {
  readonly string path;public List<PrinterProfile> Profiles=new List<PrinterProfile>();
- public PrinterProfileStore(string file){path=file;if(File.Exists(path))Profiles=ProjectXml.Decode<List<PrinterProfile>>(File.ReadAllText(path));}
+ public PrinterProfileStore(string file){path=Path.GetFullPath(file);using(Lock())Profiles=Read();}
+ IDisposable Lock(){return WorkspaceBackup.LockDirectory(Path.GetDirectoryName(path));}
+ List<PrinterProfile> Read(){return File.Exists(path)?ProjectXml.Decode<List<PrinterProfile>>(File.ReadAllText(path)):new List<PrinterProfile>();}
  public List<PrinterProfile> ForPrinter(string name){return Profiles.FindAll(p=>string.Equals(p.Printer,name,StringComparison.OrdinalIgnoreCase));}
  public PrinterProfile Find(string name){return Profiles.FindLast(p=>string.Equals(p.Printer,name,StringComparison.OrdinalIgnoreCase));}
  public PrinterProfile Find(string printer,string name){return Profiles.Find(p=>string.Equals(p.Printer,printer,StringComparison.OrdinalIgnoreCase)&&string.Equals(p.DisplayName,name,StringComparison.OrdinalIgnoreCase));}
- public void Save(PrinterProfile value){if(value==null||string.IsNullOrWhiteSpace(value.Printer)||value.Width<1||value.Height<1||value.Width>20000||value.Height>20000||double.IsNaN(value.X)||double.IsNaN(value.Y)||double.IsInfinity(value.X)||double.IsInfinity(value.Y)||Math.Abs(value.X)>100||Math.Abs(value.Y)>100)throw new ArgumentException(Loc.T("Neplatný profil média."));new PrintCalibration{X=value.X,Y=value.Y,ScaleX=value.ScaleX,ScaleY=value.ScaleY}.Validate();new ZebraSettings{Enabled=value.ZebraZpl,Dpi=value.ZplDpi,Darkness=value.Darkness}.Validate();var copy=value.Copy();copy.Name=copy.DisplayName.Trim();if(copy.Name.Length>120)throw new ArgumentException(Loc.T("Neplatný profil média."));var next=new List<PrinterProfile>(Profiles);next.RemoveAll(p=>string.Equals(p.Printer,copy.Printer,StringComparison.OrdinalIgnoreCase)&&string.Equals(p.DisplayName,copy.Name,StringComparison.OrdinalIgnoreCase));next.Add(copy);ProjectXml.Save(path,next);Profiles=next;}
- public void Delete(string printer,string name){var next=new List<PrinterProfile>(Profiles);next.RemoveAll(p=>string.Equals(p.Printer,printer,StringComparison.OrdinalIgnoreCase)&&string.Equals(p.DisplayName,name,StringComparison.OrdinalIgnoreCase));ProjectXml.Save(path,next);Profiles=next;}
+ internal static PrinterProfile ValidatedCopy(PrinterProfile value){
+  if(value==null||string.IsNullOrWhiteSpace(value.Printer)||value.Width<1||value.Height<1||value.Width>20000||value.Height>20000)
+   throw new ArgumentException(Loc.T("Neplatný profil média."));
+  new PrintCalibration{X=value.X,Y=value.Y,ScaleX=value.ScaleX,ScaleY=value.ScaleY}.Validate();
+  new ZebraSettings{Enabled=value.ZebraZpl,Dpi=value.ZplDpi,Darkness=value.Darkness}.Validate();
+  var copy=value.Copy();copy.Name=copy.DisplayName.Trim();
+  if(copy.Name.Length>120)throw new ArgumentException(Loc.T("Neplatný profil média."));
+  return copy;
+ }
+ public void Save(PrinterProfile value){var copy=ValidatedCopy(value);using(Lock()){var next=Read();next.RemoveAll(p=>string.Equals(p.Printer,copy.Printer,StringComparison.OrdinalIgnoreCase)&&string.Equals(p.DisplayName,copy.Name,StringComparison.OrdinalIgnoreCase));next.Add(copy);ProjectXml.Save(path,next);Profiles=next;}}
+ public void Delete(string printer,string name){using(Lock()){var next=Read();next.RemoveAll(p=>string.Equals(p.Printer,printer,StringComparison.OrdinalIgnoreCase)&&string.Equals(p.DisplayName,name,StringComparison.OrdinalIgnoreCase));ProjectXml.Save(path,next);Profiles=next;}}
 }
 public partial class PrintPanel {
  PrinterProfileStore profiles;PrinterProfile requestedProfile;readonly ModernComboBox mediaProfiles=new ModernComboBox();readonly TextBox profileName=new TextBox();readonly CheckBox ignoreDriverMargins=new CheckBox();readonly NumericUpDown offsetX=new ClickWheelNumericUpDown(),offsetY=new ClickWheelNumericUpDown(),scaleX=new ClickWheelNumericUpDown(),scaleY=new ClickWheelNumericUpDown();ModernButton calibrationLaunch;

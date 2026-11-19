@@ -37,7 +37,8 @@ namespace EanEtikety {
  }
  public static class AtomicOutput {
   public static void Save(string target,Action<string> write){
-   string temp=target+"."+Guid.NewGuid().ToString("N")+".tmp";
+   target=Path.GetFullPath(target);
+   string temp=Path.Combine(Path.GetDirectoryName(target),"."+Guid.NewGuid().ToString("N")+".tmp");
    try{WorkContext.Check();write(temp);WorkContext.Check();if(File.Exists(target))File.Replace(temp,target,null,true);else File.Move(temp,target);}
    finally{if(File.Exists(temp))File.Delete(temp);}
   }

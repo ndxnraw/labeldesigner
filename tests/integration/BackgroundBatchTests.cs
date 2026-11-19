@@ -42,8 +42,38 @@ class BackgroundBatchTests {
    PresetUi(controller,form,owner);
    using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,form.ClientRectangle);image.Save(Path.Combine(dir,"batch-background.png"));}completed=true;
   }catch(Exception ex){failure=ex;}finally{form.Close();}break;}};timer.Start();Call(owner,"ShowBatch");}
-  if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");Call(owner,"Apply",LabelSettings.Default());owner.Close();
+  if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");WorkspaceBackupUi(owner);Call(owner,"Apply",LabelSettings.Default());owner.Close();
  }}
+ static void WorkspaceBackupUi(MainForm owner){
+  string source=Path.Combine(dir,"profile-export"),target=Path.Combine(dir,"profile-import"),zip=Path.Combine(dir,"profiles.zip");
+  string targetFile=Path.Combine(target,"printers.xml");
+  new PrinterProfileStore(Path.Combine(source,"printers.xml")).Save(new PrinterProfile{Printer="Old",Name="Roll",Width=200,Height=100,X=2});
+  new PrinterProfileStore(targetFile).Save(new PrinterProfile{Printer="Local",Name="Roll",Width=200,Height=100,X=-3});
+  new WorkspaceBackup(source).Export(zip,false,true);
+  var service=new WorkspaceBackup(target);
+  var review=service.Open(zip);
+  WorkspaceRestorePlan selected=null;
+  Action show=()=>selected=(WorkspaceRestorePlan)Call(owner,"ReviewWorkspaceRestore",owner,review,new List<string>{"Local"});
+  VisitDialog("Náhľad obnovy pracovných údajov",show,dialog=>{
+   var map=(DataGridView)dialog.Controls.Find("workspacePrinterMap",true)[0];
+   var grid=(DataGridView)dialog.Controls.Find("workspaceRestoreItems",true)[0];
+   var restore=Button(dialog,Loc.T("Obnoviť pracovné údaje"));
+   Check(grid.RowCount==1&&Convert.ToString(grid.Rows[0].Cells[4].Value)==Loc.T("Pridať"),"review initially preserves the original printer");
+   map.Rows[0].Cells[1].Value="Local";
+   Check(Convert.ToString(grid.Rows[0].Cells[3].Value)=="Local"&&Convert.ToString(grid.Rows[0].Cells[4].Value)==Loc.T("Ponechať")&&!restore.Enabled,"remapping recalculates the conflict and defaults to keeping the destination");
+   ((CheckBox)dialog.Controls.Find("workspaceReplace",true)[0]).Checked=true;
+   Check(Convert.ToString(grid.Rows[0].Cells[4].Value)==Loc.T("Nahradiť")&&restore.Enabled,"explicit replacement appears in review");
+   Button(dialog,Loc.T("Zrušiť")).PerformClick();
+  });
+  Check(selected==null&&new PrinterProfileStore(targetFile).Find("Local","Roll").X==-3,"cancel writes nothing");
+  VisitDialog("Náhľad obnovy pracovných údajov",show,dialog=>{
+   var map=(DataGridView)dialog.Controls.Find("workspacePrinterMap",true)[0];
+   map.Rows[0].Cells[1].Value="Local";
+   ((CheckBox)dialog.Controls.Find("workspaceReplace",true)[0]).Checked=true;
+   Button(dialog,Loc.T("Obnoviť pracovné údaje")).PerformClick();
+  });
+  Check(selected!=null&&selected.Items[0].Action==WorkspaceRestoreAction.Replace&&selected.Items[0].TargetPrinter=="Local","confirmed dialog returns the reviewed replace plan");
+ }
  static void VisitDialog(string title,Action show,Action<Form> inspect){
   Exception failure=null;bool visited=false;
   using(var timer=new System.Windows.Forms.Timer{Interval=40}){

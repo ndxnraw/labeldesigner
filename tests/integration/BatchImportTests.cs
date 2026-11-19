@@ -1,5 +1,89 @@
 using System;using System.IO;using System.IO.Compression;using System.Collections.Generic;using System.Drawing;using System.Windows.Forms;using EanEtikety;
 class BatchImportTests {
+ static void PortableBackup(string dir){
+  string source=Path.Combine(dir,"backup-source"),target=Path.Combine(dir,"backup-target");
+  string library=Path.Combine(source,"Templates");
+  Directory.CreateDirectory(library);Directory.CreateDirectory(target);
+  var label=LabelSettings.Default();
+  label.Batch.Presets.Add(new BatchPreset{Name="Supplier",Bindings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0,HeaderName="Item"}}});
+  label.Batch.ActivePresetName="Supplier";
+  Engine.Save(Path.Combine(library,"Shipping.ean.xml"),label);
+  var printers=new PrinterProfileStore(Path.Combine(source,"printers.xml"));
+  printers.Save(new PrinterProfile{Printer="Source Zebra",Name="40 × 30",Paper="Roll",Width=157,Height=118,X=-1.25,ScaleY=1.04,ZebraZpl=true,ZplDpi=203,Darkness=16});
+  printers.Save(new PrinterProfile{Printer="Source Zebra",Name="100 × 150",Paper="Roll",Width=394,Height=591,X=2,ScaleX=.97});
+  File.WriteAllText(Path.Combine(source,"secret.csv"),"not included");
+  string zip=Path.Combine(dir,"workspace.zip");
+  new WorkspaceBackup(source).Export(zip,true,true);
+  var service=new WorkspaceBackup(target);
+  var review=service.Open(zip);
+  var staleStore=new PrinterProfileStore(Path.Combine(target,"printers.xml"));
+  Check(!Directory.Exists(Path.Combine(target,"Templates"))&&review.SourcePrinters.Count==1,"reading portable backup is nonmutating");
+  var map=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase){{"Source Zebra","Local Zebra"}};
+  var plan=review.Preview(false,map);
+  Check(plan.Items.Count==3&&plan.Items.TrueForAll(item=>item.Action==WorkspaceRestoreAction.Add),"restore preview shows added template and both media");
+  var result=service.Restore(plan);
+  var loaded=Engine.Load(Path.Combine(target,"Templates","Shipping.ean.xml"));
+  var roll=new PrinterProfileStore(Path.Combine(target,"printers.xml"));
+  Check(loaded.Batch.ActivePresetName=="Supplier"&&loaded.Batch.Presets[0].Bindings[0].HeaderName=="Item","portable template retains its named batch preset");
+  Check(roll.ForPrinter("Local Zebra").Count==2&&roll.Find("Local Zebra","40 × 30").Darkness==16&&roll.Find("Local Zebra","40 × 30").ScaleY==1.04&&roll.Find("Local Zebra","100 × 150").ScaleX==.97,"printer mapping preserves independent calibration and Zebra darkness");
+  Check(result.Applied==3&&Path.GetDirectoryName(result.BackupPath)==target+".backups"&&File.Exists(result.BackupPath)&&
+   !File.Exists(Path.Combine(target,"secret.csv")),"successful restore saves an independent checkpoint and transfers only allowed data");
+  plan=service.Open(zip).Preview(false,map);
+  Check(plan.Items.TrueForAll(item=>item.Action==WorkspaceRestoreAction.Keep)&&service.Restore(plan).Applied==0,"name conflicts default to keeping local items");
+  string local=Path.Combine(target,"Templates","Shipping.ean.xml");
+  label.Texts[0].Text="local edit";Engine.Save(local,label);
+  plan=service.Open(zip).Preview(true,map);
+  result=service.Restore(plan);
+  Check(Engine.Load(local).Texts[0].Text!="local edit"&&service.Open(result.BackupPath).Preview(true).Items.Count==3,"explicit replacement and a readable pre-restore ZIP");
+  plan=service.Open(zip).Preview(true,map);
+  label.Texts[0].Text="changed after preview";Engine.Save(local,label);
+  bool rejected=false;
+  try{service.Restore(plan);}catch(IOException){rejected=true;}
+  Check(rejected&&Engine.Load(local).Texts[0].Text=="changed after preview","stale preview cannot overwrite recent local edits");
+  string corrupt=Path.Combine(dir,"invalid-workspace.zip");File.Copy(zip,corrupt);
+  using(var archive=ZipFile.Open(corrupt,ZipArchiveMode.Update)){Entry(archive,"../accidental.txt","extra");}
+  rejected=false;try{service.Open(corrupt);}catch(InvalidDataException){rejected=true;}
+  Check(rejected&&!File.Exists(Path.Combine(dir,"accidental.txt")),"unexpected entries are rejected without extraction");
+  string tampered=Path.Combine(dir,"tampered.zip");File.Copy(zip,tampered);
+  using(var archive=ZipFile.Open(tampered,ZipArchiveMode.Update)){
+   var entry=archive.GetEntry("Templates/Shipping.ean.xml");
+   using(var stream=entry.Open()){stream.Position=0;stream.WriteByte(33);}
+  }
+  rejected=false;try{service.Open(tampered);}catch(InvalidDataException){rejected=true;}
+  Check(rejected,"same-length payload tampering fails the ZIP inventory checksum");
+  File.WriteAllText(local,"<broken");
+  result=service.Restore(service.Open(zip).Preview(true,map));
+  var checkpoint=service.Open(result.BackupPath).Preview(true);
+  Check(checkpoint.Items.Exists(item=>item.Name=="Shipping.ean.xml"&&item.Action==WorkspaceRestoreAction.Invalid)&&
+   checkpoint.Items.Exists(item=>item.TargetPrinter=="Local Zebra"&&item.Action==WorkspaceRestoreAction.Replace),
+   "checkpoint can reopen after replacing a damaged template, with other entries eligible");
+  staleStore.Save(new PrinterProfile{Printer="Another",Name="Roll",Width=100,Height=200});
+  Check(new PrinterProfileStore(Path.Combine(target,"printers.xml")).ForPrinter("Local Zebra").Count==2,"saving from an earlier profile store retains restored media");
+  string rollback=Path.Combine(dir,"rollback-work");
+  string blocked=Path.Combine(rollback,"printers.xml");
+  Directory.CreateDirectory(blocked);
+  var failing=new WorkspaceBackup(rollback);
+  rejected=false;try{failing.Open(zip);}catch(IOException){rejected=true;}
+  Check(rejected&&!Directory.Exists(rollback+".backups"),"directory blocking profiles is detected in preview");
+  Directory.Delete(blocked);
+  new PrinterProfileStore(blocked).Save(new PrinterProfile{Printer="Existing",Name="Roll",Width=200,Height=100});
+  plan=failing.Open(zip).Preview(false);
+  rejected=false;
+  using(var hold=File.Open(blocked,FileMode.Open,FileAccess.Read,FileShare.Read)){
+   try{failing.Restore(plan);}catch(IOException){rejected=true;}catch(UnauthorizedAccessException){rejected=true;}
+  }
+  Check(rejected&&!File.Exists(Path.Combine(rollback,"Templates","Shipping.ean.xml"))&&
+   Directory.GetFiles(rollback+".backups","*.zip").Length==1,"later write failure rolls back earlier additions and retains checkpoint");
+  string templatesOnly=Path.Combine(dir,"templates.zip");
+  new WorkspaceBackup(source).Export(templatesOnly,true,false);
+  using(var archive=ZipFile.OpenRead(templatesOnly))Check(archive.GetEntry("printers.xml")==null,"template-only export excludes media profiles");
+  var stop=new WorkContext();stop.Cancel();
+  byte[] stable=File.ReadAllBytes(templatesOnly);
+  rejected=false;using(stop.Enter()){
+   try{new WorkspaceBackup(source).Export(templatesOnly,true,true);}catch(OperationCanceledException){rejected=true;}
+  }
+  Check(rejected&&UpdateFiles.Digest(stable)==UpdateFiles.Hash(templatesOnly),"cancelled export preserves an existing ZIP");
+ }
  static void Presets(){
   var source=BatchData.CsvText("Item;Case;Qty;Serial\r\n590123412345;858000000001;2;001",';');
   var setup=new BatchSetup{QuantityColumn=2,UniqueColumn=3};
@@ -77,7 +161,7 @@ class BatchImportTests {
   catch(InvalidDataException ex){Check(ex.Message.Contains("4"),"CSV syntax error cites the source line");}
  }
  static int count;static void Check(bool b,string message){count++;if(!b)throw new Exception(message);}static void Entry(ZipArchive z,string name,string content){using(var w=new StreamWriter(z.CreateEntry(name).Open()))w.Write(content);}
- [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
+ [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{PortableBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
  Entry(z,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Products' r:id='r1'/><sheet name='Other' r:id='r2'/></sheets></workbook>");Entry(z,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");Entry(z,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");Entry(z,"xl/sharedStrings.xml","<sst><si><t>Žltý čaj</t></si></sst>");Entry(z,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' s='1'><v>123</v></c><c r='B1' t='s'><v>0</v></c><c r='C1' s='2'><v>45292</v></c><c r='D1'><f>1+1</f><v>2</v></c><c r='E1'><f>1+1</f></c></row><row r='3'><c r='A3' t='inlineStr'><is><t>000045</t></is></c></row></sheetData></worksheet>");Entry(z,"xl/worksheets/sheet2.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other sheet</t></is></c></row></sheetData></worksheet>");}
  var tables=BatchData.Xlsx(file);Check(tables.Count==2&&tables[1].Name=="Other","sheet selection");Check(tables[0].Rows[0][0]=="000123"&&tables[0].Rows[2][0]=="000045","formatted and text leading zeros");Check(tables[0].Rows[0][1]=="Žltý čaj","shared strings unicode");Check(tables[0].Rows[0][2]=="2024-01-01","Excel numeric date");Check(tables[0].Rows[0][3]=="2"&&tables[0].Rows[0][4].StartsWith("!ERROR"),"formula cached result versus error");Check(tables[0].Rows[1].Length==0,"sparse row number retained");
  var persisted=LabelSettings.Default();persisted.Texts.Add(new TextItem{Text="Second"});persisted.Batch.Bindings.Add(new ColumnBinding{Target="text:1",Column=3});persisted=ProjectXml.Clone(persisted);Check(persisted.Batch.Bindings[0].Column==3,"batch mapping project roundtrip");Elements.Remove(persisted,new List<int>{0});Check(persisted.Batch.Bindings[0].Target=="text:0","mapping follows surviving element after deletion");var label=LabelSettings.Default();label.Kind=128;var mappings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}};var record=BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today);Check(record.Error==null&&record.Count==2&&record.Label.Ean=="000123","mapped record quantity");mappings[1].Column=4;Check(BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today).Error!=null,"formula error blocks mapped row");

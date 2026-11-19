@@ -125,6 +125,7 @@ public static class Engine {
   }
  }
  public static void Save(string file,LabelSettings s){ValidateDraft(s);string backup=null;if(File.Exists(file)){try{Load(file);backup=file+".bak";}catch(IOException){throw;}catch(UnauthorizedAccessException){throw;}catch{ /* Keep an existing backup when the overwritten file is damaged. */ }}ProjectXml.Save(file,s,backup);}
- public static LabelSettings Load(string file){using(var r=XmlReader.Create(file,new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=64000000})){var s=(LabelSettings)new XmlSerializer(typeof(LabelSettings)).Deserialize(r);ValidateDraft(s);return s;}}
+ public static LabelSettings Load(string file){using(var stream=File.OpenRead(file))return Load(stream);}
+ public static LabelSettings Load(Stream stream){using(var r=XmlReader.Create(stream,new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=64000000})){var s=(LabelSettings)new XmlSerializer(typeof(LabelSettings)).Deserialize(r);ValidateDraft(s);return s;}}
 }
 }
