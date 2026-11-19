@@ -13,6 +13,11 @@ go to `build/tests/`; timestamped reports, screenshots and generated exports go 
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
+`BatchImportTests` checks physical CSV line numbers across quoted line breaks,
+multiple findings for one record, opt-in duplicates and migration of existing
+mappings. `BackgroundBatchTests` opens the issues list, navigates to the
+corresponding partial preview and verifies that excluding the erroneous
+record enables printing the valid selection.
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,

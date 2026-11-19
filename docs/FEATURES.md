@@ -18,6 +18,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Kontrola vstupných dát dávky** zobrazí chyby a upozornenia s pôvodným
+  riadkom CSV a stĺpcom. Z prehľadu sa dá prejsť na etiketu v náhľade.
+  Duplicity sa kontrolujú vo voliteľnom stĺpci s jedinečnými hodnotami.
+
 - **Čitateľnosť kódov pred tlačou** je v tlačovom náhľade pod **Detaily →
   Čitateľnosť kódov…**. Pre EAN-13, ITF-14, GS1-128, QR a Data Matrix
   kontroluje modul, voľné okraje, orez a skúšobné načítanie pri rozlíšení

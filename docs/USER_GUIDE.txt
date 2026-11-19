@@ -44,6 +44,21 @@ alebo pôvodný riadok dávky. Záznam dávky uvádza aj prvú dotknutú stranu.
 Výber prázdnej dávky alebo zahrnutého chybného riadka vypne tlač aj export;
 chybný riadok možno opraviť v zdroji a dávku znova pripraviť alebo ho vynechať.
 
+Po príprave dávky otvorte Problémy vstupných dát… pre zoznam jednotlivých
+chýb a upozornení. Číslo riadka CSV je fyzický riadok, na ktorom sa záznam
+začína, vrátane hlavičky a zalomení v úvodzovkách. Stĺpce sa číslujú od 1.
+Pri chýbajúcom namapovanom stĺpci CSV sa zobrazí chyba. Prázdne textové
+pole v prítomnom stĺpci je povolené. Nesprávne množstvo alebo neplatný kód
+sa uvádzajú pri príslušnom stĺpci.
+
+Prejsť na etiketu vyberie záznam v dávkovom okne a zobrazí jeho náhľad.
+Pri chybnom zázname sú viditeľné jeho použiteľné prvky. Opravte CSV a znova
+ho importujte alebo zrušte zahrnutie chybného riadka pre aktuálnu tlač.
+Ak majú byť hodnoty, napríklad sériové čísla, jedinečné, vyberte v mapovaní
+Stĺpec s jedinečnými hodnotami. Rovnaké neprázdne hodnoty vo vstupnej tabuľke
+vytvoria upozornenia aj pre prvý výskyt. Porovnanie zachová úvodné nuly,
+medzery a veľkosť písmen. Táto kontrola funguje lokálne na oboch verziách.
+
 OTÁČANIE PRVKOV
 Po označení uchopte kruhový rotačný úchyt nad prvkom. Uhly 0°, 90°, 180° a 270° sa prichytávajú v tolerancii 3°.
 Shift prichytáva po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.

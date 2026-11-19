@@ -725,3 +725,14 @@ Označiť v náhľade	Highlight in preview	Označit v náhledu	Kiemelés az elő
 Skontrolovať celú úlohu	Check the whole job	Zkontrolovat celou úlohu	Teljes feladat ellenőrzése
 Skúšobné načítanie je digitálna kontrola. Čitateľnosť výtlačku overte skenerom.	The test scan is a digital check. Verify the printed label with a scanner.	Zkušební načtení je digitální kontrola. Čitelnost výtisku ověřte skenerem.	A próbaolvasás digitális ellenőrzés. A nyomat olvashatóságát szkennerrel ellenőrizze.
 Ďalšie upozornenia na čitateľnosť nájdete v okne Čitateľnosť kódov.	See Code readability for additional warnings.	Další upozornění na čitelnost najdete v okně Čitelnost kódů.	További figyelmeztetések a Kódolvashatóság ablakban találhatók.
+Riadok CSV	CSV line	Řádek CSV	CSV-sor
+V riadku chýba namapovaný stĺpec.	The row is missing a mapped column.	V řádku chybí namapovaný sloupec.	A sorból hiányzik egy hozzárendelt oszlop.
+Rovnaká hodnota je aj v riadku {0}.	The same value also appears on line {0}.	Stejná hodnota je také na řádku {0}.	Ugyanez az érték a(z) {0}. sorban is szerepel.
+Náhľad etikety	Label preview	Náhled etikety	Címke előnézete
+Problémy vstupných dát…	Input data issues…	Problémy vstupních dat…	Bemeneti adatok hibái…
+Stĺpec s jedinečnými hodnotami	Column with unique values	Sloupec s jedinečnými hodnotami	Egyedi értékeket tartalmazó oszlop
+Náhľad tohto riadka nie je dostupný.	A preview is unavailable for this row.	Náhled tohoto řádku není dostupný.	Ehhez a sorhoz nem érhető el előnézet.
+Náhľad použiteľných prvkov. Záznam má chyby.	Preview of usable elements. This record has errors.	Náhled použitelných prvků. Záznam obsahuje chyby.	A használható elemek előnézete. A rekord hibákat tartalmaz.
+Opravte a znova importujte súbor alebo vynechajte chybné záznamy.	Fix and reimport the file, or exclude rows with errors.	Opravte a znovu importujte soubor nebo vynechte chybné záznamy.	Javítsa és importálja újra a fájlt, vagy hagyja ki a hibás sorokat.
+Prejsť na etiketu	Go to label	Přejít na etiketu	Ugrás a címkére
+Hodnota obsahuje nepovolený znak.	The value contains an unsupported character.	Hodnota obsahuje nepovolený znak.	Az érték nem támogatott karaktert tartalmaz.

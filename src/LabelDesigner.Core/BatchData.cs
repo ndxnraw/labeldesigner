@@ -1,12 +1,82 @@
 using System;using System.IO;using System.IO.Compression;using System.Xml;using System.Collections.Generic;using System.Globalization;using System.Text;using System.Text.RegularExpressions;
 namespace EanEtikety {
-public class BatchSetup {public List<ColumnBinding> Bindings=new List<ColumnBinding>();public int QuantityColumn=-1,CodePage=65001,GeneratedCount=1;public bool Header=true;public char Separator=';';public string SheetName="";}
-public class DataTableSource {public string Name;public List<string[]> Rows=new List<string[]>();}
+public class BatchSetup {public List<ColumnBinding> Bindings=new List<ColumnBinding>();public int QuantityColumn=-1,UniqueColumn=-1,CodePage=65001,GeneratedCount=1;public bool Header=true;public char Separator=';';public string SheetName="";}
+public class DataTableSource {
+ public string Name;
+ public List<string[]> Rows=new List<string[]>();
+ internal readonly List<int> CsvLines=new List<int>();
+ public bool HasCsvLineNumbers { get { return CsvLines.Count>0; } }
+ internal int SourceRow(int index) { return index<CsvLines.Count?CsvLines[index]:index+1; }
+}
 public class ColumnBinding {public string Target;public int Column=-1;}
-public class BatchRecord {public int Row,Count=1;public LabelSettings Label;public string Error,VariableValues;public DateTime? PreparedAt;}
-public static class BatchData {
+public class BatchRecord {
+ public int Row,Count=1;
+ public LabelSettings Label;
+ public string Error,VariableValues;
+ public DateTime? PreparedAt;
+ public readonly List<BatchInputIssue> Issues=new List<BatchInputIssue>();
+ internal LabelSettings PartialPreview;
+ public LabelSettings PreviewLabel { get { return Label??PartialPreview; } }
+ internal void AddIssue(int column,string target,string message,bool blocking=true) {
+  Issues.Add(new BatchInputIssue { Row=Row, Column=column, Target=target, Message=message, Blocking=blocking });
+  if(blocking&&Error==null)Error=message;
+ }
+}
+public sealed class BatchInputIssue {
+ public int Row,Column;
+ public string Message;
+ public bool Blocking;
+ internal string Target;
+}
+public static partial class BatchData {
  public static DataTableSource Csv(string path,char separator,int codePage){if(new FileInfo(path).Length>16000000)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));string data;using(var input=new CheckedReadStream(File.OpenRead(path)))using(var reader=new StreamReader(input,codePage==65001?new UTF8Encoding(false,true):TextEncodings.Get(codePage),true))data=reader.ReadToEnd();return CsvText(data,separator);}
- public static DataTableSource CsvText(string data,char separator){var result=new DataTableSource{Name="CSV"};var row=new List<string>();var field=new StringBuilder();bool quoted=false,afterQuote=false;Action finish=delegate{row.Add(field.ToString());field.Clear();afterQuote=false;if(row.Count>256)throw new InvalidDataException(Loc.T("Príliš veľa stĺpcov"));};for(int i=0;i<data.Length;i++){if((i&4095)==0)WorkContext.Report("Načítavam CSV…",i,data.Length);char c=data[i];if(quoted){if(c=='"'){if(i+1<data.Length&&data[i+1]=='"'){field.Append('"');i++;}else{quoted=false;afterQuote=true;}}else field.Append(c);continue;}if(c=='"'){if(field.Length>0||afterQuote)throw new InvalidDataException(Loc.T("Neplatné úvodzovky CSV"));quoted=true;}else if(c==separator)finish();else if(c=='\r'||c=='\n'){if(c=='\r'&&i+1<data.Length&&data[i+1]=='\n')i++;finish();result.Rows.Add(row.ToArray());row.Clear();if(result.Rows.Count>10001)throw new InvalidDataException(Loc.T("Najviac 10000 záznamov"));}else{if(afterQuote&&!char.IsWhiteSpace(c))throw new InvalidDataException(Loc.T("Neplatné CSV"));if(!afterQuote)field.Append(c);}}if(quoted)throw new InvalidDataException(Loc.T("Neuzavreté úvodzovky CSV"));if(field.Length>0||row.Count>0||afterQuote){finish();result.Rows.Add(row.ToArray());}WorkContext.Report("Načítavam CSV…",data.Length,data.Length);return result;}
+ public static DataTableSource CsvText(string data,char separator) {
+  var result=new DataTableSource { Name="CSV" };
+  var row=new List<string>();
+  var field=new StringBuilder();
+  bool quoted=false,afterQuote=false;
+  int line=1,rowLine=1;
+  Action finishField=delegate {
+   row.Add(field.ToString());field.Clear();afterQuote=false;
+   if(row.Count>256)throw CsvError(rowLine,"Príliš veľa stĺpcov");
+  };
+  Action finishRow=delegate {
+   finishField();
+   if(result.Rows.Count>=10001)throw CsvError(rowLine,"Najviac 10000 záznamov");
+   result.Rows.Add(row.ToArray());result.CsvLines.Add(rowLine);row.Clear();
+  };
+  for(int i=0;i<data.Length;i++) {
+   if((i&4095)==0)WorkContext.Report("Načítavam CSV…",i,data.Length);
+   char c=data[i];
+   if(c=='\r'||c=='\n') {
+    bool crlf=c=='\r'&&i+1<data.Length&&data[i+1]=='\n';
+    if(quoted){field.Append(c);if(crlf)field.Append('\n');}
+    else{finishRow();rowLine=line+1;}
+    line++;
+    if(crlf)i++;
+    continue;
+   }
+   if(quoted) {
+    if(c!='"')field.Append(c);
+    else if(i+1<data.Length&&data[i+1]=='"'){field.Append('"');i++;}
+    else{quoted=false;afterQuote=true;}
+    continue;
+   }
+   if(c=='"') {
+    if(field.Length>0||afterQuote)throw CsvError(rowLine,"Neplatné úvodzovky CSV");
+    quoted=true;
+   } else if(c==separator)finishField();
+   else if(!afterQuote)field.Append(c);
+   else if(!char.IsWhiteSpace(c))throw CsvError(rowLine,"Neplatné CSV");
+  }
+  if(quoted)throw CsvError(rowLine,"Neuzavreté úvodzovky CSV");
+  if(field.Length>0||row.Count>0||afterQuote)finishRow();
+  WorkContext.Report("Načítavam CSV…",data.Length,data.Length);
+  return result;
+ }
+ static InvalidDataException CsvError(int line,string message) {
+  return new InvalidDataException(Loc.T("Riadok CSV")+" "+line+" — "+Loc.T(message));
+ }
  static XmlDocument Xml(ZipArchive z,string path){var entry=z.GetEntry(path);if(entry==null)throw new InvalidDataException(Loc.T("Neplatný XLSX")+": "+path);if(entry.Length>32000000)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));var d=new XmlDocument{XmlResolver=null};using(var s=entry.Open())using(var checkedStream=new CheckedReadStream(s))using(var reader=XmlReader.Create(checkedStream,new XmlReaderSettings{XmlResolver=null,DtdProcessing=DtdProcessing.Prohibit,MaxCharactersInDocument=32000000}))d.Load(reader);return d;}
  static List<XmlElement> All(XmlNode n,string local){var result=new List<XmlElement>();foreach(XmlNode node in n.SelectNodes(".//*[local-name()='"+local+"']"))if(node is XmlElement)result.Add((XmlElement)node);WorkContext.Check();return result;}
  public static List<DataTableSource> Xlsx(string path){if(new FileInfo(path).Length>32000000)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));using(var z=ZipFile.OpenRead(path)){long total=0;foreach(var entry in z.Entries){WorkContext.Check();total+=entry.Length;if(total>64000000)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));}var book=Xml(z,"xl/workbook.xml");var rel=Xml(z,"xl/_rels/workbook.xml.rels");var targets=new Dictionary<string,string>();foreach(var e in All(rel,"Relationship")){if(e.GetAttribute("TargetMode")=="External")continue;string target=e.GetAttribute("Target").Replace('\\','/');if(target.Contains(".."))throw new InvalidDataException(Loc.T("Neplatný XLSX"));targets[e.GetAttribute("Id")]=target.StartsWith("/")?target.TrimStart('/'):"xl/"+target;}
@@ -21,7 +91,5 @@ public static class BatchData {
  public static string Value(string[] row,int column){return column>=0&&column<row.Length?row[column]:"";}
  public static Dictionary<string,string> Variables(LabelSettings template,int index,DateTime instant){var result=new Dictionary<string,string>(StringComparer.Ordinal);foreach(var variable in template.Variables){if(!Regex.IsMatch(variable.Name??"",@"^[\p{L}_][\p{L}\p{N}_]*$")||result.ContainsKey(variable.Name))throw new InvalidDataException(Loc.T("Neplatný alebo duplicitný názov premennej"));string value;if(variable.Type=="Number"){if(variable.Digits<1||variable.Digits>30)throw new InvalidDataException(Loc.T("Neplatný počet číslic"));value=checked(variable.Start+variable.Step*index).ToString("D"+variable.Digits,CultureInfo.InvariantCulture);}else if(variable.Type=="Date")value=(variable.FixedDate?variable.Date:instant.Date).AddMonths(variable.Months).AddDays(variable.Days).ToString(variable.Format,CultureInfo.InvariantCulture);else if(variable.Type=="Fixed")value=variable.FixedValue;else throw new InvalidDataException(Loc.T("Neplatný typ premennej"));result.Add(variable.Name,variable.Prefix+value+variable.Suffix);}WorkContext.Check();return result;}
  static string Expand(string text,Dictionary<string,string> values){return Regex.Replace(text??"",@"\{([\p{L}_][\p{L}\p{N}_]*)\}",m=>{if(!values.ContainsKey(m.Groups[1].Value))throw new InvalidDataException(Loc.T("Neznáma premenná")+": "+m.Groups[1].Value);return values[m.Groups[1].Value];});}
- public static BatchRecord Record(LabelSettings template,string[] row,List<ColumnBinding> mappings,int quantityColumn,int index,int rowNumber,DateTime instant){var result=new BatchRecord{Row=rowNumber,PreparedAt=instant};try{WorkContext.Check();var s=ProjectXml.Clone(template);foreach(var binding in mappings){if(binding.Column<0)continue;string value=Value(row,binding.Column);if(value.StartsWith("!ERROR:"))throw new InvalidDataException(value);if(binding.Target=="code")s.Ean=value;else if(binding.Target.StartsWith("text:"))s.Texts[int.Parse(binding.Target.Substring(5))].Text=value;else if(binding.Target.StartsWith("symbol:")){var symbol=s.Symbols[int.Parse(binding.Target.Substring(7))];if(symbol.Matrix!=null)symbol.Matrix.Data=value;else if(symbol.Code!=null)symbol.Code.Ean=value;}}
-  var values=Variables(template,index,instant);result.VariableValues=JobPreparation.Describe(values);s.Ean=Expand(s.Ean,values);foreach(var text in s.Texts)text.Text=Expand(text.Text,values);foreach(var ai in s.ApplicationIdentifiers)ai.Data=Expand(ai.Data,values);foreach(var symbol in s.Symbols){if(symbol.Matrix!=null)symbol.Matrix.Data=Expand(symbol.Matrix.Data,values);if(symbol.Code!=null){symbol.Code.Ean=Expand(symbol.Code.Ean,values);foreach(var ai in symbol.Code.ApplicationIdentifiers)ai.Data=Expand(ai.Data,values);}}s.Variables.Clear();if(quantityColumn>=0){int count;if(!int.TryParse(Value(row,quantityColumn),NumberStyles.Integer,CultureInfo.InvariantCulture,out count)||count<1||count>10000)throw new InvalidDataException(Loc.T("Neplatný počet etikiet"));result.Count=count;}TextAutoLayout.Apply(s);Engine.Validate(s);result.Label=s;}catch(OperationCanceledException){throw;}catch(Exception ex){result.Error=ex.Message;}WorkContext.Check();return result;}
 }
 }

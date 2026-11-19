@@ -38,9 +38,49 @@ class BackgroundBatchTests {
    // No partial result or candidate mapping is committed to the editor.
    Check(object.ReferenceEquals(old,Field<List<BatchRecord>>(controller,"batch"))&&ProjectXml.Encode((LabelSettings)Call(owner,"Read"))==original,"cancel/completion race preserves consistent batch and project");
    var grid=Field<DataGridView>(controller,"records");grid.Rows[0].Cells[0].Value=false;grid.EndEdit();Check(!Field<List<bool>>(controller,"included")[0],"virtual checkbox edits update selected records");Call(controller,"SelectAll",false);Check(!Field<List<bool>>(controller,"included")[0],"virtual selection clears");Call(controller,"SelectAll",true);Check(Field<List<bool>>(controller,"included")[0],"virtual selection restores");
+   CsvIssuesUi(controller,form);
    using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,form.ClientRectangle);image.Save(Path.Combine(dir,"batch-background.png"));}completed=true;
   }catch(Exception ex){failure=ex;}finally{form.Close();}break;}};timer.Start();Call(owner,"ShowBatch");}
   if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");Call(owner,"Apply",LabelSettings.Default());owner.Close();
  }}
+ static void CsvIssuesUi(object controller,Form batchWindow){
+  string csv=Path.Combine(dir,"issues.csv");
+  File.WriteAllText(csv,"Code;Name\r\n590123412345;\"Good\r\nlabel\"\r\nnot a barcode;Bad code\r\n590123412345;Other");
+  Check((bool)Call(controller,"LoadFile",csv,';',65001),"batch window imports CSV for data check");
+  var mapping=Field<DataGridView>(controller,"mapping");
+  var targets=Field<List<string>>(controller,"targets");
+  var source=(DataGridViewComboBoxColumn)mapping.Columns[1];
+  mapping.Rows[targets.IndexOf("code")].Cells[1].Value=source.Items[1];
+  mapping.Rows[targets.IndexOf("text:0")].Cells[1].Value=source.Items[2];
+  Call(controller,"Prepare");
+  var grid=Field<DataGridView>(controller,"records");
+  var print=Field<Button>(controller,"printSelected");
+  var open=Button(batchWindow,Loc.T("Problémy vstupných dát…"));
+  Check(open!=null&&open.Enabled&&!print.Enabled,"imported error enables review and blocks printing");
+  Exception dialogFailure=null;bool visited=false;
+  using(var timer=new System.Windows.Forms.Timer{Interval=40}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog.Text!=Loc.T("Problémy vstupných dát…"))continue;
+     timer.Stop();
+     try{
+      var issues=(DataGridView)dialog.Controls.Find("batchIssues",true)[0];
+      Check(issues.VirtualMode&&issues.RowCount==1&&Convert.ToInt32(issues.Rows[0].Cells[0].Value)==4,"issue list displays physical CSV line");
+      Button(dialog,Loc.T("Prejsť na etiketu")).PerformClick();visited=true;
+     }catch(Exception ex){dialogFailure=ex;dialog.Close();}
+     break;
+    }
+   };
+   timer.Start();open.PerformClick();
+  }
+  if(dialogFailure!=null)throw dialogFailure;
+  Check(visited&&grid.CurrentCell.RowIndex==1,"issue action selects matching record in the batch window");
+  var picture=Field<PictureBox>(controller,"view");
+  var watch=Stopwatch.StartNew();
+  while(picture.Image==null&&watch.ElapsedMilliseconds<5000){Application.DoEvents();Thread.Sleep(5);}
+  Check(picture.Image!=null,"row with invalid code still displays its valid artwork");
+  grid.Rows[1].Cells[0].Value=false;grid.EndEdit();
+  Check(print.Enabled,"excluding just the erroneous row enables the other labels");
+ }
  [STAThread]static void Main(string[] args){dir=args[0];Directory.CreateDirectory(dir);try{Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Control.CheckForIllegalCrossThreadCalls=true;Core();Logs();Dialogs();BatchUi();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" cancellation, atomic output, CSV/XLSX, batch snapshots, progress, UI heartbeat, close/commit races, virtual grid and private bounded diagnostics checks. No physical printing.");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }
