@@ -14,11 +14,12 @@ namespace EanEtikety {
  public enum PrintHistoryStatus { Failed, Cancelled, Submitted }
 
  public sealed class PrintHistoryEntry {
-  public string Id, Printer, Media;
+  public string Id, Printer, Media, QueueToken;
   public DateTime StartedUtc;
   public int Pages, Labels, Repetitions;
   public PrintHistoryStatus Status;
   public bool HasArchive;
+  [XmlIgnore] public PrintQueueHistory QueueStatus;
  }
 
  public sealed class ArchivedPlacement {
@@ -165,6 +166,7 @@ namespace EanEtikety {
       var entry = Read<PrintHistoryEntry>(file.FullName, 64 * 1024);
       if (entry == null || !string.Equals(file.FullName, PathFor(entry.Id, ".entry.xml"), StringComparison.OrdinalIgnoreCase)) continue;
       entry.HasArchive &= File.Exists(PathFor(entry.Id, ".job.xml"));
+      if (PrintQueue.CanCheck(entry)) entry.QueueStatus = ReadQueue(entry);
       entries.Add(entry);
      } catch (InvalidOperationException) { }
        catch (InvalidDataException) { }
@@ -199,12 +201,49 @@ namespace EanEtikety {
    }
   }
 
+  PrintQueueHistory ReadQueue(PrintHistoryEntry entry) {
+   try {
+    var path = PathFor(entry.Id, ".queue.xml");
+    if (!File.Exists(path)) return null;
+    var value = Read<PrintQueueHistory>(path, 16 * 1024);
+    return value != null && value.Token == entry.QueueToken && value.LastCheck != null &&
+     value.LastCheck.CheckedUtc.Kind == DateTimeKind.Utc &&
+     (value.LastKnown == null || value.LastKnown.Outcome == PrintQueueOutcome.Found &&
+      value.LastKnown.CheckedUtc.Kind == DateTimeKind.Utc && value.LastKnown.CheckedUtc <= value.LastCheck.CheckedUtc) ? value : null;
+   } catch (InvalidOperationException) { return null; }
+     catch (InvalidDataException) { return null; }
+     catch (IOException) { return null; }
+     catch (UnauthorizedAccessException) { return null; }
+  }
+
+  public bool UpdateQueue(string id, string token, PrintQueueObservation observation) {
+   if (observation == null || observation.CheckedUtc.Kind != DateTimeKind.Utc) throw new ArgumentException("observation");
+   using (new HistoryLease(mutexName)) {
+    WorkContext.Check();
+    var path = PathFor(id, ".entry.xml");
+    if (!File.Exists(path)) return false;
+    var entry = Read<PrintHistoryEntry>(path, 64 * 1024);
+    if (!PrintQueue.CanCheck(entry) || entry.Id != id || entry.QueueToken != token) return false;
+    var status = ReadQueue(entry) ?? new PrintQueueHistory { Token = token };
+    bool latest = status.LastCheck == null || status.LastCheck.CheckedUtc < observation.CheckedUtc;
+    bool known = observation.Outcome == PrintQueueOutcome.Found &&
+     (status.LastKnown == null || status.LastKnown.CheckedUtc < observation.CheckedUtc);
+    if (!latest && !known) return false;
+    if (latest) status.LastCheck = observation;
+    if (known) status.LastKnown = observation;
+    WorkContext.Check();
+    ProjectXml.Save(PathFor(id, ".queue.xml"), status);
+    return true;
+   }
+  }
+
   public void Remove(string id) {
    using (new HistoryLease(mutexName)) DeleteEntry(id);
   }
 
   void DeleteEntry(string id) {
    File.Delete(PathFor(id, ".job.xml"));
+   File.Delete(PathFor(id, ".queue.xml"));
    File.Delete(PathFor(id, ".entry.xml"));
   }
 
@@ -213,7 +252,7 @@ namespace EanEtikety {
    foreach (string file in Directory.EnumerateFiles(directory, "*.tmp")) {
     string[] parts = Path.GetFileName(file).Split('.');
     Guid entry, operation;
-    if (parts.Length != 5 || (parts[1] != "job" && parts[1] != "entry") || parts[2] != "xml"
+    if (parts.Length != 5 || (parts[1] != "job" && parts[1] != "entry" && parts[1] != "queue") || parts[2] != "xml"
       || parts[4] != "tmp" || !Guid.TryParseExact(parts[0], "N", out entry)
       || !Guid.TryParseExact(parts[3], "N", out operation)) continue;
     try { File.Delete(file); }

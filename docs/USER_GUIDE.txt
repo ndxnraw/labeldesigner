@@ -323,6 +323,8 @@ Korekcie, mierka, DPI, tmavosť Zebra a ignorovanie okrajov majú vysvetlenia pr
 
 HISTÓRIA TLAČE
 Nástroje → Dáta → História tlače zobrazí pokusy o odoslanie tlače.
+Vyberte odoslanú úlohu a stlačte Skontrolovať front tlače. Ak už úloha vo fronte
+nie je, história naďalej zobrazuje posledný známy stav a čas jeho zistenia.
 Ak chcete použiť opakovanie, v tlačovom okne na karte Detaily zapnite uloženie obsahu úlohy.
 Pri opakovaní môžete vybrať strany alebo záznamy dávky. Tlač až po náhľade a novom potvrdení.
 Podrobný postup a limity sú v PRINT_HISTORY.md.

@@ -27,6 +27,9 @@ The portable workspace tests verify ZIP inventory, offline transfer of a
 template with a saved batch preset, multiple media profiles and calibration,
 printer reassignment, default conflict handling, checkpoint backup, stale
 preview detection and rollback when a later write fails.
+`BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
+and inaccessible queues, preservation of the last observation, the timeout
+for a stalled provider, and status refresh in the actual history dialog.
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,

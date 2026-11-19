@@ -3,8 +3,17 @@
 Otvorte **Nástroje → Dáta → História tlače**. Každý riadok zobrazuje čas
 pokusu o odoslanie, tlačiareň, profil alebo média, počty vrátane opakovaní
 a výsledok. **Odoslané** znamená prijatie úlohy tlačovým systémom. Pri
-prerušení zistite vytlačený rozsah podľa hárkov alebo etikiet. Stav vo fronte
-a fyzické dokončenie tlače sa do histórie nesynchronizujú.
+prerušení zistite vytlačený rozsah podľa hárkov alebo etikiet.
+
+Vyberte odoslanú úlohu a stlačte **Skontrolovať front tlače**. Aplikácia
+vyhľadá jedinečný názov úlohy vo fronte zaznamenanej tlačiarne a zobrazí
+posledný známy stav, čas jeho zistenia a výsledok poslednej kontroly. Ak sa
+úloha vo fronte nenájde alebo sa front nepodarí načítať, posledný známy
+stav je naďalej viditeľný. Staršie záznamy sa označia ako nepriraditeľné.
+Kontrola sa spúšťa na vyžiadanie a trvá najviac približne šesť sekúnd.
+Ak ovládač poskytne vlastný text stavu, história uloží jeho krátku verziu.
+Stav **Odovzdané podľa Windows** znamená stav frontu. Pri rozhodovaní
+o opakovaní skontrolujte skutočne vytlačené etikety.
 
 Ak chcete úlohu neskôr zopakovať, na karte **Detaily** v tlačovom okne
 začiarknite **Uložiť obsah úlohy lokálne na opakovanie** pred odoslaním.

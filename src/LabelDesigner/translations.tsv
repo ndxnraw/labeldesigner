@@ -793,3 +793,26 @@ Poškodená šablóna:	Damaged template:	Poškozená šablona:	Sérült sablon:
 Poškodená šablóna	Damaged template	Poškozená šablona	Sérült sablon
 Poškodené šablóny sa pri obnove preskočia: {0}	Damaged templates to skip: {0}	Poškozené šablony budou při obnově přeskočeny: {0}	A visszaállításból kihagyott sérült sablonok: {0}
 Cestu pracovných údajov už používa iná položka:	The workspace path is already used by another item:	Cestu pracovních dat již používá jiná položka:	A munkaterület útvonalát már más elem használja:
+Vo fronte	Queued	Ve frontě	Sorban áll
+Zaraďuje sa do frontu	Spooling	Zařazuje se do fronty	Sorba állítás
+Prebieha tlač	Printing	Probíhá tisk	Nyomtatás folyamatban
+Pozastavené	Paused	Pozastaveno	Szüneteltetve
+Tlačiareň offline	Printer offline	Tiskárna offline	A nyomtató nem érhető el
+Chýba papier	Out of paper	Chybí papír	Kifogyott a papír
+Vyžaduje zásah	Needs attention	Vyžaduje zásah	Beavatkozást igényel
+Chyba vo fronte	Queue error	Chyba ve frontě	Nyomtatási sorhiba
+Odovzdané podľa Windows	Handed off according to Windows	Předáno podle Windows	A Windows szerint átadva
+Odstraňuje sa alebo odstránené	Deleting or removed	Odstraňuje se nebo odstraněno	Törlés alatt vagy törölve
+Úlohu nemožno priradiť	Job cannot be matched	Úlohu nelze přiřadit	A feladat nem azonosítható
+Front ešte nebol skontrolovaný	Queue not checked yet	Fronta ještě nebyla zkontrolována	A sor még nem lett ellenőrizve
+Stav zistený	Status found	Stav zjištěn	Állapot lekérdezve
+Úloha sa vo fronte nenašla	Job was not found in the queue	Úloha se ve frontě nenašla	A feladat nem található a sorban
+Nejednoznačná úloha vo fronte	Ambiguous job in the queue	Nejednoznačná úloha ve frontě	Nem egyértelmű feladat a sorban
+Front je nedostupný	Queue unavailable	Fronta je nedostupná	A sor nem érhető el
+História rozlišuje odoslanie úlohy a stav hlásený frontom Windows.	History shows submission and the status reported by the Windows queue.	Historie rozlišuje odeslání úlohy a stav hlášený frontou Windows.	Az előzmények a feladat elküldését és a Windows által jelentett sorállapotot mutatják.
+Posledný známy stav	Last known status	Poslední známý stav	Utolsó ismert állapot
+Čas zistenia	Observed at	Čas zjištění	Lekérdezés ideje
+Posledná kontrola frontu	Last queue check	Poslední kontrola fronty	Utolsó sorellenőrzés
+Skontrolovať front tlače	Check print queue	Zkontrolovat tiskovou frontu	Nyomtatási sor ellenőrzése
+Kontrolujem front tlače…	Checking print queue…	Kontroluji tiskovou frontu…	Nyomtatási sor ellenőrzése…
+Neurčený stav frontu	Unspecified queue status	Neurčený stav fronty	Nem meghatározott sorállapot

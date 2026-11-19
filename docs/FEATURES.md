@@ -18,6 +18,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Stav tlačovej úlohy** sa dá na vyžiadanie načítať z frontu Windows.
+  História uchová posledný známy stav aj čas zistenia, vrátane informácie,
+  či aktuálna kontrola úlohu ešte našla.
+
 - **Prenosná záloha a obnova** prenesie šablóny s predvoľbami dávok a profily
   médií medzi inštaláciami cez ZIP. Náhľad ukáže konflikty a priradenie tlačiarní.
   Pred obnovou vznikne lokálna záloha aktuálnych údajov.
