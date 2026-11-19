@@ -83,3 +83,11 @@ Pri publikovaní sa nahráva **päť aktív**: oba ZIPy, oba SHA256SUMS súbory
 a UPDATE-INDEX.xml. Všetky musia pochádzať z otestovaného zostavenia. Po lokálnom
 commite obnovte metadáta balenia bez zmeny otestovaných binárnych súborov, aby
 SourceCommit zodpovedal publikovanému commitu. Index a ZIPy publikujte spoločne.
+
+V metadátach GitHub vydania nastavte `target_commitish` na plný 40-znakový
+SHA zo `SourceCommit` v indexe. Staršie aktualizátory odmietnu názov vetvy
+`main` aj vtedy, keď značka vydania a ZIPy ukazujú na správny commit.
+GitHub Actions po zverejnení alebo úprave verejného Pre-release automaticky
+porovná metadáta vydania, značku, index a údaje oboch ZIPov. Pri nezhode kontrola
+zlyhá v karte **Actions → Pre-release publication check**. Kontrola je dostupná
+aj ručne cez `pwsh -File scripts/test-published-update.ps1`.
