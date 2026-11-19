@@ -44,6 +44,7 @@ public static class Engine {
   foreach(var v in s.Variables)if(v==null||!DraftText(v.Name,200)||!DraftText(v.Type,100)||!DraftText(v.Format,4000)||!DraftText(v.Prefix,4000)||!DraftText(v.Suffix,4000)||!DraftText(v.FixedValue,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   foreach(var m in s.Metadata)if(m==null)throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   foreach(var b in s.Batch.Bindings)if(b==null||!DraftText(b.Target,200))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
+  BatchPresets.ValidateAll(s.Batch);
   foreach(var ai in s.ApplicationIdentifiers)if(ai==null||!DraftText(ai.AI,200)||!DraftText(ai.Data,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   Range(s.Layout.Columns,1,100,Loc.T("Stĺpce"));Range(s.Layout.Rows,1,100,Loc.T("Riadky"));Range(s.Layout.Count,1,10000,Loc.T("Počet etikiet"));Range(s.Layout.FirstSlot,0,9999,Loc.T("Prvá voľná pozícia (od 1)"));
   foreach(double value in new[]{s.Layout.Left,s.Layout.Top,s.Layout.Right,s.Layout.Bottom,s.Layout.HorizontalGap,s.Layout.VerticalGap})Range(value,0,1000,Loc.T("Neplatné rozloženie hárka"));

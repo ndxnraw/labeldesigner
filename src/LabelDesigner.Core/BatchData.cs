@@ -1,6 +1,13 @@
 using System;using System.IO;using System.IO.Compression;using System.Xml;using System.Collections.Generic;using System.Globalization;using System.Text;using System.Text.RegularExpressions;
 namespace EanEtikety {
-public class BatchSetup {public List<ColumnBinding> Bindings=new List<ColumnBinding>();public int QuantityColumn=-1,UniqueColumn=-1,CodePage=65001,GeneratedCount=1;public bool Header=true;public char Separator=';';public string SheetName="";}
+public class BatchSetup {
+ public List<ColumnBinding> Bindings=new List<ColumnBinding>();
+ public int QuantityColumn=-1,UniqueColumn=-1,CodePage=65001,GeneratedCount=1;
+ public bool Header=true;
+ public char Separator=';';
+ public string SheetName="",ActivePresetName;
+ public List<BatchPreset> Presets=new List<BatchPreset>();
+}
 public class DataTableSource {
  public string Name;
  public List<string[]> Rows=new List<string[]>();
@@ -8,7 +15,7 @@ public class DataTableSource {
  public bool HasCsvLineNumbers { get { return CsvLines.Count>0; } }
  internal int SourceRow(int index) { return index<CsvLines.Count?CsvLines[index]:index+1; }
 }
-public class ColumnBinding {public string Target;public int Column=-1;}
+public class ColumnBinding {public string Target,HeaderName;public int Column=-1;}
 public class BatchRecord {
  public int Row,Count=1;
  public LabelSettings Label;

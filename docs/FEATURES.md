@@ -18,6 +18,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Predvoľby dávky** ukladajú nastavenia CSV, hárok XLSX a mapovanie v projekte.
+  Pri ďalšom importe vyhľadajú stĺpce podľa hlavičiek. Ukážka prvých piatich
+  záznamov zobrazí zdroj stĺpca a jeho hodnoty aj pri mapovaní podľa pozície.
+
 - **Kontrola vstupných dát dávky** zobrazí chyby a upozornenia s pôvodným
   riadkom CSV a stĺpcom. Z prehľadu sa dá prejsť na etiketu v náhľade.
   Duplicity sa kontrolujú vo voliteľnom stĺpci s jedinečnými hodnotami.

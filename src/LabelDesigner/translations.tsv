@@ -736,3 +736,27 @@ Náhľad použiteľných prvkov. Záznam má chyby.	Preview of usable elements. 
 Opravte a znova importujte súbor alebo vynechajte chybné záznamy.	Fix and reimport the file, or exclude rows with errors.	Opravte a znovu importujte soubor nebo vynechte chybné záznamy.	Javítsa és importálja újra a fájlt, vagy hagyja ki a hibás sorokat.
 Prejsť na etiketu	Go to label	Přejít na etiketu	Ugrás a címkére
 Hodnota obsahuje nepovolený znak.	The value contains an unsupported character.	Hodnota obsahuje nepovolený znak.	Az érték nem támogatott karaktert tartalmaz.
+Najprv importujte tabuľku.	Import a table first.	Nejprve importujte tabulku.	Először importáljon egy táblázatot.
+Stĺpec {0} nemá názov v hlavičke.	Column {0} has no header name.	Sloupec {0} nemá název v záhlaví.	A(z) {0}. oszlopnak nincs fejléce.
+Pre predvoľbu priraďte aspoň jeden stĺpec.	Map at least one column for the preset.	Pro předvolbu namapujte alespoň jeden sloupec.	Rendeljen legalább egy oszlopot a beállításhoz.
+Chýba stĺpec „{0}“.	Column “{0}” is missing.	Chybí sloupec „{0}“.	Hiányzik a(z) „{0}” oszlop.
+Názov stĺpca „{0}“ je v hlavičke viackrát.	Column name “{0}” appears more than once.	Název sloupce „{0}“ je v záhlaví vícekrát.	A(z) „{0}” oszlopnév többször szerepel.
+Stĺpec na pozícii {0} chýba.	The column at position {0} is missing.	Sloupec na pozici {0} chybí.	Hiányzik az oszlop a(z) {0}. pozícióban.
+Neplatná predvoľba dávky.	Invalid batch preset.	Neplatná předvolba dávky.	Érvénytelen kötegbeállítás.
+Kontrola hlavičky	Header check	Kontrola záhlaví	Fejléc ellenőrzése
+Predvoľby dávky…	Batch presets…	Předvolby dávky…	Kötegbeállítások…
+Náhľad prvých záznamov…	Preview first records…	Náhled prvních záznamů…	Első rekordok előnézete…
+Predvoľba dávky: {0}	Batch preset: {0}	Předvolba dávky: {0}	Kötegbeállítás: {0}
+Hárok „{0}“ chýba. Vyberte hárok.	Sheet “{0}” is missing. Select a sheet.	List „{0}“ chybí. Vyberte list.	Hiányzik a(z) „{0}” munkalap. Válasszon munkalapot.
+Pred prípravou skontrolujte mapovanie stĺpcov.	Review the column mapping before preparing the batch.	Před přípravou zkontrolujte mapování sloupců.	Az előkészítés előtt ellenőrizze az oszlop-hozzárendeléseket.
+Skontrolujte poradie stĺpcov v náhľade.	Review the column order in the preview.	Zkontrolujte pořadí sloupců v náhledu.	Ellenőrizze az oszlopok sorrendjét az előnézetben.
+Názov predvoľby	Preset name	Název předvolby	Beállítás neve
+Použiť predvoľbu	Apply preset	Použít předvolbu	Beállítás alkalmazása
+Ručné mapovanie	Manual mapping	Ruční mapování	Kézi hozzárendelés
+Uložiť aktuálne mapovanie	Save current mapping	Uložit aktuální mapování	Jelenlegi hozzárendelés mentése
+Najviac 24 predvolieb dávky.	Up to 24 batch presets are allowed.	Nejvýše 24 předvoleb dávky.	Legfeljebb 24 kötegbeállítás engedélyezett.
+Nahradiť uloženú predvoľbu?	Replace the saved preset?	Nahradit uloženou předvolbu?	Lecseréli a mentett beállítást?
+Odstrániť vybranú predvoľbu dávky?	Delete the selected batch preset?	Odstranit vybranou předvolbu dávky?	Törli a kijelölt kötegbeállítást?
+Tabuľka nemá hlavičku. Pred prípravou dávky potvrďte poradie namapovaných stĺpcov.	The table has no headers. Confirm the mapped column order before preparing the batch.	Tabulka nemá záhlaví. Před přípravou dávky potvrďte pořadí namapovaných sloupců.	A táblázatnak nincs fejléce. Előkészítés előtt erősítse meg a hozzárendelt oszlopok sorrendjét.
+Ukážka najviac piatich záznamov s hodnotami zo zdrojovej tabuľky.	Up to five records with values from the source table.	Ukázka nejvýše pěti záznamů s hodnotami ze zdrojové tabulky.	Legfeljebb öt rekord a forrástáblázat értékeivel.
+Potvrdiť mapovanie	Confirm mapping	Potvrdit mapování	Hozzárendelés megerősítése

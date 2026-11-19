@@ -10,6 +10,11 @@ namespace EanEtikety {
    var result=new List<BatchRecord>();
    bool csv=table!=null&&table.HasCsvLineNumbers;
    int uniqueColumn=table==null?-1:template.Batch.UniqueColumn;
+   if(template.Batch.Presets.Count>0){
+    template=ProjectXml.Clone(template);
+    template.Batch.Presets.Clear();
+    template.Batch.ActivePresetName=null;
+   }
    var identifiers=uniqueColumn<0?null:new Dictionary<string,BatchRecord>(StringComparer.Ordinal);
    for(int i=0;i<count;i++){
     WorkContext.Report("Pripravujem záznamy…",i,count);

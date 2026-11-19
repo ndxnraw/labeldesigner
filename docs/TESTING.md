@@ -18,6 +18,11 @@ multiple findings for one record, opt-in duplicates and migration of existing
 mappings. `BackgroundBatchTests` opens the issues list, navigates to the
 corresponding partial preview and verifies that excluding the erroneous
 record enables printing the valid selection.
+Batch preset tests reorder columns containing valid codes, check duplicate
+and missing headers, preserve quantity and uniqueness mappings, round-trip
+saved presets and verify that deleting an element remaps surviving bindings.
+The batch dialog test saves multiple presets, checks actual sample values and
+verifies positional confirmation, cancellation and invalidation.
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,

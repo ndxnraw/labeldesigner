@@ -38,6 +38,22 @@ public static class Elements {
  public static int Layer(LabelSettings s,int index){var m=s.Metadata.Find(x=>x.Index==index);return m==null?(index==-1?50:index>=0?index:100-index):m.Layer;}
  public static bool Locked(LabelSettings s,int index){var m=s.Metadata.Find(x=>x.Index==index);return m!=null&&m.Locked;}
  public static void Set(LabelSettings s,ElementEdit e){if(e.Index==-1){s.BarX=e.X;s.BarY=e.Y;s.BarWidth=e.Width;s.BarRotation=e.Rotation;s.DigitSize=e.Font;s.BarHeight=Math.Max(1,e.Height-Engine.ExtraHeight(s,e.Width,e.Font));}else if(e.Index>=0){var t=s.Texts[e.Index];if(Math.Abs(t.Width-e.Width)>.001||Math.Abs(t.Height-e.Height)>.001)t.AutoWidth=false;t.X=e.X;t.Y=e.Y;t.Width=e.Width;t.Height=e.Height;t.Rotation=e.Rotation;t.Size=e.Font;}else{var t=s.Symbols[-3-e.Index];t.X=e.X;t.Y=e.Y;t.Width=e.Width;t.Height=e.Height;t.Rotation=e.Rotation;}}
- public static void Remove(LabelSettings s,List<int> selection){var old=new List<ElementMeta>();foreach(var m in s.Metadata)old.Add(m);var indices=Indices(s);var mapping=new Dictionary<int,int>();int text=0,symbol=0;foreach(int i in indices){if(selection.Contains(i)){if(i==-1)s.HideBarcode=true;continue;}mapping[i]=i>=0?text++:i<=-3?-3-symbol++:-1;}if(s.Batch!=null&&s.Batch.Bindings!=null){var bindings=new List<ColumnBinding>();foreach(var binding in s.Batch.Bindings){int key;if(binding.Target=="code")key=-1;else if(binding.Target.StartsWith("text:"))key=int.Parse(binding.Target.Substring(5));else if(binding.Target.StartsWith("symbol:"))key=-3-int.Parse(binding.Target.Substring(7));else continue;if(!mapping.ContainsKey(key))continue;int next=mapping[key];binding.Target=next==-1?"code":next>=0?"text:"+next:"symbol:"+(-3-next);bindings.Add(binding);}s.Batch.Bindings=bindings;}s.Metadata.Clear();foreach(var m in old)if(mapping.ContainsKey(m.Index)){m.Index=mapping[m.Index];s.Metadata.Add(m);}for(int i=s.Texts.Count-1;i>=0;i--)if(selection.Contains(i))s.Texts.RemoveAt(i);for(int i=s.Symbols.Count-1;i>=0;i--)if(selection.Contains(-3-i))s.Symbols.RemoveAt(i);}
+ static List<ColumnBinding> RemapBindings(List<ColumnBinding> bindings,Dictionary<int,int> mapping){
+  var result=new List<ColumnBinding>();
+  foreach(var binding in bindings){
+   if(binding.Target=="quantity"||binding.Target=="unique"){result.Add(binding);continue;}
+   int key;
+   if(binding.Target=="code")key=-1;
+   else if(binding.Target.StartsWith("text:",StringComparison.Ordinal))key=int.Parse(binding.Target.Substring(5));
+   else if(binding.Target.StartsWith("symbol:",StringComparison.Ordinal))key=-3-int.Parse(binding.Target.Substring(7));
+   else continue;
+   int next;
+   if(!mapping.TryGetValue(key,out next))continue;
+   binding.Target=next==-1?"code":next>=0?"text:"+next:"symbol:"+(-3-next);
+   result.Add(binding);
+  }
+  return result;
+ }
+ public static void Remove(LabelSettings s,List<int> selection){var old=new List<ElementMeta>();foreach(var m in s.Metadata)old.Add(m);var indices=Indices(s);var mapping=new Dictionary<int,int>();int text=0,symbol=0;foreach(int i in indices){if(selection.Contains(i)){if(i==-1)s.HideBarcode=true;continue;}mapping[i]=i>=0?text++:i<=-3?-3-symbol++:-1;}if(s.Batch!=null&&s.Batch.Bindings!=null){s.Batch.Bindings=RemapBindings(s.Batch.Bindings,mapping);foreach(var preset in s.Batch.Presets)preset.Bindings=RemapBindings(preset.Bindings,mapping);}s.Metadata.Clear();foreach(var m in old)if(mapping.ContainsKey(m.Index)){m.Index=mapping[m.Index];s.Metadata.Add(m);}for(int i=s.Texts.Count-1;i>=0;i--)if(selection.Contains(i))s.Texts.RemoveAt(i);for(int i=s.Symbols.Count-1;i>=0;i--)if(selection.Contains(-3-i))s.Symbols.RemoveAt(i);}
 }
 }

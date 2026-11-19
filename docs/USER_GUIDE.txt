@@ -59,6 +59,25 @@ Stĺpec s jedinečnými hodnotami. Rovnaké neprázdne hodnoty vo vstupnej tabu�
 vytvoria upozornenia aj pre prvý výskyt. Porovnanie zachová úvodné nuly,
 medzery a veľkosť písmen. Táto kontrola funguje lokálne na oboch verziách.
 
+PREDVOĽBY PRE OPAKOVANÉ DÁVKY
+Naimportujte tabuľku, priraďte stĺpce a otvorte Predvoľby dávky…. Zadajte názov
+a zvoľte Uložiť aktuálne mapovanie. Predvoľba obsahuje oddeľovač, kódovanie,
+režim hlavičky, hárok XLSX a priradenie polí vrátane množstva a kontroly
+duplicít. Uložte projekt, aby boli predvoľby dostupné pri jeho ďalšom otvorení.
+
+Pri ďalšej dávke použite uloženú predvoľbu a importujte nový súbor. Názvy
+stĺpcov sa porovnávajú bez ohľadu na veľkosť písmen a medzery na začiatku
+a konci názvu. Pri prepnutí na predvoľbu s iným oddeľovačom alebo kódovaním
+znova importujte CSV. Chýbajúcu alebo duplicitnú hlavičku uvidíte pri dotknutom
+poli. Pred prípravou vyberte správny zdrojový stĺpec. Ak chýba uložený hárok,
+vyberte správny hárok ručne. Ak opravené mapovanie chcete používať aj nabudúce,
+uložte predvoľbu znova.
+
+Náhľad prvých záznamov… ukáže pôvodné číslo riadka a hodnoty z namapovaných
+stĺpcov pre prvých päť dátových záznamov. Pri tabuľke bez hlavičky potvrďte
+pozície pred prípravou dávky. Nový import alebo zmena priradenia vyžiada nové
+potvrdenie. Funkcie sú dostupné offline na .NET Framework 4.8 aj .NET 10.
+
 OTÁČANIE PRVKOV
 Po označení uchopte kruhový rotačný úchyt nad prvkom. Uhly 0°, 90°, 180° a 270° sa prichytávajú v tolerancii 3°.
 Shift prichytáva po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.

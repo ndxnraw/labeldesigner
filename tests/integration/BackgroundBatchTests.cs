@@ -39,10 +39,99 @@ class BackgroundBatchTests {
    Check(object.ReferenceEquals(old,Field<List<BatchRecord>>(controller,"batch"))&&ProjectXml.Encode((LabelSettings)Call(owner,"Read"))==original,"cancel/completion race preserves consistent batch and project");
    var grid=Field<DataGridView>(controller,"records");grid.Rows[0].Cells[0].Value=false;grid.EndEdit();Check(!Field<List<bool>>(controller,"included")[0],"virtual checkbox edits update selected records");Call(controller,"SelectAll",false);Check(!Field<List<bool>>(controller,"included")[0],"virtual selection clears");Call(controller,"SelectAll",true);Check(Field<List<bool>>(controller,"included")[0],"virtual selection restores");
    CsvIssuesUi(controller,form);
+   PresetUi(controller,form,owner);
    using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,form.ClientRectangle);image.Save(Path.Combine(dir,"batch-background.png"));}completed=true;
   }catch(Exception ex){failure=ex;}finally{form.Close();}break;}};timer.Start();Call(owner,"ShowBatch");}
   if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");Call(owner,"Apply",LabelSettings.Default());owner.Close();
  }}
+ static void VisitDialog(string title,Action show,Action<Form> inspect){
+  Exception failure=null;bool visited=false;
+  using(var timer=new System.Windows.Forms.Timer{Interval=40}){
+   timer.Tick+=delegate{
+    foreach(Form form in Application.OpenForms){
+     if(form.Text!=Loc.T(title))continue;
+     timer.Stop();visited=true;
+     try{inspect(form);}catch(Exception ex){failure=ex;form.Close();}
+     break;
+    }
+   };
+   timer.Start();show();
+  }
+  if(failure!=null)throw failure;
+  Check(visited,"visited dialog "+title);
+ }
+ static void PresetUi(object controller,Form window,MainForm owner){
+  string path=Path.Combine(dir,"preset.csv");
+  var mapping=Field<DataGridView>(controller,"mapping");
+  var targets=Field<List<string>>(controller,"targets");
+  var options=(DataGridViewComboBoxColumn)mapping.Columns["column"];
+  foreach(DataGridViewColumn field in mapping.Columns)Check(field.SortMode==DataGridViewColumnSortMode.NotSortable,"mapping row order cannot be changed by sorting");
+  var prepare=Field<Button>(controller,"prepareButton");
+  var sample=Field<Button>(controller,"sampleButton");
+  var presets=Button(window,Loc.T("Predvoľby dávky…"));
+  Action<string,int> map=(key,column)=>mapping.Rows[targets.IndexOf(key)].Cells["column"].Value=options.Items[column+1];
+  Func<string,int> mapped=key=>options.Items.IndexOf(mapping.Rows[targets.IndexOf(key)].Cells["column"].Value)-1;
+  File.WriteAllText(path,"Item;Case;Qty;Serial\r\n590123412345;858000000001;2;007");
+  Check((bool)Call(controller,"LoadFile",path,';',65001),"open original supplier table");
+  map("code",0);map("text:0",1);map("quantity",2);map("unique",3);
+  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>{
+   ((TextBox)dialog.Controls.Find("batchPresetName",true)[0]).Text="Supplier A";
+   Button(dialog,Loc.T("Uložiť aktuálne mapovanie")).PerformClick();
+  });
+  var setup=((LabelSettings)Call(owner,"Read")).Batch;
+  Check(setup.Presets.Count==1&&setup.ActivePresetName=="Supplier A","saving a named preset updates project state");
+  File.WriteAllText(path,"Case;Serial;Qty;Item\n858000000001;007;3;590123412345");
+  Check((bool)Call(controller,"LoadFile",path,';',65001)&&mapped("code")==3&&mapped("text:0")==0&&mapped("unique")==1,
+   "active preset uses header names on next import");
+  VisitDialog("Náhľad prvých záznamov…",()=>sample.PerformClick(),dialog=>{
+   var data=(DataGridView)dialog.Controls.Find("batchSample",true)[0];
+   Check(data.RowCount==1&&Convert.ToInt32(data.Rows[0].Cells[0].Value)==2&&
+    Convert.ToString(data.Rows[0].Cells[1].Value)=="590123412345"&&data.Columns[1].HeaderText.Contains("Item"),
+    "sample gives original row, mapped code and source header");
+   Button(dialog,Loc.T("Zavrieť")).PerformClick();
+  });
+  prepare.PerformClick();
+  var batch=Field<List<BatchRecord>>(controller,"batch");
+  Check(batch.Count==1&&batch[0].Label.Ean=="590123412345"&&batch[0].Count==3,"prepared batch uses the exact preview mapping");
+  File.WriteAllText(path,"Item;item;Case;Serial\n590123412345;858000000001;Case;3");
+  Check((bool)Call(controller,"LoadFile",path,';',65001)&&!prepare.Enabled&&mapping.Columns["schema"].Visible&&
+   mapped("code")==-1&&mapped("quantity")==-1,"duplicate and missing headings visibly block preparation");
+  map("code",0);map("quantity",3);
+  Check(prepare.Enabled&&!mapping.Columns["schema"].Visible,"explicit replacement mapping resolves schema errors");
+  map("quantity",-1);
+  Check(!prepare.Enabled,"removing the replacement leaves the original schema error unresolved");
+  map("quantity",3);
+  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>Button(dialog,Loc.T("Ručné mapovanie")).PerformClick());
+  var header=Field<CheckBox>(controller,"header");
+  header.Checked=false;
+  Field<ModernComboBox>(controller,"separator").SelectedIndex=1;
+  File.WriteAllText(path,"590123412345,\"A\",2\n858000000001,B,3");
+  Check((bool)Call(controller,"LoadFile",path,',',65001),"headerless CSV imported");
+  map("code",0);map("text:0",1);map("quantity",2);map("unique",-1);
+  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>{
+   ((TextBox)dialog.Controls.Find("batchPresetName",true)[0]).Text="Positions";
+   Button(dialog,Loc.T("Uložiť aktuálne mapovanie")).PerformClick();
+  });
+  setup=((LabelSettings)Call(owner,"Read")).Batch;
+  Check(setup.Presets.Count==2&&setup.ActivePresetName=="Positions","multiple saved presets and positional mode persisted");
+  VisitDialog("Náhľad prvých záznamov…",()=>prepare.PerformClick(),dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
+  Check(Field<List<BatchRecord>>(controller,"batch").Count==0,"cancelling positional confirmation leaves batch unprepared");
+  VisitDialog("Náhľad prvých záznamov…",()=>prepare.PerformClick(),dialog=>Button(dialog,Loc.T("Potvrdiť mapovanie")).PerformClick());
+  Check(Field<List<BatchRecord>>(controller,"batch").Count==2,"confirming positional sample continues preparation");
+  map("code",1);
+  VisitDialog("Náhľad prvých záznamov…",()=>prepare.PerformClick(),dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
+  Check(Field<List<BatchRecord>>(controller,"batch").Count==0,"changing a positional binding requires new confirmation");
+  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>{
+   var list=(ListBox)dialog.Controls.Find("batchPresetList",true)[0];
+   list.SelectedItem="Supplier A";
+   Button(dialog,Loc.T("Použiť predvoľbu")).PerformClick();
+  });
+  Check(((LabelSettings)Call(owner,"Read")).Batch.ActivePresetName=="Supplier A"&&header.Checked&&
+   Field<ModernComboBox>(controller,"separator").SelectedIndex==0&&!prepare.Enabled,
+   "a preset using another delimiter activates before importing a replacement");
+  File.WriteAllText(path,"Case;Serial;Qty;Item\n858000000001;007;3;590123412345");
+  Check((bool)Call(controller,"LoadFile",path,';',65001)&&prepare.Enabled&&mapped("code")==3,"new import follows newly selected preset");
+ }
  static void CsvIssuesUi(object controller,Form batchWindow){
   string csv=Path.Combine(dir,"issues.csv");
   File.WriteAllText(csv,"Code;Name\r\n590123412345;\"Good\r\nlabel\"\r\nnot a barcode;Bad code\r\n590123412345;Other");
