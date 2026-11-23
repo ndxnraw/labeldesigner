@@ -15,9 +15,9 @@ namespace EanEtikety {
    Button exportSelected,printSelected,issuesButton;readonly Label preparedInfo=new Label();readonly BatchPreview preview;
    readonly List<DataTableSource> tables=new List<DataTableSource>();readonly List<string> targets=new List<string>();
    List<BatchRecord> batch=new List<BatchRecord>();readonly List<bool> included=new List<bool>();
-   string csvPath;char loadedSeparator;int loadedCodePage;bool updating,csvLineNumbers;
+   string csvPath,tableSourcePath;char loadedSeparator;int loadedCodePage;bool updating,csvLineNumbers;
    public BatchWindow(MainForm main){
-    owner=main;setup=ProjectXml.Decode<BatchSetup>(ProjectXml.Encode(main.batchSetup));window=main.FeatureForm("Dávka a premenné",1100,750);window.Tag=this;
+    owner=main;setup=main.batchSetup.Copy();window=main.FeatureForm("Dávka a premenné",1100,750);window.Tag=this;
     var root=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=3,ColumnCount=2};root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,55));root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,45));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));window.Controls.Add(root);
     var toolbar=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(toolbar,0,0);root.SetColumnSpan(toolbar,2);
     sheet.DropDownStyle=ComboBoxStyle.DropDownList;sheet.Width=160;
@@ -57,6 +57,7 @@ namespace EanEtikety {
     actions.Controls.Add(owner.Btn(Loc.T("Vybrať všetko"),delegate{SelectAll(true);}));actions.Controls.Add(owner.Btn(Loc.T("Zrušiť výber"),delegate{SelectAll(false);}));exportSelected=owner.Btn(Loc.T("Exportovať vybrané"),Export);printSelected=owner.Btn(Loc.T("Tlačiť vybrané"),Print);actions.Controls.Add(exportSelected);actions.Controls.Add(printSelected);selectionInfo.AutoSize=true;selectionInfo.UseMnemonic=false;selectionInfo.MaximumSize=new Size(360,0);actions.Controls.Add(selectionInfo);
     issuesButton=owner.Btn(Loc.T("Problémy vstupných dát…"),ShowIssues);actions.Controls.Add(issuesButton);
     compareButton=owner.Btn(Loc.T("Porovnať dávku…"),CompareBatch);actions.Controls.Add(compareButton);
+    referenceButton=owner.Btn(Loc.T("Referenčná dávka…"),ShowBatchReference);actions.Controls.Add(referenceButton);
     sheet.SelectedIndexChanged+=delegate{if(!updating)Map();};header.CheckedChanged+=delegate{if(!updating)Map();};
     mapping.CurrentCellDirtyStateChanged+=delegate{if(!updating&&mapping.IsCurrentCellDirty)mapping.CommitEdit(DataGridViewDataErrorContexts.Commit);};
     mapping.CellValueChanged+=delegate(object sender,DataGridViewCellEventArgs args){
@@ -91,7 +92,7 @@ namespace EanEtikety {
     try{
      bool csv=Path.GetExtension(path).Equals(".csv",StringComparison.OrdinalIgnoreCase);List<DataTableSource> candidate;
      if(!ReadSource(path,split,codePage,csv,out candidate))return false;
-     csvPath=csv?path:null;loadedSeparator=split;loadedCodePage=codePage;
+     csvPath=csv?path:null;tableSourcePath=path;loadedSeparator=split;loadedCodePage=codePage;
      InstallTables(candidate);return true;
     }catch(Exception ex){owner.Error(ex);return false;}
    }

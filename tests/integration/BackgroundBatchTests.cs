@@ -124,6 +124,7 @@ class BackgroundBatchTests {
   prepare.PerformClick();
   var batch=Field<List<BatchRecord>>(controller,"batch");
   Check(batch.Count==1&&batch[0].Label.Ean=="590123412345"&&batch[0].Count==3,"prepared batch uses the exact preview mapping");
+  SavedReferenceUi(controller,window,owner,path);
   File.WriteAllText(path,"Item;item;Case;Serial\n590123412345;858000000001;Case;3");
   Check((bool)Call(controller,"LoadFile",path,';',65001)&&!prepare.Enabled&&mapping.Columns["schema"].Visible&&
    mapped("code")==-1&&mapped("quantity")==-1,"duplicate and missing headings visibly block preparation");
@@ -162,6 +163,54 @@ class BackgroundBatchTests {
    "a preset using another delimiter activates before importing a replacement");
   File.WriteAllText(path,"Case;Serial;Qty;Item\n858000000001;007;3;590123412345");
   Check((bool)Call(controller,"LoadFile",path,';',65001)&&prepare.Enabled&&mapped("code")==3,"new import follows newly selected preset");
+ }
+ static void SavedReferenceUi(object controller,Form batchWindow,MainForm owner,string path){
+  var referenceButton=Button(batchWindow,Loc.T("Referenčná dávka…"));
+  const string managerTitle="Referenčná dávka…";
+  Func<BatchReference> read=()=>((LabelSettings)Call(owner,"Read")).Batch.Presets.Find(preset=>preset.Name=="Supplier A").Reference;
+  Action<Form,string,bool> confirm=(manager,action,yes)=>VisitDialog("Potvrdenie referencie",
+   ()=>Button(manager,Loc.T(action)).PerformClick(),dialog=>{
+    Check(dialog.AcceptButton==dialog.CancelButton&&dialog.CancelButton.DialogResult==DialogResult.No,
+     "reference modification requires an explicit affirmative choice");
+    Button(dialog,Loc.T(yes?"Áno":"Nie")).PerformClick();
+   });
+  const string save="Uložiť aktuálnu dávku ako referenciu…";
+  VisitDialog(managerTitle,()=>referenceButton.PerformClick(),manager=>{
+   confirm(manager,save,true);
+   Check(read()!=null&&read().RowCount==1,"saving the reference attaches it to the active project preset");
+   VisitDialog("Uložená referenčná dávka",()=>Button(manager,Loc.T("Zobraziť referenciu")).PerformClick(),dialog=>{
+    var grid=(DataGridView)dialog.Controls.Find("savedBatchReferenceRows",true)[0];
+    Check(grid.VirtualMode&&grid.RowCount==1&&Convert.ToString(grid.Rows[0].Cells["id"].Value)=="007",
+     "saved reference displays original identifier and rows");
+    Button(dialog,Loc.T("Zavrieť")).PerformClick();
+   });
+   Button(manager,Loc.T("Zavrieť")).PerformClick();
+  });
+  File.WriteAllText(path,"Case;Serial;Qty;Item\n858000000001;007;4;590123412345");
+  Check((bool)Call(controller,"LoadFile",path,';',65001),"replacement fixture loaded with existing preset");
+  Call(controller,"Prepare");
+  var previous=Convert.ToBase64String(read().PackedRows);
+  VisitDialog("Rozdiely medzi dávkami",()=>VisitDialog(managerTitle,
+   ()=>Button(batchWindow,Loc.T("Porovnať dávku…")).PerformClick(),
+   manager=>Button(manager,Loc.T("Porovnať s uloženou referenciou")).PerformClick()),dialog=>{
+    var rows=(DataGridView)dialog.Controls.Find("batchComparisonRows",true)[0];
+    rows.CurrentCell=rows.Rows[0].Cells["id"];
+    var details=(DataGridView)dialog.Controls.Find("batchComparisonValues",true)[0];
+    Check(details.RowCount==1&&Convert.ToString(details.Rows[0].Cells["before"].Value)=="3"&&
+     Convert.ToString(details.Rows[0].Cells["after"].Value)=="4","saved reference feeds the existing comparison review");
+    Button(dialog,Loc.T("Zavrieť")).PerformClick();
+   });
+  VisitDialog(managerTitle,()=>referenceButton.PerformClick(),manager=>{
+   confirm(manager,save,false);
+   Check(Convert.ToBase64String(read().PackedRows)==previous,"declining replacement keeps the original snapshot");
+   confirm(manager,save,true);
+   Check(Convert.ToBase64String(read().PackedRows)!=previous,"confirming replacement updates only this preset");
+   confirm(manager,"Odstrániť referenciu",false);
+   Check(read()!=null,"declining deletion keeps the reference");
+   confirm(manager,"Odstrániť referenciu",true);
+   Check(read()==null&&!Button(manager,Loc.T("Zobraziť referenciu")).Enabled,"confirmed removal clears the stored reference");
+   Button(manager,Loc.T("Zavrieť")).PerformClick();
+  });
  }
  static void ComparisonUi(object controller,Form batchWindow){
   var current=Path.Combine(dir,"current-comparison.csv");

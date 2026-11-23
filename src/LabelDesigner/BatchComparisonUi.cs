@@ -12,6 +12,12 @@ namespace EanEtikety {
 
    void CompareBatch() {
     if (comparisonTable == null) return;
+    if (ActivePreset != null && ActivePreset.Reference != null) { ShowBatchReference(); return; }
+    CompareFromFilePicker();
+   }
+
+   void CompareFromFilePicker() {
+    if (comparisonTable == null) return;
     using (var picker = new OpenFileDialog { Filter = "CSV / Excel|*.csv;*.xlsx", Title = Loc.T("Vybrať referenčný súbor") })
      if (picker.ShowDialog(window) == DialogResult.OK) CompareBatchWithFile(picker.FileName);
    }

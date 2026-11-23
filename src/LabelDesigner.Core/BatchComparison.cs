@@ -77,6 +77,25 @@ namespace EanEtikety {
 
   public static BatchComparisonResult Compare(DataTableSource current, DataTableSource reference,
       BatchSetup mapping, bool referenceHeader, int currentIdentifierColumn, int referenceIdentifierColumn) {
+   return CompareCore(current, reference, mapping, referenceHeader, currentIdentifierColumn, referenceIdentifierColumn, null);
+  }
+
+  internal static BatchComparisonResult CompareSaved(DataTableSource current, DataTableSource reference,
+      BatchSetup mapping, int currentKey, Dictionary<string,int> referenceColumns) {
+   return CompareCore(current, reference, mapping, false, currentKey, 0, referenceColumns);
+  }
+
+  internal static void EnsureIdentifiers(DataTableSource table, bool header, int column) {
+   var source = new Source(table, header, column);
+   var issues = new List<BatchComparisonIssue>();
+   source.ReadKeys(issues, true, 0, table.Rows.Count);
+   if (issues.Count != 0)
+    throw new InvalidDataException(Loc.T("Riadok") + " " + issues[0].CurrentRow + " — " + issues[0].Message);
+  }
+
+  static BatchComparisonResult CompareCore(DataTableSource current, DataTableSource reference,
+      BatchSetup mapping, bool referenceHeader, int currentIdentifierColumn, int referenceIdentifierColumn,
+      Dictionary<string,int> referenceColumns) {
    var now = new Source(current, mapping.Header, currentIdentifierColumn);
    var before = new Source(reference, referenceHeader, referenceIdentifierColumn);
    var result = new BatchComparisonResult();
@@ -86,12 +105,8 @@ namespace EanEtikety {
    before.ReadKeys(result.Issues, false, current.Rows.Count, total);
    if (result.Issues.Count != 0) return result;
 
-   var fields = new List<ColumnBinding>();
-   foreach (var binding in mapping.Bindings)
-    if (binding.Column >= 0) fields.Add(binding);
-   if (mapping.QuantityColumn >= 0)
-    fields.Add(new ColumnBinding { Target = "quantity", Column = mapping.QuantityColumn });
-   var referenceColumns = ReferenceColumns(now, before, fields, mapping.Header && referenceHeader);
+   var fields = MappedFields(mapping);
+   if (referenceColumns == null) referenceColumns = ReferenceColumns(now, before, fields, mapping.Header && referenceHeader);
    for (int i = now.Start; i < current.Rows.Count; i++) {
     WorkContext.Report("Porovnávam dávky…", rows + i, total);
     if (!now.HasRow(i)) continue;
@@ -128,6 +143,15 @@ namespace EanEtikety {
    return result;
   }
 
+  internal static List<ColumnBinding> MappedFields(BatchSetup mapping) {
+   var fields = new List<ColumnBinding>();
+   foreach (var binding in mapping.Bindings)
+    if (binding.Column >= 0) fields.Add(binding);
+   if (mapping.QuantityColumn >= 0)
+    fields.Add(new ColumnBinding { Target = "quantity", Column = mapping.QuantityColumn });
+   return fields;
+  }
+
   static Dictionary<string,int> ReferenceColumns(Source current, Source reference, IList<ColumnBinding> fields, bool byHeader) {
    var preset = new BatchPreset { Header = byHeader };
    foreach (var field in fields) {
@@ -154,7 +178,7 @@ namespace EanEtikety {
     throw new InvalidDataException(string.Join(Environment.NewLine, mapping.Problems.Values));
   }
 
-  static string FieldValue(DataTableSource table, int rowIndex, int column) {
+  internal static string FieldValue(DataTableSource table, int rowIndex, int column) {
    var row = table.Rows[rowIndex];
    if (table.HasCsvLineNumbers && column >= row.Length) return null;
    return BatchData.Value(row, column);

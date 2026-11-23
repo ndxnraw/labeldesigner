@@ -58,7 +58,7 @@ namespace EanEtikety {
 
    BatchSetup ReadMapping() {
     mapping.EndEdit();
-    var candidate=ProjectXml.Decode<BatchSetup>(ProjectXml.Encode(setup));
+    var candidate=setup.Copy();
     candidate.Header=header.Checked;candidate.Separator=Separator;candidate.CodePage=CodePage;
     candidate.GeneratedCount=(int)generated.Value;candidate.SheetName=sheet.Text;
     candidate.Bindings.Clear();candidate.QuantityColumn=-1;candidate.UniqueColumn=-1;
@@ -104,6 +104,7 @@ namespace EanEtikety {
     mappingInfo.Text=selection.Length>0&&issue.Length>0?selection+Environment.NewLine+issue:selection+issue;
     prepareButton.Enabled=!blocked;
     sampleButton.Enabled=!blocked&&CurrentTable!=null;
+    referenceButton.Enabled=preset!=null;
    }
 
    void ActivatePreset(BatchPreset preset) {
@@ -152,7 +153,10 @@ namespace EanEtikety {
        if(existing!=null&&UiMessageBox.Show(dialog,Loc.T("Nahradiť uloženú predvoľbu?"),dialog.Text,
           MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)return;
        if(existing==null)setup.Presets.Add(candidate);
-       else setup.Presets[setup.Presets.IndexOf(existing)]=candidate;
+       else {
+        candidate.Reference=existing.Reference;
+        setup.Presets[setup.Presets.IndexOf(existing)]=candidate;
+       }
        selected=candidate;apply=true;dialog.Close();
       }catch(Exception ex){UiMessageBox.Show(dialog,ex.Message,dialog.Text);}
      });

@@ -40,6 +40,8 @@ Názov produktu je naďalej Pre-release.
   CSV alebo XLSX podľa identifikátora. Zobrazí pridané, odstránené a zmenené
   položky, pôvodné hodnoty a prechod na aktuálnu etiketu. Z pridaných
   a zmenených riadkov sa dá pripraviť výber na tlač s aktuálnymi množstvami.
+  Každá predvoľba môže mať uloženú jednu referenčnú dávku. Dá sa zobraziť,
+  použiť na porovnanie, nahradiť alebo odstrániť po potvrdení.
 
 - **Čitateľnosť kódov pred tlačou** je v tlačovom náhľade pod **Detaily →
   Čitateľnosť kódov…**. Pre EAN-13, ITF-14, GS1-128, QR a Data Matrix

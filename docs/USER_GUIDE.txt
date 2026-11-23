@@ -99,6 +99,21 @@ počet záznamov a etikiet. Používa sa aktuálne množstvo každej položky.
 Potvrdenie cez Použiť výber na tlač nahradí výber v dávkovom okne.
 Odtiaľ pokračujte cez Tlačiť vybrané na náhľad a predtlačovú kontrolu.
 
+ULOŽENÁ REFERENČNÁ DÁVKA
+Použite predvoľbu, pripravte aktuálnu dávku a otvorte Referenčná dávka….
+Zvoľte Uložiť aktuálnu dávku ako referenciu…, vyberte identifikátor, ak
+ho predvoľba nemá, a potvrďte. Do referencie sa uložia všetky riadky
+pripravenej tabuľky s identifikátormi, pôvodnými číslami riadkov,
+namapovanými hodnotami, názvom zdroja a časom uloženia.
+
+Uložte projekt, aby bola referencia dostupná pri ďalšom otvorení. Pri
+zdieľaní projektu, šablóny alebo ich zálohy sa zdieľajú aj tieto hodnoty.
+Tlačové úlohy aj ZPL export vynechávajú uložené referenčné hodnoty.
+V okne referencie môžete hodnoty zobraziť, porovnať ich s aktuálnou
+dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
+po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
+novú referenciu. Celý postup funguje offline.
+
 PRENOSNÁ ZÁLOHA ŠABLÓN A PROFILOV
 Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
 profily médií alebo obe kategórie a použite Exportovať zálohu do ZIPu….

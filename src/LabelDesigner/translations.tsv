@@ -869,3 +869,24 @@ Chybné záznamy vo výbere · {0}	Invalid records in selection · {0}	Chybné z
 Použitím výberu nahradíte výber v dávke.	Applying replaces the selection in the batch.	Použitím výběru nahradíte výběr v dávce.	A kijelölés alkalmazása lecseréli a kötegben lévő kijelölést.
 Označiť pridané	Select added	Označit přidané	Hozzáadottak kijelölése
 Označiť zmenené	Select changed	Označit změněné	Módosítottak kijelölése
+Referenčná dávka…	Reference batch…	Referenční dávka…	Referenciaköteg…
+Referenčná dávka musí obsahovať aspoň jeden záznam.	The reference batch must contain at least one record.	Referenční dávka musí obsahovat alespoň jeden záznam.	A referenciakötegnek legalább egy rekordot kell tartalmaznia.
+Mapovanie alebo identifikátor sa od uloženia referencie zmenili.	The mapping or identifier has changed since this reference was saved.	Mapování nebo identifikátor se od uložení reference změnily.	A referencia mentése óta megváltozott a hozzárendelés vagy az azonosító.
+Neplatná referenčná dávka.	Invalid reference batch.	Neplatná referenční dávka.	Érvénytelen referenciaköteg.
+Referenčná dávka prekračuje limit veľkosti.	The reference batch exceeds the size limit.	Referenční dávka překračuje limit velikosti.	A referenciaköteg túllépi a méretkorlátot.
+Referenčné dávky prekračujú limit projektu.	Reference batches exceed the project limit.	Referenční dávky překračují limit projektu.	A referenciakötegek túllépik a projekt korlátját.
+Zobraziť referenciu	View reference	Zobrazit referenci	Referencia megtekintése
+Uložiť aktuálnu dávku ako referenciu…	Save current batch as reference…	Uložit aktuální dávku jako referenci…	A jelenlegi köteg mentése referenciaként…
+Ukladám referenčnú dávku…	Saving reference batch…	Ukládám referenční dávku…	Referenciaköteg mentése…
+Uložiť túto referenciu do projektu?	Save this reference in the project?	Uložit tuto referenci do projektu?	Menti ezt a referenciát a projektbe?
+Nahradiť uloženú referenciu aktuálnou dávkou?	Replace the saved reference with the current batch?	Nahradit uloženou referenci aktuální dávkou?	Lecseréli a mentett referenciát az aktuális kötegre?
+Odstrániť referenciu	Remove reference	Odstranit referenci	Referencia eltávolítása
+Odstrániť uloženú referenčnú dávku?	Remove the saved reference batch?	Odstranit uloženou referenční dávku?	Eltávolítja a mentett referenciaköteget?
+Porovnať s uloženou referenciou	Compare with saved reference	Porovnat s uloženou referencí	Összehasonlítás a mentett referenciával
+Predvoľba nemá uloženú referenciu.	This preset has no saved reference.	Předvolba nemá uloženou referenci.	Ehhez a beállításhoz nincs mentett referencia.
+Referenčné hodnoty sa ukladajú do projektu. Uložte projekt, aby boli dostupné nabudúce.	Reference values are stored in the project. Save the project to use them next time.	Referenční hodnoty se ukládají do projektu. Uložte projekt, aby byly příště dostupné.	A referenciaértékek a projektben tárolódnak. Mentse a projektet a későbbi használathoz.
+Zdroj {0} · Uložené {1} · Záznamy {2}	Source {0} · Saved {1} · Records {2}	Zdroj {0} · Uloženo {1} · Záznamy {2}	Forrás {0} · Mentve {1} · Rekordok {2}
+Načítavam referenčnú dávku…	Loading reference batch…	Načítám referenční dávku…	Referenciaköteg betöltése…
+Uložená referenčná dávka	Saved reference batch	Uložená referenční dávka	Mentett referenciaköteg
+Potvrdenie referencie	Confirm reference change	Potvrzení změny reference	Referenciaváltozás megerősítése
+Pred uložením referencie uložte aktuálne mapovanie do predvoľby.	Save the current mapping in the preset before saving a reference.	Před uložením reference uložte aktuální mapování do předvolby.	A referencia mentése előtt mentse az aktuális hozzárendelést a beállításba.

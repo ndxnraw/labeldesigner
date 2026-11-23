@@ -7,15 +7,25 @@ public class BatchSetup {
  public char Separator=';';
  public string SheetName="",ActivePresetName;
  public List<BatchPreset> Presets=new List<BatchPreset>();
+ public BatchSetup Copy(){
+  var copy=(BatchSetup)MemberwiseClone();
+  copy.Bindings=Bindings==null?null:Bindings.ConvertAll(binding=>binding==null?null:binding.Copy());
+  copy.Presets=Presets==null?null:Presets.ConvertAll(preset=>preset==null?null:preset.Copy());
+  return copy;
+ }
 }
 public class DataTableSource {
  public string Name;
  public List<string[]> Rows=new List<string[]>();
  internal readonly List<int> CsvLines=new List<int>();
  public bool HasCsvLineNumbers { get { return CsvLines.Count>0; } }
- internal int SourceRow(int index) { return index<CsvLines.Count?CsvLines[index]:index+1; }
+ internal readonly List<int> ReferenceRows=new List<int>();
+ public int SourceRow(int index) { return index<ReferenceRows.Count?ReferenceRows[index]:index<CsvLines.Count?CsvLines[index]:index+1; }
 }
-public class ColumnBinding {public string Target,HeaderName;public int Column=-1;}
+public class ColumnBinding {
+ public string Target,HeaderName;public int Column=-1;
+ internal ColumnBinding Copy(){return (ColumnBinding)MemberwiseClone();}
+}
 public class BatchRecord {
  public int Row,Count=1;
  public LabelSettings Label;

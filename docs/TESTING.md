@@ -33,6 +33,10 @@ The same suite exercises bulk and individual print selection from comparison,
 live totals from current quantities, cancellation and output planning after
 confirmation. It also verifies that erroneous rows and a selection over the
 output limit prevent confirmation.
+Saved-reference tests verify projection to mapped columns, project round trips,
+mapping and identifier compatibility, preview, comparison, and confirmed or
+declined replacement and removal. The ZPL round-trip test preserves preset
+mapping while keeping reference values in the project.
 The portable workspace tests verify ZIP inventory, offline transfer of a
 template with a saved batch preset, multiple media profiles and calibration,
 printer reassignment, default conflict handling, checkpoint backup, stale

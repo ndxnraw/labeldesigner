@@ -1,5 +1,59 @@
 using System;using System.IO;using System.IO.Compression;using System.Collections.Generic;using System.Drawing;using System.Windows.Forms;using EanEtikety;
 class BatchImportTests {
+ static void SavedReferences(string dir){
+  var source=BatchData.CsvText("SKU;Name;Qty;Private\r\n001;\"First\r\nlabel\";2;unused secret\r\n002;Old;1;other secret",';');
+  var mapping=new BatchSetup{Header=true,QuantityColumn=2,UniqueColumn=0,Bindings=new List<ColumnBinding>{
+   new ColumnBinding{Target="text:0",Column=1}}};
+  var preset=BatchPresets.Capture("Supplier",mapping,source,false);
+  BatchReferences.EnsurePresetMapping(source,mapping,preset);
+  preset.Reference=BatchReferences.Capture(source,mapping,0,"source.csv",null,DateTime.UtcNow);
+  var project=LabelSettings.Default();
+  project.Batch.Presets.Add(preset);
+  project.Batch.Presets.Add(new BatchPreset{Name="Other"});
+  string projectPath=Path.Combine(dir,"saved-reference.ean.xml");
+  Engine.Save(projectPath,project);
+  var saved=Engine.Load(projectPath).Batch.Presets;
+  var reference=saved[0].Reference;
+  Check(reference.RowCount==2&&reference.SourceName=="source.csv"&&saved[1].Reference==null,"one optional reference round-trips per preset");
+  var table=BatchReferences.Open(reference);
+  Check(table.Rows[0].Length==3&&Array.IndexOf(table.Rows[0],"unused secret")<0,"only identifier and mapped values are saved");
+  var output=JobPreparation.Resolve(project,DateTime.Today);
+  Check(output.Batch.Presets[0].Reference==null&&project.Batch.Presets[0].Reference!=null,"output snapshot excludes reference without changing the project");
+  string zpl=Path.Combine(dir,"saved-reference.zpl");
+  Engine.Zpl(zpl,project);
+  var imported=ZplImport.Project(File.ReadAllText(zpl));
+  Check(imported!=null&&imported.Batch.Presets[0].Name=="Supplier"&&imported.Batch.Presets[0].Reference==null,
+   "editable ZPL metadata keeps ordinary presets without reference values");
+  var current=BatchData.CsvText("Qty;sku;NAME\n3;002;New\n2;001;\"First\nlabel\"",';');
+  mapping.QuantityColumn=0;mapping.UniqueColumn=1;mapping.Bindings[0].Column=2;
+  var comparison=BatchReferences.Compare(current,mapping,reference);
+  Check(comparison.Changed==1&&comparison.Unchanged==1&&comparison.Rows[0].ReferenceRow==4&&comparison.Rows[0].Values.Count==2,
+   "stored reference compares reorganized columns and retains original CSV rows");
+  BatchReferences.EnsurePresetMapping(current,mapping,saved[0]);
+  var setupCopy=project.Batch.Copy();
+  Check(setupCopy.Presets[0].Reference.PackedRows!=preset.Reference.PackedRows&&
+   setupCopy.Presets[0].Reference.Fields[0]!=preset.Reference.Fields[0],"editor copies keep independent reference state");
+  mapping.UniqueColumn=0;
+  bool invalid=false;
+  try{BatchReferences.Compare(current,mapping,reference);}catch(InvalidDataException){invalid=true;}
+  Check(invalid,"changing the configured identifier makes the reference incompatible");
+  invalid=false;
+  try{BatchReferences.EnsurePresetMapping(current,mapping,saved[0]);}catch(InvalidDataException){invalid=true;}
+  Check(invalid,"temporary overrides cannot save a reference under a different preset mapping");
+  invalid=false;
+  try{BatchReferences.Capture(BatchData.CsvText("ID\n01\n01",';'),new BatchSetup(),0,"bad.csv",null,DateTime.UtcNow);}
+  catch(InvalidDataException){invalid=true;}
+  Check(invalid,"duplicate identifiers cannot replace a reference");
+  var sparse=new DataTableSource{Rows=new List<string[]>{new[]{"ID","Text"},new string[0],new[]{"0007","Alfa"}}};
+  var sparseMapping=new BatchSetup{Bindings=new List<ColumnBinding>{new ColumnBinding{Target="text:0",Column=1}}};
+  var worksheet=BatchReferences.Capture(sparse,sparseMapping,0,"workbook.xlsx","Products",DateTime.UtcNow);
+  var reopened=BatchReferences.Open(worksheet);
+  Check(worksheet.SheetName=="Products"&&worksheet.RowCount==1&&reopened.SourceRow(0)==3&&reopened.Rows[0][0]=="0007",
+   "saved worksheet skips gaps and preserves row, sheet and leading zeros");
+  BatchReferences.Replace(project.Batch,preset,null);
+  Engine.Save(projectPath,project);
+  Check(Engine.Load(projectPath).Batch.Presets[0].Reference==null,"deletion persists when saving the project");
+ }
  static void Comparison(){
   var setup=new BatchSetup{Header=true,QuantityColumn=2,Bindings=new List<ColumnBinding>{
    new ColumnBinding{Target="text:0",Column=1},new ColumnBinding{Target="code",Column=3}}};
@@ -211,7 +265,7 @@ class BatchImportTests {
   catch(InvalidDataException ex){Check(ex.Message.Contains("4"),"CSV syntax error cites the source line");}
  }
  static int count;static void Check(bool b,string message){count++;if(!b)throw new Exception(message);}static void Entry(ZipArchive z,string name,string content){using(var w=new StreamWriter(z.CreateEntry(name).Open()))w.Write(content);}
- [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{Comparison();PortableBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
+ [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{SavedReferences(dir);Comparison();PortableBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
  Entry(z,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Products' r:id='r1'/><sheet name='Other' r:id='r2'/></sheets></workbook>");Entry(z,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");Entry(z,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");Entry(z,"xl/sharedStrings.xml","<sst><si><t>Žltý čaj</t></si></sst>");Entry(z,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' s='1'><v>123</v></c><c r='B1' t='s'><v>0</v></c><c r='C1' s='2'><v>45292</v></c><c r='D1'><f>1+1</f><v>2</v></c><c r='E1'><f>1+1</f></c></row><row r='3'><c r='A3' t='inlineStr'><is><t>000045</t></is></c></row></sheetData></worksheet>");Entry(z,"xl/worksheets/sheet2.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other sheet</t></is></c></row></sheetData></worksheet>");}
  var tables=BatchData.Xlsx(file);Check(tables.Count==2&&tables[1].Name=="Other","sheet selection");Check(tables[0].Rows[0][0]=="000123"&&tables[0].Rows[2][0]=="000045","formatted and text leading zeros");Check(tables[0].Rows[0][1]=="Žltý čaj","shared strings unicode");Check(tables[0].Rows[0][2]=="2024-01-01","Excel numeric date");Check(tables[0].Rows[0][3]=="2"&&tables[0].Rows[0][4].StartsWith("!ERROR"),"formula cached result versus error");Check(tables[0].Rows[1].Length==0,"sparse row number retained");
  var persisted=LabelSettings.Default();persisted.Texts.Add(new TextItem{Text="Second"});persisted.Batch.Bindings.Add(new ColumnBinding{Target="text:1",Column=3});persisted=ProjectXml.Clone(persisted);Check(persisted.Batch.Bindings[0].Column==3,"batch mapping project roundtrip");Elements.Remove(persisted,new List<int>{0});Check(persisted.Batch.Bindings[0].Target=="text:0","mapping follows surviving element after deletion");var label=LabelSettings.Default();label.Kind=128;var mappings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}};var record=BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today);Check(record.Error==null&&record.Count==2&&record.Label.Ean=="000123","mapped record quantity");mappings[1].Column=4;Check(BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today).Error!=null,"formula error blocks mapped row");

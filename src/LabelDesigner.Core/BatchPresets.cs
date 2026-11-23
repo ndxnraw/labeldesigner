@@ -11,6 +11,14 @@ namespace EanEtikety {
   public char Separator=';';
   public int CodePage=65001;
   public List<ColumnBinding> Bindings=new List<ColumnBinding>();
+  public BatchReference Reference;
+
+  internal BatchPreset Copy() {
+   var copy=(BatchPreset)MemberwiseClone();
+   copy.Bindings=Bindings==null?null:Bindings.ConvertAll(binding=>binding==null?null:binding.Copy());
+   copy.Reference=Reference==null?null:Reference.Copy();
+   return copy;
+  }
  }
 
  public sealed class BatchMappingResolution {
@@ -92,8 +100,14 @@ namespace EanEtikety {
   internal static void ValidateAll(BatchSetup setup) {
    if(setup.Presets==null||setup.Presets.Count>MaxPresets)throw InvalidPreset();
    var names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+   long referenceBytes=0;
    foreach(var preset in setup.Presets) {
     Validate(preset);
+    if(preset.Reference!=null) {
+     BatchReferences.Validate(preset.Reference);
+     referenceBytes+=preset.Reference.PackedRows.Length;
+     if(referenceBytes>BatchReferences.MaxProjectBytes)throw new InvalidDataException(Loc.T("Referenčné dávky prekračujú limit projektu."));
+    }
     if(!names.Add(preset.Name))throw InvalidPreset();
    }
    if(!string.IsNullOrEmpty(setup.ActivePresetName)&&!names.Contains(setup.ActivePresetName))throw InvalidPreset();
@@ -115,7 +129,7 @@ namespace EanEtikety {
    CheckText(preset.Name);
   }
 
-  static bool ValidTarget(string target) {
+  internal static bool ValidTarget(string target) {
    if(target=="code"||target=="quantity"||target=="unique")return true;
    if(string.IsNullOrEmpty(target))return false;
    int index;
@@ -125,7 +139,7 @@ namespace EanEtikety {
     int.TryParse(target.Substring(7),NumberStyles.None,CultureInfo.InvariantCulture,out index)&&index<20;
   }
 
-  static string Heading(string value){return (value??"").Trim().Replace("\r\n","\n").Replace('\r','\n');}
+  internal static string Heading(string value){return (value??"").Trim().Replace("\r\n","\n").Replace('\r','\n');}
 
   static void CheckText(string value) {
    try{XmlConvert.VerifyXmlChars(value);}
