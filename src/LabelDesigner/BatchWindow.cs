@@ -106,7 +106,13 @@ namespace EanEtikety {
     csvLineNumbers=table!=null&&table.HasCsvLineNumbers;records.Columns["row"].HeaderText=SourceRowHeading;
     foreach(var item in batch)included.Add(true);records.RowCount=batch.Count;UpdateSelectionSummary();preparedInfo.Text=Loc.T("Údaje pripravené")+": "+instant.ToString("g");if(batch.Count>0){records.CurrentCell=records.Rows[0].Cells[0];ShowRecordPreview();}
    }catch(Exception ex){owner.Error(ex);}}
-   void SelectAll(bool selected){records.EndEdit();for(int i=0;i<included.Count;i++)included[i]=selected;records.Invalidate();UpdateSelectionSummary();}
+   void SelectAll(bool selected){SetIncluded(record=>selected);}
+   void SetIncluded(Predicate<BatchRecord> selected){
+    records.EndEdit();
+    for(int i=0;i<included.Count;i++)included[i]=selected(batch[i]);
+    records.Invalidate();
+    UpdateSelectionSummary();
+   }
    bool Plan(out OutputPlan result,out LabelSettings model){records.EndEdit();var selected=new List<BatchRecord>();for(int i=0;i<batch.Count;i++)if(included[i])selected.Add(batch[i]);var format=owner.Read();model=format;return owner.RunWork(window,"plan-batch","Pripravujem tlačovú úlohu…",()=>OutputPlan.Create(selected,format),out result);}
    string SourceRowHeading{get{return Loc.T(csvLineNumbers?"Riadok CSV":"Riadok");}}
    void NavigateIssue(LabelIssue issue){NavigateRecord(issue.Record);}

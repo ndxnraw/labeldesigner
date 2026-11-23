@@ -862,3 +862,10 @@ Nová hodnota	New value	Nová hodnota	Új érték
 Chýbajúci alebo neplatný identifikátor.	Missing or invalid identifier.	Chybějící nebo neplatný identifikátor.	Hiányzó vagy érvénytelen azonosító.
 Referenčný stĺpec {0} slúži ako identifikátor aj ako hodnota etikety. Skontrolujte stĺpce.	Reference column {0} is used both as an identifier and as a label value. Check the columns.	Referenční sloupec {0} slouží jako identifikátor i jako hodnota etikety. Zkontrolujte sloupce.	A(z) {0}. referenciaoszlop azonosítóként és címkeértékként is szerepel. Ellenőrizze az oszlopokat.
 Obe tabuľky musia obsahovať stĺpec s identifikátormi.	Both tables must contain an identifier column.	Obě tabulky musí obsahovat sloupec s identifikátory.	Mindkét táblázatnak tartalmaznia kell egy azonosítóoszlopot.
+Aktuálny počet etikiet	Current label quantity	Aktuální počet etiket	Aktuális címkemennyiség
+Použiť výber na tlač	Use selection for printing	Použít výběr k tisku	Kijelölés használata nyomtatáshoz
+Výber na tlač · Záznamy {0} · Etikety {1}	Print selection · Records {0} · Labels {1}	Výběr k tisku · Záznamy {0} · Etikety {1}	Nyomtatási kijelölés · Rekordok {0} · Címkék {1}
+Chybné záznamy vo výbere · {0}	Invalid records in selection · {0}	Chybné záznamy ve výběru · {0}	Hibás rekordok a kijelölésben · {0}
+Použitím výberu nahradíte výber v dávke.	Applying replaces the selection in the batch.	Použitím výběru nahradíte výběr v dávce.	A kijelölés alkalmazása lecseréli a kötegben lévő kijelölést.
+Označiť pridané	Select added	Označit přidané	Hozzáadottak kijelölése
+Označiť zmenené	Select changed	Označit změněné	Módosítottak kijelölése

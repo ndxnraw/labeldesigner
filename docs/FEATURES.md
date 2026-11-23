@@ -38,7 +38,8 @@ Názov produktu je naďalej Pre-release.
 
 - **Porovnanie opakovaných dávok** spáruje pripravené riadky s ručne vybraným
   CSV alebo XLSX podľa identifikátora. Zobrazí pridané, odstránené a zmenené
-  položky, pôvodné hodnoty a prechod na aktuálnu etiketu.
+  položky, pôvodné hodnoty a prechod na aktuálnu etiketu. Z pridaných
+  a zmenených riadkov sa dá pripraviť výber na tlač s aktuálnymi množstvami.
 
 - **Čitateľnosť kódov pred tlačou** je v tlačovom náhľade pod **Detaily →
   Čitateľnosť kódov…**. Pre EAN-13, ITF-14, GS1-128, QR a Data Matrix

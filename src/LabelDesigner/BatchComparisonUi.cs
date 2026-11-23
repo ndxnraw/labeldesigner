@@ -147,13 +147,15 @@ namespace EanEtikety {
 
    void ShowComparison(BatchComparisonResult result) {
     int targetRow = 0;
+    HashSet<int> printRows = null;
     bool hasIssues = result.Issues.Count != 0;
     using (var dialog = owner.FeatureForm("Rozdiely medzi dávkami", 960, 660)) {
      dialog.MinimumSize = new Size(620, 400);
-     var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4, Padding = new Padding(12) };
+     var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5, Padding = new Padding(12) };
      layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
      layout.RowStyles.Add(new RowStyle(SizeType.Percent, 65));
      layout.RowStyles.Add(new RowStyle(SizeType.Percent, result.Changed > 0 ? 35 : 0));
+     layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
      layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
      dialog.Controls.Add(layout);
      var summary = new Label { AutoSize = true, MaximumSize = new Size(580, 0), Text = hasIssues
@@ -209,8 +211,10 @@ namespace EanEtikety {
      var jump = owner.Btn(Loc.T("Prejsť na etiketu"), go);
      var close = owner.Btn(Loc.T("Zavrieť"), dialog.Close);
      actions.Controls.Add(jump);
+     if (!hasIssues && result.Added + result.Changed > 0)
+      layout.Controls.Add(ComparisonPrintControls(dialog, rows, result, actions, selection => printRows = selection), 0, 3);
      actions.Controls.Add(close);
-     layout.Controls.Add(actions, 0, 3);
+     layout.Controls.Add(actions, 0, 4);
      Action update = delegate {
       jump.Enabled = currentRow() != 0;
       details.Rows.Clear();
@@ -224,14 +228,17 @@ namespace EanEtikety {
       }
      };
      rows.CurrentCellChanged += delegate { update(); };
-     rows.CellDoubleClick += delegate(object sender, DataGridViewCellEventArgs e) { if (e.RowIndex >= 0) go(); };
+     rows.CellDoubleClick += delegate(object sender, DataGridViewCellEventArgs e) {
+      if (e.RowIndex >= 0 && e.ColumnIndex >= 0 && rows.Columns[e.ColumnIndex].Name != "print") go();
+     };
      update();
      dialog.AcceptButton = jump;
      dialog.CancelButton = close;
      owner.ApplyColors(dialog);
      if (dialog.ShowDialog(window) != DialogResult.OK) return;
     }
-    NavigateRecord(targetRow);
+    if (printRows != null) SetIncluded(record => printRows.Contains(record.Row));
+    else NavigateRecord(targetRow);
    }
 
    static object RowText(int row) { return row > 0 ? (object)row : "—"; }

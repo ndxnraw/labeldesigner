@@ -92,8 +92,12 @@ Prehľad ukáže počty pridaných, odstránených, zmenených a nezmenených
 položiek. Pri zmene zobrazí pôvodnú aj novú hodnotu.
 Pri aktuálnom riadku použite Prejsť na etiketu. Pri nejednoznačných
 identifikátoroch sa zobrazia riadky na opravu a porovnanie sa zastaví.
-Funkcia pracuje offline, porovnáva celú pripravenú dávku a výber tlače
-sa ovláda samostatne v dávkovom okne.
+Porovnanie celej pripravenej dávky funguje offline. Na prípravu tlače
+kliknite na Označiť pridané, Označiť zmenené alebo začiarknite konkrétne
+riadky. Hromadné označenie pridá riadky do výberu. V súhrne skontrolujte
+počet záznamov a etikiet. Používa sa aktuálne množstvo každej položky.
+Potvrdenie cez Použiť výber na tlač nahradí výber v dávkovom okne.
+Odtiaľ pokračujte cez Tlačiť vybrané na náhľad a predtlačovú kontrolu.
 
 PRENOSNÁ ZÁLOHA ŠABLÓN A PROFILOV
 Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,

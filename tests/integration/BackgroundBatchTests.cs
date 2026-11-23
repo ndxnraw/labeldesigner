@@ -203,8 +203,29 @@ class BackgroundBatchTests {
   ExerciseComparison(controller,xlsx,false);
   Check(object.ReferenceEquals(prepared,Field<List<BatchRecord>>(controller,"batch"))&&!Field<List<bool>>(controller,"included")[1]
    &&grid.CurrentCell.RowIndex==1,"comparison selects real source row without changing the prepared data or print selection");
+  ExerciseComparison(controller,csv,true,1);
+  Check(Field<List<bool>>(controller,"included")[0]&&!Field<List<bool>>(controller,"included")[1],
+   "closing comparison discards the pending print selection");
+  ExerciseComparison(controller,xlsx,false,2);
+  Check(!Field<List<bool>>(controller,"included")[0]&&Field<List<bool>>(controller,"included")[1],
+   "confirmation replaces the selection with the explicitly chosen source row");
+  var args=new object[]{null,null};
+  Check((bool)Call(controller,"Plan",args),"existing output planner accepts the comparison selection");
+  var plan=(OutputPlan)args[0];
+  Check(plan.RecordCount==1&&plan.Placements.Count==2&&plan.Placements.TrueForAll(place=>place.Record==4),
+   "output uses the current quantity of two for the selected row");
+  int firstCount=prepared[0].Count,secondCount=prepared[1].Count;
+  try{
+   prepared[1].Error="Invalid prepared row";
+   ExerciseComparison(controller,xlsx,false,3);
+   prepared[1].Error=null;
+   prepared[0].Count=6000;prepared[1].Count=6000;
+   ExerciseComparison(controller,xlsx,false,4);
+  }finally{prepared[1].Error=null;prepared[0].Count=firstCount;prepared[1].Count=secondCount;}
+  Check(!Field<List<bool>>(controller,"included")[0]&&Field<List<bool>>(controller,"included")[1],
+   "an invalid or oversized selection leaves the previous batch selection in place");
  }
- static void ExerciseComparison(object controller,string path,bool csv){
+ static void ExerciseComparison(object controller,string path,bool csv,int selection=0){
   int step=csv?0:1;
   Exception failure=null;
   using(var timer=new System.Windows.Forms.Timer{Interval=40}){
@@ -245,7 +266,38 @@ class BackgroundBatchTests {
       rows.CurrentCell=rows.Rows[1].Cells["id"];
       Check(details.RowCount==2&&Convert.ToString(details.Rows[0].Cells["before"].Value)=="Old"&&
        Convert.ToString(details.Rows[0].Cells["after"].Value)=="New","report displays previous and current values");
-      step=3;timer.Stop();jump.PerformClick();
+      step=3;timer.Stop();
+      if(selection==0){jump.PerformClick();return;}
+      var applyControls=dialog.Controls.Find("applyComparisonSelection",true);
+      var summaryControls=dialog.Controls.Find("comparisonPrintSummary",true);
+      Check(applyControls.Length==1&&summaryControls.Length==1,"comparison provides a confirmation action and summary");
+      var apply=(Button)applyControls[0];
+      var summary=(Label)summaryControls[0];
+      Check(!apply.Enabled,"empty comparison selection cannot be confirmed");
+      Button(dialog,Loc.T("Označiť pridané")).PerformClick();
+      Button(dialog,Loc.T("Označiť zmenené")).PerformClick();
+      if(selection>=3){
+       string warning=Loc.T(selection==3?"Chybné záznamy vo výbere · {0}":"Najviac 10000 etikiet");
+       Check(!apply.Enabled&&summary.Text.Contains(selection==3?string.Format(warning,1):warning),
+        "summary blocks invalid prepared rows and selections over the output limit");
+       ((Button)dialog.CancelButton).PerformClick();return;
+      }
+      Check(apply.Enabled&&summary.Text.Contains(string.Format(Loc.T("Výber na tlač · Záznamy {0} · Etikety {1}"),2,3)),
+       "bulk selection counts current quantities for both categories");
+      Check(rows.Columns["id"].ReadOnly&&!rows.Columns["print"].ReadOnly,"only selection checkboxes are editable");
+      rows.CurrentCell=rows.Rows[2].Cells["print"];
+      Check(!rows.BeginEdit(false),"removed row checkbox cannot be edited");
+      rows.Rows[2].Cells["print"].Value=true;
+      Check(summary.Text.Contains(string.Format(Loc.T("Výber na tlač · Záznamy {0} · Etikety {1}"),2,3)),
+       "removed reference row never enters the print selection");
+      if(selection==1){((Button)dialog.CancelButton).PerformClick();return;}
+      var cell=(DataGridViewCheckBoxCell)rows.Rows[0].Cells["print"];
+      rows.CurrentCell=cell;
+      Check(rows.BeginEdit(false),"a current row checkbox can be edited");
+      typeof(DataGridViewCheckBoxCell).GetMethod("OnContentClick",Hidden).Invoke(cell,new object[]{new DataGridViewCellEventArgs(cell.ColumnIndex,0)});
+      Check(summary.Text.Contains(string.Format(Loc.T("Výber na tlač · Záznamy {0} · Etikety {1}"),1,2)),
+       "individual checkbox edits immediately update the total before leaving the cell");
+      apply.PerformClick();
      }
     }catch(Exception ex){failure=ex;timer.Stop();dialog.Close();}
    };
