@@ -1,5 +1,55 @@
 using System;using System.IO;using System.IO.Compression;using System.Collections.Generic;using System.Drawing;using System.Windows.Forms;using EanEtikety;
 class BatchImportTests {
+ static void Comparison(){
+  var setup=new BatchSetup{Header=true,QuantityColumn=2,Bindings=new List<ColumnBinding>{
+   new ColumnBinding{Target="text:0",Column=1},new ColumnBinding{Target="code",Column=3}}};
+  var current=BatchData.CsvText("SKU;Name;Qty;EAN\r\n01;Same; 02 ;0001\r\n02;\"New\r\nlabel\";3;0002\r\n03;Added;1;0003",';');
+  var reference=BatchData.CsvText("ean;qty;name;sku\n0002;1;Old;02\n0001;2;Same;01\n0004;1;Removed;04",';');
+  var report=BatchComparison.Compare(current,reference,setup,true,0,3);
+  Check(report.Issues.Count==0&&report.Unchanged==1&&report.Rows.Count==3,"reordered columns and rows match and numeric counts compare by value");
+  var changed=report.Rows[0];
+  Check(changed.Kind==BatchDifferenceKind.Changed&&changed.Id=="02"&&changed.CurrentRow==3&&changed.ReferenceRow==2&&
+   changed.Values.Count==2&&changed.Values[0].Before=="Old"&&changed.Values[0].After=="New\r\nlabel","changed fields retain values and original rows");
+  Check(report.Rows[1].Kind==BatchDifferenceKind.Added&&report.Rows[1].CurrentRow==5&&report.Rows[1].ReferenceRow==0&&
+   report.Rows[2].Kind==BatchDifferenceKind.Removed&&report.Rows[2].CurrentRow==0&&report.Rows[2].ReferenceRow==4,"added and removed rows keep their own source location");
+  var bad=BatchData.CsvText("SKU;Name;Qty;EAN\n01;A;1;X\n01;B;2;Y\n;C;1;Z",';');
+  var blocked=BatchComparison.Compare(current,bad,setup,true,0,0);
+  Check(blocked.Rows.Count==0&&blocked.Issues.Count==3&&blocked.Issues[0].ReferenceRow==2&&
+   blocked.Issues[1].ReferenceRow==3&&blocked.Issues[2].ReferenceRow==4,"all duplicate and missing keys reported without partial claims");
+  var badCurrent=BatchComparison.Compare(bad,reference,setup,true,0,3);
+  Check(badCurrent.Rows.Count==0&&badCurrent.Issues[2].CurrentRow==4,"invalid current rows retain a preview link");
+  var positional=BatchComparison.Compare(BatchData.CsvText("001;A\n1;B",';'),
+   BatchData.CsvText("1;B\n001;A",';'),new BatchSetup{Header=false},false,0,0);
+  Check(positional.Unchanged==2&&positional.Rows.Count==0,"leading zeros remain significant for positional identifiers");
+  var renamed=BatchComparison.Compare(BatchData.CsvText("SKU;Name\n001;A",';'),BatchData.CsvText("ID;name\n001;A",';'),
+   new BatchSetup{Bindings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}}},true,0,0);
+  Check(renamed.Unchanged==1,"manually paired identifier columns can differ in name even when used as label data");
+  var duplicateHeading=BatchData.CsvText("ean;qty;name;sku;NAME\n0001;2;Same;01;Other",';');
+  bool ambiguous=false;
+  try{BatchComparison.Compare(current,duplicateHeading,setup,true,0,3);}catch(InvalidDataException){ambiguous=true;}
+  Check(ambiguous,"duplicate mapped headings cannot silently choose one field");
+  WorkContext stop=null;
+  stop=new WorkContext(progress=>stop.Cancel());
+  bool cancelled=false;
+  using(stop.Enter())try{BatchComparison.Compare(current,reference,setup,true,0,3);}catch(OperationCanceledException){cancelled=true;}
+  Check(cancelled,"comparison honours background cancellation");
+  var headerless=new BatchSetup{Header=false,Bindings=new List<ColumnBinding>{new ColumnBinding{Target="text:0",Column=1}}};
+  ambiguous=false;
+  try{
+   BatchComparison.Compare(BatchData.CsvText("A;New",';'),BatchData.CsvText("Old;A",';'),headerless,false,0,1);
+  }catch(InvalidDataException){ambiguous=true;}
+  Check(ambiguous,"positional comparison cannot compare a label field with the chosen reference identifier");
+  ambiguous=false;
+  try{
+   BatchComparison.Compare(BatchData.CsvText("SKU;Name\nA;New",';'),BatchData.CsvText("DisplayName;Name\nOld;A",';'),
+    new BatchSetup{Bindings=headerless.Bindings},true,0,1);
+  }catch(InvalidDataException){ambiguous=true;}
+  Check(ambiguous,"heading-based comparison also rejects a field mapped to the reference identifier");
+  var xlsx=new DataTableSource{Rows=new List<string[]>{new[]{"SKU","Name","Qty","EAN"},new string[0],new[]{"02","New\nlabel","3","0002"}}};
+  var sparse=BatchComparison.Compare(current,xlsx,setup,true,0,0);
+  Check(sparse.Issues.Count==0&&sparse.Unchanged==1&&sparse.Added==2&&sparse.Removed==0,
+   "sparse worksheet gaps are ignored and line endings in label text do not create a difference");
+ }
  static void PortableBackup(string dir){
   string source=Path.Combine(dir,"backup-source"),target=Path.Combine(dir,"backup-target");
   string library=Path.Combine(source,"Templates");
@@ -161,7 +211,7 @@ class BatchImportTests {
   catch(InvalidDataException ex){Check(ex.Message.Contains("4"),"CSV syntax error cites the source line");}
  }
  static int count;static void Check(bool b,string message){count++;if(!b)throw new Exception(message);}static void Entry(ZipArchive z,string name,string content){using(var w=new StreamWriter(z.CreateEntry(name).Open()))w.Write(content);}
- [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{PortableBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
+ [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{Comparison();PortableBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
  Entry(z,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Products' r:id='r1'/><sheet name='Other' r:id='r2'/></sheets></workbook>");Entry(z,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");Entry(z,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");Entry(z,"xl/sharedStrings.xml","<sst><si><t>Žltý čaj</t></si></sst>");Entry(z,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' s='1'><v>123</v></c><c r='B1' t='s'><v>0</v></c><c r='C1' s='2'><v>45292</v></c><c r='D1'><f>1+1</f><v>2</v></c><c r='E1'><f>1+1</f></c></row><row r='3'><c r='A3' t='inlineStr'><is><t>000045</t></is></c></row></sheetData></worksheet>");Entry(z,"xl/worksheets/sheet2.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other sheet</t></is></c></row></sheetData></worksheet>");}
  var tables=BatchData.Xlsx(file);Check(tables.Count==2&&tables[1].Name=="Other","sheet selection");Check(tables[0].Rows[0][0]=="000123"&&tables[0].Rows[2][0]=="000045","formatted and text leading zeros");Check(tables[0].Rows[0][1]=="Žltý čaj","shared strings unicode");Check(tables[0].Rows[0][2]=="2024-01-01","Excel numeric date");Check(tables[0].Rows[0][3]=="2"&&tables[0].Rows[0][4].StartsWith("!ERROR"),"formula cached result versus error");Check(tables[0].Rows[1].Length==0,"sparse row number retained");
  var persisted=LabelSettings.Default();persisted.Texts.Add(new TextItem{Text="Second"});persisted.Batch.Bindings.Add(new ColumnBinding{Target="text:1",Column=3});persisted=ProjectXml.Clone(persisted);Check(persisted.Batch.Bindings[0].Column==3,"batch mapping project roundtrip");Elements.Remove(persisted,new List<int>{0});Check(persisted.Batch.Bindings[0].Target=="text:0","mapping follows surviving element after deletion");var label=LabelSettings.Default();label.Kind=128;var mappings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}};var record=BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today);Check(record.Error==null&&record.Count==2&&record.Label.Ean=="000123","mapped record quantity");mappings[1].Column=4;Check(BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today).Error!=null,"formula error blocks mapped row");

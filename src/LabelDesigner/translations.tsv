@@ -830,3 +830,35 @@ Etiketa {0} · strana {1}	Label {0} · page {1}	Etiketa {0} · strana {1}	{0}. c
  · záznam {0}	 · record {0}	 · záznam {0}	 · {0}. rekord
 Na dotlač nezostala žiadna strana. Skontrolujte poslednú vytlačenú stranu.	No pages remain. Check the last printed page.	K dotisku nezbývá žádná strana. Zkontrolujte poslední vytištěnou stranu.	Nincs hátralévő oldal. Ellenőrizze az utolsó kinyomtatott oldalt.
 Označte aspoň jednu etiketu na dotlač.	Select at least one label to reprint.	Označte alespoň jednu etiketu k dotisku.	Jelöljön ki legalább egy címkét az utónyomtatáshoz.
+Vybrať referenčný súbor	Choose reference file	Vybrat referenční soubor	Referenciafájl kiválasztása
+Referenčný súbor neobsahuje tabuľku.	The reference file contains no table.	Referenční soubor neobsahuje tabulku.	A referenciafájl nem tartalmaz táblázatot.
+Nastavenia referenčného CSV	Reference CSV settings	Nastavení referenčního CSV	Referencia CSV beállításai
+Oddeľovač	Delimiter	Oddělovač	Elválasztó
+Kódovanie	Encoding	Kódování	Kódolás
+Načítať tabuľku	Load table	Načíst tabulku	Táblázat betöltése
+Porovnať dávku…	Compare batch…	Porovnat dávku…	Köteg összehasonlítása…
+Referenčný súbor	Reference file	Referenční soubor	Referenciafájl
+Referenčný hárok	Reference sheet	Referenční list	Referencia-munkalap
+Prvý riadok referencie je hlavička	First reference row is the header	První řádek reference je záhlaví	A referencia első sora a fejléc
+Identifikátor aktuálnej dávky	Current batch identifier	Identifikátor aktuální dávky	A jelenlegi köteg azonosítója
+Identifikátor referenčnej dávky	Reference batch identifier	Identifikátor referenční dávky	A referenciaköteg azonosítója
+Porovnať	Compare	Porovnat	Összehasonlítás
+Porovnávam dávky…	Comparing batches…	Porovnávám dávky…	Kötegek összehasonlítása…
+Porovnávajú sa všetky pripravené riadky. Mapované stĺpce sa hľadajú podľa názvu.	All prepared rows are compared. Mapped columns are matched by name.	Porovnávají se všechny připravené řádky. Mapované sloupce se hledají podle názvu.	Minden előkészített sor részt vesz az összehasonlításban. A hozzárendelt oszlopokat név alapján keresi a program.
+Porovnávajú sa všetky pripravené riadky. Mapované stĺpce sa porovnajú podľa pozície.	All prepared rows are compared. Mapped columns are matched by position.	Porovnávají se všechny připravené řádky. Mapované sloupce se porovnají podle pozice.	Minden előkészített sor részt vesz az összehasonlításban. A hozzárendelt oszlopokat pozíció alapján párosítja a program.
+Pridaná položka	Added item	Přidaná položka	Hozzáadott tétel
+Odstránená položka	Removed item	Odstraněná položka	Eltávolított tétel
+Zmenená položka	Changed item	Změněná položka	Módosított tétel
+Rozdiely medzi dávkami	Batch differences	Rozdíly mezi dávkami	Kötegek közötti eltérések
+Pred porovnaním opravte identifikátory v uvedených riadkoch.	Fix the identifiers in the listed rows before comparing.	Před porovnáním opravte identifikátory v uvedených řádcích.	Az összehasonlítás előtt javítsa a felsorolt sorok azonosítóit.
+Pridané {0} · Odstránené {1} · Zmenené {2} · Bez zmeny {3}	Added {0} · Removed {1} · Changed {2} · Unchanged {3}	Přidané {0} · Odstraněné {1} · Změněné {2} · Beze změny {3}	Hozzáadott {0} · Eltávolított {1} · Módosított {2} · Változatlan {3}
+Identifikátor	Identifier	Identifikátor	Azonosító
+Aktuálny riadok	Current row	Aktuální řádek	Jelenlegi sor
+Referenčný riadok	Reference row	Referenční řádek	Referenciasor
+Zmenené hodnoty	Changed values	Změněné hodnoty	Módosított értékek
+Pôvodná hodnota	Previous value	Původní hodnota	Korábbi érték
+Nová hodnota	New value	Nová hodnota	Új érték
+(chýba hodnota)	(missing value)	(chybí hodnota)	(hiányzó érték)
+Chýbajúci alebo neplatný identifikátor.	Missing or invalid identifier.	Chybějící nebo neplatný identifikátor.	Hiányzó vagy érvénytelen azonosító.
+Referenčný stĺpec {0} slúži ako identifikátor aj ako hodnota etikety. Skontrolujte stĺpce.	Reference column {0} is used both as an identifier and as a label value. Check the columns.	Referenční sloupec {0} slouží jako identifikátor i jako hodnota etikety. Zkontrolujte sloupce.	A(z) {0}. referenciaoszlop azonosítóként és címkeértékként is szerepel. Ellenőrizze az oszlopokat.
+Obe tabuľky musia obsahovať stĺpec s identifikátormi.	Both tables must contain an identifier column.	Obě tabulky musí obsahovat sloupec s identifikátory.	Mindkét táblázatnak tartalmaznia kell egy azonosítóoszlopot.

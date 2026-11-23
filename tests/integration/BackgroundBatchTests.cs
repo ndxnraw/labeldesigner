@@ -39,6 +39,7 @@ class BackgroundBatchTests {
    Check(object.ReferenceEquals(old,Field<List<BatchRecord>>(controller,"batch"))&&ProjectXml.Encode((LabelSettings)Call(owner,"Read"))==original,"cancel/completion race preserves consistent batch and project");
    var grid=Field<DataGridView>(controller,"records");grid.Rows[0].Cells[0].Value=false;grid.EndEdit();Check(!Field<List<bool>>(controller,"included")[0],"virtual checkbox edits update selected records");Call(controller,"SelectAll",false);Check(!Field<List<bool>>(controller,"included")[0],"virtual selection clears");Call(controller,"SelectAll",true);Check(Field<List<bool>>(controller,"included")[0],"virtual selection restores");
    CsvIssuesUi(controller,form);
+   ComparisonUi(controller,form);
    PresetUi(controller,form,owner);
    using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,form.ClientRectangle);image.Save(Path.Combine(dir,"batch-background.png"));}completed=true;
   }catch(Exception ex){failure=ex;}finally{form.Close();}break;}};timer.Start();Call(owner,"ShowBatch");}
@@ -161,6 +162,97 @@ class BackgroundBatchTests {
    "a preset using another delimiter activates before importing a replacement");
   File.WriteAllText(path,"Case;Serial;Qty;Item\n858000000001;007;3;590123412345");
   Check((bool)Call(controller,"LoadFile",path,';',65001)&&prepare.Enabled&&mapped("code")==3,"new import follows newly selected preset");
+ }
+ static void ComparisonUi(object controller,Form batchWindow){
+  var current=Path.Combine(dir,"current-comparison.csv");
+  File.WriteAllText(current,"SKU;Code;Name;Qty\n01;590123412345;\"First\nlabel\";1\n02;590123412345;New;2");
+  var compare=Button(batchWindow,Loc.T("Porovnať dávku…"));
+  Check((bool)Call(controller,"LoadFile",current,';',65001)&&!compare.Enabled,"comparison requires prepared imported rows");
+  var map=Field<DataGridView>(controller,"mapping");
+  var columns=(DataGridViewComboBoxColumn)map.Columns["column"];
+  var targets=Field<List<string>>(controller,"targets");
+  map.Rows[targets.IndexOf("code")].Cells["column"].Value=columns.Items[2];
+  map.Rows[targets.IndexOf("text:0")].Cells["column"].Value=columns.Items[3];
+  map.Rows[targets.IndexOf("quantity")].Cells["column"].Value=columns.Items[4];
+  Call(controller,"Prepare");
+  Check(compare.Enabled,"prepared imported batch enables comparison");
+  var prepared=Field<List<BatchRecord>>(controller,"batch");
+  var grid=Field<DataGridView>(controller,"records");
+  grid.Rows[1].Cells[0].Value=false;grid.EndEdit();
+  var csv=Path.Combine(dir,"prior-comparison.csv");
+  File.WriteAllText(csv,"Qty,Name,Code,SKU\n1,Old,590123412345,02\n1,Removed,590123412345,03");
+  var xlsx=Path.Combine(dir,"prior-comparison.xlsx");
+  using(var file=File.Create(xlsx))using(var zip=new ZipArchive(file,ZipArchiveMode.Create)){
+   ZipText(zip,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Other' r:id='r1'/><sheet name='Prior' r:id='r2'/></sheets></workbook>");
+   ZipText(zip,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");
+   ZipText(zip,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other</t></is></c></row></sheetData></worksheet>");
+   string xml="<worksheet><sheetData>";
+   var values=new[]{new[]{"Qty","Name","Code","SKU"},new[]{"1","Old","590123412345","02"},new[]{"1","Removed","590123412345","03"}};
+   for(int i=0;i<values.Length;i++){
+    int row=i==0?1:i+2;
+    xml+="<row r='"+row+"'>";
+    for(int col=0;col<values[i].Length;col++)xml+="<c r='"+(char)('A'+col)+row+"' t='inlineStr'><is><t>"+values[i][col]+"</t></is></c>";
+    xml+="</row>";
+   }
+   ZipText(zip,"xl/worksheets/sheet2.xml",xml+"</sheetData></worksheet>");
+  }
+  VisitDialog("Nastavenia referenčného CSV",()=>Call(controller,"CompareBatchWithFile",csv),
+   dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
+  Check(object.ReferenceEquals(prepared,Field<List<BatchRecord>>(controller,"batch")),"cancelled reference import keeps prepared batch");
+  ExerciseComparison(controller,csv,true);
+  ExerciseComparison(controller,xlsx,false);
+  Check(object.ReferenceEquals(prepared,Field<List<BatchRecord>>(controller,"batch"))&&!Field<List<bool>>(controller,"included")[1]
+   &&grid.CurrentCell.RowIndex==1,"comparison selects real source row without changing the prepared data or print selection");
+ }
+ static void ExerciseComparison(object controller,string path,bool csv){
+  int step=csv?0:1;
+  Exception failure=null;
+  using(var timer=new System.Windows.Forms.Timer{Interval=40}){
+   var watch=Stopwatch.StartNew();
+   timer.Tick+=delegate{
+    string title=Loc.T(step==0?"Nastavenia referenčného CSV":step==1?"Porovnať dávku…":"Rozdiely medzi dávkami");
+    Form dialog=null;
+    foreach(Form candidate in Application.OpenForms)if(candidate.Text==title){dialog=candidate;break;}
+    if(watch.ElapsedMilliseconds>30000){
+     failure=new Exception("Comparison dialog stalled at "+step);
+     timer.Stop();
+     var open=new List<Form>();
+     foreach(Form candidate in Application.OpenForms)
+      if(candidate.Modal&&candidate.Text!=Loc.T("Dávka a premenné"))open.Add(candidate);
+     for(int i=open.Count-1;i>=0;i--)open[i].Close();
+     return;
+    }
+    if(dialog==null)return;
+    try{
+     if(step==0){
+      ((ComboBox)dialog.Controls.Find("comparisonSeparator",true)[0]).SelectedIndex=1;step=1;
+      Button(dialog,Loc.T("Načítať tabuľku")).PerformClick();
+     }else if(step==1){
+      if(!csv)((ComboBox)dialog.Controls.Find("comparisonReferenceSheet",true)[0]).SelectedIndex=1;
+      ((ComboBox)dialog.Controls.Find("comparisonCurrentKey",true)[0]).SelectedIndex=0;
+      Check(((ComboBox)dialog.Controls.Find("comparisonReferenceKey",true)[0]).SelectedIndex==3,
+       "key inferred by heading after reference column reordering");
+      step=2;
+      ((Button)dialog.Controls.Find("comparisonRun",true)[0]).PerformClick();
+     }else if(step==2){
+      var rows=(DataGridView)dialog.Controls.Find("batchComparisonRows",true)[0];
+      var details=(DataGridView)dialog.Controls.Find("batchComparisonValues",true)[0];
+      Check(rows.VirtualMode&&rows.RowCount==3&&Convert.ToInt32(rows.Rows[1].Cells["now"].Value)==4,"report uses physical CSV line for changed row");
+      Check(Convert.ToInt32(rows.Rows[1].Cells["before"].Value)==(csv?2:3),"reference row number remains accurate after sparse worksheet rows");
+      rows.CurrentCell=rows.Rows[2].Cells["id"];
+      var jump=Button(dialog,Loc.T("Prejsť na etiketu"));
+      Check(!jump.Enabled,"reference-only removal has no current preview target");
+      rows.CurrentCell=rows.Rows[1].Cells["id"];
+      Check(details.RowCount==2&&Convert.ToString(details.Rows[0].Cells["before"].Value)=="Old"&&
+       Convert.ToString(details.Rows[0].Cells["after"].Value)=="New","report displays previous and current values");
+      step=3;timer.Stop();jump.PerformClick();
+     }
+    }catch(Exception ex){failure=ex;timer.Stop();dialog.Close();}
+   };
+   timer.Start();Call(controller,"CompareBatchWithFile",path);
+  }
+  if(failure!=null)throw failure;
+  Check(step==3,"reference file workflow completed");
  }
  static void CsvIssuesUi(object controller,Form batchWindow){
   string csv=Path.Combine(dir,"issues.csv");

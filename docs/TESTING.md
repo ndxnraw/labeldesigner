@@ -23,6 +23,12 @@ and missing headers, preserve quantity and uniqueness mappings, round-trip
 saved presets and verify that deleting an element remaps surviving bindings.
 The batch dialog test saves multiple presets, checks actual sample values and
 verifies positional confirmation, cancellation and invalidation.
+Batch comparison tests cover reordered headers and records, exact identifiers,
+missing and duplicate keys, sparse sheets, conflicting columns, numeric
+quantities and cancellation. `BackgroundBatchTests` compares a prepared CSV
+with a reference CSV using a different delimiter and an XLSX workbook with
+multiple sheets. It verifies old and new values, navigation to the current
+physical CSV line and retention of the current batch and print selection.
 The portable workspace tests verify ZIP inventory, offline transfer of a
 template with a saved batch preset, multiple media profiles and calibration,
 printer reassignment, default conflict handling, checkpoint backup, stale

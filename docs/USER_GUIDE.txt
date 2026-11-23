@@ -78,6 +78,23 @@ stĺpcov pre prvých päť dátových záznamov. Pri tabuľke bez hlavičky potv
 pozície pred prípravou dávky. Nový import alebo zmena priradenia vyžiada nové
 potvrdenie. Funkcie sú dostupné offline na .NET Framework 4.8 aj .NET 10.
 
+POROVNANIE OPAKOVANÝCH DÁVOK
+Importujte aktuálnu tabuľku, priraďte stĺpce a stlačte Pripraviť dávku.
+V spodnej časti okna vyberte Porovnať dávku… a otvorte referenčný súbor
+CSV alebo XLSX. Pri CSV nastavte oddeľovač a kódovanie, pri XLSX vyberte
+hárok. Nastavte hlavičku referencie a stĺpec identifikátora pre obe tabuľky.
+Identifikátory sa porovnávajú doslovne vrátane veľkých písmen a úvodných núl.
+
+Texty, kódy a množstvo sa berú z aktuálneho mapovania. Ak majú obe tabuľky
+hlavičku, ich stĺpce sa hľadajú podľa názvu. Pri tabuľke bez hlavičky sa
+použijú pozície stĺpcov. Prázdne medzery v hárku XLSX sa preskočia.
+Prehľad ukáže počty pridaných, odstránených, zmenených a nezmenených
+položiek. Pri zmene zobrazí pôvodnú aj novú hodnotu.
+Pri aktuálnom riadku použite Prejsť na etiketu. Pri nejednoznačných
+identifikátoroch sa zobrazia riadky na opravu a porovnanie sa zastaví.
+Funkcia pracuje offline, porovnáva celú pripravenú dávku a výber tlače
+sa ovláda samostatne v dávkovom okne.
+
 PRENOSNÁ ZÁLOHA ŠABLÓN A PROFILOV
 Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
 profily médií alebo obe kategórie a použite Exportovať zálohu do ZIPu….

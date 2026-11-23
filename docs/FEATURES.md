@@ -36,6 +36,10 @@ Názov produktu je naďalej Pre-release.
   riadkom CSV a stĺpcom. Z prehľadu sa dá prejsť na etiketu v náhľade.
   Duplicity sa kontrolujú vo voliteľnom stĺpci s jedinečnými hodnotami.
 
+- **Porovnanie opakovaných dávok** spáruje pripravené riadky s ručne vybraným
+  CSV alebo XLSX podľa identifikátora. Zobrazí pridané, odstránené a zmenené
+  položky, pôvodné hodnoty a prechod na aktuálnu etiketu.
+
 - **Čitateľnosť kódov pred tlačou** je v tlačovom náhľade pod **Detaily →
   Čitateľnosť kódov…**. Pre EAN-13, ITF-14, GS1-128, QR a Data Matrix
   kontroluje modul, voľné okraje, orez a skúšobné načítanie pri rozlíšení

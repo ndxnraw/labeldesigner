@@ -56,6 +56,7 @@ namespace EanEtikety {
     var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(actions,0,2);root.SetColumnSpan(actions,2);
     actions.Controls.Add(owner.Btn(Loc.T("Vybrať všetko"),delegate{SelectAll(true);}));actions.Controls.Add(owner.Btn(Loc.T("Zrušiť výber"),delegate{SelectAll(false);}));exportSelected=owner.Btn(Loc.T("Exportovať vybrané"),Export);printSelected=owner.Btn(Loc.T("Tlačiť vybrané"),Print);actions.Controls.Add(exportSelected);actions.Controls.Add(printSelected);selectionInfo.AutoSize=true;selectionInfo.UseMnemonic=false;selectionInfo.MaximumSize=new Size(360,0);actions.Controls.Add(selectionInfo);
     issuesButton=owner.Btn(Loc.T("Problémy vstupných dát…"),ShowIssues);actions.Controls.Add(issuesButton);
+    compareButton=owner.Btn(Loc.T("Porovnať dávku…"),CompareBatch);actions.Controls.Add(compareButton);
     sheet.SelectedIndexChanged+=delegate{if(!updating)Map();};header.CheckedChanged+=delegate{if(!updating)Map();};
     mapping.CurrentCellDirtyStateChanged+=delegate{if(!updating&&mapping.IsCurrentCellDirty)mapping.CommitEdit(DataGridViewDataErrorContexts.Commit);};
     mapping.CellValueChanged+=delegate(object sender,DataGridViewCellEventArgs args){
@@ -65,7 +66,7 @@ namespace EanEtikety {
     owner.ApplyColors(window);Map();preview=new BatchPreview(view,message=>preparedInfo.Text=message);
    }
    char Separator{get{return separator.SelectedIndex==2?'\t':separator.Text[0];}}int CodePage{get{return encoding.SelectedIndex==0?65001:1250;}}
-   void Clear(){records.RowCount=0;batch=new List<BatchRecord>();included.Clear();preparedInfo.Text="";ShowRecordPreview();UpdateSelectionSummary();}
+   void Clear(){records.RowCount=0;batch=new List<BatchRecord>();comparisonTable=null;included.Clear();preparedInfo.Text="";ShowRecordPreview();UpdateSelectionSummary();}
    void Map(){
     Clear();positionsConfirmed=false;updating=true;try{
      mapping.Rows.Clear();targets.Clear();var table=CurrentTable;
@@ -101,7 +102,7 @@ namespace EanEtikety {
     if(table!=null&&!candidate.Header&&!positionsConfirmed&&!ReviewSample(table,true))return;
     var model=owner.Read();model.Batch=candidate;DateTime instant=owner.currentTime();List<BatchRecord> prepared;
     if(!owner.RunWork(window,"prepare-batch","Pripravujem dávku…",()=>BatchProcessing.Prepare(model,table,candidate.Header,candidate.Bindings,candidate.QuantityColumn,candidate.GeneratedCount,instant),out prepared))return;
-    owner.ChangeDocument(s=>s.Batch=candidate);setup=candidate;Clear();batch=prepared;
+    owner.ChangeDocument(s=>s.Batch=candidate);setup=candidate;Clear();batch=prepared;comparisonTable=table;
     csvLineNumbers=table!=null&&table.HasCsvLineNumbers;records.Columns["row"].HeaderText=SourceRowHeading;
     foreach(var item in batch)included.Add(true);records.RowCount=batch.Count;UpdateSelectionSummary();preparedInfo.Text=Loc.T("Údaje pripravené")+": "+instant.ToString("g");if(batch.Count>0){records.CurrentCell=records.Rows[0].Cells[0];ShowRecordPreview();}
    }catch(Exception ex){owner.Error(ex);}}
@@ -173,7 +174,7 @@ namespace EanEtikety {
     }
     NavigateRecord(targetRow);
    }
-   void UpdateSelectionSummary(){int selected=0,errors=0;long labels=0;for(int i=0;i<batch.Count;i++)if(included[i]){selected++;labels+=batch[i].Count;if(batch[i].Error!=null)errors++;}selectionInfo.Text=Loc.T("Vybrané záznamy")+": "+selected+"  •  "+Loc.T("Etikety spolu")+": "+labels+"  •  "+Loc.T("Chyby")+": "+errors;exportSelected.Enabled=printSelected.Enabled=selected>0&&errors==0;issuesButton.Enabled=batch.Exists(record=>record.Issues.Count>0);}
+   void UpdateSelectionSummary(){int selected=0,errors=0;long labels=0;for(int i=0;i<batch.Count;i++)if(included[i]){selected++;labels+=batch[i].Count;if(batch[i].Error!=null)errors++;}selectionInfo.Text=Loc.T("Vybrané záznamy")+": "+selected+"  •  "+Loc.T("Etikety spolu")+": "+labels+"  •  "+Loc.T("Chyby")+": "+errors;exportSelected.Enabled=printSelected.Enabled=selected>0&&errors==0;issuesButton.Enabled=batch.Exists(record=>record.Issues.Count>0);compareButton.Enabled=comparisonTable!=null;}
    void Export(){try{OutputPlan plan;LabelSettings model;if(Plan(out plan,out model))owner.ExportJob(plan,model.Dpi,null,window,NavigateIssue);}catch(Exception ex){owner.Error(ex);}}
    void Print(){try{OutputPlan plan;LabelSettings model;if(Plan(out plan,out model))using(var form=owner.CreateJobPrintWindow(model,plan,NavigateIssue))form.ShowDialog(window);}catch(Exception ex){owner.Error(ex);}}
    public void Show(){window.ShowDialog(owner);}
