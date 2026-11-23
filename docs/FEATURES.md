@@ -19,6 +19,8 @@ Názov produktu je naďalej Pre-release.
 ## Nové možnosti
 
 - **Stav tlačovej úlohy** sa dá na vyžiadanie načítať z frontu Windows.
+- **Ručný výsledok tlače** eviduje použiteľné a zostávajúce etikety po
+  zdrojových riadkoch. Z uloženého obsahu úlohy pripraví návrh dotlače.
 - **Dotlač prerušenej dávky** pripraví z histórie zvyšné strany jednej kópie
   alebo vybrané etikety v pôvodných pozíciách. Nový pokus odkazuje na zdroj.
   História uchová posledný známy stav aj čas zistenia, vrátane informácie,

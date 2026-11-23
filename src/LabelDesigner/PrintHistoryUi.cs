@@ -72,7 +72,10 @@ namespace EanEtikety {
    }
    if (keepCopy && profile == null) warning = Loc.T("Obsah úlohy sa do histórie nepodarilo uložiť.");
    try {
-    return store.Record(entry, archive) ? warning : Loc.T("Obsah úlohy sa do histórie nepodarilo uložiť.");
+    if (!store.Record(entry, archive, plan)) warning = Loc.T("Obsah úlohy sa do histórie nepodarilo uložiť.");
+    if (plan.Placements.Count > 0 && !entry.HasResultRows)
+     warning = (warning == null ? "" : warning + " ") + Loc.T("Počty po riadkoch sa nepodarilo uložiť.");
+    return warning;
    } catch (Exception ex) {
     DiagnosticLog.Write("print-history", ex);
     return Loc.T("Záznam do histórie tlače sa nepodarilo uložiť.");
@@ -151,7 +154,7 @@ namespace EanEtikety {
     };
     table.AccessibleName = Loc.T("História tlače");
     foreach (string title in new[] { "Čas", "Tlačiareň", "Profil média", "Strany", "Etikety", "Stav",
-      "Posledný známy stav", "Čas zistenia", "Posledná kontrola frontu", "Uložený obsah", "Dotlač kópie" })
+      "Posledný známy stav", "Čas zistenia", "Posledná kontrola frontu", "Uložený obsah", "Dotlač kópie", "Ručný výsledok" })
      table.Columns.Add(title, Loc.T(title));
     layout.Controls.Add(table, 0, 1);
     Func<PrintHistoryEntry> selected = () => table.CurrentRow == null ? null : table.CurrentRow.Tag as PrintHistoryEntry;
@@ -166,7 +169,7 @@ namespace EanEtikety {
        (long)entry.Pages * entry.Repetitions, (long)entry.Labels * entry.Repetitions,
        PrintHistoryStatusText(entry.Status), LastQueueStateText(known),
        known == null ? "—" : known.CheckedUtc.ToLocalTime().ToString("g"), PrintQueueCheckText(entry),
-       Loc.T(entry.HasArchive ? "Áno" : "Nie"), entry.RecoveredCopy > 0 ? entry.RecoveredCopy.ToString() : "—");
+       Loc.T(entry.HasArchive ? "Áno" : "Nie"), entry.RecoveredCopy > 0 ? entry.RecoveredCopy.ToString() : "—", ManualResultText(entry));
       table.Rows[row].Tag = entry;
       if (previous != null && entry.Id == previous.Id) restoreRow = table.Rows[row];
      }
@@ -195,6 +198,13 @@ namespace EanEtikety {
     });
     recover.Name = "recoverPrintJob";
     source.Name = "recoverySourceJob";
+    var outcome = Btn(Loc.T("Potvrdiť výsledok…"), delegate {
+     var entry = selected();
+     if (entry == null || !entry.HasResultRows) return;
+     try { EditBatchResult(window, store, entry, refresh); }
+     catch (Exception ex) { Error(ex); }
+    });
+    outcome.Name = "manualPrintResult";
     var remove = Btn(Loc.T("Odstrániť"), delegate {
      var entry = selected();
      if (entry == null) return;
@@ -212,13 +222,14 @@ namespace EanEtikety {
           store.UpdateQueue(entry.Id, entry.QueueToken, historyQueueQuery(entry)), out saved)) refresh();
      } catch (Exception ex) { Error(ex); }
     });
-    foreach (var action in new[] { checkQueue, recover, repeat, source, remove, close }) actions.Controls.Add(action);
+    foreach (var action in new[] { checkQueue, outcome, recover, repeat, source, remove, close }) actions.Controls.Add(action);
     layout.Controls.Add(actions, 0, 2);
     window.CancelButton = close;
     update = delegate {
      var entry = selected();
      repeat.Enabled = entry != null && entry.HasArchive;
      recover.Enabled = repeat.Enabled;
+     outcome.Enabled = entry != null && entry.HasResultRows;
      source.Enabled = sourceRow(entry) != null;
      remove.Enabled = entry != null;
      checkQueue.Enabled = PrintQueue.CanCheck(entry);

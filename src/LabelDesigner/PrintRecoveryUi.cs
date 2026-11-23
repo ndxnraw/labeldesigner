@@ -71,6 +71,10 @@ namespace EanEtikety {
     if (selection.ShowDialog(owner) != DialogResult.OK) return;
    }
 
+   ShowRecoveryPreview(owner, entry, refresh, job, plan, selectedCopy);
+  }
+
+  void ShowRecoveryPreview(Form owner, PrintHistoryEntry entry, Action refresh, ArchivedPrintJob job, OutputPlan plan, int selectedCopy) {
    using (var preview = CreateJobPrintWindow(job.Format, plan, null, job)) {
     ((PrintPanel)preview.Controls[0]).SetPrintRecovery(entry.Id, selectedCopy, () => {
      try {

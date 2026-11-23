@@ -15,6 +15,21 @@ Ak ovládač poskytne vlastný text stavu, história uloží jeho krátku verziu
 Stav **Odovzdané podľa Windows** znamená stav frontu. Pri rozhodovaní
 o opakovaní skontrolujte skutočne vytlačené etikety.
 
+Vyberte úlohu a stlačte **Potvrdiť výsledok…**. Pri každom zdrojovom
+riadku zadajte počet použiteľných etikiet zo všetkých opakovaní úlohy.
+Tabuľka ukáže plánovaný, potvrdený a zostávajúci počet. Uložený ručný
+výsledok uvidíte v histórii pri hlásení frontu Windows.
+
+Nové úlohy ukladajú počty po riadkoch. Pri starších úlohách sa počty
+načítajú z uloženého obsahu. Ak je obsah k dispozícii, po uložení
+čiastočného alebo nulového výsledku použite **Navrhnúť dotlač…**.
+Návrh priradí potvrdené množstvo najprv k skorším kópiám a potom
+k prvým etiketám každého riadka v kópii. Pripraví zostávajúce etikety
+z jednej kópie.
+Pozície na hárku sa zachovajú. Návrh overte podľa skutočných výtlačkov
+v náhľade. Ak poznáte presné chýbajúce pozície, vyberiete ich cez
+**Pripraviť dotlač…**.
+
 Ak chcete úlohu neskôr zopakovať, na karte **Detaily** v tlačovom okne
 začiarknite **Uložiť obsah úlohy lokálne na opakovanie** pred odoslaním.
 Obsah môže zahŕňať hodnoty premenných, kódy, texty a obrázky. Voľba je

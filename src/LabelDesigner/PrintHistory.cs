@@ -20,6 +20,8 @@ namespace EanEtikety {
   public PrintHistoryStatus Status;
   public bool HasArchive;
   [XmlIgnore] public PrintQueueHistory QueueStatus;
+  [XmlIgnore] public bool HasResultRows, ManualResultUnavailable;
+  [XmlIgnore] public int? ManualConfirmed;
  }
 
  public sealed class ArchivedPlacement {
@@ -98,6 +100,38 @@ namespace EanEtikety {
    return BuildPlan((item, index) => selected.Contains(index + 1));
   }
 
+  public int FirstIncompleteCopy(PrintBatchResult result) {
+   var rows = RecoveryCounts(result);
+   return rows.Values.Where(row => row.Remaining > 0)
+    .Select(row => row.Confirmed / (row.Planned / Repetitions) + 1).DefaultIfEmpty(0).Min();
+  }
+
+  public OutputPlan ProposeRemainder(int copy, PrintBatchResult result) {
+   ValidateCopy(copy);
+   var rows = RecoveryCounts(result);
+   var firstOccurrences = new Dictionary<int,int>();
+   foreach (var row in rows.Values)
+    firstOccurrences.Add(row.Record, Math.Max(0, row.Confirmed - (copy - 1) * (row.Planned / Repetitions)));
+   return BuildPlan((item, index) => {
+    int remaining = firstOccurrences[item.Record];
+    if (remaining == 0) return true;
+    firstOccurrences[item.Record] = remaining - 1;
+    return false;
+   });
+  }
+
+  Dictionary<int,PrintBatchResultRow> RecoveryCounts(PrintBatchResult result) {
+   ValidateArchive();
+   if (result == null || result.ConfirmedTotal < 0) throw PrintBatchResult.Invalid();
+   result.Validate((long)Placements.Count * Repetitions);
+   var archived = PrintBatchResult.FromRecords(Placements.Select(item => item.Record), Repetitions);
+   if (archived.Rows.Count != result.Rows.Count) throw PrintBatchResult.Invalid();
+   for (int i = 0; i < archived.Rows.Count; i++)
+    if (archived.Rows[i].Record != result.Rows[i].Record || archived.Rows[i].Planned != result.Rows[i].Planned)
+     throw PrintBatchResult.Invalid();
+   return result.Rows.ToDictionary(row => row.Record);
+  }
+
   void ValidateCopy(int copy) {
    if (copy < 1 || copy > Repetitions) throw new ArgumentOutOfRangeException("copy");
   }
@@ -157,7 +191,7 @@ namespace EanEtikety {
   }
  }
 
- public sealed class PrintHistoryStore {
+ public sealed partial class PrintHistoryStore {
   const int MaxArchiveBytes = 16 * 1024 * 1024;
   const int MaxEntries = 50;
   const long MaxTotalArchiveBytes = 128L * 1024 * 1024;
@@ -202,6 +236,7 @@ namespace EanEtikety {
       if (entry == null || !string.Equals(file.FullName, PathFor(entry.Id, ".entry.xml"), StringComparison.OrdinalIgnoreCase)) continue;
       entry.HasArchive &= File.Exists(PathFor(entry.Id, ".job.xml"));
       if (PrintQueue.CanCheck(entry)) entry.QueueStatus = ReadQueue(entry);
+      LoadResultSummary(entry);
       entries.Add(entry);
      } catch (InvalidOperationException) { }
        catch (InvalidDataException) { }
@@ -279,6 +314,7 @@ namespace EanEtikety {
   void DeleteEntry(string id) {
    File.Delete(PathFor(id, ".job.xml"));
    File.Delete(PathFor(id, ".queue.xml"));
+   File.Delete(PathFor(id, ResultSuffix));
    File.Delete(PathFor(id, ".entry.xml"));
   }
 
@@ -287,7 +323,7 @@ namespace EanEtikety {
    foreach (string file in Directory.EnumerateFiles(directory, "*.tmp")) {
     string[] parts = Path.GetFileName(file).Split('.');
     Guid entry, operation;
-    if (parts.Length != 5 || (parts[1] != "job" && parts[1] != "entry" && parts[1] != "queue") || parts[2] != "xml"
+    if (parts.Length != 5 || (parts[1] != "job" && parts[1] != "entry" && parts[1] != "queue" && parts[1] != "result") || parts[2] != "xml"
       || parts[4] != "tmp" || !Guid.TryParseExact(parts[0], "N", out entry)
       || !Guid.TryParseExact(parts[3], "N", out operation)) continue;
     try { File.Delete(file); }
@@ -297,7 +333,7 @@ namespace EanEtikety {
   }
 
   // Returns false if the optional content could not be saved. Metadata is still retained.
-  public bool Record(PrintHistoryEntry entry, ArchivedPrintJob archive) {
+  public bool Record(PrintHistoryEntry entry, ArchivedPrintJob archive, OutputPlan rows = null) {
    using (new HistoryLease(mutexName)) {
     Directory.CreateDirectory(directory);
     CleanInterruptedWrites();
@@ -320,7 +356,9 @@ namespace EanEtikety {
        catch (UnauthorizedAccessException ex) { DiagnosticLog.Write("print-history-archive", ex); }
     }
     entry.HasArchive = saved;
+    entry.HasResultRows = saved;
     Trim();
+    if (File.Exists(PathFor(entry.Id, ".entry.xml"))) SavePlannedRows(entry, rows);
     return archive == null || saved;
    }
   }

@@ -890,3 +890,28 @@ Načítavam referenčnú dávku…	Loading reference batch…	Načítám referen
 Uložená referenčná dávka	Saved reference batch	Uložená referenční dávka	Mentett referenciaköteg
 Potvrdenie referencie	Confirm reference change	Potvrzení změny reference	Referenciaváltozás megerősítése
 Pred uložením referencie uložte aktuálne mapovanie do predvoľby.	Save the current mapping in the preset before saving a reference.	Před uložením reference uložte aktuální mapování do předvolby.	A referencia mentése előtt mentse az aktuális hozzárendelést a beállításba.
+Ručný výsledok tlače	Manual print result	Ruční výsledek tisku	Kézi nyomtatási eredmény
+Ručný výsledok	Manual result	Ruční výsledek	Kézi eredmény
+Potvrdiť výsledok…	Confirm result…	Potvrdit výsledek…	Eredmény megerősítése…
+Nepotvrdené	Unconfirmed	Nepotvrzeno	Nincs megerősítve
+Bez použiteľných etikiet	No usable labels	Bez použitelných etiket	Nincs használható címke
+Dokončené	Completed	Dokončeno	Befejezve
+Čiastočne dokončené	Partially completed	Částečně dokončeno	Részben befejezve
+Ručný výsledok tlače je neplatný.	The manual print result is invalid.	Ruční výsledek tisku je neplatný.	A kézi nyomtatási eredmény érvénytelen.
+Zadajte počet použiteľných etikiet podľa skutočných výtlačkov zo všetkých kópií tejto úlohy.	Enter the number of usable labels from the actual printouts across all copies of this job.	Zadejte počet použitelných etiket podle skutečných výtisků ze všech kopií této úlohy.	Adja meg a használható címkék számát a feladat összes példányának tényleges nyomatai alapján.
+Zdrojový riadok	Source row	Zdrojový řádek	Forrássor
+Plánované etikety	Planned labels	Plánované etikety	Tervezett címkék
+Potvrdené etikety	Confirmed labels	Potvrzené etikety	Megerősített címkék
+Zostávajúce etikety	Remaining labels	Zbývající etikety	Hátralévő címkék
+Uložiť výsledok	Save result	Uložit výsledek	Eredmény mentése
+Ukladám výsledok tlače…	Saving print result…	Ukládám výsledek tisku…	Nyomtatási eredmény mentése…
+Výsledok sa medzitým zmenil. Zatvorte okno a otvorte ho znova.	The result changed while this window was open. Close and reopen it.	Výsledek se mezitím změnil. Zavřete okno a otevřete je znovu.	Az eredmény időközben megváltozott. Zárja be az ablakot, majd nyissa meg újra.
+Navrhnúť dotlač…	Suggest recovery print…	Navrhnout dotisk…	Utónyomtatás javaslata…
+Vyplniť všetky počty	Fill all quantities	Vyplnit všechny počty	Összes mennyiség kitöltése
+Vynulovať všetky počty	Reset all quantities	Vynulovat všechny počty	Összes mennyiség nullázása
+Plánované {0} · Potvrdené {1} · Zostávajúce {2}	Planned {0} · Confirmed {1} · Remaining {2}	Plánované {0} · Potvrzené {1} · Zbývající {2}	Tervezett {0} · Megerősített {1} · Hátralévő {2}
+Zadajte celé číslo od nuly po plánované množstvo.	Enter a whole number from zero to the planned quantity.	Zadejte celé číslo od nuly po plánované množství.	Adjon meg egész számot nullától a tervezett mennyiségig.
+Výsledok čaká na potvrdenie.	The result awaits confirmation.	Výsledek čeká na potvrzení.	Az eredmény megerősítésre vár.
+Návrh priradí potvrdené počty najprv k skorším kópiám a potom k prvým etiketám daného riadka v kópii. Rozsah overte v náhľade podľa výtlačkov.	The suggestion assigns confirmed counts to earlier copies first, then to the first labels for each row within the copy. Check the preview against the printouts.	Návrh přiřadí potvrzené počty nejdříve k dřívějším kopiím a poté k prvním etiketám daného řádku v kopii. Rozsah ověřte v náhledu podle výtisků.	A javaslat a megerősített mennyiségeket először a korábbi példányokhoz, majd az egy adott sorhoz tartozó első címkékhez rendeli. Ellenőrizze az előnézetet a nyomatok alapján.
+Výsledok nedostupný	Result unavailable	Výsledek není dostupný	Az eredmény nem érhető el
+Počty po riadkoch sa nepodarilo uložiť.	Could not save the quantities by row.	Nepodařilo se uložit počty podle řádků.	A soronkénti mennyiségek mentése sikertelen.

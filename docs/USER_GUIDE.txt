@@ -365,6 +365,9 @@ Ak chcete použiť opakovanie, v tlačovom okne na karte Detaily zapnite uložen
 Pri opakovaní môžete vybrať strany alebo záznamy dávky. Tlač až po náhľade a novom potvrdení.
 Pri prerušení vyberte Pripraviť dotlač, kópiu úlohy a zvyšné strany alebo
 konkrétne etikety. Po potvrdení tlače vznikne v histórii samostatný pokus.
+Po kontrole výtlačkov použite Potvrdiť výsledok… a uložte použiteľné
+množstvá po riadkoch. Ak je obsah úlohy uložený, môžete z uložených
+množstiev pripraviť návrh dotlače a overiť ho v náhľade.
 Podrobný postup a limity sú v PRINT_HISTORY.md.
 
 ČITATEĽNOSŤ KÓDOV PRED TLAČOU

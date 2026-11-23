@@ -194,7 +194,11 @@ class BarcodeZebraTests {
    owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
    var watch=Stopwatch.StartNew();
    timer.Tick+=delegate{
-    Form active=Form.ActiveForm;
+    Form active=null;
+    foreach(Form open in Application.OpenForms){
+     if(stage==0&&open.Text==Loc.T("História tlače")||stage==1&&open.Text==Loc.T("Pripraviť dotlač…")||
+        stage==2&&open.Controls.Count>0&&open.Controls[0] is PrintPanel){active=open;break;}
+    }
     try{
      if(watch.ElapsedMilliseconds>45000)throw new Exception("Recovery dialog timed out at stage "+stage);
      if(active==null)return;
@@ -254,9 +258,13 @@ class BarcodeZebraTests {
        }));
       using(var reviewTimer=new Timer{Interval=35}){
        int reviews=0;
+       var reviewWait=Stopwatch.StartNew();
+       bool reviewTimedOut=false;
        reviewTimer.Tick+=delegate{
-        var review=Form.ActiveForm as OutputReviewDialog;
+        OutputReviewDialog review=null;
+        foreach(Form open in Application.OpenForms)if(open is OutputReviewDialog){review=(OutputReviewDialog)open;break;}
         if(review==null)return;
+        if(reviewWait.ElapsedMilliseconds>10000){reviewTimedOut=true;review.Close();return;}
         if(++reviews==1)((Button)review.CancelButton).PerformClick();
         else{
          F<CheckBox>(review,"acknowledge").Checked=true;
@@ -265,10 +273,11 @@ class BarcodeZebraTests {
        };
        reviewTimer.Start();
        Call(panel,"Submit");
-       Check(reviews==1&&sends==0&&store.List().Count==1,"cancelling the recovery review leaves source history and printer untouched");
+       Check(!reviewTimedOut&&reviews==1&&sends==0&&store.List().Count==1,"cancelling the recovery review leaves source history and printer untouched");
+       reviewWait.Restart();
        Call(panel,"Submit");
        reviewTimer.Stop();
-       Check(reviews==2,"recovery dispatch uses a fresh review");
+       Check(!reviewTimedOut&&reviews==2,"recovery dispatch uses a fresh review");
       }
       Check(System.Threading.SpinWait.SpinUntil(()=>System.Threading.Volatile.Read(ref sends)==1,5000),
        "fake transport started before closing the recovery preview");
@@ -286,6 +295,97 @@ class BarcodeZebraTests {
   }
   if(failure!=null)throw failure;
   Check(stage==4,"recovery workflow completed from the history dialog");
+ }
+ static void ManualResultUi(){
+  string prefs=Path.Combine(dir,"outcome-ui.xml");
+  var store=new PrintHistoryStore(prefs+".print-history");
+  var label=LabelSettings.Default();
+  var plan=OutputPlan.Create(new List<BatchRecord>{new BatchRecord{Row=7,Count=2,Label=label},
+   new BatchRecord{Row=11,Count=1,Label=label}},label);
+  var profile=new PrinterProfile{Printer="Microsoft Print to PDF",Name="Result test",Width=827,Height=1169};
+  var entry=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Printer=profile.Printer,Status=PrintHistoryStatus.Submitted,
+   Pages=plan.PageCount,Labels=plan.Placements.Count,Repetitions=2};
+  store.Record(entry,ArchivedPrintJob.Capture(label,plan,profile,2),plan);
+  int stage=0;
+  Exception failure=null;
+  using(var owner=new MainForm(prefs))using(var timer=new Timer{Interval=40}){
+   owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+   var watchdog=Stopwatch.StartNew();
+   timer.Tick+=delegate{
+    Form dialog=null;
+    foreach(Form open in Application.OpenForms){
+     if(stage==0&&open.Text==Loc.T("História tlače")||stage==1&&open.Text==Loc.T("Ručný výsledok tlače")||
+        stage==2&&open.Text==Loc.T("Navrhnúť dotlač…")||stage==3&&open.Controls.Count>0&&open.Controls[0] is PrintPanel){
+      dialog=open;break;
+     }
+    }
+    try{
+     if(watchdog.ElapsedMilliseconds>45000)throw new Exception("Manual result dialog timed out at stage "+stage);
+     if(dialog==null)return;
+     if(stage==0){
+      var button=(Button)dialog.Controls.Find("manualPrintResult",true)[0];
+      Check(button.Enabled,"history offers manual result for a planned job");
+      stage=1;
+      button.PerformClick();
+      if(failure!=null)return;
+      var grid=(DataGridView)dialog.Controls.Find("printHistoryGrid",true)[0];
+      Check(stage==4&&store.List().Count==1&&Convert.ToString(grid.CurrentRow.Cells["Ručný výsledok"].Value).Contains("5 / 6"),
+       "history shows the saved result after reviewing a proposal");
+      dialog.Close();
+     }else if(stage==1){
+      var rows=(DataGridView)dialog.Controls.Find("manualPrintRows",true)[0];
+      var summary=dialog.Controls.Find("manualPrintSummary",true)[0];
+      var save=FindButton(dialog,Loc.T("Uložiť výsledok"));
+      var propose=FindButton(dialog,Loc.T("Navrhnúť dotlač…"));
+      Check(rows.VirtualMode&&rows.RowCount==2&&!propose.Enabled,"unconfirmed job shows both source rows without a proposal");
+      rows.CurrentCell=rows.Rows[0].Cells[2];
+      Check(rows.BeginEdit(false),"confirmed count opens a text editor");
+      ((TextBox)rows.EditingControl).Text="5";
+      stage=5;
+      save.PerformClick();
+      if(failure!=null)return;
+      Check(rows.IsCurrentCellInEditMode&&summary.Text.Contains(Loc.T("Zadajte celé číslo od nuly po plánované množstvo."))&&
+       store.OpenBatchResult(entry.Id).ConfirmedTotal<0,
+       "quantity larger than planned is rejected in the editor");
+      ((TextBox)rows.EditingControl).Text="3";
+      Check(rows.EndEdit(),"corrected quantity is accepted");
+      Check(Convert.ToInt32(rows.Rows[0].Cells[3].Value)==1,"remaining count updates for edited row");
+      rows.CurrentCell=rows.Rows[1].Cells[2];
+      Check(rows.BeginEdit(false),"second confirmed count opens a text editor");
+      ((TextBox)rows.EditingControl).Text="2";
+      save.PerformClick();
+      if(failure!=null)return;
+      Check(propose.Enabled&&store.OpenBatchResult(entry.Id).ConfirmedTotal==5,"explicit save enables a recovery proposal");
+      stage=2;propose.PerformClick();
+     }else if(stage==2){
+      stage=3;
+      ((Button)dialog.AcceptButton).PerformClick();
+     }else if(stage==3){
+      var panel=(PrintPanel)dialog.Controls[0];
+      if(!panel.Ready)return;
+      timer.Stop();
+      var report=F<PreflightReport>(panel,"currentReport");
+      Check(report.Plan.Placements.Count==1&&report.Plan.Placements[0].Record==7&&F<NumericUpDown>(panel,"copies").Value==1,
+       "manual quantities lead to a one-label recovery preview for the original row");
+      stage=4;dialog.Close();
+     }
+    }catch(Exception ex){
+     failure=ex;timer.Stop();
+     var windows=new List<Form>();
+     foreach(Form open in Application.OpenForms)if(open!=owner)windows.Add(open);
+     windows.Reverse();
+     foreach(Form open in windows)if(!open.IsDisposed)open.Close();
+    }
+   };
+   timer.Start();Call(owner,"ShowPrintHistory");owner.Close();
+  }
+  if(failure!=null)throw failure;
+  Check(stage==4,"real manual confirmation and recovery preview completed");
+ }
+ static Button FindButton(Control parent,string text){
+  if(parent is Button&&parent.Text==text)return (Button)parent;
+  foreach(Control child in parent.Controls){var button=FindButton(child,text);if(button!=null)return button;}
+  return null;
  }
  static void HistoryArchive(){
   string path=Path.Combine(dir,"history-archive");
@@ -306,6 +406,34 @@ class BarcodeZebraTests {
    &&!File.Exists(interrupted),"interrupted archive scratch removed when history reopens");
   second.Texts[0].Text="Edited later";
   var archived=store.Open(entry.Id);
+  var result=store.OpenBatchResult(entry.Id);
+  Check(result.Rows.Count==2&&result.Rows[0].Record==3&&result.Rows[0].Planned==2&&
+   result.Rows[1].Record==7&&result.Rows[1].Planned==4&&result.ConfirmedTotal==-1,"legacy archive provides unconfirmed per-row totals across copies");
+  result.Rows[0].Confirmed=2;
+  result.Rows[1].Confirmed=3;
+  Check(store.SaveBatchResult(entry.Id,result)!=null,"save manual counts");
+  Check(store.SaveBatchResult(entry.Id,result)==null,"stale result cannot overwrite a newer save");
+  var savedResult=new PrintHistoryStore(path).OpenBatchResult(entry.Id);
+  Check(savedResult.ConfirmedTotal==5&&savedResult.Rows[1].Remaining==1,"confirmed and remaining counts persist");
+  Check(store.List().Find(item=>item.Id==entry.Id).ManualConfirmed==5,"history shows confirmed total");
+  Check(archived.FirstIncompleteCopy(savedResult)==2,"proposal starts at the first incomplete copy");
+  var proposal=archived.ProposeRemainder(2,savedResult);
+  Check(proposal.PageCount==1&&proposal.Placements.Count==1&&proposal.Placements[0].Record==7&&proposal.Placements[0].Bounds==bounds,
+   "proposal preserves original slot geometry in the selected copy");
+  savedResult.Rows[1].Confirmed=5;
+  Reject(()=>store.SaveBatchResult(entry.Id,savedResult),"confirmation cannot exceed planned quantity");
+  var metadata=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Printer=profile.Printer,Status=PrintHistoryStatus.Failed,Pages=2,Labels=3,Repetitions=2};
+  Check(store.Record(metadata,null,plan),"row plan persists without label archive");
+  var recorded=store.List().Find(item=>item.Id==metadata.Id);
+  Check(recorded.HasResultRows&&!recorded.HasArchive&&!recorded.ManualConfirmed.HasValue,"metadata-only attempt supports manual result");
+  var empty=store.OpenBatchResult(metadata.Id);
+  Check(store.SaveBatchResult(metadata.Id,empty)!=null&&store.List().Find(item=>item.Id==metadata.Id).ManualConfirmed==0,
+   "an explicit all-zero confirmation differs from no confirmation");
+  File.WriteAllText(Path.Combine(path,metadata.Id+".result.xml"),"<PrintBatchResult entry=\""+metadata.Id+"\" confirmed=\"6\">");
+  var corrupt=store.List().Find(item=>item.Id==metadata.Id);
+  Check(corrupt.ManualResultUnavailable&&!corrupt.ManualConfirmed.HasValue,"damaged result does not claim the batch was complete");
+  store.Remove(metadata.Id);
+  Check(!File.Exists(Path.Combine(path,metadata.Id+".result.xml")),"removing history also removes manual result");
   var remaining=archived.ContinueCopy(2,1);
   Check(remaining.PageCount==1&&remaining.Placements.Count==1&&remaining.Placements[0].Bounds==bounds
    &&remaining.Placements[0].Record==7,"continue selects only pages after the confirmed sheet in the specified copy");
@@ -352,5 +480,5 @@ class BarcodeZebraTests {
  static readonly BindingFlags hidden=BindingFlags.Instance|BindingFlags.NonPublic;static T F<T>(object o,string n){return (T)o.GetType().GetField(n,hidden).GetValue(o);}static object Call(object o,string n,params object[] args){foreach(var method in o.GetType().GetMethods(hidden))if(method.Name==n&&method.GetParameters().Length==args.Length)return method.Invoke(o,args);throw new MissingMethodException(n);}
  static void Wait(PrintPanel p,Action action){bool done=false;EventHandler ready=delegate{done=true;};p.PreviewReady+=ready;try{action();var watch=Stopwatch.StartNew();while(!done){Application.DoEvents();System.Threading.Thread.Sleep(2);if(watch.ElapsedMilliseconds>30000)throw new Exception("Preview timeout: "+F<Label>(p,"info").Text);}}finally{p.PreviewReady-=ready;}}
  static void Ui(){using(var form=new Form{ClientSize=new Size(1050,760)})using(var panel=new PrintPanel(LabelSettings.Default())){form.Controls.Add(panel);var history=new PrintHistoryStore(Path.Combine(dir,"sending-history"));typeof(PrintPanel).GetMethod("UsePrintHistory",hidden).Invoke(panel,new object[]{history});panel.LoadProfiles(Path.Combine(dir,"ui-profiles.xml"));form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();form.Hide();form.Show();Wait(panel,()=>panel.SelectPrinter("Microsoft Print to PDF"));Check(panel.Ready,"PDF preview ready");Check(F<System.Drawing.Printing.PrinterSettings>(panel,"selectedPrinter").PrinterName=="Microsoft Print to PDF","requested printer retained before discovery completes");var initial=F<PreflightReport>(panel,"currentReport").Fingerprint;Wait(panel,()=>{F<CheckBox>(panel,"zebraZpl").Checked=true;F<CheckBox>(panel,"zebraDarknessOverride").Checked=true;F<NumericUpDown>(panel,"zebraDarkness").Value=10.5m;});var report=F<PreflightReport>(panel,"currentReport");Check(report.Context.Contains("ZPL|"),"ZPL included in approval context");Check(report.Fingerprint!=initial,"mode/darkness invalidates consent");int submissions=0;ZebraSettings sent=null;string sentTitle=null;typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{submissions++;sent=s.Copy();sentTitle=d.DocumentName;}));typeof(PrintPanel).GetField("approvedFingerprint",hidden).SetValue(panel,initial);Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(submissions==0&&history.List().Count==0,"stale approval prevents RAW submission and history");F<CheckBox>(panel,"archivePrint").Checked=true;typeof(PrintPanel).GetField("approvedFingerprint",hidden).SetValue(panel,F<PreflightReport>(panel,"currentReport").Fingerprint);Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(submissions==1&&sent.Darkness==10.5m,"approved job uses captured darkness");var entry=history.List()[0];Check(entry.Status==PrintHistoryStatus.Submitted&&entry.HasArchive,"actual approved send recorded and archived");Check(PrintQueue.CanCheck(entry)&&sentTitle==PrintQueue.DocumentName(entry.QueueToken),"approved transport and history share a job title");Check(history.Open(entry.Id).Profile.Darkness==10.5m,"archived settings match the send");F<CheckBox>(panel,"archivePrint").Checked=false;typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{throw new IOException("Injected send failure");}));Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(history.List().Exists(item=>item.Status==PrintHistoryStatus.Failed&&!item.HasArchive),"failed send retains metadata only");Wait(panel,panel.RefreshPreview);typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{throw new OperationCanceledException();}));Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(history.List().Exists(item=>item.Status==PrintHistoryStatus.Cancelled&&!item.HasArchive),"cancelled send is distinguished from a failed send");F<TextBox>(panel,"profileName").Text="Media A";Call(panel,"SaveMediaProfile");var saved=new PrinterProfileStore(Path.Combine(dir,"ui-profiles.xml")).Find("Microsoft Print to PDF","Media A");Check(saved.ZebraZpl&&saved.Darkness==10.5m,"real profile UI saves darkness");Wait(panel,()=>{F<NumericUpDown>(panel,"zebraDarkness").Value=8m;F<NumericUpDown>(panel,"zebraDpi").Value=203.2m;});F<TextBox>(panel,"profileName").Text="Media B";Call(panel,"SaveMediaProfile");Wait(panel,()=>{var list=F<ModernComboBox>(panel,"mediaProfiles");foreach(PrinterProfile profile in list.Items)if(profile.DisplayName=="Media A"){list.SelectedItem=profile;break;}});Check(F<NumericUpDown>(panel,"zebraDarkness").Value==10.5m&&F<NumericUpDown>(panel,"zebraDpi").Value==300,"profile switch restores independent Zebra settings");var baseline=(PrinterProfile)Call(panel,"CurrentMediaProfile");using(var target=(PrintPanel)Call(panel,"CreateCalibrationPanel",CalibrationTarget.Create(60,45),baseline)){Check(F<CheckBox>(target,"zebraZpl").Checked&&!F<CheckBox>(target,"zebraZpl").Enabled,"calibration target retains and locks transport");Check(F<NumericUpDown>(target,"zebraDarkness").Value==10.5m&&!F<NumericUpDown>(target,"zebraDarkness").Enabled,"calibration target retains and locks darkness");}form.Close();}}
- [STAThread]static void Main(string[] args){dir=Path.GetFullPath(args[0]);Directory.CreateDirectory(dir);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Barcodes();Zebra();Spooling();Profiles();MoreZebra();Translations();QueueStatus();BoundedQueue();QueueHistoryUi();HistoryArchive();RecoveryHistoryUi();Ui();ReplayPreview();ReadabilityPreview();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" barcode/Zebra checks; no physical print job");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){dir=Path.GetFullPath(args[0]);Directory.CreateDirectory(dir);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Barcodes();Zebra();Spooling();Profiles();MoreZebra();Translations();QueueStatus();BoundedQueue();QueueHistoryUi();HistoryArchive();ManualResultUi();RecoveryHistoryUi();Ui();ReplayPreview();ReadabilityPreview();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" barcode/Zebra checks; no physical print job");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

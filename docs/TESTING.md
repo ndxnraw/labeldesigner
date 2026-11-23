@@ -47,6 +47,9 @@ for a stalled provider, and status refresh in the actual history dialog.
 The same suite checks recovery of one archived copy, preservation of positions
 for individual labels, empty selection, preview and history navigation to the
 source attempt. A test transport captures the submitted copy count.
+Manual print result checks cover per-row totals across copies, metadata-only
+attempts, old archives, concurrent edits, bounds, cleanup and a recovery
+proposal through the actual history and print preview.
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,
