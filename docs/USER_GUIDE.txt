@@ -327,6 +327,8 @@ Vyberte odoslanú úlohu a stlačte Skontrolovať front tlače. Ak už úloha vo
 nie je, história naďalej zobrazuje posledný známy stav a čas jeho zistenia.
 Ak chcete použiť opakovanie, v tlačovom okne na karte Detaily zapnite uloženie obsahu úlohy.
 Pri opakovaní môžete vybrať strany alebo záznamy dávky. Tlač až po náhľade a novom potvrdení.
+Pri prerušení vyberte Pripraviť dotlač, kópiu úlohy a zvyšné strany alebo
+konkrétne etikety. Po potvrdení tlače vznikne v histórii samostatný pokus.
 Podrobný postup a limity sú v PRINT_HISTORY.md.
 
 ČITATEĽNOSŤ KÓDOV PRED TLAČOU

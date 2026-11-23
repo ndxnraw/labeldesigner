@@ -176,6 +176,117 @@ class BarcodeZebraTests {
    form.Close();
   }
  }
+ static void RecoveryHistoryUi(){
+  string prefs=Path.Combine(dir,"recovery-ui.xml");
+  var store=new PrintHistoryStore(prefs+".print-history");
+  var label=LabelSettings.Default();
+  label.Copies=3;
+  var profile=new PrinterProfile{Printer="Microsoft Print to PDF",Name="Recovery media",Width=590,Height=820,ZebraZpl=true};
+  var plan=OutputPlan.Create(label);
+  var entry=new PrintHistoryEntry{Printer=profile.Printer,StartedUtc=DateTime.UtcNow,Status=PrintHistoryStatus.Submitted,
+   Pages=plan.PageCount,Labels=plan.Placements.Count,Repetitions=3};
+  store.Record(entry,ArchivedPrintJob.Capture(label,plan,profile,3));
+  int stage=0,sends=0;
+  Exception failure=null;
+  Form historyWindow=null;
+  using(var owner=new MainForm(prefs))using(var timer=new Timer{Interval=40})
+  using(var finishSubmission=new System.Threading.ManualResetEventSlim(false)){
+   owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+   var watch=Stopwatch.StartNew();
+   timer.Tick+=delegate{
+    Form active=Form.ActiveForm;
+    try{
+     if(watch.ElapsedMilliseconds>45000)throw new Exception("Recovery dialog timed out at stage "+stage);
+     if(active==null)return;
+     if(stage==0&&active.Text==Loc.T("História tlače")){
+      historyWindow=active;
+      var recover=(Button)active.Controls.Find("recoverPrintJob",true)[0];
+      Check(recover.Enabled,"archived history enables recovery");
+      stage=1;
+      recover.PerformClick();
+      if(failure!=null)return;
+      Check(stage==3&&store.List().Count==1,"preview can close before recovery reaches history");
+      var grid=(DataGridView)active.Controls.Find("printHistoryGrid",true)[0];
+      var source=(Button)active.Controls.Find("recoverySourceJob",true)[0];
+      finishSubmission.Set();
+      var waitForHistory=Stopwatch.StartNew();
+      while(grid.Rows.Count<2&&waitForHistory.ElapsedMilliseconds<10000){
+       Application.DoEvents();
+       System.Threading.Thread.Sleep(5);
+      }
+      Check(grid.Rows.Count==2&&sends==1,"one approved recovery appears without reopening the history window");
+      foreach(DataGridViewRow row in grid.Rows){
+       var attempt=(PrintHistoryEntry)row.Tag;
+       if(attempt.RecoverySourceId!=entry.Id)continue;
+       grid.CurrentCell=row.Cells[0];
+       Check(attempt.RecoveredCopy==2&&attempt.Repetitions==1&&attempt.Labels==1&&attempt.Pages==1&&
+        attempt.Status==PrintHistoryStatus.Submitted&&!attempt.HasArchive,"new recovery status and source persist independently");
+       break;
+      }
+      Check(source.Enabled,"source link is available on the recovery row");
+      source.PerformClick();
+      Check(((PrintHistoryEntry)grid.CurrentRow.Tag).Id==entry.Id,"source link selects the original history row");
+      stage=4;
+      active.Close();
+     }else if(stage==1&&active.Text==Loc.T("Pripraviť dotlač…")){
+      var copy=(NumericUpDown)active.Controls.Find("recoveryCopy",true)[0];
+      var mode=(ComboBox)active.Controls.Find("recoveryMode",true)[0];
+      var labels=(CheckedListBox)active.Controls.Find("recoveryLabels",true)[0];
+      copy.Value=2;
+      mode.SelectedIndex=1;
+      Check(labels.Visible&&labels.Items.Count==3&&!((NumericUpDown)active.Controls.Find("recoveryLastPage",true)[0]).Visible,
+       "individual-label mode shows the archived placements");
+      labels.SetItemChecked(1,true);
+      stage=2;
+      ((Button)active.Controls.Find("recoveryPreview",true)[0]).PerformClick();
+     }else if(stage==2&&active.Controls.Count>0&&active.Controls[0] is PrintPanel){
+      var panel=(PrintPanel)active.Controls[0];
+      if(!panel.Ready)return;
+      timer.Stop();
+      var repeats=F<NumericUpDown>(panel,"copies");
+      var report=F<PreflightReport>(panel,"currentReport");
+      Check(repeats.Value==1&&!repeats.Enabled&&report.Plan.Placements.Count==1&&store.List().Count==1,
+       "recovery preview limits output to one copy without creating a history entry");
+      typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,
+       (Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{
+        System.Threading.Interlocked.Add(ref sends,c);
+        if(!finishSubmission.Wait(15000))throw new IOException("Timed out waiting to finish fake submission");
+       }));
+      using(var reviewTimer=new Timer{Interval=35}){
+       int reviews=0;
+       reviewTimer.Tick+=delegate{
+        var review=Form.ActiveForm as OutputReviewDialog;
+        if(review==null)return;
+        if(++reviews==1)((Button)review.CancelButton).PerformClick();
+        else{
+         F<CheckBox>(review,"acknowledge").Checked=true;
+         ((Button)review.AcceptButton).PerformClick();
+        }
+       };
+       reviewTimer.Start();
+       Call(panel,"Submit");
+       Check(reviews==1&&sends==0&&store.List().Count==1,"cancelling the recovery review leaves source history and printer untouched");
+       Call(panel,"Submit");
+       reviewTimer.Stop();
+       Check(reviews==2,"recovery dispatch uses a fresh review");
+      }
+      Check(System.Threading.SpinWait.SpinUntil(()=>System.Threading.Volatile.Read(ref sends)==1,5000),
+       "fake transport started before closing the recovery preview");
+      stage=3;
+      active.Close();
+     }
+    }catch(Exception ex){
+     failure=ex;timer.Stop();
+     finishSubmission.Set();
+     if(active!=null&&active!=historyWindow)active.Close();
+     if(historyWindow!=null)historyWindow.Close();
+    }
+   };
+   timer.Start();Call(owner,"ShowPrintHistory");owner.Close();
+  }
+  if(failure!=null)throw failure;
+  Check(stage==4,"recovery workflow completed from the history dialog");
+ }
  static void HistoryArchive(){
   string path=Path.Combine(dir,"history-archive");
   var store=new PrintHistoryStore(path);
@@ -195,6 +306,17 @@ class BarcodeZebraTests {
    &&!File.Exists(interrupted),"interrupted archive scratch removed when history reopens");
   second.Texts[0].Text="Edited later";
   var archived=store.Open(entry.Id);
+  var remaining=archived.ContinueCopy(2,1);
+  Check(remaining.PageCount==1&&remaining.Placements.Count==1&&remaining.Placements[0].Bounds==bounds
+   &&remaining.Placements[0].Record==7,"continue selects only pages after the confirmed sheet in the specified copy");
+  var missing=archived.SelectCopyLabels(2,new[]{3,2,2});
+  Check(missing.PageCount==2&&missing.Placements.Count==2&&missing.RecordCount==1&&missing.Placements[0].Bounds==bounds
+   &&missing.Placements[0].Page==0&&missing.Placements[1].Page==1,"recovery deduplicates and preserves order and positions");
+  Check(archived.ContinueCopy(1,0).Placements.Count==3,"zero confirmed pages allows the full copy");
+  Reject(()=>archived.ContinueCopy(2,2),"all pages confirmed leaves no recovery");
+  Reject(()=>archived.ContinueCopy(3,0),"copy must exist");
+  Reject(()=>archived.SelectCopyLabels(1,new int[0]),"no labels selected cannot recover the full copy");
+  Reject(()=>archived.SelectCopyLabels(1,new[]{1,4}),"selection outside the archive is rejected");
   Check(archived.Labels.Count==2&&archived.Profile.Darkness==12.5m&&archived.Repetitions==2,"archive deduplicates labels and retains device options");
   var selected=archived.Select("7",true);
   Check(selected.RecordCount==1&&selected.PageCount==2&&selected.Placements.Count==2,"record selection spans original pages");
@@ -230,5 +352,5 @@ class BarcodeZebraTests {
  static readonly BindingFlags hidden=BindingFlags.Instance|BindingFlags.NonPublic;static T F<T>(object o,string n){return (T)o.GetType().GetField(n,hidden).GetValue(o);}static object Call(object o,string n,params object[] args){foreach(var method in o.GetType().GetMethods(hidden))if(method.Name==n&&method.GetParameters().Length==args.Length)return method.Invoke(o,args);throw new MissingMethodException(n);}
  static void Wait(PrintPanel p,Action action){bool done=false;EventHandler ready=delegate{done=true;};p.PreviewReady+=ready;try{action();var watch=Stopwatch.StartNew();while(!done){Application.DoEvents();System.Threading.Thread.Sleep(2);if(watch.ElapsedMilliseconds>30000)throw new Exception("Preview timeout: "+F<Label>(p,"info").Text);}}finally{p.PreviewReady-=ready;}}
  static void Ui(){using(var form=new Form{ClientSize=new Size(1050,760)})using(var panel=new PrintPanel(LabelSettings.Default())){form.Controls.Add(panel);var history=new PrintHistoryStore(Path.Combine(dir,"sending-history"));typeof(PrintPanel).GetMethod("UsePrintHistory",hidden).Invoke(panel,new object[]{history});panel.LoadProfiles(Path.Combine(dir,"ui-profiles.xml"));form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();form.Hide();form.Show();Wait(panel,()=>panel.SelectPrinter("Microsoft Print to PDF"));Check(panel.Ready,"PDF preview ready");Check(F<System.Drawing.Printing.PrinterSettings>(panel,"selectedPrinter").PrinterName=="Microsoft Print to PDF","requested printer retained before discovery completes");var initial=F<PreflightReport>(panel,"currentReport").Fingerprint;Wait(panel,()=>{F<CheckBox>(panel,"zebraZpl").Checked=true;F<CheckBox>(panel,"zebraDarknessOverride").Checked=true;F<NumericUpDown>(panel,"zebraDarkness").Value=10.5m;});var report=F<PreflightReport>(panel,"currentReport");Check(report.Context.Contains("ZPL|"),"ZPL included in approval context");Check(report.Fingerprint!=initial,"mode/darkness invalidates consent");int submissions=0;ZebraSettings sent=null;string sentTitle=null;typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{submissions++;sent=s.Copy();sentTitle=d.DocumentName;}));typeof(PrintPanel).GetField("approvedFingerprint",hidden).SetValue(panel,initial);Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(submissions==0&&history.List().Count==0,"stale approval prevents RAW submission and history");F<CheckBox>(panel,"archivePrint").Checked=true;typeof(PrintPanel).GetField("approvedFingerprint",hidden).SetValue(panel,F<PreflightReport>(panel,"currentReport").Fingerprint);Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(submissions==1&&sent.Darkness==10.5m,"approved job uses captured darkness");var entry=history.List()[0];Check(entry.Status==PrintHistoryStatus.Submitted&&entry.HasArchive,"actual approved send recorded and archived");Check(PrintQueue.CanCheck(entry)&&sentTitle==PrintQueue.DocumentName(entry.QueueToken),"approved transport and history share a job title");Check(history.Open(entry.Id).Profile.Darkness==10.5m,"archived settings match the send");F<CheckBox>(panel,"archivePrint").Checked=false;typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{throw new IOException("Injected send failure");}));Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(history.List().Exists(item=>item.Status==PrintHistoryStatus.Failed&&!item.HasArchive),"failed send retains metadata only");Wait(panel,panel.RefreshPreview);typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{throw new OperationCanceledException();}));Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(history.List().Exists(item=>item.Status==PrintHistoryStatus.Cancelled&&!item.HasArchive),"cancelled send is distinguished from a failed send");F<TextBox>(panel,"profileName").Text="Media A";Call(panel,"SaveMediaProfile");var saved=new PrinterProfileStore(Path.Combine(dir,"ui-profiles.xml")).Find("Microsoft Print to PDF","Media A");Check(saved.ZebraZpl&&saved.Darkness==10.5m,"real profile UI saves darkness");Wait(panel,()=>{F<NumericUpDown>(panel,"zebraDarkness").Value=8m;F<NumericUpDown>(panel,"zebraDpi").Value=203.2m;});F<TextBox>(panel,"profileName").Text="Media B";Call(panel,"SaveMediaProfile");Wait(panel,()=>{var list=F<ModernComboBox>(panel,"mediaProfiles");foreach(PrinterProfile profile in list.Items)if(profile.DisplayName=="Media A"){list.SelectedItem=profile;break;}});Check(F<NumericUpDown>(panel,"zebraDarkness").Value==10.5m&&F<NumericUpDown>(panel,"zebraDpi").Value==300,"profile switch restores independent Zebra settings");var baseline=(PrinterProfile)Call(panel,"CurrentMediaProfile");using(var target=(PrintPanel)Call(panel,"CreateCalibrationPanel",CalibrationTarget.Create(60,45),baseline)){Check(F<CheckBox>(target,"zebraZpl").Checked&&!F<CheckBox>(target,"zebraZpl").Enabled,"calibration target retains and locks transport");Check(F<NumericUpDown>(target,"zebraDarkness").Value==10.5m&&!F<NumericUpDown>(target,"zebraDarkness").Enabled,"calibration target retains and locks darkness");}form.Close();}}
- [STAThread]static void Main(string[] args){dir=Path.GetFullPath(args[0]);Directory.CreateDirectory(dir);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Barcodes();Zebra();Spooling();Profiles();MoreZebra();Translations();QueueStatus();BoundedQueue();QueueHistoryUi();HistoryArchive();Ui();ReplayPreview();ReadabilityPreview();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" barcode/Zebra checks; no physical print job");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){dir=Path.GetFullPath(args[0]);Directory.CreateDirectory(dir);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Barcodes();Zebra();Spooling();Profiles();MoreZebra();Translations();QueueStatus();BoundedQueue();QueueHistoryUi();HistoryArchive();RecoveryHistoryUi();Ui();ReplayPreview();ReadabilityPreview();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" barcode/Zebra checks; no physical print job");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

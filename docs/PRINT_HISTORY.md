@@ -28,6 +28,20 @@ zachované. Náhľad obnoví tlačiareň, papier, kalibráciu, nastavenia Zebra 
 počet opakovaní. Špecifické nastavenia ovládača, ako zásobník, overte v
 jeho vlastnostiach. Pred odoslaním potvrďte novú predtlačovú kontrolu.
 
+Na obnovu prerušenej tlače vyberte úlohu s uloženým obsahom a stlačte
+**Pripraviť dotlač…**. Vyberte kópiu pôvodnej úlohy a zvoľte rozsah podľa
+skutočných výtlačkov.
+
+- **Zvyšné strany** začnú za poslednou správne vytlačenou stranou. Hodnota
+  0 pripraví celú vybranú kópiu.
+- **Vybrané etikety** umožnia označiť jednotlivé etikety podľa pôvodnej
+  strany, pozície a dostupného čísla záznamu. Pozície na hárku sa zachovajú.
+
+Náhľad zobrazí počet strán a etikiet a pripraví jedno opakovanie. Pri
+viacerých nedokončených kópiách pripravte každú samostatne. Po potvrdení
+tlače pribudne samostatný pokus. Tlačidlo **Prejsť na zdrojovú úlohu**
+vyberie zdrojový záznam, kým je dostupný v histórii.
+
 História sa ukladá vedľa miestnych nastavení, mimo ich aktualizačných záloh, a uchováva najviac
 50 pokusov. Obsah má limit 16 MiB na úlohu a 128 MiB spolu. Pri prekročení
 celkového limitu sa uvoľní najstarší obsah. Pri prekročení limitu jednej

@@ -816,3 +816,17 @@ Posledná kontrola frontu	Last queue check	Poslední kontrola fronty	Utolsó sor
 Skontrolovať front tlače	Check print queue	Zkontrolovat tiskovou frontu	Nyomtatási sor ellenőrzése
 Kontrolujem front tlače…	Checking print queue…	Kontroluji tiskovou frontu…	Nyomtatási sor ellenőrzése…
 Neurčený stav frontu	Unspecified queue status	Neurčený stav fronty	Nem meghatározott sorállapot
+Pripraviť dotlač…	Prepare recovery print…	Připravit dotisk…	Utónyomtatás előkészítése…
+Prejsť na zdrojovú úlohu	Go to source job	Přejít na zdrojovou úlohu	Ugrás az eredeti feladathoz
+Dotlač kópie	Recovered copy	Dotisk kopie	Utónyomtatott példány
+Dotlač kópie {0}	Recovery of copy {0}	Dotisk kopie {0}	A(z) {0}. példány utónyomtatása
+Vyberte rozsah podľa skutočných výtlačkov. Každá dotlač sa týka jednej kópie.	Choose the range based on the actual printouts. Each recovery prints part or all of one copy.	Vyberte rozsah podle skutečných výtisků. Každý dotisk se týká jedné kopie.	A tényleges nyomatok alapján válassza ki a tartományt. Egy utónyomtatás egy példányra vonatkozik.
+Kópia pôvodnej úlohy	Copy of the original job	Kopie původní úlohy	Az eredeti feladat példánya
+Zvyšné strany	Remaining pages	Zbývající strany	Hátralévő oldalak
+Vybrané etikety	Selected labels	Vybrané etikety	Kiválasztott címkék
+Posledná správne vytlačená strana (0 = žiadna)	Last correctly printed page (0 = none)	Poslední správně vytištěná strana (0 = žádná)	Utolsó helyesen kinyomtatott oldal (0 = nincs)
+Etiketa {0} · strana {1}	Label {0} · page {1}	Etiketa {0} · strana {1}	{0}. címke · {1}. oldal
+ · pozícia {0}	 · position {0}	 · pozice {0}	 · {0}. pozíció
+ · záznam {0}	 · record {0}	 · záznam {0}	 · {0}. rekord
+Na dotlač nezostala žiadna strana. Skontrolujte poslednú vytlačenú stranu.	No pages remain. Check the last printed page.	K dotisku nezbývá žádná strana. Zkontrolujte poslední vytištěnou stranu.	Nincs hátralévő oldal. Ellenőrizze az utolsó kinyomtatott oldalt.
+Označte aspoň jednu etiketu na dotlač.	Select at least one label to reprint.	Označte alespoň jednu etiketu k dotisku.	Jelöljön ki legalább egy címkét az utónyomtatáshoz.

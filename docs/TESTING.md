@@ -30,6 +30,9 @@ preview detection and rollback when a later write fails.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.
+The same suite checks recovery of one archived copy, preservation of positions
+for individual labels, empty selection, preview and history navigation to the
+source attempt. A test transport captures the submitted copy count.
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,

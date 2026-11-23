@@ -14,9 +14,9 @@ namespace EanEtikety {
  public enum PrintHistoryStatus { Failed, Cancelled, Submitted }
 
  public sealed class PrintHistoryEntry {
-  public string Id, Printer, Media, QueueToken;
+  public string Id, Printer, Media, QueueToken, RecoverySourceId;
   public DateTime StartedUtc;
-  public int Pages, Labels, Repetitions;
+  public int Pages, Labels, Repetitions, RecoveredCopy;
   public PrintHistoryStatus Status;
   public bool HasArchive;
   [XmlIgnore] public PrintQueueHistory QueueStatus;
@@ -70,29 +70,64 @@ namespace EanEtikety {
   static bool ValidSize(double value) { return value > 0 && value <= 10000; }
 
   public OutputPlan Select(string ranges, bool byRecord) {
+   ValidateArchive();
+   var available = new HashSet<int>();
+   foreach (var item in Placements) available.Add(byRecord ? item.Record : item.Page + 1);
+   var selected = ParseRanges(ranges, available);
+   return BuildPlan((item, index) => selected.Contains(byRecord ? item.Record : item.Page + 1));
+  }
+
+  public OutputPlan ContinueCopy(int copy, int lastPrintedPage) {
+   ValidateArchive();
+   ValidateCopy(copy);
+   if (lastPrintedPage < 0 || lastPrintedPage > Placements[Placements.Count - 1].Page)
+    throw new ArgumentException(Loc.T("Na dotlač nezostala žiadna strana. Skontrolujte poslednú vytlačenú stranu."));
+   return BuildPlan((item, index) => item.Page >= lastPrintedPage);
+  }
+
+  public OutputPlan SelectCopyLabels(int copy, ICollection<int> labelNumbers) {
+   ValidateArchive();
+   ValidateCopy(copy);
+   if (labelNumbers == null || labelNumbers.Count == 0)
+    throw new ArgumentException(Loc.T("Označte aspoň jednu etiketu na dotlač."));
+   var selected = new HashSet<int>();
+   foreach (int number in labelNumbers) {
+    if (number < 1 || number > Placements.Count) throw new ArgumentOutOfRangeException("labelNumbers");
+    selected.Add(number);
+   }
+   return BuildPlan((item, index) => selected.Contains(index + 1));
+  }
+
+  void ValidateCopy(int copy) {
+   if (copy < 1 || copy > Repetitions) throw new ArgumentOutOfRangeException("copy");
+  }
+
+  internal void ValidateArchive() {
    if (Format == null || Profile == null || Format.Layout == null || !ValidSize(Width) || !ValidSize(Height)
      || Repetitions < 1 || Repetitions > 32767 || Placements == null || Placements.Count < 1 || Placements.Count > 10000
      || Labels == null || Labels.Count < 1 || Labels.Count > Placements.Count || string.IsNullOrWhiteSpace(Profile.Printer)
      || Profile.Width < 1 || Profile.Width > 20000 || Profile.Height < 1 || Profile.Height > 20000)
     throw InvalidArchive();
-   var available = new HashSet<int>();
    int previous = -1;
    foreach (var item in Placements) {
+    WorkContext.Check();
     if (item == null || item.Page < previous || item.Page < 0 || item.Page >= 10000
       || item.LabelIndex < 0 || item.LabelIndex >= Labels.Count || Labels[item.LabelIndex] == null
       || !ValidSize(item.Bounds.Width) || !ValidSize(item.Bounds.Height)
       || !(item.Bounds.X >= 0 && item.Bounds.X <= 100000)
       || !(item.Bounds.Y >= 0 && item.Bounds.Y <= 100000)) throw InvalidArchive();
-    available.Add(byRecord ? item.Record : item.Page + 1);
     previous = item.Page;
    }
-   var selected = ParseRanges(ranges, available);
+  }
+
+  OutputPlan BuildPlan(Func<ArchivedPlacement,int,bool> include) {
    var plan = new OutputPlan { Width = Width, Height = Height, PreparedAt = PreparedAt };
    var records = new HashSet<int>();
    int originalPage = -1, outputPage = -1;
-   foreach (var item in Placements) {
+   for (int i = 0; i < Placements.Count; i++) {
     WorkContext.Check();
-    if (!selected.Contains(byRecord ? item.Record : item.Page + 1)) continue;
+    var item = Placements[i];
+    if (!include(item, i)) continue;
     if (item.Page != originalPage) { originalPage = item.Page; outputPage++; }
     plan.Placements.Add(new OutputPlacement {
      Page = outputPage, Record = item.Record, Slot = item.Slot, Bounds = item.Bounds, Label = Labels[item.LabelIndex]
