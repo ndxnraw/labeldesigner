@@ -915,3 +915,11 @@ Výsledok čaká na potvrdenie.	The result awaits confirmation.	Výsledek čeká
 Návrh priradí potvrdené počty najprv k skorším kópiám a potom k prvým etiketám daného riadka v kópii. Rozsah overte v náhľade podľa výtlačkov.	The suggestion assigns confirmed counts to earlier copies first, then to the first labels for each row within the copy. Check the preview against the printouts.	Návrh přiřadí potvrzené počty nejdříve k dřívějším kopiím a poté k prvním etiketám daného řádku v kopii. Rozsah ověřte v náhledu podle výtisků.	A javaslat a megerősített mennyiségeket először a korábbi példányokhoz, majd az egy adott sorhoz tartozó első címkékhez rendeli. Ellenőrizze az előnézetet a nyomatok alapján.
 Výsledok nedostupný	Result unavailable	Výsledek není dostupný	Az eredmény nem érhető el
 Počty po riadkoch sa nepodarilo uložiť.	Could not save the quantities by row.	Nepodařilo se uložit počty podle řádků.	A soronkénti mennyiségek mentése sikertelen.
+Potvrdené z tejto úlohy	Confirmed from this job	Potvrzeno z této úlohy	A feladatból megerősítve
+Potvrdené z dotlačí	Confirmed from reprints	Potvrzeno z dotisků	Utónyomtatásból megerősítve
+Plánované {0} · Z tejto úlohy {1} · Z dotlačí {2} · Zostávajúce {3}	Planned {0} · From this job {1} · From reprints {2} · Remaining {3}	Plánováno {0} · Z této úlohy {1} · Z dotisků {2} · Zbývá {3}	Tervezett {0} · Ebből a feladatból {1} · Utónyomtatásból {2} · Hátralévő {3}
+Dotlače bez potvrdeného výsledku: {0}	Reprints awaiting confirmation: {0}	Dotisky bez potvrzeného výsledku: {0}	Megerősítésre váró utónyomtatások: {0}
+Skontrolujte skutočné výtlačky. Chcete pokračovať v dotlači?	Check the actual printouts. Do you want to continue with the reprint?	Zkontrolujte skutečné výtisky. Chcete pokračovat v dotisku?	Ellenőrizze a nyomatokat. Folytatja az utónyomtatást?
+Dotlač	Reprint	Dotisk	Utónyomtatás
+Potvrďte dotlač v náhľade.	Confirm the reprint in the preview.	Potvrďte dotisk v náhledu.	Erősítse meg az utónyomtatást az előnézetben.
+Odstránenie dotlače môže zmeniť zostatok pôvodnej dávky.	Removing a reprint can change the original batch balance.	Odstranění dotisku může změnit zůstatek původní dávky.	Az utónyomtatás törlése módosíthatja az eredeti köteg fennmaradó mennyiségét.

@@ -128,28 +128,31 @@ namespace EanEtikety {
 
   public PrintBatchResult SaveBatchResult(string id, PrintBatchResult proposed) {
    if (proposed == null) throw new ArgumentNullException("proposed");
-   using (new HistoryLease(mutexName)) {
-    var entry = ReadResultEntry(id);
-    var stored = ReadBatchResult(entry);
-    if (proposed.EntryId != id || stored.Revision != proposed.Revision) return null;
-    if (proposed.Rows == null || stored.Rows.Count != proposed.Rows.Count) throw PrintBatchResult.Invalid();
-    int total = 0;
-    for (int i = 0; i < stored.Rows.Count; i++) {
-     WorkContext.Check();
-     var next = proposed.Rows[i];
-     var row = stored.Rows[i];
-     if (next == null || row.Record != next.Record || row.Planned != next.Planned || next.Confirmed < 0 || next.Confirmed > row.Planned)
-      throw PrintBatchResult.Invalid();
-     row.Confirmed = next.Confirmed;
-     total = checked(total + next.Confirmed);
-    }
-    stored.ConfirmedTotal = total;
-    stored.Revision = Guid.NewGuid().ToString("N");
-    AtomicOutput.Save(PathFor(id, ResultSuffix), temp => {
-     using (var stream = File.Create(temp)) new XmlSerializer(typeof(PrintBatchResult)).Serialize(stream, stored);
-    });
-    return stored;
+   using (new HistoryLease(mutexName)) return SaveResult(id, ReadBatchResult(ReadResultEntry(id)), proposed);
+  }
+
+  PrintBatchResult SaveResult(string id, PrintBatchResult stored, PrintBatchResult proposed) {
+   if (proposed.EntryId != id || stored.Revision != proposed.Revision) return null;
+   if (proposed.Rows == null || stored.Rows.Count != proposed.Rows.Count) throw PrintBatchResult.Invalid();
+   int total = 0;
+   bool changed = stored.ConfirmedTotal < 0;
+   for (int i = 0; i < stored.Rows.Count; i++) {
+    WorkContext.Check();
+    var next = proposed.Rows[i];
+    var row = stored.Rows[i];
+    if (next == null || row.Record != next.Record || row.Planned != next.Planned || next.Confirmed < 0 || next.Confirmed > row.Planned)
+     throw PrintBatchResult.Invalid();
+    changed |= row.Confirmed != next.Confirmed;
+    row.Confirmed = next.Confirmed;
+    total = checked(total + next.Confirmed);
    }
+   if (!changed) return stored;
+   stored.ConfirmedTotal = total;
+   stored.Revision = Guid.NewGuid().ToString("N");
+   AtomicOutput.Save(PathFor(id, ResultSuffix), temp => {
+    using (var stream = File.Create(temp)) new XmlSerializer(typeof(PrintBatchResult)).Serialize(stream, stored);
+   });
+   return stored;
   }
  }
 }

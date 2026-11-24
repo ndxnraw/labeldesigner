@@ -82,6 +82,8 @@ public partial class PrintPanel:UserControl {
   string sourceId=recoverySourceId;
   int sourceCopy=recoveredCopy;
   Action recorded=recoveryRecorded;
+  var recoveryApproval=approvedRecovery;
+  approvedRecovery=null;
   string historyName=profileName.Text.Trim(), historyPaper=papers.Text;
   string accepted=approvedFingerprint;trace.Captured=trace.Now;
   PrintWorker.Queue(this,delegate{
@@ -93,10 +95,16 @@ public partial class PrintPanel:UserControl {
     RecoverySourceId=sourceId, RecoveredCopy=sourceCopy
    };
    PrinterProfile historySettings=null;
+   IDisposable recoveryLease=null;
+   bool recoveryRefused=false;
    try{
    if(discover){var list=new List<string>();foreach(string item in PrinterSettings.InstalledPrinters)list.Add(item);result.Printers=list.ToArray();}
    trace.Discovered=trace.Now;using(var doc=new LabelPrintDocument(renderLabel,renderPlan)){if(printer==null){printer=new PrinterSettings();if(!string.IsNullOrEmpty(name))printer.PrinterName=name;if(profile==null&&availableProfiles!=null){var saved=availableProfiles.FindLast(p=>string.Equals(p.Printer,printer.PrinterName,StringComparison.OrdinalIgnoreCase));if(saved!=null)profile=saved.Copy();}settings=(PageSettings)printer.DefaultPageSettings.Clone();settings.Margins=new Margins(0,0,0,0);PrinterPageGeometry.FreezePaper(settings);correctionX=correctionY=0;correctionScaleX=correctionScaleY=1;ignoreMargins=false;if(profile!=null){new PrintCalibration{X=profile.X,Y=profile.Y,ScaleX=profile.ScaleX,ScaleY=profile.ScaleY}.Validate();result.Profile=profile;zebra=ProfileZebra(profile);correctionX=profile.X;correctionY=profile.Y;correctionScaleX=profile.ScaleX;correctionScaleY=profile.ScaleY;ignoreMargins=profile.IgnoreDriverMargins;settings.Landscape=profile.Landscape;bool found=false;result.Papers=ReadPreviewPapers(printer,trace);foreach(PaperSize size in result.Papers)if(size.PaperName==profile.Paper&&size.Width==profile.Width&&size.Height==profile.Height){settings.PaperSize=size;found=true;break;}if(!found){settings.PaperSize=new PaperSize(profile.Paper??profile.DisplayName,profile.Width,profile.Height);result.ProfileWarning=Loc.T("Profil používa vlastné rozmery média. Overte ich v nastavení ovládača.");}}}doc.OffsetX=correctionX;doc.OffsetY=correctionY;doc.ScaleX=correctionScaleX;doc.ScaleY=correctionScaleY;doc.IgnoreDriverMargins=ignoreMargins;result.Zebra=zebra.Copy();result.IgnoreDriverMargins=ignoreMargins;result.OffsetX=correctionX;result.OffsetY=correctionY;result.ScaleX=correctionScaleX;result.ScaleY=correctionScaleY;printer.Copies=count;doc.PrinterSettings=printer;doc.DefaultPageSettings=settings;var readyPage=(PageSettings)settings.Clone();readyPage.PaperSize=settings.PaperSize;readyPage.Landscape=settings.Landscape;result.Printer=(PrinterSettings)printer.Clone();result.Settings=readyPage;if(cachedPapers!=null)result.Papers=cachedPapers;else if(result.Papers==null)result.Papers=ReadPreviewPapers(printer,trace);if(!Array.Exists(result.Papers,size=>size.Width==settings.PaperSize.Width&&size.Height==settings.PaperSize.Height))result.ProfileWarning=Loc.T("Profil používa vlastné rozmery média. Overte ich v nastavení ovládača.");result.Count=doc.PageCount;trace.Setup=trace.Now;
     doc.ValidatePrinter();var geometry=PreviewGeometry(GeometryKey(printer,settings,setupRevision),settings,send||discover,trace);result.Diagnostics=PrintDiagnostics.Capture(doc,geometry,count,zebra);result.Report=doc.InspectOutput(geometry);result.Readability=InspectReadability(result.Report,doc,geometry,zebra,renderLabel.Dpi,cachedReadability);ReviewZebra(result.Report,zebra,renderLabel.Dpi);if(result.ProfileWarning!=null)result.Report.AddWarning(result.ProfileWarning);result.Warnings=result.Report.Messages().ToArray();trace.Inspected=trace.Now;if(send&&(result.Report.Blocking||result.Report.Fingerprint!=accepted)){result.RequiresReview=true;DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,"review-required",null);}else if(send){
+     if(sourceId!=null) {
+      try { recoveryLease=history.BeginRecoverySend(sourceId,recoveryApproval); }
+      catch { recoveryRefused=true; throw; }
+     }
      if(historyEntry!=null){
       historyEntry.Printer=printer.PrinterName;
       historyEntry.QueueToken=Guid.NewGuid().ToString("N");
@@ -109,8 +117,12 @@ public partial class PrintPanel:UserControl {
      }
      DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,"submit",null);if(zebra.Enabled){sendZebra(doc,geometry,zebra,count);result.Sent=true;}else{doc.PrintController=new StandardPrintController();doc.Print();result.Cancelled=doc.Cancelled;result.Sent=!doc.Cancelled;}DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,result.Cancelled?"cancelled":"submitted",null);}else{result.Paper=new SizeF(Math.Max((float)(doc.WidthMm*doc.ScaleX+Math.Max(0,doc.OffsetX)),geometry.Bounds.Width*.254f),Math.Max((float)(doc.HeightMm*doc.ScaleY+Math.Max(0,doc.OffsetY)),geometry.Bounds.Height*.254f));result.Image=PreviewImage(doc,renderPlan,Math.Max(0,Math.Min(doc.PageCount-1,index)),result.Paper,trace);var a=geometry.PrintableArea;result.Printable=new RectangleF(a.X*.254f,a.Y*.254f,a.Width*.254f,a.Height*.254f);}}
   }catch(OperationCanceledException){result.Cancelled=true;}catch(Exception ex){string id=send?DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,"failed",ex):DiagnosticLog.Write("print-preview",ex);result.Error=ex.Message+(id==null?"":"\r\n"+Loc.T("Diagnostický záznam")+": "+id);}
-   result.HistoryWarning=RecordPrintAttempt(history,historyEntry,keepCopy,renderLabel,renderPlan,historySettings,result);
-   if(recorded!=null&&historyEntry!=null&&!result.RequiresReview)recorded();
+   try {
+    if(!recoveryRefused) {
+     result.HistoryWarning=RecordPrintAttempt(history,historyEntry,keepCopy,renderLabel,renderPlan,historySettings,result);
+     if(recorded!=null&&historyEntry!=null&&!result.RequiresReview)recorded();
+    }
+   } finally { if(recoveryLease!=null)recoveryLease.Dispose(); }
    trace.Rendered=trace.Now;Deliver(ticket,result);
   });
  }
@@ -129,7 +141,28 @@ public partial class PrintPanel:UserControl {
   jobSummary.Text=recoveredCopy>0?string.Format(Loc.T("Dotlač kópie {0}"),recoveredCopy)+" · "+summary:summary;
   LayoutPrintSummary();
  }
- void Review(bool submit){if(currentReport==null||sending||busy)return;var report=currentReport;using(var dialog=new OutputReviewDialog(report,(int)copies.Value,Loc.T("Tlačiť"),printerName.Text,Font,FindForm()==null?null:FindForm().Icon,!replaying)){if(calibrationStyle!=null)calibrationStyle(dialog);if(dialog.ShowDialog(this)!=DialogResult.OK){if(dialog.EditIssue!=null&&EditIssueRequested!=null){if(BackRequested!=null)BackRequested(this,EventArgs.Empty);EditIssueRequested(dialog.EditIssue);}return;}if(submit&&Ready&&ReferenceEquals(report,currentReport)){approvedFingerprint=report.Fingerprint;StartRequest(false,true);}}}
+ void Review(bool submit){
+  if(currentReport==null||sending||busy)return;
+  var report=currentReport;
+  var owner=FindForm();
+  using(var dialog=new OutputReviewDialog(report,(int)copies.Value,Loc.T("Tlačiť"),printerName.Text,Font,owner==null?null:owner.Icon,!replaying)){
+   if(calibrationStyle!=null)calibrationStyle(dialog);
+   if(dialog.ShowDialog(this)!=DialogResult.OK){
+    if(dialog.EditIssue!=null&&EditIssueRequested!=null){
+     if(BackRequested!=null)BackRequested(this,EventArgs.Empty);
+     EditIssueRequested(dialog.EditIssue);
+    }
+    return;
+   }
+  }
+  if(!submit||!Ready||!ReferenceEquals(report,currentReport))return;
+  var recovery=authorizeRecovery==null?null:authorizeRecovery();
+  if(authorizeRecovery!=null&&recovery==null)return;
+  if(!Ready||!ReferenceEquals(report,currentReport))return;
+  approvedRecovery=recovery;
+  approvedFingerprint=report.Fingerprint;
+  StartRequest(false,true);
+ }
  void Submit(){if(!Ready||sending)return;Review(true);}
  void Back(){if(sending){info.Text=Loc.T("Odosielanie už prebieha. Úlohu môžete zrušiť vo fronte Windows.");}if(BackRequested!=null)BackRequested(this,EventArgs.Empty);}
  protected override bool ProcessCmdKey(ref Message msg,Keys key){if(key==Keys.Escape){Back();return true;}return base.ProcessCmdKey(ref msg,key);}

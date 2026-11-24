@@ -366,8 +366,10 @@ Pri opakovaní môžete vybrať strany alebo záznamy dávky. Tlač až po náh�
 Pri prerušení vyberte Pripraviť dotlač, kópiu úlohy a zvyšné strany alebo
 konkrétne etikety. Po potvrdení tlače vznikne v histórii samostatný pokus.
 Po kontrole výtlačkov použite Potvrdiť výsledok… a uložte použiteľné
-množstvá po riadkoch. Ak je obsah úlohy uložený, môžete z uložených
-množstiev pripraviť návrh dotlače a overiť ho v náhľade.
+množstvá po riadkoch. Výsledok dotlače potvrďte v jej vlastnom zázname.
+Pôvodná dávka zohľadní potvrdené dotlače aj opravy ich množstiev.
+Ak je obsah úlohy uložený, návrh dotlače použije aktuálny zostatok.
+Pri odoslaní sa zobrazí upozornenie na dotlače bez potvrdeného výsledku.
 Podrobný postup a limity sú v PRINT_HISTORY.md.
 
 ČITATEĽNOSŤ KÓDOV PRED TLAČOU

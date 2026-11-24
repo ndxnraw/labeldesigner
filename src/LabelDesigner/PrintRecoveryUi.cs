@@ -71,10 +71,35 @@ namespace EanEtikety {
     if (selection.ShowDialog(owner) != DialogResult.OK) return;
    }
 
-   ShowRecoveryPreview(owner, entry, refresh, job, plan, selectedCopy);
+   ShowRecoveryPreview(owner, store, entry, refresh, job, plan, selectedCopy);
   }
 
-  void ShowRecoveryPreview(Form owner, PrintHistoryEntry entry, Action refresh, ArchivedPrintJob job, OutputPlan plan, int selectedCopy) {
+  static string UnconfirmedReprints(int count) {
+   return string.Format(Loc.T("Dotlače bez potvrdeného výsledku: {0}"), count);
+  }
+
+  PrintRecoveryAuthorization AuthorizeRecoverySend(Form preview, PrintHistoryStore store, string id, string proposalVersion) {
+   string title = Loc.T("Dotlač");
+   try {
+    var latest = store.ReadRecoveryAuthorization(id, proposalVersion != null);
+    if (latest.ProposalVersion != proposalVersion) {
+     UiMessageBox.Show(preview, Loc.T("Výsledok sa medzitým zmenil. Zatvorte okno a otvorte ho znova."), title);
+     return null;
+    }
+    if (latest.PendingReprints == 0) return latest;
+    using (var warning = UiMessageBox.Create(preview, UnconfirmedReprints(latest.PendingReprints) + Environment.NewLine +
+      Loc.T("Skontrolujte skutočné výtlačky. Chcete pokračovať v dotlači?"),
+      title, MessageBoxButtons.YesNo, MessageBoxIcon.Warning)) {
+     warning.AcceptButton = warning.CancelButton;
+     if (warning.ShowDialog(preview) != DialogResult.Yes) return null;
+    }
+    return latest;
+   } catch (Exception ex) { UiMessageBox.Show(preview, ex.Message, title); }
+   return null;
+  }
+
+  void ShowRecoveryPreview(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, Action refresh,
+    ArchivedPrintJob job, OutputPlan plan, int selectedCopy, string proposalVersion = null) {
    using (var preview = CreateJobPrintWindow(job.Format, plan, null, job)) {
     ((PrintPanel)preview.Controls[0]).SetPrintRecovery(entry.Id, selectedCopy, () => {
      try {
@@ -85,7 +110,7 @@ namespace EanEtikety {
      } catch (InvalidOperationException) {
       // The history window may have closed while submission was in progress.
      }
-    });
+    }, () => AuthorizeRecoverySend(preview, store, entry.Id, proposalVersion));
     preview.ShowDialog(owner);
    }
   }

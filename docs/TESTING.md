@@ -60,6 +60,9 @@ renderer as the parent menu. `BarcodeZebraTests` uses a fake sender to check
 logging only after approval, optional content retention, persisted printer
 settings, range selection with unchanged sheet positions and fresh confirmation
 before repeating a saved job.
+It also checks the balance across linked partial reprints, corrected and repeated
+confirmations, unconfirmed reprint warning cancellation, stale proposals, and
+manual reprints from an intact archive with a damaged result file.
 It also tests deliberate numeric wheel editing through both managed events and
 native child-window messages: hover and keyboard focus, click activation, focus
 loss, readonly values, bounds, spinner buttons and enclosing-panel scrolling.

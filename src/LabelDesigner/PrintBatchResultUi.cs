@@ -20,9 +20,10 @@ namespace EanEtikety {
   }
 
   void EditBatchResult(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, Action refresh) {
-   PrintBatchResult result;
-   if (!RunWork(owner, "read-print-result", "Načítavam tlačovú úlohu…", () => store.OpenBatchResult(entry.Id), out result)) return;
-   PrintBatchResult proposal = null;
+   PrintBatchOutcome outcome;
+   if (!RunWork(owner, "read-print-result", "Načítavam tlačovú úlohu…", () => store.OpenBatchOutcome(entry.Id), out outcome)) return;
+   PrintBatchOutcome proposal = null;
+   var result = outcome.Result;
    using (var dialog = FeatureForm("Ručný výsledok tlače", 880, 570)) {
     dialog.MinimumSize = new Size(580, 380);
     var layout = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, ColumnCount = 1, Padding = new Padding(12) };
@@ -37,7 +38,7 @@ namespace EanEtikety {
      AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false, MultiSelect = false,
      AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
      AccessibleName = dialog.Text };
-    foreach (string label in new[] { "Zdrojový riadok", "Plánované etikety", "Potvrdené etikety", "Zostávajúce etikety" }) {
+    foreach (string label in new[] { "Zdrojový riadok", "Plánované etikety", "Potvrdené z tejto úlohy", "Potvrdené z dotlačí", "Zostávajúce etikety" }) {
      int index = grid.Columns.Add("result" + grid.Columns.Count, Loc.T(label));
      grid.Columns[index].SortMode = DataGridViewColumnSortMode.NotSortable;
      grid.Columns[index].ReadOnly = index != 2;
@@ -58,14 +59,15 @@ namespace EanEtikety {
      if (!grid.EndEdit() || invalid) return;
      try {
       var candidate = result;
-      PrintBatchResult saved;
+      PrintBatchOutcome saved;
       if (!RunWork(dialog, "save-print-result", "Ukladám výsledok tlače…", () => {
-       var committed = store.SaveBatchResult(entry.Id, candidate);
+       var committed = store.SaveBatchOutcome(entry.Id, candidate);
        if (committed == null)
         throw new InvalidOperationException(Loc.T("Výsledok sa medzitým zmenil. Zatvorte okno a otvorte ho znova."));
        return committed;
       }, out saved)) return;
-      result = saved;
+      outcome = saved;
+      result = saved.Result;
       changed = false;
       grid.Invalidate();
       refresh();
@@ -73,8 +75,8 @@ namespace EanEtikety {
      } catch (Exception ex) { UiMessageBox.Show(dialog, ex.Message, dialog.Text); }
     });
     var propose = Btn(Loc.T("Navrhnúť dotlač…"), delegate {
-     if (!grid.EndEdit() || changed || invalid || result.ConfirmedTotal < 0 || result.ConfirmedTotal >= planned) return;
-     proposal = result;
+     if (!grid.EndEdit() || changed || invalid || result.ConfirmedTotal < 0 || outcome.RemainingTotal == 0) return;
+     proposal = outcome;
      dialog.Close();
     });
     var close = Btn(Loc.T("Zavrieť"), dialog.Close);
@@ -93,13 +95,16 @@ namespace EanEtikety {
     foreach (var action in new[] { allButton, zeroButton, save, propose, close }) actions.Controls.Add(action);
     update = delegate {
      int confirmed = result.Rows.Sum(row => row.Confirmed);
-     summary.Text = string.Format(Loc.T("Plánované {0} · Potvrdené {1} · Zostávajúce {2}"), planned, confirmed, planned - confirmed);
+     int remaining = outcome.RemainingTotal;
+     summary.Text = string.Format(Loc.T("Plánované {0} · Z tejto úlohy {1} · Z dotlačí {2} · Zostávajúce {3}"),
+      planned, confirmed, outcome.ReprintedTotal, remaining);
      if (invalid) summary.Text += Environment.NewLine + Loc.T("Zadajte celé číslo od nuly po plánované množstvo.");
      else if (changed || result.ConfirmedTotal < 0) summary.Text += Environment.NewLine + Loc.T("Výsledok čaká na potvrdenie.");
-     else summary.Text += Environment.NewLine + ResultStatus(confirmed, planned);
+     else summary.Text += Environment.NewLine + ResultStatus(planned - remaining, planned);
+     if (outcome.PendingReprints > 0) summary.Text += Environment.NewLine + UnconfirmedReprints(outcome.PendingReprints);
      save.Enabled = grid.IsCurrentCellDirty || !invalid && (changed || result.ConfirmedTotal < 0);
      propose.Enabled = entry.HasArchive && !grid.IsCurrentCellDirty && !changed && !invalid &&
-      result.ConfirmedTotal >= 0 && result.ConfirmedTotal < planned;
+      result.ConfirmedTotal >= 0 && remaining > 0;
     };
     grid.CellValueNeeded += delegate(object sender, DataGridViewCellValueEventArgs e) {
      if (e.RowIndex < 0 || e.RowIndex >= result.Rows.Count) return;
@@ -108,7 +113,8 @@ namespace EanEtikety {
       case 0: e.Value = row.Record > 0 ? (object)row.Record : "—"; break;
       case 1: e.Value = row.Planned; break;
       case 2: e.Value = row.Confirmed; break;
-      case 3: e.Value = row.Remaining; break;
+      case 3: e.Value = outcome.Reprinted(row.Record); break;
+      case 4: e.Value = outcome.Remaining(row); break;
      }
     };
     grid.CellValidating += delegate(object sender, DataGridViewCellValidatingEventArgs e) {
@@ -126,7 +132,7 @@ namespace EanEtikety {
      invalid = false;
      changed |= row.Confirmed != value;
      row.Confirmed = value;
-     grid.InvalidateCell(3, e.RowIndex);
+     grid.InvalidateCell(4, e.RowIndex);
      update();
     };
     grid.CellEndEdit += delegate { if (invalid) { invalid = false; update(); } };
@@ -146,10 +152,10 @@ namespace EanEtikety {
     count >= 0 && count <= row.Planned;
   }
 
-  void ProposeBatchRecovery(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, PrintBatchResult result, Action refresh) {
+  void ProposeBatchRecovery(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, PrintBatchOutcome outcome, Action refresh) {
    ArchivedPrintJob job;
    if (!RunWork(owner, "print-recovery-load", "Načítavam tlačovú úlohu…", () => store.Open(entry.Id), out job)) return;
-   int first = job.FirstIncompleteCopy(result);
+   int first = job.FirstIncompleteCopy(outcome.ForProposal());
    if (first == 0) return;
    int copy;
    using (var dialog = FeatureForm("Navrhnúť dotlač…", 615, 315)) {
@@ -172,12 +178,12 @@ namespace EanEtikety {
    }
    OutputPlan plan;
    if (!RunWork(owner, "prepare-print-result-recovery", "Pripravujem tlačovú úlohu…", () => {
-    var latest = store.OpenBatchResult(entry.Id);
-    if (latest.Revision != result.Revision)
+    var latest = store.OpenBatchOutcome(entry.Id);
+    if (latest.Version != outcome.Version)
      throw new InvalidOperationException(Loc.T("Výsledok sa medzitým zmenil. Zatvorte okno a otvorte ho znova."));
-    return job.ProposeRemainder(copy, latest);
+    return job.ProposeRemainder(copy, latest.ForProposal());
    }, out plan)) return;
-   if (plan.Placements.Count > 0) ShowRecoveryPreview(owner, entry, refresh, job, plan, copy);
+   if (plan.Placements.Count > 0) ShowRecoveryPreview(owner, store, entry, refresh, job, plan, copy, outcome.Version);
   }
  }
 }

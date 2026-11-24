@@ -17,13 +17,23 @@ o opakovaní skontrolujte skutočne vytlačené etikety.
 
 Vyberte úlohu a stlačte **Potvrdiť výsledok…**. Pri každom zdrojovom
 riadku zadajte počet použiteľných etikiet zo všetkých opakovaní úlohy.
-Tabuľka ukáže plánovaný, potvrdený a zostávajúci počet. Uložený ručný
-výsledok uvidíte v histórii pri hlásení frontu Windows.
+Tabuľka ukáže plánovaný počet, potvrdené množstvá z tejto úlohy a zo
+súvisiacich dotlačí a zostávajúci počet. Uložený ručný výsledok aktuálnej
+úlohy uvidíte v histórii pri hlásení frontu Windows.
+
+Po kontrole dotlače potvrďte jej výsledok v samostatnom zázname dotlače.
+Pôvodná dávka prepočíta zostatok po riadkoch aj po oprave potvrdenia.
+Ak výtlačky chýbajú alebo sú nepoužiteľné, potvrďte nulu. Pred odoslaním
+ďalšej dotlače sa zobrazí upozornenie na súvisiace pokusy bez potvrdenia.
+Ak sa od prípravy návrhu zmenili potvrdené výsledky, pripravte návrh
+znova z aktuálneho zostatku.
+Pri výpočte sa použijú prepojené záznamy dostupné v histórii. Odstránenie
+záznamu dotlače môže zmeniť zostatok.
 
 Nové úlohy ukladajú počty po riadkoch. Pri starších úlohách sa počty
 načítajú z uloženého obsahu. Ak je obsah k dispozícii, po uložení
 čiastočného alebo nulového výsledku použite **Navrhnúť dotlač…**.
-Návrh priradí potvrdené množstvo najprv k skorším kópiám a potom
+Návrh priradí súčet potvrdených množstiev najprv k skorším kópiám a potom
 k prvým etiketám každého riadka v kópii. Pripraví zostávajúce etikety
 z jednej kópie.
 Pozície na hárku sa zachovajú. Návrh overte podľa skutočných výtlačkov

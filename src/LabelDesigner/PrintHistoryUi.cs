@@ -12,6 +12,8 @@ namespace EanEtikety {
   string recoverySourceId;
   int recoveredCopy;
   Action recoveryRecorded;
+  Func<PrintRecoveryAuthorization> authorizeRecovery;
+  PrintRecoveryAuthorization approvedRecovery;
   readonly CheckBox archivePrint = new CheckBox { AutoSize = true };
 
   internal void UsePrintHistory(PrintHistoryStore store) {
@@ -27,10 +29,11 @@ namespace EanEtikety {
    copies.Value = job.Repetitions;
   }
 
-  internal void SetPrintRecovery(string sourceId, int copy, Action recorded) {
+  internal void SetPrintRecovery(string sourceId, int copy, Action recorded, Func<PrintRecoveryAuthorization> authorize) {
    recoverySourceId = sourceId;
    recoveredCopy = copy;
    recoveryRecorded = recorded;
+   authorizeRecovery = authorize;
    copies.Value = 1;
    copies.Maximum = 1;
    copies.Enabled = false;
@@ -208,7 +211,10 @@ namespace EanEtikety {
     var remove = Btn(Loc.T("Odstrániť"), delegate {
      var entry = selected();
      if (entry == null) return;
-     if (UiMessageBox.Show(window, Loc.T("Odstrániť tento záznam a jeho uložený obsah?"),
+     string prompt = Loc.T("Odstrániť tento záznam a jeho uložený obsah?");
+     if (!string.IsNullOrEmpty(entry.RecoverySourceId))
+      prompt += Environment.NewLine + Loc.T("Odstránenie dotlače môže zmeniť zostatok pôvodnej dávky.");
+     if (UiMessageBox.Show(window, prompt,
           window.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
      try { store.Remove(entry.Id); refresh(); } catch (Exception ex) { Error(ex); }
     });
