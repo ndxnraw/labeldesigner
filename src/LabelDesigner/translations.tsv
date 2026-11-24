@@ -964,3 +964,20 @@ Trvalo uchované	Retained	Uchováno	Tartósan megőrizve
 Počty pôvodnej tlače nie sú dostupné.	The original print quantities are unavailable.	Počty z původního tisku nejsou dostupné.	Az eredeti nyomtatás mennyiségei nem érhetők el.
 Pokus a jeho potvrdené množstvá zostanú v prehľade dávky.	The attempt and its confirmed quantities will remain in the batch overview.	Pokus a jeho potvrzená množství zůstanou v přehledu dávky.	A kísérlet és megerősített mennyiségei megmaradnak a köteg áttekintésében.
 Pôvodná úloha ani jej uchované údaje nie sú dostupné.	The original job and its retained data are unavailable.	Původní úloha ani její uchované údaje nejsou dostupné.	Az eredeti feladat és megőrzött adatai nem érhetők el.
+Dávky a uzávierky	Batches and closures	Dávky a uzávěrky	Kötegek és lezárások
+Záloha dávok obsahuje identifikátory, počty a uzávierky. Obsah na dotlač sa uchováva v histórii tlače.	Batch backups include IDs, quantities and closures. Printable content is kept in print history.	Záloha dávek obsahuje identifikátory, počty a uzávěrky. Obsah pro dotisk se uchovává v historii tisku.	A köteg biztonsági mentése az azonosítókat, a mennyiségeket és a lezárásokat tartalmazza. Az újranyomtatható tartalom a nyomtatási előzményekben marad.
+Zo zálohy	From backup	Ze zálohy	A biztonsági mentésből
+Miestne údaje	Local data	Místní údaje	Helyi adatok
+Použiť údaje zo zálohy pre vybranú dávku	Use backup data for the selected batch	Použít údaje ze zálohy pro vybranou dávku	A kiválasztott köteg adatainak visszaállítása
+Nezlučiteľná dávka	Incompatible batch	Neslučitelná dávka	Nem kompatibilis köteg
+Zhodná dávka	Matching batch	Shodná dávka	Egyező köteg
+Nezlučiteľné dávky sa pri obnove preskočia: {0}	Incompatible batches skipped during restore: {0}	Neslučitelné dávky budou při obnově přeskočeny: {0}	A visszaállításból kihagyott nem kompatibilis kötegek: {0}
+Nezlučiteľné identifikátory dávky.	Incompatible batch identifiers.	Neslučitelné identifikátory dávky.	Nem kompatibilis kötegazonosítók.
+Rozdielne výsledky pokusov: {0}. Rozdielne uzávierky: {1}.	Different attempt results: {0}. Different closures: {1}.	Odlišné výsledky pokusů: {0}. Odlišné uzávěrky: {1}.	Eltérő kísérleteredmények: {0}. Eltérő lezárások: {1}.
+Pokusy {0} · Potvrdené {1} · Uzávierky {2}	Attempts {0} · Confirmed {1} · Closures {2}	Pokusy {0} · Potvrzeno {1} · Uzávěrky {2}	Kísérletek {0} · Megerősítve {1} · Lezárások {2}
+Neplatné údaje o dávke v zálohe.	Invalid batch data in the backup.	Neplatné údaje o dávce v záloze.	Érvénytelen kötegadatok a biztonsági mentésben.
+Úložisko dávok nie je dostupné.	The batch store is unavailable.	Úložiště dávek není dostupné.	A kötegtár nem érhető el.
+Riadok {0}: miestne {1}, zo zálohy {2}	Row {0}: local {1}, backup {2}	Řádek {0}: místní {1}, ze zálohy {2}	{0}. sor: helyi {1}, mentésből {2}
+Pri nahradení zostane miestna verzia uzávierky v zálohe pred obnovou.	When replaced, the local closure will be kept in the pre-restore backup.	Při nahrazení zůstane místní verze uzávěrky v záloze před obnovou.	Csere esetén a helyi lezárás megmarad a visszaállítás előtti mentésben.
+Uložená uzávierka je dostupná. Súhrn dávky nemožno z prítomných pokusov overiť.	The saved closure is available. The existing attempts cannot verify the batch summary.	Uložená uzávěrka je dostupná. Souhrn dávky nelze z přítomných pokusů ověřit.	A mentett lezárás elérhető. A meglévő kísérletekből a köteg összesítése nem ellenőrizhető.
+Zostatok po zlúčení: {0}. Zostatok v uloženej uzávierke: {1}. Údaje sa líšia.	Remaining after merge: {0}. Remaining in the saved closure: {1}. The underlying data differ.	Zůstatek po sloučení: {0}. Zůstatek v uložené uzávěrce: {1}. Údaje se liší.	Fennmaradó mennyiség összevonás után: {0}. A mentett lezárásban: {1}. Az adatok eltérnek.

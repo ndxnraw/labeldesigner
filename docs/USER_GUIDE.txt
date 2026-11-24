@@ -114,9 +114,10 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
-PRENOSNÁ ZÁLOHA ŠABLÓN A PROFILOV
+PRENOSNÁ ZÁLOHA ŠABLÓN, PROFILOV A DÁVOK
 Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
-profily médií alebo obe kategórie a použite Exportovať zálohu do ZIPu….
+profily médií, dávky s uzávierkami alebo ich kombináciu a použite
+Exportovať zálohu do ZIPu….
 Šablóny obsahujú uložené predvoľby dávok. Profily obsahujú nastavenia média,
 kalibráciu a nastavenia Zebra vrátane tmavosti.
 
@@ -124,6 +125,17 @@ Na cieľovom počítači vyberte Otvoriť ZIP na obnovu…. V náhľade skontrol
 položky a podľa potreby vyberte cieľovú tlačiareň. Zhodné názvy sa predvolene
 ponechajú. Voľba Nahradiť položky s rovnakým názvom zmení výsledok v náhľade.
 Po presune profilu na inú tlačiareň overte kalibráciu skúšobným výtlačkom.
+
+Pri konflikte dávky vyberte jej riadok a porovnajte údaje. Predvolene sa
+ponechá miestny stav. Voľba Použiť údaje zo zálohy pre vybranú dávku platí
+iba pre túto dávku. Pokusy a uzávierky sa párujú podľa ID. Pri výmene
+aktívnej uzávierky zostane miestna verzia v ZIPe pred obnovou. Opakovaná
+obnova rovnakých údajov nepripočíta ďalšie etikety.
+
+Obnovené dávky nájdete v Histórii tlače → Prehľad dávok…. ZIP prenáša
+metadáta pokusov, počty po riadkoch a uložené uzávierky. Podklady na
+dotlač a front tlače patria do miestnej histórie tlače. Existujúce
+miestne podklady sa pri aktualizácii potvrdených výsledkov zachovajú.
 
 Po potvrdení obnovy vznikne pred zápisom ZIP v susednom priečinku .workspace.backups.
 Jeho umiestnenie sa zobrazí po obnove. Otvorením tohto ZIPu sa dajú obnoviť

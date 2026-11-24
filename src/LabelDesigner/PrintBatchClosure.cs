@@ -84,7 +84,7 @@ namespace EanEtikety {
  }
 
  public sealed partial class PrintHistoryStore {
-  const int MaxClosureBytes = 4 * 1024 * 1024;
+  internal const int MaxClosureBytes = 4 * 1024 * 1024;
   string ClosureDirectory { get { return Path.Combine(directory, "batch-closures"); } }
 
   string ClosurePath(string entryId, string closureId) {

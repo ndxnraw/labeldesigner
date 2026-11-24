@@ -43,7 +43,7 @@ class BackgroundBatchTests {
    PresetUi(controller,form,owner);
    using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,form.ClientRectangle);image.Save(Path.Combine(dir,"batch-background.png"));}completed=true;
   }catch(Exception ex){failure=ex;}finally{form.Close();}break;}};timer.Start();Call(owner,"ShowBatch");}
-  if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");WorkspaceBackupUi(owner);Call(owner,"Apply",LabelSettings.Default());owner.Close();
+  if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");WorkspaceBackupUi(owner);WorkspaceBatchBackupUi(owner);Call(owner,"Apply",LabelSettings.Default());owner.Close();
  }}
  static void WorkspaceBackupUi(MainForm owner){
   string source=Path.Combine(dir,"profile-export"),target=Path.Combine(dir,"profile-import"),zip=Path.Combine(dir,"profiles.zip");
@@ -74,6 +74,46 @@ class BackgroundBatchTests {
    Button(dialog,Loc.T("Obnoviť pracovné údaje")).PerformClick();
   });
   Check(selected!=null&&selected.Items[0].Action==WorkspaceRestoreAction.Replace&&selected.Items[0].TargetPrinter=="Local","confirmed dialog returns the reviewed replace plan");
+ }
+ static void WorkspaceBatchBackupUi(MainForm owner){
+  var source=new PrintHistoryStore(Path.Combine(dir,"print-from"));
+  var target=new PrintHistoryStore(Path.Combine(dir,"print-to"));
+  var export=new WorkspaceBackup(Path.Combine(dir,"work-from"),source);
+  var restore=new WorkspaceBackup(Path.Combine(dir,"work-to"),target);
+  var label=LabelSettings.Default();
+  var rows=OutputPlan.Create(new List<BatchRecord>{new BatchRecord{Row=7,Count=2,Label=label}},label);
+  var attempt=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=2,Pages=1,Repetitions=1,Status=PrintHistoryStatus.Submitted};
+  source.Record(attempt,null,rows);
+  var result=source.OpenBatchResult(attempt.Id);
+  result.Rows[0].Confirmed=1;
+  source.SaveBatchResult(attempt.Id,result);
+  string zip=Path.Combine(dir,"backup-ui-print.zip");
+  export.Export(zip,false,false,true);
+  restore.Restore(restore.Open(zip).Preview(false));
+  result=target.OpenBatchResult(attempt.Id);
+  result.Rows[0].Confirmed=0;
+  target.SaveBatchResult(attempt.Id,result);
+  var review=restore.Open(zip);
+  WorkspaceRestorePlan selected=null;
+  Action show=()=>selected=(WorkspaceRestorePlan)Call(owner,"ReviewWorkspaceRestore",owner,review,new List<string>());
+  VisitDialog("Náhľad obnovy pracovných údajov",show,dialog=>{
+   var grid=(DataGridView)dialog.Controls.Find("workspaceRestoreItems",true)[0];
+   var choice=(CheckBox)dialog.Controls.Find("workspaceUseBatchBackup",true)[0];
+   var confirm=Button(dialog,Loc.T("Obnoviť pracovné údaje"));
+   grid.CurrentCell=grid.Rows[0].Cells[0];
+   Check(choice.Visible&&!choice.Checked&&!confirm.Enabled&&Convert.ToString(grid.Rows[0].Cells[4].Value)==Loc.T("Ponechať"),
+    "batch restore UI defaults to keeping conflicting local data");
+   Check(dialog.Controls.Find("workspaceBatchDetails",true)[0].Text.Contains(string.Format(Loc.T("Riadok {0}: miestne {1}, zo zálohy {2}"),7,0,1)),
+    "batch restore UI shows the changed row and both quantities");
+   choice.Checked=true;
+   Check(confirm.Enabled&&Convert.ToString(grid.Rows[0].Cells[4].Value)==Loc.T("Nahradiť"),
+    "batch choice changes the preview for the same ID");
+   confirm.PerformClick();
+  });
+  Check(selected!=null&&selected.Items[0].BatchConflict&&target.OpenBatchResult(attempt.Id).ConfirmedTotal==0,
+   "confirming batch preview returns the selected plan without writing yet");
+  Check(restore.Restore(selected).Applied==1&&target.OpenBatchResult(attempt.Id).ConfirmedTotal==1,
+   "applying the preview restores the chosen batch count once");
  }
  static void VisitDialog(string title,Action show,Action<Form> inspect){
   Exception failure=null;bool visited=false;

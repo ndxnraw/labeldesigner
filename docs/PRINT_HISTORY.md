@@ -45,6 +45,14 @@ a údaje frontu sa naďalej riadia limitmi histórie tlače. Pri starších
 záznamoch sa využijú zachované väzby. Údaje odstránené pred zavedením
 tejto funkcie sa nedajú obnoviť.
 
+Prenos medzi počítačmi je dostupný cez **Nástroje → Projekt →
+Prenosná záloha a obnova… → Dávky a uzávierky**. ZIP prenáša pôvodné
+ID a uložené počty aj uzávierky. Náhľad rozlišuje nové dávky, zhodné
+údaje a konflikty. Pri konflikte môžete použiť údaje zo zálohy pre
+vybranú dávku. Ak sa zostatok po zlúčení líši od uloženej uzávierky,
+náhľad zobrazí obe hodnoty. Podklady na samotnú dotlač zostávajú
+v miestnej histórii tlače.
+
 ### Uzavretie a export dávky
 
 Po ručnom potvrdení pôvodnej tlače vyberte jej záznam a stlačte

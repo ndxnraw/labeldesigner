@@ -41,6 +41,10 @@ The portable workspace tests verify ZIP inventory, offline transfer of a
 template with a saved batch preset, multiple media profiles and calibration,
 printer reassignment, default conflict handling, checkpoint backup, stale
 preview detection and rollback when a later write fails.
+Batch backup tests restore on an empty installation, compare closure CSV IDs,
+repeat the import, exercise per-batch choices in the dialog and reject stale
+previews. The mixed restore case locks a live result file and verifies rollback
+of the template written before that failure.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.

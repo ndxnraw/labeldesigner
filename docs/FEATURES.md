@@ -32,9 +32,10 @@ Názov produktu je naďalej Pre-release.
   História uchová posledný známy stav aj čas zistenia, vrátane informácie,
   či aktuálna kontrola úlohu ešte našla.
 
-- **Prenosná záloha a obnova** prenesie šablóny s predvoľbami dávok a profily
-  médií medzi inštaláciami cez ZIP. Náhľad ukáže konflikty a priradenie tlačiarní.
-  Pred obnovou vznikne lokálna záloha aktuálnych údajov.
+- **Prenosná záloha a obnova** prenesie šablóny s predvoľbami dávok, profily
+  médií, potvrdené množstvá a uzávierky cez ZIP. Náhľad umožní vyriešiť
+  konflikty pre jednotlivé dávky a priradiť tlačiarne. Pred obnovou vznikne
+  lokálna záloha aktuálnych údajov.
 
 - **Predvoľby dávky** ukladajú nastavenia CSV, hárok XLSX a mapovanie v projekte.
   Pri ďalšom importe vyhľadajú stĺpce podľa hlavičiek. Ukážka prvých piatich

@@ -104,6 +104,100 @@ class BatchImportTests {
   Check(sparse.Issues.Count==0&&sparse.Unchanged==1&&sparse.Added==2&&sparse.Removed==0,
    "sparse worksheet gaps are ignored and line endings in label text do not create a difference");
  }
+ static void PortableBatchBackup(string dir){
+  var source=new PrintHistoryStore(Path.Combine(dir,"src-print"));
+  var target=new PrintHistoryStore(Path.Combine(dir,"dst-print"));
+  var backup=new WorkspaceBackup(Path.Combine(dir,"src-work"),source);
+  var restore=new WorkspaceBackup(Path.Combine(dir,"dst-work"),target);
+  var label=LabelSettings.Default();
+  var plan=OutputPlan.Create(new List<BatchRecord>{new BatchRecord{Row=12,Count=3,Label=label}},label);
+  var original=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=3,Pages=1,Repetitions=1,Status=PrintHistoryStatus.Submitted};
+  source.Record(original,null,plan);
+  var reprint=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=3,Pages=1,Repetitions=1,Status=PrintHistoryStatus.Submitted,
+   RecoverySourceId=original.Id,RecoveredCopy=1};
+  source.Record(reprint,null,plan);
+  Action<PrintHistoryStore,string,int> confirm=(store,id,count)=>{
+   var result=store.OpenBatchResult(id);
+   result.Rows[0].Confirmed=count;
+   Check(store.SaveBatchResult(id,result)!=null,"test confirms useable labels");
+  };
+  confirm(source,original.Id,1);confirm(source,reprint.Id,1);
+  source.Remove(reprint.Id);
+  var closure=source.CloseBatch(original.Id,source.OpenBatchOutcome(original.Id).Version,"Missing output",false);
+  string zip=Path.Combine(dir,"batches.zip");
+  backup.Export(zip,false,false,true);
+  var preview=restore.Open(zip).Preview(false);
+  Check(target.ListPrintBatches().Count==0&&preview.Items.Count==1&&preview.Items[0].BatchId==original.Id&&
+   preview.Items[0].Action==WorkspaceRestoreAction.Add,"ZIP preview exposes original identity and leaves target untouched");
+  var restored=restore.Restore(preview);
+  var imported=target.OpenPrintBatch(original.Id);
+  Check(restored.Applied==1&&imported.Attempts.Count==2&&imported.Outcome.BatchClosed&&imported.Outcome.RemainingTotal==1&&
+   imported.Outcome.Reprinted(12)==1&&target.List().Count==0,"clean restore preserves counts and closure without submitting jobs");
+  var csv=Path.Combine(dir,"restored.csv");
+  target.ExportBatchClosure(original.Id,closure.ClosureId,csv);
+  Check(File.ReadAllText(csv).Contains("12,3,1,1,1,"+original.Id+","+closure.ClosureId+","),"restored CSV preserves original batch and closure IDs");
+  var useBackup=new HashSet<string>{original.Id};
+  Check(restore.Restore(restore.Open(zip).Preview(true,null,useBackup)).Applied==0,"repeat import remains idempotent even when explicit replacement is enabled");
+  target.ReopenBatch(original.Id,closure.ClosureId);
+  confirm(target,reprint.Id,0);
+  var localClosure=target.CloseBatch(original.Id,target.OpenBatchOutcome(original.Id).Version,"Local balance",false);
+  var collision=restore.Open(zip);
+  var kept=collision.Preview(false);
+  Check(kept.Items[0].BatchConflict&&kept.Items[0].Action==WorkspaceRestoreAction.Keep&&restore.Restore(kept).Applied==0&&
+   target.OpenPrintBatch(original.Id).Outcome.RemainingTotal==2,"conflicting local closure and count remain until explicitly replaced");
+  var replacement=collision.Preview(false,null,useBackup);
+  restored=restore.Restore(replacement);
+  Check(restored.Applied==1&&target.OpenPrintBatch(original.Id).Outcome.RemainingTotal==1&&
+   target.ReadBatchClosure(original.Id,closure.ClosureId).Reason=="Missing output"&&target.ListBatchClosures().FindAll(item=>!item.IsOpen).Count==1,
+   "accepting conflicts restores selected counts and the active closure without double counting");
+  Check(restore.Open(restored.BackupPath).Preview(false).Items[0].BatchConflict&&localClosure.ClosureId!=closure.ClosureId,
+   "pre-restore ZIP retains the local state");
+  var oldRevision=target.OpenBatchResult(reprint.Id).Revision;
+  var restoreLocal=restore.Open(restored.BackupPath).Preview(false,null,useBackup);
+  restore.Restore(restoreLocal);
+  var returned=target.OpenBatchResult(reprint.Id);
+  Check(returned.ConfirmedTotal==0&&returned.Revision!=oldRevision,"restoring an older result creates a new edit revision");
+  var active=target.ListBatchClosures().Find(item=>!item.IsOpen);
+  target.ReopenBatch(active.EntryId,active.ClosureId);
+  confirm(target,reprint.Id,1);
+  var reopenConflict=restore.Open(zip).Preview(false);
+  Check(reopenConflict.Items[0].BatchConflict&&reopenConflict.Items[0].Action==WorkspaceRestoreAction.Keep,
+   "an incoming active closure requires a decision for an existing open batch");
+  var stale=restore.Open(zip).Preview(false,null,useBackup);
+  confirm(target,reprint.Id,2);
+  bool rejected=false;
+  try{restore.Restore(stale);}catch(IOException){rejected=true;}
+  Check(rejected&&target.OpenBatchOutcome(original.Id).Reprinted(12)==2,"stale batch preview cannot overwrite a later confirmation");
+
+  string templates=Path.Combine(dir,"src-work","Templates");
+  Directory.CreateDirectory(templates);
+  Engine.Save(Path.Combine(templates,"Rollback.ean.xml"),label);
+  string mixedZip=Path.Combine(dir,"mixed-batches.zip");
+  backup.Export(mixedZip,true,false,true);
+  source.ReopenBatch(original.Id,closure.ClosureId);
+  confirm(source,original.Id,0);
+  string mixedRoot=Path.Combine(dir,"mixed-work");
+  var mixed=new WorkspaceBackup(mixedRoot,source);
+  var mixedPlan=mixed.Open(mixedZip).Preview(false,null,useBackup);
+  string liveSidecar=Path.Combine(dir,"src-print",original.Id+".result.xml");
+  rejected=false;
+  using(var hold=File.Open(liveSidecar,FileMode.Open,FileAccess.Read,FileShare.Read)){
+   try{mixed.Restore(mixedPlan);}catch(IOException){rejected=true;}catch(UnauthorizedAccessException){rejected=true;}
+  }
+  Check(rejected&&!File.Exists(Path.Combine(mixedRoot,"Templates","Rollback.ean.xml"))&&
+   source.OpenBatchResult(original.Id).ConfirmedTotal==0,"a failed print result write rolls back earlier workspace changes");
+  restored=mixed.Restore(mixed.Open(mixedZip).Preview(false,null,useBackup));
+  Check(restored.Applied==2&&source.List().Find(item=>item.Id==original.Id).ManualConfirmed==1&&source.OpenBatchOutcome(original.Id).BatchClosed,
+   "batch replacement updates a live result without duplicating the attempt");
+
+  var pending=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=3,Pages=1,Repetitions=1,Status=PrintHistoryStatus.Submitted};
+  source.Record(pending,null,plan);
+  string pendingZip=Path.Combine(dir,"pending-batches.zip");
+  backup.Export(pendingZip,false,false,true);
+  confirm(source,pending.Id,2);
+  Check(mixed.Restore(mixed.Open(pendingZip).Preview(false,null,new HashSet<string>{pending.Id})).Applied==0&&
+   source.OpenBatchResult(pending.Id).ConfirmedTotal==2,"an older pending backup does not clear a known confirmation");
+ }
  static void PortableBackup(string dir){
   string source=Path.Combine(dir,"backup-source"),target=Path.Combine(dir,"backup-target");
   string library=Path.Combine(source,"Templates");
@@ -265,7 +359,7 @@ class BatchImportTests {
   catch(InvalidDataException ex){Check(ex.Message.Contains("4"),"CSV syntax error cites the source line");}
  }
  static int count;static void Check(bool b,string message){count++;if(!b)throw new Exception(message);}static void Entry(ZipArchive z,string name,string content){using(var w=new StreamWriter(z.CreateEntry(name).Open()))w.Write(content);}
- [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{SavedReferences(dir);Comparison();PortableBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
+ [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{SavedReferences(dir);Comparison();PortableBackup(dir);PortableBatchBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
  Entry(z,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Products' r:id='r1'/><sheet name='Other' r:id='r2'/></sheets></workbook>");Entry(z,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");Entry(z,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");Entry(z,"xl/sharedStrings.xml","<sst><si><t>Žltý čaj</t></si></sst>");Entry(z,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' s='1'><v>123</v></c><c r='B1' t='s'><v>0</v></c><c r='C1' s='2'><v>45292</v></c><c r='D1'><f>1+1</f><v>2</v></c><c r='E1'><f>1+1</f></c></row><row r='3'><c r='A3' t='inlineStr'><is><t>000045</t></is></c></row></sheetData></worksheet>");Entry(z,"xl/worksheets/sheet2.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other sheet</t></is></c></row></sheetData></worksheet>");}
  var tables=BatchData.Xlsx(file);Check(tables.Count==2&&tables[1].Name=="Other","sheet selection");Check(tables[0].Rows[0][0]=="000123"&&tables[0].Rows[2][0]=="000045","formatted and text leading zeros");Check(tables[0].Rows[0][1]=="Žltý čaj","shared strings unicode");Check(tables[0].Rows[0][2]=="2024-01-01","Excel numeric date");Check(tables[0].Rows[0][3]=="2"&&tables[0].Rows[0][4].StartsWith("!ERROR"),"formula cached result versus error");Check(tables[0].Rows[1].Length==0,"sparse row number retained");
  var persisted=LabelSettings.Default();persisted.Texts.Add(new TextItem{Text="Second"});persisted.Batch.Bindings.Add(new ColumnBinding{Target="text:1",Column=3});persisted=ProjectXml.Clone(persisted);Check(persisted.Batch.Bindings[0].Column==3,"batch mapping project roundtrip");Elements.Remove(persisted,new List<int>{0});Check(persisted.Batch.Bindings[0].Target=="text:0","mapping follows surviving element after deletion");var label=LabelSettings.Default();label.Kind=128;var mappings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}};var record=BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today);Check(record.Error==null&&record.Count==2&&record.Label.Ean=="000123","mapped record quantity");mappings[1].Column=4;Check(BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today).Error!=null,"formula error blocks mapped row");

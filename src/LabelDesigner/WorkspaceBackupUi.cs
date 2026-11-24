@@ -12,32 +12,35 @@ namespace EanEtikety {
 
   void ShowWorkspaceBackup() {
    if(workspace==null)return;
-   var service=new WorkspaceBackup(workspace.DirectoryPath);
-   using(var dialog=FeatureForm(WorkspaceBackupTitle,590,340)){
+   var service=new WorkspaceBackup(workspace.DirectoryPath,LocalPrintHistory());
+   using(var dialog=FeatureForm(WorkspaceBackupTitle,650,405)){
     var stack=FeatureStack(dialog);
     var templates=Check(stack,"Šablóny",true);
     var profiles=Check(stack,"Profily médií",true);
+    var batches=Check(stack,"Dávky a uzávierky",false);
+    StackAdd(stack,new Label{AutoSize=true,MaximumSize=new Size(470,0),Text=Loc.T(
+     "Záloha dávok obsahuje identifikátory, počty a uzávierky. Obsah na dotlač sa uchováva v histórii tlače.")});
     var actions=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill};
-    var export=Btn(Loc.T("Exportovať zálohu do ZIPu…"),()=>ExportWorkspace(dialog,service,templates.Checked,profiles.Checked));
+    var export=Btn(Loc.T("Exportovať zálohu do ZIPu…"),()=>ExportWorkspace(dialog,service,templates.Checked,profiles.Checked,batches.Checked));
     var restore=Btn(Loc.T("Otvoriť ZIP na obnovu…"),()=>RestoreWorkspace(dialog,service));
     var close=Btn(Loc.T("Zavrieť"),dialog.Close);
     actions.Controls.Add(export);actions.Controls.Add(restore);actions.Controls.Add(close);
     StackAdd(stack,actions);
-    EventHandler update=delegate{export.Enabled=templates.Checked||profiles.Checked;};
-    templates.CheckedChanged+=update;profiles.CheckedChanged+=update;
+    EventHandler update=delegate{export.Enabled=templates.Checked||profiles.Checked||batches.Checked;};
+    templates.CheckedChanged+=update;profiles.CheckedChanged+=update;batches.CheckedChanged+=update;
     dialog.CancelButton=close;
     ApplyColors(dialog);
     dialog.ShowDialog(this);
    }
   }
 
-  void ExportWorkspace(Form parent,WorkspaceBackup service,bool templates,bool profiles) {
+  void ExportWorkspace(Form parent,WorkspaceBackup service,bool templates,bool profiles,bool batches) {
    using(var pick=new SaveFileDialog{Filter="ZIP (*.zip)|*.zip",DefaultExt="zip",AddExtension=true,FileName="LabelDesigner-workspace.zip"}){
     if(pick.ShowDialog(parent)!=DialogResult.OK)return;
     string path=pick.FileName;
     try{
      string exported;
-     if(RunWork(parent,"workspace-backup","Vytváram zálohu…",()=>{service.Export(path,templates,profiles);return path;},out exported))
+     if(RunWork(parent,"workspace-backup","Vytváram zálohu…",()=>{service.Export(path,templates,profiles,batches);return path;},out exported))
       UiMessageBox.Show(parent,Loc.T("Záloha bola uložená:")+Environment.NewLine+exported,Loc.T(WorkspaceBackupTitle));
     }catch(Exception ex){Error(ex);}
    }
@@ -103,13 +106,20 @@ namespace EanEtikety {
     root.Controls.Add(replace,0,2);
     var items=WorkspaceReviewGrid("workspaceRestoreItems");
     items.AccessibleName=dialog.Text;items.ReadOnly=true;items.VirtualMode=true;
-    foreach(string heading in new[]{"Typ","Názov","Pôvodná tlačiareň","Cieľová tlačiareň","Akcia"})
+    foreach(string heading in new[]{"Typ","Názov","Zo zálohy","Miestne údaje","Akcia"})
      items.Columns.Add(heading,Loc.T(heading));
     items.Columns[0].FillWeight=65;items.Columns[1].FillWeight=145;items.Columns[4].FillWeight=70;
     root.Controls.Add(items,0,3);
 
+    var footer=new FlowLayoutPanel{FlowDirection=FlowDirection.TopDown,WrapContents=false,AutoSize=true,
+     AutoSizeMode=AutoSizeMode.GrowAndShrink,Dock=DockStyle.Fill};
+    root.Controls.Add(footer,0,4);
+    var chooseBatch=new CheckBox{AutoSize=true,Name="workspaceUseBatchBackup",Text=Loc.T("Použiť údaje zo zálohy pre vybranú dávku")};
+    footer.Controls.Add(chooseBatch);
+    var batchDetails=new Label{AutoSize=true,MaximumSize=new Size(560,0),Name="workspaceBatchDetails"};
+    footer.Controls.Add(batchDetails);
     var status=new Label{AutoSize=true,UseMnemonic=false,MaximumSize=new Size(590,0)};
-    root.Controls.Add(status,0,4);
+    footer.Controls.Add(status);
     var actions=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill};
     var restore=Btn(Loc.T("Obnoviť pracovné údaje"),()=>dialog.DialogResult=DialogResult.OK);
     var cancel=Btn(Loc.T("Zrušiť"),dialog.Close);
@@ -117,15 +127,32 @@ namespace EanEtikety {
     dialog.CancelButton=cancel;
 
     WorkspaceRestorePlan candidate=null;
+    var useBackup=new HashSet<string>(StringComparer.Ordinal);
+    Func<WorkspaceRestoreItem> selected=delegate{
+     int index=items.CurrentRow==null?-1:items.CurrentRow.Index;
+     return candidate==null||index<0||index>=candidate.Items.Count?null:candidate.Items[index];
+    };
+    bool showingChoice=false;
+    Action showChoice=delegate{
+     var item=selected();
+     bool selectable=item!=null&&item.BatchConflict&&item.Action!=WorkspaceRestoreAction.Invalid;
+     showingChoice=true;
+     chooseBatch.Visible=selectable;
+     chooseBatch.Checked=selectable&&useBackup.Contains(item.BatchId);
+     showingChoice=false;
+     batchDetails.Text=item==null?"":item.BatchDetails??"";
+     batchDetails.Visible=batchDetails.Text.Length>0;
+    };
     items.CellValueNeeded+=delegate(object sender,DataGridViewCellValueEventArgs e){
      if(candidate==null||e.RowIndex<0||e.RowIndex>=candidate.Items.Count)return;
      var item=candidate.Items[e.RowIndex];
      switch(e.ColumnIndex){
-      case 0:e.Value=Loc.T(item.SourcePrinter==null?"Šablóna":"Profil média");break;
+      case 0:e.Value=Loc.T(item.BatchId!=null?"Dávka":item.SourcePrinter==null?"Šablóna":"Profil média");break;
       case 1:e.Value=item.Name;break;
-      case 2:e.Value=item.SourcePrinter;break;
-      case 3:e.Value=item.TargetPrinter;break;
-      case 4:e.Value=Loc.T(RestoreActionText(item.Action));break;
+      case 2:e.Value=item.BackupBatchSummary??item.SourcePrinter;break;
+      case 3:e.Value=item.LocalBatchSummary??item.TargetPrinter;break;
+      case 4:e.Value=Loc.T(item.BatchId!=null&&item.Action==WorkspaceRestoreAction.Invalid?"Nezlučiteľná dávka":
+       item.BatchId!=null&&item.Action==WorkspaceRestoreAction.Keep&&!item.BatchConflict?"Zhodná dávka":RestoreActionText(item.Action));break;
      }
     };
     Action update=delegate{
@@ -135,28 +162,38 @@ namespace EanEtikety {
       if(target!=null)mapping.Add((string)row.Cells[0].Value,target);
      }
      try{
-      candidate=review.Preview(replace.Checked,mapping);
-      int add=0,overwrite=0,keep=0,invalid=0;
+      candidate=review.Preview(replace.Checked,mapping,useBackup);
+      int add=0,overwrite=0,keep=0,invalid=0,incompatible=0;
       foreach(var item in candidate.Items){
        if(item.Action==WorkspaceRestoreAction.Add)add++;
        else if(item.Action==WorkspaceRestoreAction.Replace)overwrite++;
        else if(item.Action==WorkspaceRestoreAction.Keep)keep++;
-       else invalid++;
+       else if(item.BatchId==null)invalid++;
+       else incompatible++;
       }
       status.Text=string.Format(Loc.T("{0} pridať, {1} nahradiť, {2} ponechať."),add,overwrite,keep);
       if(invalid>0)status.Text+=Environment.NewLine+string.Format(Loc.T("Poškodené šablóny sa pri obnove preskočia: {0}"),invalid);
+      if(incompatible>0)status.Text+=Environment.NewLine+string.Format(Loc.T("Nezlučiteľné dávky sa pri obnove preskočia: {0}"),incompatible);
       restore.Enabled=add+overwrite>0;
      }catch(InvalidDataException ex){
       candidate=null;status.Text=ex.Message;restore.Enabled=false;
      }
      items.RowCount=candidate==null?0:candidate.Items.Count;
      items.Invalidate();
+     showChoice();
     };
     foreach(var grid in new[]{map,items})
      foreach(DataGridViewColumn column in grid.Columns)column.SortMode=DataGridViewColumnSortMode.NotSortable;
     map.CurrentCellDirtyStateChanged+=delegate{if(map.IsCurrentCellDirty)map.CommitEdit(DataGridViewDataErrorContexts.Commit);};
     map.CellValueChanged+=delegate{update();};
     replace.CheckedChanged+=delegate{update();};
+    items.CurrentCellChanged+=delegate{showChoice();};
+    chooseBatch.CheckedChanged+=delegate{
+     var item=selected();
+     if(showingChoice||item==null||!item.BatchConflict||item.Action==WorkspaceRestoreAction.Invalid)return;
+     if(chooseBatch.Checked)useBackup.Add(item.BatchId);else useBackup.Remove(item.BatchId);
+     update();
+    };
     update();
     ApplyColors(dialog);
     return dialog.ShowDialog(parent)==DialogResult.OK?candidate:null;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Xml.Serialization;
@@ -11,7 +12,7 @@ namespace EanEtikety {
  [XmlRoot("LabelDesignerWorkspaceBackup")]
  public sealed class WorkspaceBackupManifest {
   public int Format;
-  public bool Templates,Profiles;
+  public bool Templates,Profiles,Batches;
   public List<UpdateFile> Files=new List<UpdateFile>();
  }
 
@@ -22,6 +23,11 @@ namespace EanEtikety {
   public string SourcePrinter {get;private set;}
   public string TargetPrinter {get;private set;}
   public WorkspaceRestoreAction Action {get;private set;}
+  public string BatchId {get;internal set;}
+  public bool BatchConflict {get;internal set;}
+  public string LocalBatchSummary {get;internal set;}
+  public string BackupBatchSummary {get;internal set;}
+  public string BatchDetails {get;internal set;}
   internal WorkspaceRestoreItem(string name,string sourcePrinter,string targetPrinter,WorkspaceRestoreAction action){
    Name=name;SourcePrinter=sourcePrinter;TargetPrinter=targetPrinter;Action=action;
   }
@@ -32,7 +38,9 @@ namespace EanEtikety {
   internal readonly WorkspaceBackupState Before;
   internal readonly string Root;
   internal readonly List<WorkspaceBackupFile> Writes=new List<WorkspaceBackupFile>();
-  internal WorkspaceRestorePlan(string root,WorkspaceBackupState before){Root=root;Before=before;}
+  internal readonly List<PrintBatchBackup> BatchWrites=new List<PrintBatchBackup>();
+  internal readonly string PrintRoot;
+  internal WorkspaceRestorePlan(string root,string printRoot,WorkspaceBackupState before){Root=root;PrintRoot=printRoot;Before=before;}
  }
 
  public sealed class WorkspaceRestoreResult {
@@ -48,31 +56,32 @@ namespace EanEtikety {
  }
 
  internal sealed class WorkspaceBackupState {
-  public readonly bool Templates,Profiles;
+  public readonly bool Templates,Profiles,Batches;
   public readonly Dictionary<string,WorkspaceBackupFile> Files=new Dictionary<string,WorkspaceBackupFile>(StringComparer.OrdinalIgnoreCase);
   public readonly HashSet<string> InvalidTemplates=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
   public List<PrinterProfile> Media=new List<PrinterProfile>();
-  public WorkspaceBackupState(bool templates,bool profiles){Templates=templates;Profiles=profiles;}
+  public List<PrintBatchBackup> PrintBatches=new List<PrintBatchBackup>();
+  public WorkspaceBackupState(bool templates,bool profiles,bool batches=false){Templates=templates;Profiles=profiles;Batches=batches;}
  }
 
  public sealed class WorkspaceRestoreReview {
-  readonly string root;
+  readonly string root,printRoot;
   readonly WorkspaceBackupState incoming,current;
   public readonly List<string> SourcePrinters=new List<string>();
 
-  internal WorkspaceRestoreReview(string root,WorkspaceBackupState incoming,WorkspaceBackupState current) {
-   this.root=root;this.incoming=incoming;this.current=current;
+  internal WorkspaceRestoreReview(string root,string printRoot,WorkspaceBackupState incoming,WorkspaceBackupState current) {
+   this.root=root;this.printRoot=printRoot;this.incoming=incoming;this.current=current;
    var printers=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
    foreach(var profile in incoming.Media)if(printers.Add(profile.Printer))SourcePrinters.Add(profile.Printer);
    SourcePrinters.Sort(StringComparer.CurrentCultureIgnoreCase);
   }
 
-  public WorkspaceRestorePlan Preview(bool replace,IDictionary<string,string> printerMap=null) {
-   var plan=new WorkspaceRestorePlan(root,current);
+  public WorkspaceRestorePlan Preview(bool replace,IDictionary<string,string> printerMap=null,ISet<string> useBatchBackup=null) {
+   var plan=new WorkspaceRestorePlan(root,printRoot,current);
    var paths=new List<string>(incoming.Files.Keys);
    paths.Sort(StringComparer.OrdinalIgnoreCase);
    foreach(string path in paths) {
-    if(path==WorkspaceBackup.ProfilesFile)continue;
+    if(path==WorkspaceBackup.ProfilesFile||path==WorkspaceBackup.BatchesFile)continue;
     if(incoming.InvalidTemplates.Contains(path)){
      plan.Items.Add(new WorkspaceRestoreItem(Path.GetFileName(path),null,null,WorkspaceRestoreAction.Invalid));
      continue;
@@ -104,6 +113,7 @@ namespace EanEtikety {
     mediaChanges=true;
    }
    if(mediaChanges)plan.Writes.Add(WorkspaceBackup.EncodeProfiles(media));
+   if(incoming.Batches)WorkspaceBatchRestore.Preview(current.PrintBatches,incoming.PrintBatches,useBatchBackup,plan);
    WorkspaceBackup.CheckMergedSize(current,plan.Writes);
    return plan;
   }
@@ -115,25 +125,30 @@ namespace EanEtikety {
 
  public sealed class WorkspaceBackup {
   internal const string ProfilesFile="printers.xml";
+  internal const string BatchesFile="print-batches.xml";
   const string ManifestFile="workspace-backup.xml";
   const string TemplatesPrefix="Templates/";
   const int MaxFiles=512,MaxProfiles=1024,MaxManifest=512*1024,MaxTemplate=64*1024*1024,MaxProfileBytes=4*1024*1024;
+  const int MaxBatchBytes=64000000;
   const long MaxTotal=256L*1024*1024;
   static readonly UTF8Encoding Utf8=new UTF8Encoding(false,true);
   readonly string root;
+  readonly PrintHistoryStore printHistory;
+  string PrintRoot { get { return printHistory==null?null:printHistory.BackupDirectory; } }
 
-  public WorkspaceBackup(string directory){
+  public WorkspaceBackup(string directory,PrintHistoryStore printHistory=null){
    root=Path.GetFullPath(directory).TrimEnd('\\','/');
    if(string.Equals(root,Path.GetPathRoot(root).TrimEnd('\\','/'),StringComparison.OrdinalIgnoreCase))
     throw new ArgumentException("directory");
+   this.printHistory=printHistory;
   }
 
-  public void Export(string file,bool templates,bool profiles) {
-   if(!templates&&!profiles)throw InvalidBackup();
+  public void Export(string file,bool templates,bool profiles,bool batches=false) {
+   if(!templates&&!profiles&&!batches)throw InvalidBackup();
    if(!string.Equals(Path.GetExtension(file),".zip",StringComparison.OrdinalIgnoreCase))
     throw new ArgumentException(Loc.T("Zálohu uložte ako súbor ZIP."));
    using(Lock()){
-    var state=Capture(templates,profiles);
+    var state=Capture(templates,profiles,batches);
     ValidateTemplates(state,false);
     SaveArchive(file,state);
    }
@@ -142,49 +157,61 @@ namespace EanEtikety {
   public WorkspaceRestoreReview Open(string file) {
    var incoming=ReadArchive(file);
    using(Lock()){
-    var current=Capture(incoming.Templates,incoming.Profiles);
+    var current=Capture(incoming.Templates,incoming.Profiles,incoming.Batches);
     foreach(string name in incoming.Files.Keys)
-     if(!incoming.InvalidTemplates.Contains(name)&&Directory.Exists(UpdateFiles.Child(root,name)))throw PathConflict(name);
-    return new WorkspaceRestoreReview(root,incoming,current);
+     if(name!=BatchesFile&&!incoming.InvalidTemplates.Contains(name)&&Directory.Exists(UpdateFiles.Child(root,name)))throw PathConflict(name);
+    return new WorkspaceRestoreReview(root,PrintRoot,incoming,current);
    }
   }
 
   public WorkspaceRestoreResult Restore(WorkspaceRestorePlan plan) {
-   if(plan==null||!string.Equals(root,plan.Root,StringComparison.OrdinalIgnoreCase))throw new ArgumentException("plan");
-   using(Lock()){
-    var current=Capture(plan.Before.Templates,plan.Before.Profiles);
+   if(plan==null||!string.Equals(root,plan.Root,StringComparison.OrdinalIgnoreCase)||
+      !string.Equals(PrintRoot,plan.PrintRoot,StringComparison.OrdinalIgnoreCase))throw new ArgumentException("plan");
+   using(Lock())
+   using(plan.Before.Batches ? printHistory.LockBatchBackup(plan.BatchWrites.Select(batch=>batch.BatchId)) : null){
+    var current=Capture(plan.Before.Templates,plan.Before.Profiles,plan.Before.Batches);
     if(current.Files.Count!=plan.Before.Files.Count)throw Changed();
     foreach(var file in plan.Before.Files.Values)VerifySnapshot(current,file);
-    if(plan.Writes.Count==0)return new WorkspaceRestoreResult(0,null);
+    var writes=new List<WorkspaceRestoreWrite>();
+    foreach(var file in plan.Writes){
+     WorkspaceBackupFile old;
+     current.Files.TryGetValue(file.Name,out old);
+     writes.Add(WorkspaceRestoreWrite.ForWorkspace(root,old,file));
+    }
+    if(plan.BatchWrites.Count>0){
+     var selected=plan.BatchWrites.ToDictionary(batch=>batch.BatchId,StringComparer.Ordinal);
+     var previous=current.PrintBatches.ToDictionary(batch=>batch.BatchId,StringComparer.Ordinal);
+     var combined=current.PrintBatches.Where(item=>!selected.ContainsKey(item.BatchId)).Concat(plan.BatchWrites).ToList();
+     var limitCheck=new List<WorkspaceBackupFile>(plan.Writes) { EncodeBatches(combined) };
+     CheckMergedSize(current,limitCheck);
+     foreach(var batch in plan.BatchWrites){
+      PrintBatchBackup old;
+      previous.TryGetValue(batch.BatchId,out old);
+      printHistory.BatchRestoreWrites(old,batch,writes);
+     }
+    }
+    if(writes.Count==0)return new WorkspaceRestoreResult(0,null);
 
     string backups=root+".backups";
     Directory.CreateDirectory(backups);
     UpdateFiles.NoReparse(backups);
     string checkpoint=Path.Combine(backups,"before-restore-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss",CultureInfo.InvariantCulture)+"-"+Guid.NewGuid().ToString("N")+".zip");
     SaveArchive(checkpoint,current);
-    WorkContext.Report("Obnovujem pracovné údaje…",0,plan.Writes.Count);
-    var completed=new List<WorkspaceBackupFile>(plan.Writes.Count);
+    WorkContext.Report("Obnovujem pracovné údaje…",0,writes.Count);
+    var completed=new List<WorkspaceRestoreWrite>(writes.Count);
     // A cancellation before the commit leaves the destination untouched.
     // Once writes start, finish them or roll them back as a single operation.
     using(new WorkContext().Enter()){
      try{
-      foreach(var file in plan.Writes){
-       WorkspaceBackupFile old;
-       current.Files.TryGetValue(file.Name,out old);
-       VerifyDestination(file.Name,old);
-       WriteFile(file);
+      foreach(var file in writes){
+       file.Apply();
        completed.Add(file);
       }
      }catch(Exception failure){
       var rollback=new List<Exception>();
       for(int i=completed.Count-1;i>=0;i--){
        var file=completed[i];
-       try{
-        VerifyDestination(file.Name,file);
-        WorkspaceBackupFile old;
-        if(current.Files.TryGetValue(file.Name,out old))WriteFile(old);
-        else File.Delete(UpdateFiles.Child(root,file.Name));
-       }catch(Exception ex){rollback.Add(ex);}
+       try{file.RollBack();}catch(Exception ex){rollback.Add(ex);}
       }
       if(rollback.Count>0){
        rollback.Insert(0,failure);
@@ -198,9 +225,10 @@ namespace EanEtikety {
    }
   }
 
-  WorkspaceBackupState Capture(bool templates,bool profiles) {
-   UpdateFiles.NoReparse(root);
-   var state=new WorkspaceBackupState(templates,profiles);
+  WorkspaceBackupState Capture(bool templates,bool profiles,bool batches) {
+   if(File.Exists(root))throw PathConflict(root);
+   if(Directory.Exists(root))UpdateFiles.NoReparse(root);
+   var state=new WorkspaceBackupState(templates,profiles,batches);
    long total=0;
    string library=UpdateFiles.Child(root,"Templates");
    if(templates&&File.Exists(library))throw PathConflict("Templates");
@@ -221,10 +249,17 @@ namespace EanEtikety {
    if(profiles&&Directory.Exists(profilePath))throw PathConflict(ProfilesFile);
    if(profiles&&File.Exists(profilePath)){
     if(state.Files.Count>=MaxFiles)throw InvalidBackup();
-    CheckTotal(total,new FileInfo(profilePath).Length);
+    total=CheckTotal(total,new FileInfo(profilePath).Length);
     var file=ReadFile(profilePath,ProfilesFile,MaxProfileBytes);
     Add(state,file);
     state.Media=ReadProfiles(file.Bytes);
+   }
+   if(batches){
+    if(printHistory==null)throw new InvalidOperationException(Loc.T("Úložisko dávok nie je dostupné."));
+    state.PrintBatches=printHistory.CaptureBatchBackup();
+    var batchFile=EncodeBatches(state.PrintBatches);
+    CheckTotal(total,batchFile.Bytes.LongLength);
+    Add(state,batchFile);
    }
    return state;
   }
@@ -250,9 +285,10 @@ namespace EanEtikety {
     WorkspaceBackupManifest manifest;
     using(var stream=metadata.Open())
      manifest=ProjectXml.Decode<WorkspaceBackupManifest>(Utf8.GetString(ReadBytes(stream,metadata.Length,MaxManifest)));
-    if(manifest.Format!=1||(!manifest.Templates&&!manifest.Profiles)||manifest.Files==null||
+    if((manifest.Format!=1&&manifest.Format!=2)||(manifest.Format==1&&manifest.Batches)||(manifest.Format==2&&!manifest.Batches)||
+       (!manifest.Templates&&!manifest.Profiles&&!manifest.Batches)||manifest.Files==null||
        manifest.Files.Count!=entries.Count-1)throw InvalidBackup();
-    var state=new WorkspaceBackupState(manifest.Templates,manifest.Profiles);
+    var state=new WorkspaceBackupState(manifest.Templates,manifest.Profiles,manifest.Batches);
     long total=0;
     for(int i=0;i<manifest.Files.Count;i++){
      WorkContext.Report("Overujem zálohu…",i,manifest.Files.Count);
@@ -263,13 +299,22 @@ namespace EanEtikety {
      if(!entries.TryGetValue(item.Path,out entry)||entry.FullName!=item.Path||entry.Length!=item.Size)throw InvalidBackup();
      total=CheckTotal(total,item.Size);
      using(var input=entry.Open()){
-      var blob=new WorkspaceBackupFile(item.Path,ReadBytes(input,item.Size,item.Path==ProfilesFile?MaxProfileBytes:MaxTemplate));
+      int limit=item.Path==ProfilesFile?MaxProfileBytes:item.Path==BatchesFile?MaxBatchBytes:MaxTemplate;
+      var blob=new WorkspaceBackupFile(item.Path,ReadBytes(input,item.Size,limit));
       if(blob.Hash!=item.Sha256)throw InvalidBackup();
       Add(state,blob);
      }
     }
     WorkspaceBackupFile profiles;
     if(state.Files.TryGetValue(ProfilesFile,out profiles))state.Media=ReadProfiles(profiles.Bytes);
+    if(state.Batches){
+     WorkspaceBackupFile batches;
+     if(!state.Files.TryGetValue(BatchesFile,out batches))throw InvalidBackup();
+     var collection=ProjectXml.Decode<PrintBatchBackupCollection>(Utf8.GetString(batches.Bytes));
+     if(collection==null)throw InvalidBackup();
+     collection.Validate(true);
+     state.PrintBatches=collection.Batches;
+    }
    ValidateTemplates(state,true);
     return state;
    }
@@ -278,6 +323,7 @@ namespace EanEtikety {
   static void ValidateName(string name,WorkspaceBackupState state) {
    UpdateFiles.SafeName(name);
    if(state.Profiles&&name==ProfilesFile)return;
+   if(state.Batches&&name==BatchesFile)return;
    if(!state.Templates||!name.StartsWith(TemplatesPrefix,StringComparison.Ordinal)||
       name.IndexOf('/',TemplatesPrefix.Length)>=0||!name.EndsWith(".ean.xml",StringComparison.OrdinalIgnoreCase))throw InvalidBackup();
   }
@@ -290,7 +336,7 @@ namespace EanEtikety {
   static void ValidateTemplates(WorkspaceBackupState state,bool allowInvalid) {
    foreach(var file in state.Files.Values){
     WorkContext.Check();
-    if(file.Name==ProfilesFile)continue;
+    if(file.Name==ProfilesFile||file.Name==BatchesFile)continue;
     try{using(var memory=new MemoryStream(file.Bytes,false))using(var stream=new CheckedReadStream(memory))Engine.Load(stream);}
     catch(OperationCanceledException){throw;}
     catch(Exception ex){
@@ -333,7 +379,7 @@ namespace EanEtikety {
   }
 
   static void SaveArchive(string path,WorkspaceBackupState state) {
-   var manifest=new WorkspaceBackupManifest{Format=1,Templates=state.Templates,Profiles=state.Profiles};
+   var manifest=new WorkspaceBackupManifest{Format=state.Batches?2:1,Templates=state.Templates,Profiles=state.Profiles,Batches=state.Batches};
    var names=new List<string>(state.Files.Keys);
    names.Sort(StringComparer.Ordinal);
    long total=0;
@@ -392,37 +438,23 @@ namespace EanEtikety {
    if(string.IsNullOrWhiteSpace(name)||name.Length>512||name.IndexOf('\0')>=0)throw InvalidBackup();
   }
 
-  void VerifyDestination(string name,WorkspaceBackupFile expected) {
-   string path=UpdateFiles.Child(root,name);
-   string parent=Path.GetDirectoryName(path);
-   if(Directory.Exists(parent))UpdateFiles.NoReparseParents(root,path);
-   if(Directory.Exists(path)||File.Exists(path)!=(expected!=null))throw Changed();
-   if(expected!=null&&(new FileInfo(path).Length!=expected.Bytes.LongLength||UpdateFiles.Hash(path)!=expected.Hash))throw Changed();
-  }
-
   static void VerifySnapshot(WorkspaceBackupState state,WorkspaceBackupFile expected) {
    WorkspaceBackupFile file;
    if(!state.Files.TryGetValue(expected.Name,out file)||file.Hash!=expected.Hash)throw Changed();
   }
 
-  string EnsureDirectory(string name){
-   string directory=UpdateFiles.Child(root,name);
-   Directory.CreateDirectory(directory);
-   UpdateFiles.NoReparse(directory);
-   return directory;
-  }
-
-  void WriteFile(WorkspaceBackupFile file) {
-   if(file.Name.StartsWith(TemplatesPrefix,StringComparison.Ordinal))EnsureDirectory("Templates");
-   string path=UpdateFiles.Child(root,file.Name);
-   UpdateFiles.NoReparseParents(root,path);
-   AtomicOutput.Save(path,temp=>File.WriteAllBytes(temp,file.Bytes));
+  static WorkspaceBackupFile EncodeBatches(List<PrintBatchBackup> batches) {
+   var collection=new PrintBatchBackupCollection{Batches=batches};
+   collection.Validate(true);
+   var bytes=Utf8.GetBytes(ProjectXml.Encode(collection));
+   if(bytes.Length>MaxBatchBytes)throw InvalidBackup();
+   return new WorkspaceBackupFile(BatchesFile,bytes);
   }
 
   internal static IDisposable LockDirectory(string directory){return new WorkspaceBackupLease(Path.GetFullPath(directory));}
   IDisposable Lock(){return LockDirectory(root);}
   static InvalidDataException InvalidBackup(){return new InvalidDataException(Loc.T("Neplatná alebo príliš veľká záloha pracovných údajov."));}
-  static IOException Changed(){return new IOException(Loc.T("Pracovné údaje sa od náhľadu zmenili. Otvorte zálohu znova."));}
+  internal static IOException Changed(){return new IOException(Loc.T("Pracovné údaje sa od náhľadu zmenili. Otvorte zálohu znova."));}
   static IOException PathConflict(string path){return new IOException(Loc.T("Cestu pracovných údajov už používa iná položka:")+" "+path);}
 
   sealed class WorkspaceBackupLease:IDisposable {

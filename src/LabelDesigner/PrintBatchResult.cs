@@ -58,7 +58,7 @@ namespace EanEtikety {
  }
 
  public sealed partial class PrintHistoryStore {
-  const int MaxResultBytes = 2 * 1024 * 1024;
+  internal const int MaxResultBytes = 2 * 1024 * 1024;
   const string ResultSuffix = ".result.xml";
 
   static long PlannedTotal(PrintHistoryEntry entry) { return (long)entry.Labels * entry.Repetitions; }
