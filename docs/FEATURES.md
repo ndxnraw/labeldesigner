@@ -27,6 +27,9 @@ Názov produktu je naďalej Pre-release.
   zobraziť a exportovať do CSV aj po prečistení histórie tlače.
 - **Prehľad dávok** spája pokusy o tlač, dotlače a uzávierky trvalým ID
   dávky. Potvrdené množstvá ostávajú dostupné aj po prečistení histórie.
+- **Rýchle vyplnenie a tlač** zo šablóny otvorí vybrané texty a kódy
+  v jednom formulári. Po kontrole údajov a zadaní množstva pripraví tlač
+  s rozložením uloženej šablóny.
 - **Dotlač prerušenej dávky** pripraví z histórie zvyšné strany jednej kópie
   alebo vybrané etikety v pôvodných pozíciách. Nový pokus odkazuje na zdroj.
   História uchová posledný známy stav aj čas zistenia, vrátane informácie,

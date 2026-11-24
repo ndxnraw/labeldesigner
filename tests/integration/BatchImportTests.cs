@@ -104,6 +104,56 @@ class BatchImportTests {
   Check(sparse.Issues.Count==0&&sparse.Unchanged==1&&sparse.Added==2&&sparse.Removed==0,
    "sparse worksheet gaps are ignored and line endings in label text do not create a difference");
  }
+ static void QuickTemplate(string dir){
+  var label=LabelSettings.Default();
+  label.QuickPrintFields.Add(0);
+  label.QuickPrintFields.Add(-1);
+  var input=new Dictionary<int,string>{{0,"Šarža 24"},{-1,"8580000000016"}};
+  var path=Path.Combine(dir,"quick-template.ean.xml");
+  Engine.Save(path,label);
+  var saved=Engine.Load(path);
+  string before=ProjectXml.Encode(saved);
+  var draft=QuickPrint.Prepare(saved,input,DateTime.Today);
+  Check(draft.CanPrint&&draft.Label.Texts[0].Text=="Šarža 24"&&draft.Label.Texts[0].Width==saved.Texts[0].Width&&
+   draft.Label.Texts[0].Size==saved.Texts[0].Size,"quick print applies content and preserves template geometry and font");
+  var output=draft.CreatePlan(20);
+  Check(output.Placements.Count==20&&output.Placements[19].Label.Texts[0].Text=="Šarža 24"&&
+   ProjectXml.Encode(saved)==before,"quantity is placed in output without changing the template");
+  input[-1]="8580000000010";
+  Check(QuickPrint.Prepare(saved,input,DateTime.Today).Issues.Exists(issue=>issue.Element==-1&&issue.Blocking),
+   "wrong EAN check digit is attached to its field");
+  input[-1]="8580000000016";
+  input[0]=new string('W',500);
+  Check(QuickPrint.Prepare(saved,input,DateTime.Today).Issues.Exists(issue=>issue.Element==0&&issue.Blocking),
+   "text that will be clipped blocks printing at the affected field");
+  input[0]="LOT-{A}";
+  Check(QuickPrint.Prepare(saved,input,DateTime.Today).Label.Texts[0].Text=="LOT-{A}",
+   "values typed in the form are literal");
+  saved.Symbols.Add(new SymbolItem{X=39,Y=2,Width=16,Height=16,Matrix=new MatrixContent{Type="QR",Data="original"}});
+  input[-3]="unauthorized change";
+  Check(QuickPrint.Prepare(saved,input,DateTime.Today).Label.Symbols[0].Matrix.Data=="original",
+   "only selected fields can change");
+  saved.QuickPrintFields.Add(-3);
+  input[-3]="LOT-24";
+  Check(QuickPrint.Prepare(saved,input,DateTime.Today).Label.Symbols[0].Matrix.Data=="LOT-24","a selected matrix payload can be filled");
+  saved.Texts.Add(new TextItem{Text="Second"});
+  saved.QuickPrintFields.Add(1);
+  Elements.Remove(saved,new List<int>{0});
+  Check(saved.QuickPrintFields.Count==3&&saved.QuickPrintFields.Contains(0)&&saved.QuickPrintFields.Contains(-1)&&saved.QuickPrintFields.Contains(-3),
+   "deleting an element remaps selected fields");
+  var narrow=LabelSettings.Default();
+  narrow.Texts[0].Width=1;narrow.Texts[0].Height=20;narrow.Texts[0].Size=24;
+  narrow.QuickPrintFields.Add(0);
+  Check(QuickPrint.Prepare(narrow,new Dictionary<int,string>{{0,"W"}},DateTime.Today).Issues.Exists(issue=>issue.Element==0&&issue.Blocking),
+   "a single wide character is rejected even when it fits vertically");
+  var gs1=LabelSettings.Default();
+  gs1.Kind=128;gs1.Gs1Mode=true;
+  gs1.ApplicationIdentifiers.Add(new AiValue{AI="10",Data="original"});
+  gs1.QuickPrintFields.Add(-1);
+  var filled=QuickPrint.Prepare(gs1,new Dictionary<int,string>{{-1,"(10)LOT(A)\r\n(17)261231"}},DateTime.Today);
+  Check(filled.CanPrint&&filled.Label.ApplicationIdentifiers[0].Data=="LOT(A)"&&filled.Label.ApplicationIdentifiers[1].Data=="261231",
+   "GS1 uses one AI per line and preserves parentheses within the payload");
+ }
  static void PortableBatchBackup(string dir){
   var source=new PrintHistoryStore(Path.Combine(dir,"src-print"));
   var target=new PrintHistoryStore(Path.Combine(dir,"dst-print"));
@@ -359,7 +409,7 @@ class BatchImportTests {
   catch(InvalidDataException ex){Check(ex.Message.Contains("4"),"CSV syntax error cites the source line");}
  }
  static int count;static void Check(bool b,string message){count++;if(!b)throw new Exception(message);}static void Entry(ZipArchive z,string name,string content){using(var w=new StreamWriter(z.CreateEntry(name).Open()))w.Write(content);}
- [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{SavedReferences(dir);Comparison();PortableBackup(dir);PortableBatchBackup(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
+ [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{SavedReferences(dir);Comparison();PortableBackup(dir);PortableBatchBackup(dir);QuickTemplate(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
  Entry(z,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Products' r:id='r1'/><sheet name='Other' r:id='r2'/></sheets></workbook>");Entry(z,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");Entry(z,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");Entry(z,"xl/sharedStrings.xml","<sst><si><t>Žltý čaj</t></si></sst>");Entry(z,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' s='1'><v>123</v></c><c r='B1' t='s'><v>0</v></c><c r='C1' s='2'><v>45292</v></c><c r='D1'><f>1+1</f><v>2</v></c><c r='E1'><f>1+1</f></c></row><row r='3'><c r='A3' t='inlineStr'><is><t>000045</t></is></c></row></sheetData></worksheet>");Entry(z,"xl/worksheets/sheet2.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other sheet</t></is></c></row></sheetData></worksheet>");}
  var tables=BatchData.Xlsx(file);Check(tables.Count==2&&tables[1].Name=="Other","sheet selection");Check(tables[0].Rows[0][0]=="000123"&&tables[0].Rows[2][0]=="000045","formatted and text leading zeros");Check(tables[0].Rows[0][1]=="Žltý čaj","shared strings unicode");Check(tables[0].Rows[0][2]=="2024-01-01","Excel numeric date");Check(tables[0].Rows[0][3]=="2"&&tables[0].Rows[0][4].StartsWith("!ERROR"),"formula cached result versus error");Check(tables[0].Rows[1].Length==0,"sparse row number retained");
  var persisted=LabelSettings.Default();persisted.Texts.Add(new TextItem{Text="Second"});persisted.Batch.Bindings.Add(new ColumnBinding{Target="text:1",Column=3});persisted=ProjectXml.Clone(persisted);Check(persisted.Batch.Bindings[0].Column==3,"batch mapping project roundtrip");Elements.Remove(persisted,new List<int>{0});Check(persisted.Batch.Bindings[0].Target=="text:0","mapping follows surviving element after deletion");var label=LabelSettings.Default();label.Kind=128;var mappings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}};var record=BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today);Check(record.Error==null&&record.Count==2&&record.Label.Ean=="000123","mapped record quantity");mappings[1].Column=4;Check(BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today).Error!=null,"formula error blocks mapped row");

@@ -45,6 +45,9 @@ Batch backup tests restore on an empty installation, compare closure CSV IDs,
 repeat the import, exercise per-batch choices in the dialog and reject stale
 previews. The mixed restore case locks a live result file and verifies rollback
 of the template written before that failure.
+Quick template printing tests cover selection persistence and remapping,
+field errors, invariant layout, literal values and the real preview handoff
+with exactly 20 labels. The tests leave the saved template unchanged.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.

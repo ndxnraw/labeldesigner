@@ -34,10 +34,7 @@ namespace EanEtikety {
    recoveredCopy = copy;
    recoveryRecorded = recorded;
    authorizeRecovery = authorize;
-   copies.Value = 1;
-   copies.Maximum = 1;
-   copies.Enabled = false;
-   UpdateOutputSummary();
+   LimitToSingleRun();
   }
 
   void AddHistoryOption(TableLayoutPanel fields) {

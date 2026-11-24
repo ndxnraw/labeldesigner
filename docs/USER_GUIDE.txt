@@ -114,6 +114,20 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+RÝCHLE VYPLNENIE A TLAČ ŠABLÓNY
+Otvorte Nástroje → Projekt → Šablóny a nedávne projekty. Vyberte šablónu
+a cez Upraviteľné polia šablóny… označte texty alebo kódy, ktoré sa majú
+vypĺňať pri tlači. Z aktuálneho návrhu môžete polia vybrať aj v ponuke
+Projekt a potom návrh uložiť ako šablónu.
+
+Pre vybranú šablónu použite Rýchle vyplnenie a tlač…. Zadajte hodnoty
+a počet etikiet. Chyby vybraných údajov sa zobrazia pri poliach.
+Počet zadajte ako celé číslo od 1 do 10000. Pri GS1-128 použite
+samostatný riadok pre každý identifikátor v tvare (AI)hodnota.
+Formulár zobrazuje náhľad etikety. Pokračovať na tlač… otvorí tlačový
+náhľad s rozložením na médiu a zadaným počtom kusov. Uložená šablóna
+si ponechá svoje pôvodné údaje.
+
 PRENOSNÁ ZÁLOHA ŠABLÓN, PROFILOV A DÁVOK
 Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
 profily médií, dávky s uzávierkami alebo ich kombináciu a použite

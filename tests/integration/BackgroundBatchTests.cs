@@ -43,7 +43,7 @@ class BackgroundBatchTests {
    PresetUi(controller,form,owner);
    using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,form.ClientRectangle);image.Save(Path.Combine(dir,"batch-background.png"));}completed=true;
   }catch(Exception ex){failure=ex;}finally{form.Close();}break;}};timer.Start();Call(owner,"ShowBatch");}
-  if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");WorkspaceBackupUi(owner);WorkspaceBatchBackupUi(owner);Call(owner,"Apply",LabelSettings.Default());owner.Close();
+  if(failure!=null)throw failure;Check(completed,"batch window exercised with background work");WorkspaceBackupUi(owner);WorkspaceBatchBackupUi(owner);QuickPrintUi(owner);Call(owner,"Apply",LabelSettings.Default());owner.Close();
  }}
  static void WorkspaceBackupUi(MainForm owner){
   string source=Path.Combine(dir,"profile-export"),target=Path.Combine(dir,"profile-import"),zip=Path.Combine(dir,"profiles.zip");
@@ -114,6 +114,52 @@ class BackgroundBatchTests {
    "confirming batch preview returns the selected plan without writing yet");
   Check(restore.Restore(selected).Applied==1&&target.OpenBatchResult(attempt.Id).ConfirmedTotal==1,
    "applying the preview restores the chosen batch count once");
+ }
+ static void QuickPrintUi(MainForm owner){
+  string path=Path.Combine(Field<WorkspaceStore>(owner,"workspace").TemplatesPath,"Quick proof.ean.xml");
+  Engine.Save(path,LabelSettings.Default());
+  VisitDialog("Upraviteľné polia šablóny…",()=>Call(owner,"ConfigureLibraryQuickPrint",owner,path),window=>{
+   var fields=(CheckedListBox)window.Controls.Find("quickPrintFieldChoices",true)[0];
+   fields.SetItemChecked(0,true);fields.SetItemChecked(1,true);
+   Button(window,Loc.T("Použiť")).PerformClick();
+  });
+  var template=Engine.Load(path);
+  Check(template.QuickPrintFields.Count==2,"library saves editable field selection");
+  string before=File.ReadAllText(path);
+  VisitDialog("Rýchle vyplnenie a tlač…",()=>Call(owner,"ShowQuickPrint",owner,template),window=>{
+   var text=(TextBox)window.Controls.Find("quickPrintValue0",true)[0];
+   var barcode=(TextBox)window.Controls.Find("quickPrintValue-1",true)[0];
+   var error=(Label)window.Controls.Find("quickPrintError-1",true)[0];
+   var preview=(PictureBox)window.Controls.Find("quickPrintPreview",true)[0];
+   var next=(Button)window.Controls.Find("quickPrintContinue",true)[0];
+   var timer=Stopwatch.StartNew();
+   while(!next.Enabled&&timer.ElapsedMilliseconds<5000){Application.DoEvents();System.Threading.Thread.Sleep(10);}
+   Check(next.Enabled&&preview.Image!=null,"form opens with rendered label");
+   barcode.Text="8580000000010";
+   timer.Restart();
+   while(!error.Visible&&timer.ElapsedMilliseconds<3000){Application.DoEvents();System.Threading.Thread.Sleep(10);}
+   Check(error.Visible&&!next.Enabled&&preview.Image!=null,"invalid barcode prevents print while valid artwork remains visible");
+   barcode.Text="8580000000016";
+   text.Text="LOT-24";
+   var count=(TextBox)window.Controls.Find("quickPrintQuantity",true)[0];
+   count.Text="20";
+   timer.Restart();
+   while(!next.Enabled&&timer.ElapsedMilliseconds<3000){Application.DoEvents();System.Threading.Thread.Sleep(10);}
+   Check(next.Enabled&&!error.Visible&&preview.Image!=null,"correcting data refreshes the preview");
+   count.Text="20.5";
+   Check(!next.Enabled&&window.Controls.Find("quickPrintQuantityError",true)[0].Visible,"fractional input cannot silently change the label quantity");
+   count.Text="20";
+   VisitDialog("ND LabelDesigner – "+Loc.T("Tlačiť"),()=>next.PerformClick(),printing=>{
+    var panel=(PrintPanel)printing.Controls[0];
+    var output=Field<OutputPlan>(panel,"outputPlan");
+    var repeats=Field<NumericUpDown>(panel,"copies");
+    Check(output.Placements.Count==20&&output.Placements[0].Label.Texts[0].Text=="LOT-24"&&repeats.Maximum==1,
+     "printing opens with exactly the requested labels and one run");
+    printing.Close();
+   });
+   window.Close();
+  });
+  Check(File.ReadAllText(path)==before,"printing does not save the edited values into the template");
  }
  static void VisitDialog(string title,Action show,Action<Form> inspect){
   Exception failure=null;bool visited=false;

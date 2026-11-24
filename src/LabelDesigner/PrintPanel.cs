@@ -133,7 +133,7 @@ public partial class PrintPanel:UserControl {
    else if(result.RequiresReview){info.Text=Loc.T("Nastavenia alebo upozornenia sa zmenili. Skontrolujte výstup znova.");print.Enabled=currentReport!=null&&!currentReport.Blocking;}
    else if(result.Cancelled){info.Text=Loc.T("Tlač bola zrušená.");print.Enabled=true;}else if(result.Sent){info.Text=Loc.T("Úloha bola odoslaná do tlačového systému Windows.");print.Enabled=true;}
    else{preview.SetPage(result.Image,result.Paper,result.Printable);result.Image=null;preview.Page=(int)page.Value-1;paperInfo.Text=printDiagnostics==null?"":printDiagnostics.Summary();info.Text=warnings.Length==0?Loc.T("Pripravené"):Loc.T(currentReport!=null&&currentReport.Blocking?"Výstup blokujú chyby":"Skontrolujte upozornenia")+" ("+warnings.Length+")";info.AccessibleDescription=string.Join("\r\n",warnings);printerTip.SetToolTip(info,info.AccessibleDescription);print.Enabled=currentReport!=null&&!currentReport.Blocking;PreviewBuilds++;}
-  }finally{updating=false;sending=false;busy=false;printers.Enabled=papers.Enabled=landscape.Enabled=mediaProfiles.Enabled=ignoreDriverMargins.Enabled=offsetX.Enabled=offsetY.Enabled=scaleX.Enabled=scaleY.Enabled=!calibrationTargetMode;copies.Enabled=!calibrationTargetMode&&recoverySourceId==null;driverProperties.Enabled=!calibrationTargetMode;UpdateZebraEnabled();}if(result.HistoryWarning!=null)info.Text+="  "+result.HistoryWarning;if(result.Trace!=null&&result.Error==null&&!result.Sent&&!result.Cancelled&&!result.RequiresReview)LastPreviewPerformance=new PreviewPerformance(result.Trace);if(PreviewReady!=null)PreviewReady(this,EventArgs.Empty);
+  }finally{updating=false;sending=false;busy=false;printers.Enabled=papers.Enabled=landscape.Enabled=mediaProfiles.Enabled=ignoreDriverMargins.Enabled=offsetX.Enabled=offsetY.Enabled=scaleX.Enabled=scaleY.Enabled=!calibrationTargetMode;copies.Enabled=!calibrationTargetMode&&copies.Maximum>1;driverProperties.Enabled=!calibrationTargetMode;UpdateZebraEnabled();}if(result.HistoryWarning!=null)info.Text+="  "+result.HistoryWarning;if(result.Trace!=null&&result.Error==null&&!result.Sent&&!result.Cancelled&&!result.RequiresReview)LastPreviewPerformance=new PreviewPerformance(result.Trace);if(PreviewReady!=null)PreviewReady(this,EventArgs.Empty);
  }
  public bool ConfigurePrinter(Func<PrintDialog,DialogResult> show){if(selectedPrinter==null||sending||busy||calibrationTargetMode)return false;try{using(var dialog=new PrintDialog{PrinterSettings=(PrinterSettings)selectedPrinter.Clone(),UseEXDialog=true,AllowSomePages=false,AllowSelection=false,AllowCurrentPage=false,AllowPrintToFile=false}){dialog.PrinterSettings.DefaultPageSettings.PaperSize=selectedPage.PaperSize;dialog.PrinterSettings.DefaultPageSettings.Landscape=selectedPage.Landscape;dialog.PrinterSettings.Copies=(short)copies.Value;if(show(dialog)!=DialogResult.OK)return false;string previousPrinter=selectedPrinter.PrinterName;InvalidatePreviewCache();selectedPrinter=(PrinterSettings)dialog.PrinterSettings.Clone();selectedPage=(PageSettings)dialog.PrinterSettings.DefaultPageSettings.Clone();if(!string.Equals(previousPrinter,selectedPrinter.PrinterName,StringComparison.OrdinalIgnoreCase)){updating=true;try{ApplyZebra(new ZebraSettings{Dpi=snapshot.Dpi});}finally{updating=false;}}knownPapers=null;copies.Value=Math.Min(copies.Maximum,Math.Max(1,(int)selectedPrinter.Copies));StartRequest(false,false);return true;}}catch(Exception ex){info.Text=ex.Message;return false;}}
  void UpdateOutputSummary(){
@@ -162,6 +162,12 @@ public partial class PrintPanel:UserControl {
   approvedRecovery=recovery;
   approvedFingerprint=report.Fingerprint;
   StartRequest(false,true);
+ }
+ internal void LimitToSingleRun(){
+  copies.Value=1;
+  copies.Maximum=1;
+  copies.Enabled=false;
+  UpdateOutputSummary();
  }
  void Submit(){if(!Ready||sending)return;Review(true);}
  void Back(){if(sending){info.Text=Loc.T("Odosielanie už prebieha. Úlohu môžete zrušiť vo fronte Windows.");}if(BackRequested!=null)BackRequested(this,EventArgs.Empty);}

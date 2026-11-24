@@ -37,6 +37,19 @@ public partial class MainForm {
   }}catch(Exception ex){Error(ex);return;}
   refresh();
   var row=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(row,0,2);
+  var quick=Btn(Loc.T("Rýchle vyplnenie a tlač…"),delegate{
+   if(list.SelectedItems.Count==0)return;
+   try{ShowQuickPrint(f,Engine.Load((string)list.SelectedItems[0].Tag));}catch(Exception ex){Error(ex);}
+  });
+  var fields=Btn(Loc.T("Upraviteľné polia šablóny…"),delegate{
+   if(list.SelectedItems.Count==0)return;
+   try{ConfigureLibraryQuickPrint(f,(string)list.SelectedItems[0].Tag);}catch(Exception ex){Error(ex);}
+  });
+  quick.Name="openTemplateQuickPrint";fields.Name="configureTemplateQuickPrint";
+  Action updateQuick=()=>quick.Enabled=fields.Enabled=list.SelectedItems.Count>0;
+  list.SelectedIndexChanged+=delegate{updateQuick();};
+  updateQuick();
+  row.Controls.Add(quick);row.Controls.Add(fields);
   row.Controls.Add(Btn(Loc.T("Otvoriť šablónu"),delegate{if(list.SelectedItems.Count==0||!CanDiscard())return;try{var s=Engine.Load((string)list.SelectedItems[0].Tag);Apply(s);settingsPath=null;ResetHistory(false);Changed(this,EventArgs.Empty);f.Close();}catch(Exception ex){Error(ex);}}));
   row.Controls.Add(Btn(Loc.T("Uložiť ako šablónu"),delegate{using(var name=FeatureForm("Názov šablóny",400,220)){var p=FeatureStack(name);var input=Input(p,"Názov šablóny",Loc.T("Moja etiketa"));AddAccept(name,p,delegate{if(string.IsNullOrWhiteSpace(input.Text)||input.Text.IndexOfAny(Path.GetInvalidFileNameChars())>=0)throw new Exception(Loc.T("Neplatný názov"));var path=Path.Combine(workspace.TemplatesPath,input.Text.Trim()+".ean.xml");var s=Read();using(WorkspaceBackup.LockDirectory(workspace.DirectoryPath)){if(File.Exists(path))throw new Exception(Loc.T("Názov už existuje"));Engine.Save(path,s);}refresh();});name.ShowDialog(f);}}));
   row.Controls.Add(Btn(Loc.T("Odstrániť šablónu"),delegate{if(list.SelectedItems.Count>0&&UiMessageBox.Show(f,Loc.T("Odstrániť šablónu?"),Loc.T("Šablóny"),MessageBoxButtons.YesNo,MessageBoxIcon.Question)==DialogResult.Yes){try{using(WorkspaceBackup.LockDirectory(workspace.DirectoryPath))File.Delete((string)list.SelectedItems[0].Tag);refresh();}catch(Exception ex){Error(ex);}}}));

@@ -981,3 +981,16 @@ Riadok {0}: miestne {1}, zo zálohy {2}	Row {0}: local {1}, backup {2}	Řádek {
 Pri nahradení zostane miestna verzia uzávierky v zálohe pred obnovou.	When replaced, the local closure will be kept in the pre-restore backup.	Při nahrazení zůstane místní verze uzávěrky v záloze před obnovou.	Csere esetén a helyi lezárás megmarad a visszaállítás előtti mentésben.
 Uložená uzávierka je dostupná. Súhrn dávky nemožno z prítomných pokusov overiť.	The saved closure is available. The existing attempts cannot verify the batch summary.	Uložená uzávěrka je dostupná. Souhrn dávky nelze z přítomných pokusů ověřit.	A mentett lezárás elérhető. A meglévő kísérletekből a köteg összesítése nem ellenőrizhető.
 Zostatok po zlúčení: {0}. Zostatok v uloženej uzávierke: {1}. Údaje sa líšia.	Remaining after merge: {0}. Remaining in the saved closure: {1}. The underlying data differ.	Zůstatek po sloučení: {0}. Zůstatek v uložené uzávěrce: {1}. Údaje se liší.	Fennmaradó mennyiség összevonás után: {0}. A mentett lezárásban: {1}. Az adatok eltérnek.
+Rýchle vyplnenie a tlač…	Quick fill and print…	Rychlé vyplnění a tisk…	Gyors kitöltés és nyomtatás…
+Upraviteľné polia šablóny…	Editable template fields…	Upravitelná pole šablony…	A sablon szerkeszthető mezői…
+Označte údaje, ktoré sa budú meniť pri rýchlej tlači.	Select the values that can change during quick printing.	Označte údaje, které se budou měnit při rychlém tisku.	Jelölje ki a gyors nyomtatáskor módosítható adatokat.
+Šablóna sa medzitým zmenila. Otvorte ju znova.	The template changed. Open it again.	Šablona se mezitím změnila. Otevřete ji znovu.	A sablon megváltozott. Nyissa meg újra.
+Šablóna nemá vybrané upraviteľné polia.	The template has no selected editable fields.	Šablona nemá vybraná upravitelná pole.	A sablonban nincs kijelölt szerkeszthető mező.
+Pokračovať na tlač…	Continue to print…	Pokračovat k tisku…	Tovább a nyomtatáshoz…
+Opravte údaje pred tlačou.	Correct the data before printing.	Před tiskem opravte údaje.	Nyomtatás előtt javítsa az adatokat.
+Upozornenia skontrolujte v tlačovom náhľade.	Review warnings in the print preview.	Zkontrolujte upozornění v náhledu tisku.	Ellenőrizze a figyelmeztetéseket a nyomtatási előnézetben.
+Text {0}	Text {0}	Text {0}	Szöveg {0}
+Hlavný kód	Main code	Hlavní kód	Fő kód
+Kód {0} · {1}	Code {0} · {1}	Kód {0} · {1}	Kód {0} · {1}
+Zadajte celý počet etikiet od 1 do 10000.	Enter a whole number of labels between 1 and 10000.	Zadejte celý počet etiket od 1 do 10000.	Adjon meg 1 és 10000 közötti egész címkeszámot.
+Zadajte každý identifikátor na samostatný riadok vo formáte (AI)hodnota.	Enter each identifier on its own line as (AI)value.	Zadejte každý identifikátor na samostatný řádek ve formátu (AI)hodnota.	Minden azonosítót külön sorba írjon (AI)érték formátumban.
