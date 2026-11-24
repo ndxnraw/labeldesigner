@@ -128,10 +128,15 @@ namespace EanEtikety {
 
   public PrintBatchResult SaveBatchResult(string id, PrintBatchResult proposed) {
    if (proposed == null) throw new ArgumentNullException("proposed");
-   using (new HistoryLease(mutexName)) return SaveResult(id, ReadBatchResult(ReadResultEntry(id)), proposed);
+   using (new HistoryLease(mutexName)) {
+    var entry = ReadResultEntry(id);
+    return SaveResult(entry, ReadBatchResult(entry), proposed);
+   }
   }
 
-  PrintBatchResult SaveResult(string id, PrintBatchResult stored, PrintBatchResult proposed) {
+  PrintBatchResult SaveResult(PrintHistoryEntry entry, PrintBatchResult stored, PrintBatchResult proposed) {
+   string id = entry.Id;
+   EnsureBatchOpen(entry, string.IsNullOrEmpty(entry.RecoverySourceId) ? id : RecoveryRoot(entry, ReadHistoryEntries()).Id);
    if (proposed.EntryId != id || stored.Revision != proposed.Revision) return null;
    if (proposed.Rows == null || stored.Rows.Count != proposed.Rows.Count) throw PrintBatchResult.Invalid();
    int total = 0;

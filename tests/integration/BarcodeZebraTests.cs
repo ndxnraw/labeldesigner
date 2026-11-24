@@ -432,6 +432,152 @@ class BarcodeZebraTests {
   foreach(Control child in parent.Controls){var button=FindButton(child,text);if(button!=null)return button;}
   return null;
  }
+ static void BatchClosureUi(){
+  string prefs=Path.Combine(dir,"batch-close-ui.xml");
+  var store=new PrintHistoryStore(prefs+".print-history");
+  var label=LabelSettings.Default();
+  var plan=OutputPlan.Create(new List<BatchRecord>{new BatchRecord{Row=25,Count=2,Label=label}},label);
+  var entry=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=2,Pages=plan.PageCount,Repetitions=1,Status=PrintHistoryStatus.Submitted};
+  store.Record(entry,null,plan);
+  var result=store.OpenBatchResult(entry.Id);
+  result.Rows[0].Confirmed=1;
+  store.SaveBatchResult(entry.Id,result);
+  var linked=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=2,Pages=plan.PageCount,Repetitions=1,Status=PrintHistoryStatus.Submitted,
+   RecoverySourceId=entry.Id,RecoveredCopy=1};
+  store.Record(linked,null,plan);
+  int stage=0;
+  Exception failure=null;
+  using(var owner=new MainForm(prefs))using(var timer=new Timer{Interval=40}){
+   owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+   var watchdog=Stopwatch.StartNew();
+   timer.Tick+=delegate{
+    try{
+     if(watchdog.ElapsedMilliseconds>45000)throw new Exception("Batch closure dialog timed out at stage "+stage);
+     Form current=null;
+     foreach(Form window in Application.OpenForms){
+      if(stage==0&&window.Text==Loc.T("História tlače")||
+         stage==1&&window.Text==Loc.T("Uzavrieť dávku…")||
+         (stage==2||stage==6)&&window.Controls.Find("batchClosureHistory",true).Length>0||
+         stage==3&&window.Controls.Find("batchClosureDetails",true).Length>0||
+         stage==5&&FindButton(window,Loc.T("Nie"))!=null){current=window;break;}
+     }
+     if(current==null)return;
+     if(stage==0){
+      var history=(DataGridView)current.Controls.Find("printHistoryGrid",true)[0];
+      foreach(DataGridViewRow row in history.Rows)
+       if(((PrintHistoryEntry)row.Tag).Id==entry.Id){history.CurrentCell=row.Cells[0];break;}
+      var closeBatch=(Button)current.Controls.Find("closePrintBatch",true)[0];
+      Check(closeBatch.Enabled,"confirmed original can be closed from print history");
+      stage=1;
+      closeBatch.PerformClick();
+      if(failure!=null)return;
+      Check(stage==7,"closure workflow returns to print history");
+      timer.Stop();
+      current.Close();
+     }else if(stage==1){
+      var commit=(Button)current.Controls.Find("confirmBatchClosure",true)[0];
+      var ack=(CheckBox)current.Controls.Find("acceptPendingReprints",true)[0];
+      var reason=(TextBox)current.Controls.Find("batchClosureReason",true)[0];
+      Check(ack.Visible&&reason.Visible&&!commit.Enabled,"pending and remaining labels require acknowledgment and reason");
+      ack.Checked=true;
+      Check(!commit.Enabled,"acknowledgment still requires a reason");
+      reason.Text="Short shipment";
+      Check(commit.Enabled,"both requirements enable explicit closure");
+      stage=2;
+      commit.PerformClick();
+     }else if(stage==2){
+      var view=(Button)current.Controls.Find("viewBatchClosure",true)[0];
+      Check(view.Enabled&&((Button)current.Controls.Find("exportBatchClosure",true)[0]).Enabled,
+       "saved closure is selected and offers its details and export");
+      stage=3;
+      view.PerformClick();
+      if(failure!=null)return;
+      Check(stage==4,"closure detail shows the saved reason, warning and quantities");
+      stage=5;
+      ((Button)current.Controls.Find("reopenBatchClosure",true)[0]).PerformClick();
+      if(failure!=null)return;
+      Check(stage==8,"reopening requires confirmation");
+      stage=6;
+     }else if(stage==3){
+      var rows=(DataGridView)current.Controls.Find("batchClosureRows",true)[0];
+      var detail=current.Controls.Find("batchClosureDetails",true)[0];
+      Check(rows.RowCount==1&&Convert.ToInt32(rows.Rows[0].Cells[4].Value)==1&&detail.Text.Contains("Short shipment")&&
+       detail.Text.Contains(string.Format(Loc.T("Dotlače bez potvrdeného výsledku: {0}"),1)),"saved details preserve the remaining quantity and acknowledgment context");
+      stage=4;
+      current.Close();
+     }else if(stage==5){
+      Check(current.AcceptButton==current.CancelButton,"reopen confirmation defaults to keeping the closure");
+      stage=8;
+      FindButton(current,Loc.T("Áno")).PerformClick();
+     }else if(stage==6){
+      var reopen=(Button)current.Controls.Find("reopenBatchClosure",true)[0];
+      if(reopen.Enabled)return;
+      Check(store.ListBatchClosures().Count==1&&store.ListBatchClosures()[0].IsOpen&&
+       !store.OpenBatchOutcome(entry.Id).BatchClosed,"reopening keeps archived closure and permits editing");
+      stage=7;
+      current.Close();
+     }
+    }catch(Exception ex){
+     failure=ex;timer.Stop();
+     var windows=new List<Form>();
+     foreach(Form window in Application.OpenForms)if(window!=owner)windows.Add(window);
+     windows.Reverse();
+     foreach(Form window in windows)if(!window.IsDisposed)window.Close();
+    }
+   };
+   timer.Start();Call(owner,"ShowPrintHistory");owner.Close();
+  }
+  if(failure!=null)throw failure;
+  Check(stage==7,"closure and reopen workflow completed without physical printing");
+ }
+ static void BatchClosureWorkflow(){
+  var store=new PrintHistoryStore(Path.Combine(dir,"batch-closures"));
+  var label=LabelSettings.Default();
+  var plan=OutputPlan.Create(new List<BatchRecord>{new BatchRecord{Row=17,Count=3,Label=label}},label);
+  var root=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=3,Pages=plan.PageCount,Repetitions=1,Status=PrintHistoryStatus.Submitted};
+  store.Record(root,null,plan);
+  var outcome=store.OpenBatchOutcome(root.Id);
+  Reject(()=>store.CloseBatch(root.Id,outcome.Version,"",true),"original result requires confirmation before closing");
+  outcome.Result.Rows[0].Confirmed=1;
+  store.SaveBatchResult(root.Id,outcome.Result);
+  outcome=store.OpenBatchOutcome(root.Id);
+  var linked=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=3,Pages=plan.PageCount,Repetitions=1,
+   Status=PrintHistoryStatus.Submitted,RecoverySourceId=root.Id,RecoveredCopy=1};
+  store.Record(linked,null,plan);
+  var stale=outcome.Version;
+  Reject(()=>store.CloseBatch(root.Id,stale,"Shortage",true),"new linked attempt invalidates approval to close");
+  outcome=store.OpenBatchOutcome(root.Id);
+  Reject(()=>store.CloseBatch(root.Id,outcome.Version,"Shortage",false),"pending reprint requires explicit acknowledgment");
+  Reject(()=>store.CloseBatch(root.Id,outcome.Version,"  ",true),"remaining labels require a reason");
+  var first=store.CloseBatch(root.Id,outcome.Version,"=A1,\"quoted\"",true);
+  Check(first.Rows.Count==1&&first.Rows[0].Record==17&&first.Rows[0].Remaining==2&&first.PendingReprints==1&&
+   first.ClosedUtc.Kind==DateTimeKind.Utc,"first closure freezes the visible quantities");
+  Reject(()=>store.CloseBatch(root.Id,outcome.Version,"again",true),"only one closure can be active");
+  var child=store.OpenBatchResult(linked.Id);
+  child.Rows[0].Confirmed=2;
+  Reject(()=>store.SaveBatchResult(linked.Id,child),"closed family cannot be changed before reopening");
+  Reject(()=>Call(store,"ReadRecoveryAuthorization",root.Id,false),"closed batch cannot send another linked reprint");
+  store.ReopenBatch(first.EntryId,first.ClosureId);
+  Check(store.ReadBatchClosure(first.EntryId,first.ClosureId).ReopenedUtc.Kind==DateTimeKind.Utc,"reopening preserves the first closure");
+  Check(store.SaveBatchResult(linked.Id,child)!=null,"confirmation can be corrected after reopening");
+  outcome=store.OpenBatchOutcome(root.Id);
+  var second=store.CloseBatch(root.Id,outcome.Version,"",false);
+  Check(second.Rows[0].Reprinted==2&&second.Rows[0].Remaining==0&&second.PendingReprints==0,"closing again records the corrected result");
+  store.Remove(root.Id);
+  Check(store.ListBatchClosures().Count==2,"closures remain reachable after source history removal");
+  Check(store.OpenBatchOutcome(linked.Id).BatchClosed,"a retained reprint remains closed when the original is removed");
+  Reject(()=>store.SaveBatchResult(linked.Id,store.OpenBatchResult(linked.Id)),"removing the source does not permit edits to a closed member");
+  Reject(()=>Call(store,"ReadRecoveryAuthorization",linked.Id,false),"removing the source does not permit sending from a closed member");
+  var failed=new PrintHistoryEntry{StartedUtc=DateTime.UtcNow,Labels=3,Pages=plan.PageCount,Repetitions=1,
+   Status=PrintHistoryStatus.Failed,RecoverySourceId=linked.Id,RecoveredCopy=1};
+  Reject(()=>store.Record(failed,null,plan),"a closed member cannot record a new linked attempt");
+  Reject(()=>store.ReopenBatch(second.EntryId,second.ClosureId),"reopening needs the original editable print job");
+  string csv=Path.Combine(dir,"closed-batch.csv");
+  store.ExportBatchClosure(first.EntryId,first.ClosureId,csv);
+  string content=File.ReadAllText(csv);
+  Check(content.Contains("source_record,planned,confirmed_original,confirmed_reprints,remaining")&&
+   content.Contains("17,3,1,0,2,")&&content.Contains("\"'=A1,\"\"quoted\"\"\""),"CSV exports the first stored quantities and a safely escaped reason");
+ }
  static void ReprintOutcome(){
   string path=Path.Combine(dir,"reprint-outcome");
   var store=new PrintHistoryStore(path);
@@ -599,5 +745,5 @@ class BarcodeZebraTests {
  static readonly BindingFlags hidden=BindingFlags.Instance|BindingFlags.NonPublic;static T F<T>(object o,string n){return (T)o.GetType().GetField(n,hidden).GetValue(o);}static object Call(object o,string n,params object[] args){foreach(var method in o.GetType().GetMethods(hidden))if(method.Name==n&&method.GetParameters().Length==args.Length)return method.Invoke(o,args);throw new MissingMethodException(n);}
  static void Wait(PrintPanel p,Action action){bool done=false;EventHandler ready=delegate{done=true;};p.PreviewReady+=ready;try{action();var watch=Stopwatch.StartNew();while(!done){Application.DoEvents();System.Threading.Thread.Sleep(2);if(watch.ElapsedMilliseconds>30000)throw new Exception("Preview timeout: "+F<Label>(p,"info").Text);}}finally{p.PreviewReady-=ready;}}
  static void Ui(){using(var form=new Form{ClientSize=new Size(1050,760)})using(var panel=new PrintPanel(LabelSettings.Default())){form.Controls.Add(panel);var history=new PrintHistoryStore(Path.Combine(dir,"sending-history"));typeof(PrintPanel).GetMethod("UsePrintHistory",hidden).Invoke(panel,new object[]{history});panel.LoadProfiles(Path.Combine(dir,"ui-profiles.xml"));form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();form.Hide();form.Show();Wait(panel,()=>panel.SelectPrinter("Microsoft Print to PDF"));Check(panel.Ready,"PDF preview ready");Check(F<System.Drawing.Printing.PrinterSettings>(panel,"selectedPrinter").PrinterName=="Microsoft Print to PDF","requested printer retained before discovery completes");var initial=F<PreflightReport>(panel,"currentReport").Fingerprint;Wait(panel,()=>{F<CheckBox>(panel,"zebraZpl").Checked=true;F<CheckBox>(panel,"zebraDarknessOverride").Checked=true;F<NumericUpDown>(panel,"zebraDarkness").Value=10.5m;});var report=F<PreflightReport>(panel,"currentReport");Check(report.Context.Contains("ZPL|"),"ZPL included in approval context");Check(report.Fingerprint!=initial,"mode/darkness invalidates consent");int submissions=0;ZebraSettings sent=null;string sentTitle=null;typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{submissions++;sent=s.Copy();sentTitle=d.DocumentName;}));typeof(PrintPanel).GetField("approvedFingerprint",hidden).SetValue(panel,initial);Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(submissions==0&&history.List().Count==0,"stale approval prevents RAW submission and history");F<CheckBox>(panel,"archivePrint").Checked=true;typeof(PrintPanel).GetField("approvedFingerprint",hidden).SetValue(panel,F<PreflightReport>(panel,"currentReport").Fingerprint);Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(submissions==1&&sent.Darkness==10.5m,"approved job uses captured darkness");var entry=history.List()[0];Check(entry.Status==PrintHistoryStatus.Submitted&&entry.HasArchive,"actual approved send recorded and archived");Check(PrintQueue.CanCheck(entry)&&sentTitle==PrintQueue.DocumentName(entry.QueueToken),"approved transport and history share a job title");Check(history.Open(entry.Id).Profile.Darkness==10.5m,"archived settings match the send");F<CheckBox>(panel,"archivePrint").Checked=false;typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{throw new IOException("Injected send failure");}));Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(history.List().Exists(item=>item.Status==PrintHistoryStatus.Failed&&!item.HasArchive),"failed send retains metadata only");Wait(panel,panel.RefreshPreview);typeof(PrintPanel).GetField("zebraSender",hidden).SetValue(panel,(Action<LabelPrintDocument,PrinterPageGeometry,ZebraSettings,int>)((d,g,s,c)=>{throw new OperationCanceledException();}));Wait(panel,()=>Call(panel,"StartRequest",false,true,null));Check(history.List().Exists(item=>item.Status==PrintHistoryStatus.Cancelled&&!item.HasArchive),"cancelled send is distinguished from a failed send");F<TextBox>(panel,"profileName").Text="Media A";Call(panel,"SaveMediaProfile");var saved=new PrinterProfileStore(Path.Combine(dir,"ui-profiles.xml")).Find("Microsoft Print to PDF","Media A");Check(saved.ZebraZpl&&saved.Darkness==10.5m,"real profile UI saves darkness");Wait(panel,()=>{F<NumericUpDown>(panel,"zebraDarkness").Value=8m;F<NumericUpDown>(panel,"zebraDpi").Value=203.2m;});F<TextBox>(panel,"profileName").Text="Media B";Call(panel,"SaveMediaProfile");Wait(panel,()=>{var list=F<ModernComboBox>(panel,"mediaProfiles");foreach(PrinterProfile profile in list.Items)if(profile.DisplayName=="Media A"){list.SelectedItem=profile;break;}});Check(F<NumericUpDown>(panel,"zebraDarkness").Value==10.5m&&F<NumericUpDown>(panel,"zebraDpi").Value==300,"profile switch restores independent Zebra settings");var baseline=(PrinterProfile)Call(panel,"CurrentMediaProfile");using(var target=(PrintPanel)Call(panel,"CreateCalibrationPanel",CalibrationTarget.Create(60,45),baseline)){Check(F<CheckBox>(target,"zebraZpl").Checked&&!F<CheckBox>(target,"zebraZpl").Enabled,"calibration target retains and locks transport");Check(F<NumericUpDown>(target,"zebraDarkness").Value==10.5m&&!F<NumericUpDown>(target,"zebraDarkness").Enabled,"calibration target retains and locks darkness");}form.Close();}}
- [STAThread]static void Main(string[] args){dir=Path.GetFullPath(args[0]);Directory.CreateDirectory(dir);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Barcodes();Zebra();Spooling();Profiles();MoreZebra();Translations();QueueStatus();BoundedQueue();QueueHistoryUi();HistoryArchive();ReprintOutcome();ManualResultUi();RecoveryHistoryUi();Ui();ReplayPreview();ReadabilityPreview();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" barcode/Zebra checks; no physical print job");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){dir=Path.GetFullPath(args[0]);Directory.CreateDirectory(dir);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Barcodes();Zebra();Spooling();Profiles();MoreZebra();Translations();QueueStatus();BoundedQueue();QueueHistoryUi();HistoryArchive();ReprintOutcome();BatchClosureWorkflow();BatchClosureUi();ManualResultUi();RecoveryHistoryUi();Ui();ReplayPreview();ReadabilityPreview();File.WriteAllText(Path.Combine(dir,"passed.txt"),"PASS "+checks+" barcode/Zebra checks; no physical print job");}catch(Exception ex){File.WriteAllText(Path.Combine(dir,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

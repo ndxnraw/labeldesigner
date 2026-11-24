@@ -8,6 +8,7 @@ namespace EanEtikety {
   void RecoverPrintJob(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, Action refresh) {
    ArchivedPrintJob job;
    if (!RunWork(owner, "print-recovery-load", "Načítavam tlačovú úlohu…", () => {
+    store.ReadRecoveryAuthorization(entry.Id, false);
     var archived = store.Open(entry.Id);
     archived.ValidateArchive();
     return archived;

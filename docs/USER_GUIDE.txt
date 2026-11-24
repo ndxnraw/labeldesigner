@@ -370,6 +370,9 @@ množstvá po riadkoch. Výsledok dotlače potvrďte v jej vlastnom zázname.
 Pôvodná dávka zohľadní potvrdené dotlače aj opravy ich množstiev.
 Ak je obsah úlohy uložený, návrh dotlače použije aktuálny zostatok.
 Pri odoslaní sa zobrazí upozornenie na dotlače bez potvrdeného výsledku.
+Po potvrdení výsledku vyberte pôvodnú úlohu a použite Uzavrieť dávku…
+Ak chýbajú etikety, zadajte dôvod. Uzávierky dávok… umožnia zobraziť
+uložený stav, exportovať ho do CSV a znova otvoriť dávku, ktorá je v histórii.
 Podrobný postup a limity sú v PRINT_HISTORY.md.
 
 ČITATEĽNOSŤ KÓDOV PRED TLAČOU

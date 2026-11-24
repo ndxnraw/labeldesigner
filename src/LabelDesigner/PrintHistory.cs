@@ -338,6 +338,7 @@ namespace EanEtikety {
     Directory.CreateDirectory(directory);
     CleanInterruptedWrites();
     entry.Id = Guid.NewGuid().ToString("N");
+    if (!string.IsNullOrEmpty(entry.RecoverySourceId)) EnsureBatchOpen(entry, RecoveryRoot(entry, ReadHistoryEntries()).Id);
     string archivePath = PathFor(entry.Id, ".job.xml");
     // Publish metadata first. A crash before the atomic archive rename leaves
     // a visible metadata-only entry, and never an unlisted archive.

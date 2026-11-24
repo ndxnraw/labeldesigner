@@ -63,6 +63,10 @@ before repeating a saved job.
 It also checks the balance across linked partial reprints, corrected and repeated
 confirmations, unconfirmed reprint warning cancellation, stale proposals, and
 manual reprints from an intact archive with a damaged result file.
+Batch closure checks cover pending reprint acknowledgment, the required reason
+when labels remain, stale approval, reopening, retained snapshots and CSV
+export after the source history entry is removed. The dialog tests exercise
+closing, viewing a saved closure and confirming reopening.
 It also tests deliberate numeric wheel editing through both managed events and
 native child-window messages: hover and keyboard focus, click activation, focus
 loss, readonly values, bounds, spinner buttons and enclosing-panel scrolling.

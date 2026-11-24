@@ -30,6 +30,28 @@ znova z aktuálneho zostatku.
 Pri výpočte sa použijú prepojené záznamy dostupné v histórii. Odstránenie
 záznamu dotlače môže zmeniť zostatok.
 
+### Uzavretie a export dávky
+
+Po ručnom potvrdení pôvodnej tlače vyberte jej záznam a stlačte
+**Uzavrieť dávku…**. Skontrolujte súhrn po zdrojových riadkoch. Ak niektoré
+dotlače čakajú na potvrdenie, uzavretie treba výslovne odsúhlasiť. Pri
+kladnom zostatku zadajte aj dôvod. Uzávierka uloží čas, množstvá po
+riadkoch, počet nepotvrdených dotlačí a dôvod. Počas uzavretia sú úpravy
+výsledkov a odosielanie prepojených dotlačí zablokované.
+
+V časti **Uzávierky dávok…** zobrazíte uložené stavy a exportujete ich do
+CSV. Súbor je v UTF-8, používa čiarku a zachováva čísla zdrojových riadkov.
+Pri etikete bez zdrojového riadka je pole prázdne. Otvorenie CSV
+v tabuľkovom programe môže vyžadovať výber čiarky ako oddeľovača.
+
+Ak pôvodná úloha zostala v histórii, funkcia **Znova otvoriť dávku…**
+sprístupní úpravy. Po ďalšom uzavretí vznikne nový záznam. Predchádzajúce
+uzávierky zostávajú dostupné aj po odstránení alebo automatickom
+prečistení histórie. Ukladajú sa lokálne v podpriečinku
+`batch-closures` histórie tlače.
+
+### Návrh dotlače
+
 Nové úlohy ukladajú počty po riadkoch. Pri starších úlohách sa počty
 načítajú z uloženého obsahu. Ak je obsah k dispozícii, po uložení
 čiastočného alebo nulového výsledku použite **Navrhnúť dotlač…**.

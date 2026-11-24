@@ -8,6 +8,8 @@ namespace EanEtikety {
   readonly Dictionary<int,long> reprinted = new Dictionary<int,long>();
   readonly string reprintVersion;
   public PrintBatchResult Result { get; internal set; }
+  public bool BatchClosed { get; internal set; }
+  internal readonly string[] LinkedEntries;
   public int PendingReprints { get; private set; }
   public long ReprintedTotal { get { return reprinted.Values.Sum(); } }
   public int RemainingTotal { get { return Result.Rows.Sum(row => Remaining(row)); } }
@@ -25,6 +27,7 @@ namespace EanEtikety {
 
   internal PrintBatchOutcome(PrintBatchResult result, List<LinkedPrintResult> attempts) {
    Result = result;
+   LinkedEntries = attempts.Select(attempt => attempt.Id).ToArray();
    reprintVersion = LinkedPrintResult.Version(attempts);
    foreach (var row in result.Rows) reprinted.Add(row.Record, 0);
    foreach (var attempt in attempts) {
@@ -75,13 +78,14 @@ namespace EanEtikety {
     var entry = ReadResultEntry(id);
     var stored = ReadBatchResult(entry);
     var outcome = ReadBatchOutcome(entry, stored);
-    outcome.Result = SaveResult(id, stored, proposed);
+    outcome.Result = SaveResult(entry, stored, proposed);
     return outcome.Result == null ? null : outcome;
    }
   }
 
   PrintBatchOutcome ReadBatchOutcome(PrintHistoryEntry entry, PrintBatchResult result) {
-   return new PrintBatchOutcome(result, ReadReprints(entry, ReadHistoryEntries()));
+   var entries = ReadHistoryEntries();
+   return new PrintBatchOutcome(result, ReadReprints(entry, entries)) { BatchClosed = IsBatchClosed(entry, RecoveryRoot(entry, entries).Id) };
   }
 
   List<PrintHistoryEntry> ReadHistoryEntries() {
@@ -111,13 +115,8 @@ namespace EanEtikety {
    using (new HistoryLease(mutexName)) {
     var entry = ReadResultEntry(id);
     var entries = ReadHistoryEntries();
-    var byId = entries.ToDictionary(item => item.Id, StringComparer.Ordinal);
-    var root = entry;
-    var visited = new HashSet<string>(StringComparer.Ordinal) { id };
-    PrintHistoryEntry parent;
-    while (!string.IsNullOrEmpty(root.RecoverySourceId) && byId.TryGetValue(root.RecoverySourceId, out parent) &&
-           root.RecoveredCopy > 0 && root.RecoveredCopy <= parent.Repetitions && visited.Add(parent.Id))
-     root = parent;
+    var root = RecoveryRoot(entry, entries);
+    EnsureBatchOpen(entry, root.Id);
     var attempts = ReadReprints(root, entries);
     string proposalVersion = null;
     if (proposal) {
@@ -127,6 +126,18 @@ namespace EanEtikety {
     return new PrintRecoveryAuthorization { RootId = root.Id, FamilyVersion = LinkedPrintResult.Version(attempts),
      ProposalVersion = proposalVersion, PendingReprints = attempts.Count(item => item.Pending) };
    }
+  }
+
+  static PrintHistoryEntry RecoveryRoot(PrintHistoryEntry entry, IEnumerable<PrintHistoryEntry> entries) {
+   if (string.IsNullOrEmpty(entry.RecoverySourceId)) return entry;
+   var byId = entries.ToDictionary(item => item.Id, StringComparer.Ordinal);
+   var root = entry;
+   var visited = new HashSet<string>(StringComparer.Ordinal) { entry.Id };
+   PrintHistoryEntry parent;
+   while (!string.IsNullOrEmpty(root.RecoverySourceId) && byId.TryGetValue(root.RecoverySourceId, out parent) &&
+          root.RecoveredCopy > 0 && root.RecoveredCopy <= parent.Repetitions && visited.Add(parent.Id))
+    root = parent;
+   return root;
   }
 
   internal IDisposable BeginRecoverySend(string id, PrintRecoveryAuthorization approved) {

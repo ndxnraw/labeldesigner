@@ -208,6 +208,18 @@ namespace EanEtikety {
      catch (Exception ex) { Error(ex); }
     });
     outcome.Name = "manualPrintResult";
+    var closeBatch = Btn(Loc.T("Uzavrieť dávku…"), delegate {
+     var entry = selected();
+     if (entry == null || !entry.ManualConfirmed.HasValue || !string.IsNullOrEmpty(entry.RecoverySourceId)) return;
+     try { ClosePrintBatch(window, store, entry, refresh); }
+     catch (Exception ex) { UiMessageBox.Show(window, ex.Message, window.Text); }
+    });
+    closeBatch.Name = "closePrintBatch";
+    var closures = Btn(Loc.T("Uzávierky dávok…"), delegate {
+     try { ShowBatchClosures(window, store, refresh); }
+     catch (Exception ex) { UiMessageBox.Show(window, ex.Message, window.Text); }
+    });
+    closures.Name = "listBatchClosures";
     var remove = Btn(Loc.T("Odstrániť"), delegate {
      var entry = selected();
      if (entry == null) return;
@@ -228,7 +240,7 @@ namespace EanEtikety {
           store.UpdateQueue(entry.Id, entry.QueueToken, historyQueueQuery(entry)), out saved)) refresh();
      } catch (Exception ex) { Error(ex); }
     });
-    foreach (var action in new[] { checkQueue, outcome, recover, repeat, source, remove, close }) actions.Controls.Add(action);
+    foreach (var action in new[] { checkQueue, outcome, closeBatch, closures, recover, repeat, source, remove, close }) actions.Controls.Add(action);
     layout.Controls.Add(actions, 0, 2);
     window.CancelButton = close;
     update = delegate {
@@ -236,6 +248,7 @@ namespace EanEtikety {
      repeat.Enabled = entry != null && entry.HasArchive;
      recover.Enabled = repeat.Enabled;
      outcome.Enabled = entry != null && entry.HasResultRows;
+     closeBatch.Enabled = entry != null && entry.ManualConfirmed.HasValue && string.IsNullOrEmpty(entry.RecoverySourceId);
      source.Enabled = sourceRow(entry) != null;
      remove.Enabled = entry != null;
      checkQueue.Enabled = PrintQueue.CanCheck(entry);

@@ -41,7 +41,7 @@ namespace EanEtikety {
     foreach (string label in new[] { "Zdrojový riadok", "Plánované etikety", "Potvrdené z tejto úlohy", "Potvrdené z dotlačí", "Zostávajúce etikety" }) {
      int index = grid.Columns.Add("result" + grid.Columns.Count, Loc.T(label));
      grid.Columns[index].SortMode = DataGridViewColumnSortMode.NotSortable;
-     grid.Columns[index].ReadOnly = index != 2;
+     grid.Columns[index].ReadOnly = index != 2 || outcome.BatchClosed;
     }
     var summary = new Label { Name = "manualPrintSummary", AutoSize = true, MaximumSize = new Size(540, 0) };
     layout.Controls.Add(summary, 0, 2);
@@ -102,8 +102,10 @@ namespace EanEtikety {
      else if (changed || result.ConfirmedTotal < 0) summary.Text += Environment.NewLine + Loc.T("Výsledok čaká na potvrdenie.");
      else summary.Text += Environment.NewLine + ResultStatus(planned - remaining, planned);
      if (outcome.PendingReprints > 0) summary.Text += Environment.NewLine + UnconfirmedReprints(outcome.PendingReprints);
-     save.Enabled = grid.IsCurrentCellDirty || !invalid && (changed || result.ConfirmedTotal < 0);
-     propose.Enabled = entry.HasArchive && !grid.IsCurrentCellDirty && !changed && !invalid &&
+     if (outcome.BatchClosed) summary.Text += Environment.NewLine + Loc.T("Dávka je uzavretá. Pred úpravou ju znova otvorte.");
+     allButton.Enabled = zeroButton.Enabled = !outcome.BatchClosed;
+     save.Enabled = !outcome.BatchClosed && (grid.IsCurrentCellDirty || !invalid && (changed || result.ConfirmedTotal < 0));
+     propose.Enabled = !outcome.BatchClosed && entry.HasArchive && !grid.IsCurrentCellDirty && !changed && !invalid &&
       result.ConfirmedTotal >= 0 && remaining > 0;
     };
     grid.CellValueNeeded += delegate(object sender, DataGridViewCellValueEventArgs e) {
