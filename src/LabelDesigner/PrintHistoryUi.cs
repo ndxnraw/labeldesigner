@@ -220,12 +220,17 @@ namespace EanEtikety {
      catch (Exception ex) { UiMessageBox.Show(window, ex.Message, window.Text); }
     });
     closures.Name = "listBatchClosures";
+    var batches = Btn(Loc.T("Prehľad dávok…"), delegate {
+     try { ShowPrintBatchCatalog(window, store, refresh, selected()); }
+     catch (Exception ex) { UiMessageBox.Show(window, ex.Message, window.Text); }
+    });
+    batches.Name = "printBatchCatalog";
     var remove = Btn(Loc.T("Odstrániť"), delegate {
      var entry = selected();
      if (entry == null) return;
      string prompt = Loc.T("Odstrániť tento záznam a jeho uložený obsah?");
-     if (!string.IsNullOrEmpty(entry.RecoverySourceId))
-      prompt += Environment.NewLine + Loc.T("Odstránenie dotlače môže zmeniť zostatok pôvodnej dávky.");
+     if ((long)entry.Labels * entry.Repetitions > 0)
+      prompt += Environment.NewLine + Loc.T("Pokus a jeho potvrdené množstvá zostanú v prehľade dávky.");
      if (UiMessageBox.Show(window, prompt,
           window.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
      try { store.Remove(entry.Id); refresh(); } catch (Exception ex) { Error(ex); }
@@ -240,7 +245,7 @@ namespace EanEtikety {
           store.UpdateQueue(entry.Id, entry.QueueToken, historyQueueQuery(entry)), out saved)) refresh();
      } catch (Exception ex) { Error(ex); }
     });
-    foreach (var action in new[] { checkQueue, outcome, closeBatch, closures, recover, repeat, source, remove, close }) actions.Controls.Add(action);
+    foreach (var action in new[] { checkQueue, outcome, closeBatch, closures, batches, recover, repeat, source, remove, close }) actions.Controls.Add(action);
     layout.Controls.Add(actions, 0, 2);
     window.CancelButton = close;
     update = delegate {

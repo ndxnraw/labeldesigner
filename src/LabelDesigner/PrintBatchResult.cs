@@ -67,7 +67,14 @@ namespace EanEtikety {
    var path = PathFor(entry.Id, ResultSuffix);
    entry.HasResultRows = entry.HasArchive || File.Exists(path);
    try {
-    if (!File.Exists(path)) return;
+    if (!File.Exists(path)) {
+     var retained = RetainedCopy(entry);
+     if (retained == null) return;
+     entry.HasResultRows |= retained.HasResultRows;
+     entry.ManualConfirmed = retained.ManualConfirmed;
+     entry.ManualResultUnavailable = retained.ManualResultUnavailable;
+     return;
+    }
     using (var reader = XmlReader.Create(path, new XmlReaderSettings {
      DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = MaxResultBytes
     })) {
@@ -91,17 +98,28 @@ namespace EanEtikety {
   }
 
   PrintHistoryEntry ReadResultEntry(string id) {
-   var entry = Read<PrintHistoryEntry>(PathFor(id, ".entry.xml"), 64 * 1024);
-   if (entry == null || entry.Id != id) throw PrintBatchResult.Invalid();
+   var entry = ReadLiveEntry(id) ?? FindRetainedEntry(id);
+   if (entry == null) throw PrintBatchResult.Invalid();
    return entry;
   }
 
   PrintBatchResult ReadBatchResult(PrintHistoryEntry entry) {
+   var result = ReadAvailableBatchResult(entry);
+   if (result == null) throw PrintBatchResult.Invalid();
+   return result;
+  }
+
+  PrintBatchResult ReadAvailableBatchResult(PrintHistoryEntry entry) {
+   if (entry.Retained) return entry.RetainedResult;
    var path = PathFor(entry.Id, ResultSuffix);
    PrintBatchResult result;
    if (File.Exists(path)) result = Read<PrintBatchResult>(path, MaxResultBytes);
    else {
-    var job = Read<ArchivedPrintJob>(PathFor(entry.Id, ".job.xml"), MaxArchiveBytes);
+    var retained = RetainedCopy(entry);
+    if (retained != null && retained.RetainedResult != null) return retained.RetainedResult;
+    var archive = PathFor(entry.Id, ".job.xml");
+    if (!File.Exists(archive)) return null;
+    var job = Read<ArchivedPrintJob>(archive, MaxArchiveBytes);
     if (job == null) throw PrintBatchResult.Invalid();
     job.ValidateArchive();
     result = PrintBatchResult.FromRecords(job.Placements.Select(item => item.Record), job.Repetitions);
@@ -136,7 +154,8 @@ namespace EanEtikety {
 
   PrintBatchResult SaveResult(PrintHistoryEntry entry, PrintBatchResult stored, PrintBatchResult proposed) {
    string id = entry.Id;
-   EnsureBatchOpen(entry, string.IsNullOrEmpty(entry.RecoverySourceId) ? id : RecoveryRoot(entry, ReadHistoryEntries()).Id);
+   string batchId = IsHistoryId(entry.BatchId) ? entry.BatchId : ResolveBatchId(entry, ReadHistoryEntries());
+   EnsureBatchOpen(entry, batchId);
    if (proposed.EntryId != id || stored.Revision != proposed.Revision) return null;
    if (proposed.Rows == null || stored.Rows.Count != proposed.Rows.Count) throw PrintBatchResult.Invalid();
    int total = 0;
@@ -154,10 +173,28 @@ namespace EanEtikety {
    if (!changed) return stored;
    stored.ConfirmedTotal = total;
    stored.Revision = Guid.NewGuid().ToString("N");
-   AtomicOutput.Save(PathFor(id, ResultSuffix), temp => {
-    using (var stream = File.Create(temp)) new XmlSerializer(typeof(PrintBatchResult)).Serialize(stream, stored);
-   });
+   if (entry.Retained) {
+    WriteRetainedEntry(entry, stored);
+    return stored;
+   }
+   WriteLiveResult(stored);
    return stored;
+  }
+
+  void WriteLiveResult(PrintBatchResult result) {
+   AtomicOutput.Save(PathFor(result.EntryId, ResultSuffix), temp => {
+    using (var stream = File.Create(temp)) new XmlSerializer(typeof(PrintBatchResult)).Serialize(stream, result);
+   });
+  }
+
+  void PreserveLegacyRows(string id) {
+   if (File.Exists(PathFor(id, ResultSuffix))) return;
+   try {
+    var entry = ReadLiveEntry(id);
+    var result = entry == null ? null : ReadAvailableBatchResult(entry);
+    if (result != null) WriteLiveResult(result);
+   } catch (InvalidOperationException ex) { DiagnosticLog.Write("batch-retention", ex); }
+     catch (InvalidDataException ex) { DiagnosticLog.Write("batch-retention", ex); }
   }
  }
 }

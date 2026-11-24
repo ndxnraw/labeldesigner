@@ -14,7 +14,7 @@ namespace EanEtikety {
  public enum PrintHistoryStatus { Failed, Cancelled, Submitted }
 
  public sealed class PrintHistoryEntry {
-  public string Id, Printer, Media, QueueToken, RecoverySourceId;
+  public string Id, BatchId, Printer, Media, QueueToken, RecoverySourceId;
   public DateTime StartedUtc;
   public int Pages, Labels, Repetitions, RecoveredCopy;
   public PrintHistoryStatus Status;
@@ -22,6 +22,8 @@ namespace EanEtikety {
   [XmlIgnore] public PrintQueueHistory QueueStatus;
   [XmlIgnore] public bool HasResultRows, ManualResultUnavailable;
   [XmlIgnore] public int? ManualConfirmed;
+  [XmlIgnore] public bool Retained;
+  [XmlIgnore] internal PrintBatchResult RetainedResult;
  }
 
  public sealed class ArchivedPlacement {
@@ -312,6 +314,7 @@ namespace EanEtikety {
   }
 
   void DeleteEntry(string id) {
+   RetainEntry(id);
    File.Delete(PathFor(id, ".job.xml"));
    File.Delete(PathFor(id, ".queue.xml"));
    File.Delete(PathFor(id, ResultSuffix));
@@ -338,7 +341,7 @@ namespace EanEtikety {
     Directory.CreateDirectory(directory);
     CleanInterruptedWrites();
     entry.Id = Guid.NewGuid().ToString("N");
-    if (!string.IsNullOrEmpty(entry.RecoverySourceId)) EnsureBatchOpen(entry, RecoveryRoot(entry, ReadHistoryEntries()).Id);
+    AssignBatchId(entry);
     string archivePath = PathFor(entry.Id, ".job.xml");
     // Publish metadata first. A crash before the atomic archive rename leaves
     // a visible metadata-only entry, and never an unlisted archive.
@@ -358,8 +361,8 @@ namespace EanEtikety {
     }
     entry.HasArchive = saved;
     entry.HasResultRows = saved;
+    SavePlannedRows(entry, rows);
     Trim();
-    if (File.Exists(PathFor(entry.Id, ".entry.xml"))) SavePlannedRows(entry, rows);
     return archive == null || saved;
    }
   }
@@ -374,7 +377,10 @@ namespace EanEtikety {
     if (++count > MaxEntries) { DeleteEntry(id); continue; }
     var archive = new FileInfo(PathFor(id, ".job.xml"));
     if (!archive.Exists) continue;
-    if (bytes + archive.Length > MaxTotalArchiveBytes) archive.Delete();
+    if (bytes + archive.Length > MaxTotalArchiveBytes) {
+     PreserveLegacyRows(id);
+     archive.Delete();
+    }
     else bytes += archive.Length;
    }
   }

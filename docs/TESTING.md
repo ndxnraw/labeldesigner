@@ -67,6 +67,11 @@ Batch closure checks cover pending reprint acknowledgment, the required reason
 when labels remain, stale approval, reopening, retained snapshots and CSV
 export after the source history entry is removed. The dialog tests exercise
 closing, viewing a saved closure and confirming reopening.
+The durable batch tests cover a removed intermediate reprint, automatic history
+trimming, continued credits from retained attempts, legacy links, correction in
+retained history, stable CSV batch IDs and opening a batch from an empty history.
+They also exercise interrupted cleanup, damaged retained data and row-plan
+preservation when the size limit evicts an older print archive.
 It also tests deliberate numeric wheel editing through both managed events and
 native child-window messages: hover and keyboard focus, click activation, focus
 loss, readonly values, bounds, spinner buttons and enclosing-panel scrolling.

@@ -25,6 +25,8 @@ Názov produktu je naďalej Pre-release.
 - **Uzavretie dávky** uloží výsledok po zdrojových riadkoch, upozorní na
   nepotvrdené dotlače a pri zostatku vyžiada dôvod. Uzávierky možno
   zobraziť a exportovať do CSV aj po prečistení histórie tlače.
+- **Prehľad dávok** spája pokusy o tlač, dotlače a uzávierky trvalým ID
+  dávky. Potvrdené množstvá ostávajú dostupné aj po prečistení histórie.
 - **Dotlač prerušenej dávky** pripraví z histórie zvyšné strany jednej kópie
   alebo vybrané etikety v pôvodných pozíciách. Nový pokus odkazuje na zdroj.
   História uchová posledný známy stav aj čas zistenia, vrátane informácie,

@@ -50,10 +50,10 @@ namespace EanEtikety {
     snapshot.Planned, snapshot.Original, snapshot.Reprinted, snapshot.Remaining);
   }
 
-  void ClosePrintBatch(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, Action refresh) {
+  void ClosePrintBatch(Form owner, PrintHistoryStore store, PrintHistoryEntry entry, Action refresh, bool onlyThisBatch = false) {
    PrintBatchOutcome outcome;
    if (!RunWork(owner, "load-batch-closure", "Načítavam tlačovú úlohu…", () => store.OpenBatchOutcome(entry.Id), out outcome)) return;
-   if (outcome.BatchClosed) { ShowBatchClosures(owner, store, refresh, entry.Id); return; }
+   if (outcome.BatchClosed) { ShowBatchClosures(owner, store, refresh, entry.Id, onlyThisBatch); return; }
    if (outcome.Result.ConfirmedTotal < 0) throw new InvalidOperationException(Loc.T("Najprv potvrďte výsledok pôvodnej tlače."));
    var sample = PrintBatchClosure.Capture(outcome, "");
    using (var dialog = FeatureForm("Uzavrieť dávku…", 850, 530)) {
@@ -96,11 +96,11 @@ namespace EanEtikety {
     if (!RunWork(owner, "save-batch-closure", "Ukladám uzávierku dávky…",
          () => store.CloseBatch(entry.Id, outcome.Version, note, accept), out saved)) return;
     refresh();
-    ShowBatchClosures(owner, store, refresh, saved.EntryId);
+    ShowBatchClosures(owner, store, refresh, saved.EntryId, onlyThisBatch);
    }
   }
 
-  void ShowBatchClosures(Form owner, PrintHistoryStore store, Action refreshHistory, string preferred = null) {
+  void ShowBatchClosures(Form owner, PrintHistoryStore store, Action refreshHistory, string preferred = null, bool onlyThisBatch = false) {
    using (var dialog = FeatureForm("Uzávierky dávok…", 990, 555)) {
     dialog.MinimumSize = new Size(590, 390);
     var layout = ClosureLayout(dialog);
@@ -118,6 +118,7 @@ namespace EanEtikety {
      DataGridViewRow restore = null;
      list.Rows.Clear();
      foreach (var item in store.ListBatchClosures()) {
+      if (onlyThisBatch && item.EntryId != preferred) continue;
       int index = list.Rows.Add(item.ClosedUtc.ToLocalTime().ToString("g"), item.EntryId.Substring(0, 8),
        Loc.T(item.IsOpen ? "Znova otvorená" : "Uzavretá"), item.Planned, item.Remaining);
       var row = list.Rows[index];

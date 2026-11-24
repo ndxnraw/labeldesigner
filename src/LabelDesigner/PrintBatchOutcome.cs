@@ -84,60 +84,55 @@ namespace EanEtikety {
   }
 
   PrintBatchOutcome ReadBatchOutcome(PrintHistoryEntry entry, PrintBatchResult result) {
-   var entries = ReadHistoryEntries();
-   return new PrintBatchOutcome(result, ReadReprints(entry, entries)) { BatchClosed = IsBatchClosed(entry, RecoveryRoot(entry, entries).Id) };
+   var live = ReadHistoryEntries();
+   string batchId = ResolveBatchId(entry, live);
+   return BatchOutcome(entry, result, batchId, BatchEntries(batchId, live));
   }
 
-  List<PrintHistoryEntry> ReadHistoryEntries() {
-   return EntryFiles().Take(MaxEntries).Select(TryReadRelatedEntry).Where(item => item != null).ToList();
+  PrintBatchOutcome BatchOutcome(PrintHistoryEntry entry, PrintBatchResult result, string batchId, List<PrintHistoryEntry> entries) {
+   return new PrintBatchOutcome(result, ReadReprints(entry.Id, batchId, entries)) { BatchClosed = IsBatchClosed(entry, batchId) };
   }
 
-  List<LinkedPrintResult> ReadReprints(PrintHistoryEntry entry, IEnumerable<PrintHistoryEntry> entries) {
-   var attempts = new List<LinkedPrintResult>();
-   var children = entries.Where(item => !string.IsNullOrEmpty(item.RecoverySourceId))
-    .ToLookup(item => item.RecoverySourceId, StringComparer.Ordinal);
-   var visited = new HashSet<string>(StringComparer.Ordinal) { entry.Id };
-   var parents = new Queue<PrintHistoryEntry>();
-   parents.Enqueue(entry);
-   while (parents.Count > 0) {
-    WorkContext.Check();
-    var parent = parents.Dequeue();
-    foreach (var child in children[parent.Id].OrderBy(item => item.Id, StringComparer.Ordinal)) {
-     if (child.RecoveredCopy < 1 || child.RecoveredCopy > parent.Repetitions || !visited.Add(child.Id)) continue;
-     attempts.Add(new LinkedPrintResult { Id = child.Id, Result = TryReadReprintResult(child) });
-     parents.Enqueue(child);
+  Dictionary<string,PrintHistoryEntry> ReadHistoryEntries() {
+   return EntryFiles().Select(TryReadRelatedEntry).Where(item => item != null)
+    .ToDictionary(item => item.Id, StringComparer.Ordinal);
+  }
+
+  List<LinkedPrintResult> ReadReprints(string id, string batchId, List<PrintHistoryEntry> entries) {
+   var related = entries.Where(item => item.Id != id);
+   if (id != batchId) {
+    var children = entries.Where(item => !string.IsNullOrEmpty(item.RecoverySourceId))
+     .ToLookup(item => item.RecoverySourceId, StringComparer.Ordinal);
+    var visited = new HashSet<string>(StringComparer.Ordinal) { id };
+    var parents = new Queue<string>();
+    parents.Enqueue(id);
+    while (parents.Count > 0) {
+     WorkContext.Check();
+     foreach (var child in children[parents.Dequeue()])
+      if (visited.Add(child.Id)) parents.Enqueue(child.Id);
     }
+    related = related.Where(item => visited.Contains(item.Id));
    }
-   return attempts;
+   return related.OrderBy(item => item.Id, StringComparer.Ordinal)
+    .Select(item => new LinkedPrintResult { Id = item.Id, Result = TryReadAttemptResult(item) }).ToList();
   }
 
   internal PrintRecoveryAuthorization ReadRecoveryAuthorization(string id, bool proposal) {
    using (new HistoryLease(mutexName)) {
     var entry = ReadResultEntry(id);
-    var entries = ReadHistoryEntries();
-    var root = RecoveryRoot(entry, entries);
-    EnsureBatchOpen(entry, root.Id);
-    var attempts = ReadReprints(root, entries);
+    var live = ReadHistoryEntries();
+    string batchId = ResolveBatchId(entry, live);
+    EnsureBatchOpen(entry, batchId);
+    var entries = BatchEntries(batchId, live);
+    var attempts = ReadReprints(batchId, batchId, entries);
     string proposalVersion = null;
     if (proposal) {
-     var related = root.Id == id ? attempts : ReadReprints(entry, entries);
+     var related = batchId == id ? attempts : ReadReprints(id, batchId, entries);
      proposalVersion = ReadBatchResult(entry).Revision + "|" + LinkedPrintResult.Version(related);
     }
-    return new PrintRecoveryAuthorization { RootId = root.Id, FamilyVersion = LinkedPrintResult.Version(attempts),
+    return new PrintRecoveryAuthorization { RootId = batchId, FamilyVersion = LinkedPrintResult.Version(attempts),
      ProposalVersion = proposalVersion, PendingReprints = attempts.Count(item => item.Pending) };
    }
-  }
-
-  static PrintHistoryEntry RecoveryRoot(PrintHistoryEntry entry, IEnumerable<PrintHistoryEntry> entries) {
-   if (string.IsNullOrEmpty(entry.RecoverySourceId)) return entry;
-   var byId = entries.ToDictionary(item => item.Id, StringComparer.Ordinal);
-   var root = entry;
-   var visited = new HashSet<string>(StringComparer.Ordinal) { entry.Id };
-   PrintHistoryEntry parent;
-   while (!string.IsNullOrEmpty(root.RecoverySourceId) && byId.TryGetValue(root.RecoverySourceId, out parent) &&
-          root.RecoveredCopy > 0 && root.RecoveredCopy <= parent.Repetitions && visited.Add(parent.Id))
-    root = parent;
-   return root;
   }
 
   internal IDisposable BeginRecoverySend(string id, PrintRecoveryAuthorization approved) {
@@ -162,9 +157,8 @@ namespace EanEtikety {
      catch (UnauthorizedAccessException) { return null; }
   }
 
-  PrintBatchResult TryReadReprintResult(PrintHistoryEntry entry) {
-   // Legacy jobs without a result file have never been confirmed.
-   try { return File.Exists(PathFor(entry.Id, ResultSuffix)) ? ReadBatchResult(entry) : null; }
+  PrintBatchResult TryReadAttemptResult(PrintHistoryEntry entry) {
+   try { return ReadAvailableBatchResult(entry); }
    catch (InvalidOperationException) { return null; }
    catch (InvalidDataException) { return null; }
    catch (IOException) { return null; }

@@ -92,7 +92,7 @@ public partial class PrintPanel:UserControl {
    var historyEntry=history==null?null:new PrintHistoryEntry{
     StartedUtc=DateTime.UtcNow, Printer=name, Media=historyName.Length>0?historyName:historyPaper,
     Pages=renderPlan.PageCount, Labels=renderPlan.Placements.Count, Repetitions=count,
-    RecoverySourceId=sourceId, RecoveredCopy=sourceCopy
+    RecoverySourceId=sourceId, RecoveredCopy=sourceCopy, BatchId=recoveryApproval==null?null:recoveryApproval.RootId
    };
    PrinterProfile historySettings=null;
    IDisposable recoveryLease=null;

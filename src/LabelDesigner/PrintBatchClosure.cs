@@ -51,9 +51,8 @@ namespace EanEtikety {
        Reprinted < 0 || PendingReprints < 0 || (Reason != null && Reason.Length > MaxReasonLength) ||
        (Remaining > 0 && string.IsNullOrWhiteSpace(Reason))) throw Invalid();
    if (!string.IsNullOrEmpty(LinkedEntries)) {
-    if (LinkedEntries.Length > 50 * 33) throw Invalid();
     var linked = LinkedEntries.Split(',');
-    if (linked.Length > 50 || linked.Any(value => value == EntryId || !Guid.TryParseExact(value, "N", out id)) ||
+    if (linked.Any(value => value == EntryId || !Guid.TryParseExact(value, "N", out id)) ||
         linked.Distinct(StringComparer.Ordinal).Count() != linked.Length) throw Invalid();
    }
   }
@@ -118,7 +117,7 @@ namespace EanEtikety {
      header.ValidateHeader();
      if (!string.Equals(path, ClosurePath(header.EntryId, header.ClosureId), StringComparison.OrdinalIgnoreCase))
       throw PrintBatchClosure.Invalid();
-     header.CanReopen = !header.IsOpen && File.Exists(PathFor(header.EntryId, ".entry.xml"));
+     header.CanReopen = !header.IsOpen && HasBatchOriginal(header.EntryId);
      return header;
     }
    }
@@ -133,7 +132,7 @@ namespace EanEtikety {
   bool IsBatchClosed(PrintHistoryEntry entry, string rootId) {
    if (IsBatchClosed(rootId)) return true;
    // A saved closure retains its members even after one of the parent entries disappears from history.
-   return !string.IsNullOrEmpty(entry.RecoverySourceId) &&
+   return !IsHistoryId(entry.BatchId) && !string.IsNullOrEmpty(entry.RecoverySourceId) &&
     ReadClosureHeaders().Any(item => !item.IsOpen && (item.EntryId == entry.RecoverySourceId ||
      item.Includes(entry.Id) || item.Includes(entry.RecoverySourceId)));
   }
@@ -205,16 +204,21 @@ namespace EanEtikety {
    var snapshot = Read<PrintBatchClosure>(ClosurePath(entryId, closureId), MaxClosureBytes);
    if (snapshot == null || snapshot.EntryId != entryId || snapshot.ClosureId != closureId) throw PrintBatchClosure.Invalid();
    snapshot.Validate();
-   snapshot.CanReopen = !snapshot.IsOpen && File.Exists(PathFor(entryId, ".entry.xml"));
+   snapshot.CanReopen = !snapshot.IsOpen && HasBatchOriginal(entryId);
    return snapshot;
+  }
+
+  bool HasBatchOriginal(string id) {
+   return File.Exists(PathFor(id, ".entry.xml")) || File.Exists(RetainedPath(id, id));
   }
 
   public void ReopenBatch(string entryId, string closureId) {
    using (new HistoryLease(mutexName)) {
     var snapshot = LoadClosure(entryId, closureId);
     if (snapshot.IsOpen) return;
-    if (!snapshot.CanReopen) throw new InvalidOperationException(Loc.T("Pôvodná úloha už nie je v histórii tlače."));
-    ReadResultEntry(entryId);
+    if (!snapshot.CanReopen) throw new InvalidOperationException(Loc.T("Pôvodná úloha ani jej uchované údaje nie sú dostupné."));
+    var original = ReadResultEntry(entryId);
+    if (original.Retained && original.RetainedResult == null) throw PrintBatchResult.Invalid();
     var now = DateTime.UtcNow;
     snapshot.ReopenedUtc = now < snapshot.ClosedUtc ? snapshot.ClosedUtc : now;
     SaveClosure(snapshot);

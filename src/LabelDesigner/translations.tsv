@@ -948,3 +948,19 @@ Potvrďte uzavretie s nepotvrdenými dotlačami.	Confirm closure with unconfirme
 Zadajte dôvod uzavretia so zostatkom.	Enter a reason for closing with labels remaining.	Zadejte důvod uzavření se zůstatkem.	Adja meg a lezárás okát, ha címkék maradtak hátra.
 Pôvodná úloha už nie je v histórii tlače.	The original job is no longer in print history.	Původní úloha již není v historii tisku.	Az eredeti feladat már nincs a nyomtatási előzményekben.
 Výsledok uložte do súboru CSV.	Save the result as a CSV file.	Uložte výsledek do souboru CSV.	Mentse az eredményt CSV-fájlba.
+Načítavam prehľad dávky…	Loading batch overview…	Načítám přehled dávky…	Kötegáttekintés betöltése…
+Načítavam dávky…	Loading batches…	Načítám dávky…	Kötegek betöltése…
+Prehľad dávok…	Batch overview…	Přehled dávek…	Kötegek áttekintése…
+Prehľad dávok	Batches	Přehled dávek	Kötegek
+Prehľad dávky	Batch overview	Přehled dávky	Köteg áttekintése
+ID dávky	Batch ID	ID dávky	Kötegazonosító
+Čas pôvodnej tlače	Original print time	Čas původního tisku	Az eredeti nyomtatás ideje
+Zobraziť dávku…	Open batch…	Zobrazit dávku…	Köteg megnyitása…
+Typ pokusu	Attempt type	Typ pokusu	Kísérlet típusa
+Pokusy o tlač	Print attempts	Pokusy o tisk	Nyomtatási kísérletek
+Pôvodná tlač	Original print	Původní tisk	Eredeti nyomtatás
+V histórii	In history	V historii	Az előzményekben
+Trvalo uchované	Retained	Uchováno	Tartósan megőrizve
+Počty pôvodnej tlače nie sú dostupné.	The original print quantities are unavailable.	Počty z původního tisku nejsou dostupné.	Az eredeti nyomtatás mennyiségei nem érhetők el.
+Pokus a jeho potvrdené množstvá zostanú v prehľade dávky.	The attempt and its confirmed quantities will remain in the batch overview.	Pokus a jeho potvrzená množství zůstanou v přehledu dávky.	A kísérlet és megerősített mennyiségei megmaradnak a köteg áttekintésében.
+Pôvodná úloha ani jej uchované údaje nie sú dostupné.	The original job and its retained data are unavailable.	Původní úloha ani její uchované údaje nejsou dostupné.	Az eredeti feladat és megőrzött adatai nem érhetők el.

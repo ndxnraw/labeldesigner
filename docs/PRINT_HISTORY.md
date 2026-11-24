@@ -27,8 +27,23 @@ Ak výtlačky chýbajú alebo sú nepoužiteľné, potvrďte nulu. Pred odoslan�
 ďalšej dotlače sa zobrazí upozornenie na súvisiace pokusy bez potvrdenia.
 Ak sa od prípravy návrhu zmenili potvrdené výsledky, pripravte návrh
 znova z aktuálneho zostatku.
-Pri výpočte sa použijú prepojené záznamy dostupné v histórii. Odstránenie
-záznamu dotlače môže zmeniť zostatok.
+Do výpočtu vstupujú aj potvrdené množstvá z pokusov, ktoré už boli
+z histórie odstránené alebo automaticky prečistené.
+
+### Prehľad dávok a trvalé ID
+
+Otvorte **Prehľad dávok…** v histórii tlače. Pri zvolenej dávke uvidíte
+pôvodný pokus, prepojené dotlače, potvrdené množstvá a zostatok.
+Z prehľadu môžete otvoriť výsledok jednotlivého pokusu po riadkoch
+alebo zobraziť uzávierky dávky.
+
+ID pôvodnej úlohy je zároveň trvalým ID dávky. Ďalšia dotlač ho zdedí
+aj vtedy, keď vznikne z predchádzajúcej dotlače. Pri prečistení alebo
+ručnom odstránení z histórie sa metadáta pokusu a dostupné počty po
+riadkoch uchovajú lokálne v podpriečinku `batches`. Podklady na tlač
+a údaje frontu sa naďalej riadia limitmi histórie tlače. Pri starších
+záznamoch sa využijú zachované väzby. Údaje odstránené pred zavedením
+tejto funkcie sa nedajú obnoviť.
 
 ### Uzavretie a export dávky
 
@@ -40,12 +55,13 @@ riadkoch, počet nepotvrdených dotlačí a dôvod. Počas uzavretia sú úpravy
 výsledkov a odosielanie prepojených dotlačí zablokované.
 
 V časti **Uzávierky dávok…** zobrazíte uložené stavy a exportujete ich do
-CSV. Súbor je v UTF-8, používa čiarku a zachováva čísla zdrojových riadkov.
+CSV. Súbor je v UTF-8, používa čiarku a zachováva čísla zdrojových riadkov
+aj rovnaké `batch_id` pre všetky uzávierky jednej dávky.
 Pri etikete bez zdrojového riadka je pole prázdne. Otvorenie CSV
 v tabuľkovom programe môže vyžadovať výber čiarky ako oddeľovača.
 
-Ak pôvodná úloha zostala v histórii, funkcia **Znova otvoriť dávku…**
-sprístupní úpravy. Po ďalšom uzavretí vznikne nový záznam. Predchádzajúce
+Ak je pôvodný pokus v histórii alebo v prehľade uchovaných dávok, funkcia
+**Znova otvoriť dávku…** sprístupní úpravy počtov. Po ďalšom uzavretí vznikne nový záznam. Predchádzajúce
 uzávierky zostávajú dostupné aj po odstránení alebo automatickom
 prečistení histórie. Ukladajú sa lokálne v podpriečinku
 `batch-closures` histórie tlače.
