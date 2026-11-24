@@ -157,6 +157,17 @@ nahradené položky. Poškodené šablóny sú v náhľade označené a preskoč
 Pre presný návrat odstráňte aj položky pridané pôvodnou
 obnovou. Zálohy fungujú offline na .NET Framework 4.8 aj .NET 10.
 
+PRESNÉ PRESÚVANIE NA PLÁTNE
+Pri presúvaní prvku alebo výberu ukážu vodiace čiary blízke zarovnanie
+hrán a stredov s okrajom etikety alebo s iným prvkom. Popis pri kurzore
+uvádza vzdialenosť obrysu výberu od štyroch okrajov v mm alebo cm.
+Záporná vzdialenosť označuje presah mimo etikety.
+
+V ponuke Panely možno prepnúť Pravítka a Prichytávať pri presúvaní.
+Podržaním Alt počas presunu sa prichytávanie dočasne vypne. Vodiace čiary
+zostanú viditeľné. Esc obnoví pôvodnú polohu a po pustení myši sa celý
+presun dá vrátiť jedným krokom Späť. Pomôcky sa zobrazujú iba v editore.
+
 OTÁČANIE PRVKOV
 Po označení uchopte kruhový rotačný úchyt nad prvkom. Uhly 0°, 90°, 180° a 270° sa prichytávajú v tolerancii 3°.
 Shift prichytáva po 15°, Esc obnoví stav pred začiatkom operácie. Uhol vidíte pri kurzore.

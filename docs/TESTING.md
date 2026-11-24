@@ -48,6 +48,10 @@ of the template written before that failure.
 Quick template printing tests cover selection persistence and remapping,
 field errors, invariant layout, literal values and the real preview handoff
 with exactly 20 labels. The tests leave the saved template unchanged.
+Revision301Tests checks canvas placement with and without snapping, including
+an Alt override while the pointer is stationary. It exercises rotated group
+bounds at fit and scrolled zoom, edge measurements in project units, ruler
+hit testing, undo and persistence of the canvas preferences.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.

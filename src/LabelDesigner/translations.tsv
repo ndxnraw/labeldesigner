@@ -994,3 +994,7 @@ Hlavný kód	Main code	Hlavní kód	Fő kód
 Kód {0} · {1}	Code {0} · {1}	Kód {0} · {1}	Kód {0} · {1}
 Zadajte celý počet etikiet od 1 do 10000.	Enter a whole number of labels between 1 and 10000.	Zadejte celý počet etiket od 1 do 10000.	Adjon meg 1 és 10000 közötti egész címkeszámot.
 Zadajte každý identifikátor na samostatný riadok vo formáte (AI)hodnota.	Enter each identifier on its own line as (AI)value.	Zadejte každý identifikátor na samostatný řádek ve formátu (AI)hodnota.	Minden azonosítót külön sorba írjon (AI)érték formátumban.
+Pravítka	Rulers	Pravítka	Vonalzók
+Prichytávať pri presúvaní	Snap while moving	Přichytávat při přesouvání	Igazítás mozgatáskor
+Vľavo {0} · Vpravo {1}	Left {0} · Right {1}	Vlevo {0} · Vpravo {1}	Bal {0} · Jobb {1}
+Hore {0} · Dole {1}	Top {0} · Bottom {1}	Nahoře {0} · Dole {1}	Felül {0} · Alul {1}

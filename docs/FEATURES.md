@@ -18,6 +18,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Presné rozmiestňovanie na plátne** zobrazuje vodiace čiary pri presúvaní
+  prvku alebo skupiny, pravítka v mm alebo cm a vzdialenosti od okrajov.
+  Prichytávanie sa dá vypnúť v ponuke Panely alebo dočasne klávesom Alt.
 - **Stav tlačovej úlohy** sa dá na vyžiadanie načítať z frontu Windows.
 - **Ručný výsledok tlače** eviduje použiteľné etikety z pôvodnej tlače aj
   dotlačí a zostávajúce množstvá po zdrojových riadkoch. Z uloženého obsahu
