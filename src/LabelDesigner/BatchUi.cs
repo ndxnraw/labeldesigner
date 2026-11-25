@@ -15,8 +15,8 @@ public partial class MainForm {
  void ExportJob(OutputPlan plan,double dpiValue,string preferred=null,IWin32Window parent=null,Action<LabelIssue> navigate=null){
   var owner=parent??this;PreflightReport report;
   if(!RunWork(owner,"validate-output","Kontrolujem výstup…",()=>PreflightReport.Inspect(plan),out report))return;
-  if(!ReviewOutput(owner,report,1,"Exportovať",preferred==null?Loc.T("Vybrané záznamy"):preferred.ToUpperInvariant(),navigate??(issue=>{SelectEditorIssue(issue);FocusProblems();})))return;
-  using(var dialog=new SaveFileDialog{Filter="PDF|*.pdf|Word|*.docx|"+(plan.PageCount>1?"SVG (ZIP)|*.zip":"SVG|*.svg")+"|ZPL|*.zpl",FilterIndex=Math.Max(1,Array.IndexOf(new[]{"pdf","docx","svg","zpl"},preferred)+1),FileName="ND-LabelDesigner"})if(dialog.ShowDialog(owner)==DialogResult.OK){
+  if(!ReviewExport(owner,report,preferred==null?Loc.T("Vybrané záznamy"):preferred.ToUpperInvariant(),navigate??NavigateOutputIssue))return;
+  using(var dialog=new SaveFileDialog{Filter="PDF|*.pdf|Word|*.docx|"+(plan.PageCount>1?"SVG (ZIP)|*.zip":"SVG|*.svg")+"|ZPL|*.zpl",FilterIndex=Math.Max(1,Array.IndexOf(new[]{"pdf","docx","svg","zpl"},preferred)+1),FileName="ND-LabelDesigner"})if(showExportSave(dialog,owner)==DialogResult.OK){
    string format=new[]{"pdf","docx","svg","zpl"}[dialog.FilterIndex-1],path=dialog.FileName;bool done;
    if(RunWork(owner,"export-"+format,"Exportujem…",delegate{AtomicOutput.Save(path,p=>JobOutput.Export(p,format,plan,dpiValue));return true;},out done))status.Text=Loc.T("Export uložený: ")+path;
   }

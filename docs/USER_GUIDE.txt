@@ -32,15 +32,20 @@ Viacnásobný výber ukazuje spoločné akcie, aby sa omylom neupravoval iba prv
 F2 v zozname upraví odomknutý prvok, F4 otvorí vlastnosti, F8 kontrolu.
 Ctrl+PageUp/PageDown prepína karty vo vybranom paneli.
 
-Pred tlačou aj exportom sa otvorí Kontrola výstupu. Rozlišuje počet záznamov,
-etikiet, strán a opakovaní celej úlohy a uvádza výsledné celkové počty.
-V tlačovom okne zmena opakovaní upraví súhrn bez znásobovania náhľadov.
+Tlačové okno ukazuje celkový počet etikiet a strán. Počet etikiet je aj
+na tlačidle Vytlačiť. V karte Detaily je rozpis záznamov a opakovaní.
+Zmena opakovaní upraví súhrn bez znásobovania náhľadov. V zobrazení náhľadu
+vyberte Celá strana alebo Detail etikety. Na hárku s viacerými etiketami
+si v detaile môžete vybrať obsadenú pozíciu na aktuálnej strane.
+Pri odoslaní tlače sa otvorí jedno potvrdenie. Bezchybný export otvorí
+priamo uloženie súboru. Pri upozornení alebo chybe sa otvorí kontrola.
 Chyby výstup zastavia. Pri upozorneniach treba zaškrtnúť, že boli skontrolované.
 Nesprávne hlásený papier je stále upozornenie a možno vedome pokračovať.
 Filter zoznamu neskrýva chyby pred kontrolou a neumožňuje ich obísť.
 Pred odoslaním sa tlač znovu overí; zmena nastavení alebo upozornení vyžaduje
-nové potvrdenie. Návrat na úpravy pri vybranej položke označí dotknutý prvok
-alebo pôvodný riadok dávky. Záznam dávky uvádza aj prvú dotknutú stranu.
+nové potvrdenie. Prejsť na opravu otvorí vlastnosti dotknutého prvku alebo
+vyberie pôvodný riadok dávky. V karte Kontrola možno použiť Enter alebo
+dvojklik na chybu prvku. V editore je karta Kontrola dostupná aj cez F8.
 Výber prázdnej dávky alebo zahrnutého chybného riadka vypne tlač aj export;
 chybný riadok možno opraviť v zdroji a dávku znova pripraviť alebo ho vynechať.
 

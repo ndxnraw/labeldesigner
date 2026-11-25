@@ -50,7 +50,6 @@ public partial class MainForm {
   layout.DropDownItems.Add(FeatureItem("Rozloženie a výber",HeaderIcon.Panels,ShowArrange));
   layout.DropDownItems.Add(FeatureItem("Samolepiace hárky",HeaderIcon.Table,EditSheet));
   var maintenance=FeatureGroup("Kontrola a údržba",HeaderIcon.Tools);
-  maintenance.DropDownItems.Add(FeatureItem("Kontrola etikety",HeaderIcon.Check,ShowChecks));
   maintenance.DropDownItems.Add(FeatureItem("História tlače",HeaderIcon.Print,ShowPrintHistory));
   maintenance.DropDownItems.Add(FeatureItem("Diagnostika",HeaderIcon.Diagnostics,ShowDiagnostics));
   maintenance.DropDownItems.Add(FeatureItem("Aktualizácie",HeaderIcon.Update,ShowUpdates));

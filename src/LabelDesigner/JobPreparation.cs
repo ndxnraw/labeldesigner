@@ -8,9 +8,9 @@ namespace EanEtikety {
   Func<DateTime> jobClock=delegate{return DateTime.Now;};
   readonly Label jobInfo=new Label{AutoSize=true,UseMnemonic=false,MaximumSize=new Size(270,0)};
   string jobError;
-  void InitializeJobInfo(TableLayoutPanel fields,bool batch){
+  void InitializeJobInfo(TableLayoutPanel details,TableLayoutPanel fields,bool batch){
    jobInfo.Visible=sourceTemplate.Variables.Count>0||!string.IsNullOrEmpty(outputPlan.VariableValues);
-   Add(fields,jobInfo);UpdateJobInfo();
+   Add(details,jobInfo);UpdateJobInfo();
    var refresh=Button(Loc.T("Prepočítať údaje"),RefreshJobVariables);
    refresh.Visible=!batch&&sourceTemplate.Variables.Count>0;
    Add(fields,refresh);
@@ -27,7 +27,7 @@ namespace EanEtikety {
     snapshot=CloneLabel(job.Label);outputPlan=job.Plan;jobError=null;UpdateJobInfo();UpdateOutputSummary();
     updating=true;try{page.Value=1;}finally{updating=false;}
     Schedule();
-   }catch(Exception ex){jobError=ex.Message;currentReport=null;version++;debounce.Stop();print.Enabled=false;preview.ClearPages();info.Text=jobError;}
+   }catch(Exception ex){jobError=ex.Message;currentReport=null;version++;debounce.Stop();print.Enabled=false;UpdateRepairAction();preview.ClearPages();info.Text=jobError;}
   }
  }
 }

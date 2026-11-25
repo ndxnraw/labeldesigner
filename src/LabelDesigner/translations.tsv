@@ -1039,3 +1039,11 @@ Tučné písmo v celom poli	Bold throughout the field	Tučné písmo v celém po
 Formátovanie textu	Text formatting	Formátování textu	Szövegformázás
 Rozšírené formátovanie…	Advanced formatting…	Pokročilé formátování…	Speciális formázás…
 Obnoviť hlavný kód	Restore main code	Obnovit hlavní kód	Fő kód visszaállítása
+Detail etikety	Label detail	Detail etikety	Címke részlete
+Náhľad tlače	Print preview	Náhled tisku	Nyomtatási előnézet
+Zobrazenie náhľadu	Preview view	Zobrazení náhledu	Előnézet nézete
+Etiketa na strane	Label on page	Etiketa na stránce	Címke az oldalon
+Etikety spolu: {0:N0} · Strany spolu: {1:N0}	Total labels: {0:N0} · Total pages: {1:N0}	Etikety celkem: {0:N0} · Strany celkem: {1:N0}	Összes címke: {0:N0} · Összes oldal: {1:N0}
+Vytlačiť ({0:N0})	Print ({0:N0})	Vytisknout ({0:N0})	Nyomtatás ({0:N0})
+Prejsť na opravu	Go to fix	Přejít k opravě	Ugrás a javításhoz
+Prerušovaná čiara označuje hranicu tlačiteľnej oblasti.	The dashed line marks the edge of the printable area.	Přerušovaná čára označuje hranici tisknutelné oblasti.	A szaggatott vonal a nyomtatható terület határát jelzi.

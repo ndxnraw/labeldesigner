@@ -136,22 +136,18 @@ namespace EanEtikety {
 
   void BuildEditorStatus() {
    status.Dock=DockStyle.Fill;
+   status.AutoSize=true;
    status.AutoEllipsis=true;
    status.TextAlign=ContentAlignment.MiddleLeft;
    status.Padding=new Padding(8,0,0,0);
    var footer=new TableLayoutPanel {
-    Dock=DockStyle.Fill,ColumnCount=2,Margin=Padding.Empty,AccessibleName=Loc.T("Stav editora")
+    Dock=DockStyle.Fill,ColumnCount=1,Margin=Padding.Empty,AccessibleName=Loc.T("Stav editora")
    };
    footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
-   footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
    footer.Controls.Add(status,0,0);
-   var checks=NamedEditorButton("openEditorChecks","Kontrola",FocusProblems);
-   footer.Controls.Add(checks,1,0);
    footer.AutoSize=true;
    studio.RowStyles[3].SizeType=SizeType.AutoSize;
    studio.Controls.Add(footer,0,3);
-   status.Cursor=Cursors.Hand;
-   status.Click+=delegate{FocusProblems();};
   }
  }
 }

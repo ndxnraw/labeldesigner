@@ -47,8 +47,14 @@ public partial class MainForm {
  Form CreateJobPrintWindow(LabelSettings settings,OutputPlan plan,Action<LabelIssue> navigate=null,ArchivedPrintJob replay=null){var panel=new PrintPanel(settings,plan,true);if(workspace!=null)panel.LoadProfiles(System.IO.Path.Combine(workspace.DirectoryPath,"printers.xml"));
   panel.UsePrintHistory(LocalPrintHistory());if(replay!=null)panel.RestorePrintSettings(replay);
   var window=new Form{Text="ND LabelDesigner – "+Loc.T("Tlačiť"),Size=new Size(1280,840),MinimumSize=new Size(980,680),StartPosition=FormStartPosition.CenterParent,ShowInTaskbar=false,Font=Font,Icon=Icon,AutoScaleMode=AutoScaleMode.Dpi};
-  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);panel.BackRequested+=delegate{window.Close();};if(replay==null)panel.EditIssueRequested+=issue=>{if(navigate!=null)navigate(issue);else{SelectEditorIssue(issue);FocusProblems();}};return window;
+  window.Controls.Add(panel);ApplyColors(window);panel.Style(ApplyColors,dark);
+  panel.BackRequested+=delegate{window.Close();};
+  if(replay==null){
+   Action<LabelIssue> repair=navigate??NavigateOutputIssue;
+   panel.EditIssueRequested+=issue=>BeginInvoke((Action)(()=>repair(issue)));
+  }
+  return window;
  }
- void PrintLabel(){try{CommitInspectorIfFocused();UpdatePreview();if(labelIssues.Exists(i=>i.Blocking)){FocusProblems();return;}var settings=Read();timer.Stop();using(var window=CreatePrintWindow(settings))window.ShowDialog(this);}catch(Exception ex){Error(ex);}}
+ void PrintLabel(){try{CommitInspectorIfFocused();UpdatePreview();if(labelIssues.Exists(i=>i.Blocking)){OpenBlockingOutputIssue();return;}var settings=Read();timer.Stop();using(var window=CreatePrintWindow(settings))window.ShowDialog(this);}catch(Exception ex){Error(ex);}}
 }
 }

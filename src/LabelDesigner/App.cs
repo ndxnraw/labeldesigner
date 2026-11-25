@@ -79,12 +79,12 @@ FormClosing+=delegate(object sender,FormClosingEventArgs args){if(!CanDiscard())
  void SaveAs(){using(var d=new SaveFileDialog{Filter=Loc.T("Nastavenie etikety (*.ean.xml)|*.ean.xml"),FileName=Loc.T("Moja etiketa.ean.xml")})if(d.ShowDialog(this)==DialogResult.OK)try{SaveDocument(d.FileName);}catch(Exception ex){Error(ex);}}
  static void Atomic(string target,Action<string> action){string tmp=target+"."+Guid.NewGuid().ToString("N")+".tmp";try{action(tmp);if(File.Exists(target))File.Replace(tmp,target,null,true);else File.Move(tmp,target);}finally{if(File.Exists(tmp))File.Delete(tmp);}}
  void Export(string format){try{
-  CommitInspectorIfFocused();UpdatePreview();if(labelIssues.Exists(i=>i.Blocking)){FocusProblems();return;}var input=Read();var instant=currentTime();PreparedLabelJob job;
+  CommitInspectorIfFocused();UpdatePreview();if(labelIssues.Exists(i=>i.Blocking)){OpenBlockingOutputIssue();return;}var input=Read();var instant=currentTime();PreparedLabelJob job;
   if(!RunWork(this,"prepare-output","Pripravujem výstup…",()=>new PreparedLabelJob(input,instant),out job))return;
   var settings=job.Label;if(settings.Layout.Enabled||format=="svg"&&job.Plan.PageCount>1){ExportJob(job.Plan,settings.Dpi,format);return;}
   PreflightReport report;if(!RunWork(this,"validate-output","Kontrolujem výstup…",()=>PreflightReport.Inspect(job.Plan),out report))return;
-  if(!ReviewOutput(this,report,1,"Exportovať",format.ToUpperInvariant(),issue=>{SelectEditorIssue(issue);FocusProblems();}))return;
-  using(var dialog=new SaveFileDialog{Filter=format.ToUpper()+" (*."+format+")|*."+format,FileName="ND-LabelDesigner-"+DateTime.Now.ToString("yyyyMMdd-HHmm")+"."+format})if(dialog.ShowDialog(this)==DialogResult.OK){
+  if(!ReviewExport(this,report,format.ToUpperInvariant(),NavigateOutputIssue))return;
+  using(var dialog=new SaveFileDialog{Filter=format.ToUpper()+" (*."+format+")|*."+format,FileName="ND-LabelDesigner-"+DateTime.Now.ToString("yyyyMMdd-HHmm")+"."+format})if(showExportSave(dialog,this)==DialogResult.OK){
    string path=dialog.FileName;bool finished;
    if(RunWork(this,"export-"+format,"Exportujem…",delegate{AtomicOutput.Save(path,p=>{if(format=="pdf")Engine.Pdf(p,settings);else if(format=="docx")Engine.Docx(p,settings);else if(format=="svg")Engine.Svg(p,settings);else Engine.Zpl(p,settings);});return true;},out finished)){status.Text=Loc.T("Export uložený: ")+path;status.ForeColor=Color.FromArgb(32,84,58);}
   }

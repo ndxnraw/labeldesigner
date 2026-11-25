@@ -85,6 +85,10 @@ Názov produktu je naďalej Pre-release.
   a kurzívu možno použiť priamo na výber v textovom poli. Mierka pod plátnom mení
   iba jeho zobrazenie. Tabuľku otvoríte v ponuke Zobrazenie a centrovanie je vo
   vlastnostiach hlavného kódu. Bočné panely si uchovávajú šírku.
+- **Tlač a export:** náhľad prepína medzi celou stranou a detailom vybranej
+  etikety. Súhrn zvýrazní výsledný počet etikiet a strán vrátane opakovaní.
+  Kontrola ponúkne prechod na opraviteľný prvok alebo riadok dávky.
+  Bezchybný export otvorí priamo uloženie súboru.
 - **GS1 editor:** pomenované polia, rýchle voľby, vyhľadávanie, formáty a chyby
   pri poli, náhľad, zmena poradia a bezpečné zrušenie.
 - **Ochrana ovládania kolieskom:** číselné polia a zatvorené rozbaľovacie ponuky

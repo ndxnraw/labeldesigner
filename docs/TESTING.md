@@ -189,6 +189,8 @@ virtual grid and cancelled re-preparation, and bounded diagnostics that exclude 
 messages and paths. Synthetic diagnostic failures use a test-local directory.
 `PreflightUiTests` covers shared print/export rules, explicit warning consent,
 blocking errors hidden by filters, stale print approval rejected before submission,
+direct file saving for clean single, sheet and batch exports, label detail and
+slot changes without page re-rendering, keyboard repair navigation,
 source row/page navigation, counts across partially filled sheets and whole-job
 repetitions, synchronized layer selection, group locks, protected multi-selection
 properties, layer undo, keyboard panel access, export cancellation, and batch gates.

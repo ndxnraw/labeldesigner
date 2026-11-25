@@ -91,6 +91,7 @@ namespace EanEtikety {
     BarcodeReadabilityItem selected;
     DialogResult choice = ReadabilityDialog(run, out selected);
     if (choice == DialogResult.OK && selected != null) {
+     if(preview.ShowDetail)zoom.SelectedIndex=0;
      page.Value = selected.Page;
      preview.HighlightedCode = selected.Bounds;
      preview.HighlightedPage = selected.Page - 1;

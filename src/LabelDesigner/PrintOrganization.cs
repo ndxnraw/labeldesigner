@@ -1,6 +1,31 @@
-using System.Drawing;using System.Windows.Forms;
+using System;using System.Drawing;using System.Windows.Forms;
 namespace EanEtikety {
 public partial class PrintPanel {
+ ModernButton fixIssue;
+ LabelIssue blockedRepair;
+
+ void BuildRepairAction(FlowLayoutPanel actions){
+  fixIssue=Button(Loc.T("Prejsť na opravu"),()=>GoToRepair(blockedRepair));
+  fixIssue.Name="fixPrintIssue";
+  fixIssue.Visible=false;
+  actions.Controls.Add(fixIssue);
+ }
+
+ void UpdateRepairAction(){
+  blockedRepair=busy||sending||replaying||EditIssueRequested==null?null:
+   currentReport?.Issues.Find(issue=>issue.Blocking&&OutputReviewDialog.HasRepairTarget(issue));
+  fixIssue.Visible=blockedRepair!=null;
+  print.Visible=blockedRepair==null;
+  fixIssue.AccessibleDescription=blockedRepair?.ToString();
+ }
+
+ void GoToRepair(LabelIssue issue){
+  var navigate=EditIssueRequested;
+  if(navigate==null||issue==null||sending||busy)return;
+  BackRequested?.Invoke(this,EventArgs.Empty);
+  navigate(issue);
+ }
+
  void FitCommonSettings(TableLayoutPanel side,TableLayoutPanel fields){
   bool fitting=false;System.Action fit=delegate{if(fitting||side.IsDisposed)return;fitting=true;try{
    int settings=(int)printSections.RowStyles[0].Height+System.Math.Max(100,Font.Height*4);
@@ -9,8 +34,7 @@ public partial class PrintPanel {
   }finally{fitting=false;}};
   side.SizeChanged+=delegate{fit();};fields.SizeChanged+=delegate{fit();};printSections.Layout+=delegate{fit();};FontChanged+=delegate{fit();};
  }
- bool summaryLayout,summaryLayoutPending;TableLayoutPanel printDetails;
- void LayoutPrintSummary(){if(summaryLayout||jobSummary.Parent==null)return;summaryLayout=true;try{var container=(TableLayoutPanel)jobSummary.Parent;int width=System.Math.Max(100,container.ClientSize.Width-container.Padding.Horizontal-12);jobSummary.MaximumSize=new Size(width,0);jobInfo.MaximumSize=new Size(290,0);jobSummary.AutoSize=false;jobSummary.Height=TextRenderer.MeasureText(jobSummary.Text,jobSummary.Font,new Size(width,0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+4;int height=container.Padding.Vertical+jobSummary.Height+jobSummary.Margin.Vertical;foreach(Control child in container.Controls)if(child!=jobSummary&&child.Visible)height+=child.GetPreferredSize(new Size(width,0)).Height+child.Margin.Vertical;var parent=container.Parent as TableLayoutPanel;if(parent!=null){int row=parent.GetRow(container);if(row<0||row>=parent.RowStyles.Count)return;parent.RowStyles[row].SizeType=SizeType.Absolute;parent.RowStyles[row].Height=System.Math.Min(150,height);container.AutoSize=false;container.Dock=DockStyle.Fill;if(parent.IsHandleCreated&&!summaryLayoutPending&&parent.GetRowHeights()[row]<(int)parent.RowStyles[row].Height){summaryLayoutPending=true;parent.BeginInvoke((System.Action)delegate{summaryLayoutPending=false;if(!parent.IsDisposed)parent.PerformLayout(container,"Height");});}}}finally{summaryLayout=false;}}
+ TableLayoutPanel printDetails;
  readonly ModernTabs printSections=new ModernTabs{Dock=DockStyle.Fill,Name="printSections",AccessibleName=Loc.T("Nastavenia tlače")};
  TableLayoutPanel PrintSection(string name){var page=printSections.AddPage(Loc.T(name));var stack=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1,Padding=new Padding(8)};stack.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));page.Controls.Add(stack);return stack;}
  void OrganizePrintSettings(TableLayoutPanel side){

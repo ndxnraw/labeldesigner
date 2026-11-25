@@ -17,28 +17,50 @@ internal static class PrintWorker {
 }
 public class PrintCanvas:ScrollableControl {
  Image image;internal RectangleF HighlightedCode;internal int HighlightedPage=-1;public double Zoom;public int Page;[System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public SizeF Paper{get;set;}[System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public RectangleF Printable{get;set;}
+ internal bool ShowDetail;
+ internal RectangleF DetailBounds;
  public PrintCanvas(){DoubleBuffered=true;AutoScroll=true;TabStop=true;Resize+=delegate{Invalidate();};}
  public void SetPage(Image next,SizeF paper,RectangleF printable){var old=image;image=next;Paper=paper;Printable=printable;if(old!=null)old.Dispose();Invalidate();}
- public void ClearPages(){SetPage(null,SizeF.Empty,RectangleF.Empty);}
+ public void ClearPages(){DetailBounds=RectangleF.Empty;SetPage(null,SizeF.Empty,RectangleF.Empty);}
+ RectangleF ViewBounds()=>ShowDetail&&DetailBounds.Width>0&&DetailBounds.Height>0
+  ?DetailBounds:new RectangleF(PointF.Empty,Paper);
  protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(image==null||Paper.Width<=0||Paper.Height<=0)return;
-  double scale=Zoom==0?Math.Max(.01,Math.Min((ClientSize.Width-48)/Paper.Width,(ClientSize.Height-48)/Paper.Height)):Zoom*e.Graphics.DpiX/25.4;
-  int w=Math.Max(1,(int)Math.Round(Paper.Width*scale)),h=Math.Max(1,(int)Math.Round(Paper.Height*scale));var extent=Zoom==0?Size.Empty:new Size(w+48,h+48);if(AutoScrollMinSize!=extent)AutoScrollMinSize=extent;
-  float x=Math.Max(24,(ClientSize.Width-w)/2)+AutoScrollPosition.X,y=Math.Max(24,(ClientSize.Height-h)/2)+AutoScrollPosition.Y;e.Graphics.FillRectangle(Brushes.White,x,y,w,h);e.Graphics.DrawImage(image,new RectangleF(x,y,w,h));
-  if(Page==HighlightedPage&&!HighlightedCode.IsEmpty){
-   var code=HighlightedCode;
-   using(var pen=new Pen(SystemInformation.HighContrast?SystemColors.Highlight:Color.DeepSkyBlue,3))
-    e.Graphics.DrawRectangle(pen,x+code.X*w/Paper.Width,y+code.Y*h/Paper.Height,code.Width*w/Paper.Width,code.Height*h/Paper.Height);
-  }
+  var view=ViewBounds();
+  float scale=(float)(Zoom==0?Math.Max(.01,Math.Min((ClientSize.Width-48)/view.Width,(ClientSize.Height-48)/view.Height)):Zoom*e.Graphics.DpiX/25.4);
+  float w=Math.Max(1,view.Width*scale),h=Math.Max(1,view.Height*scale);
+  var extent=Zoom==0?Size.Empty:new Size((int)Math.Ceiling(w)+48,(int)Math.Ceiling(h)+48);
+  if(AutoScrollMinSize!=extent)AutoScrollMinSize=extent;
+  float x=Math.Max(24,(ClientSize.Width-w)/2)+AutoScrollPosition.X,y=Math.Max(24,(ClientSize.Height-h)/2)+AutoScrollPosition.Y;
+  var viewport=new RectangleF(x,y,w,h);
+  RectangleF Map(RectangleF area)=>new(x+(area.X-view.X)*scale,y+(area.Y-view.Y)*scale,area.Width*scale,area.Height*scale);
+  var saved=e.Graphics.Save();
+  try{
+   e.Graphics.SetClip(viewport,System.Drawing.Drawing2D.CombineMode.Intersect);
+   e.Graphics.FillRectangle(Brushes.White,viewport);
+   e.Graphics.DrawImage(image,Map(new RectangleF(PointF.Empty,Paper)));
+   if(ShowDetail&&!Printable.IsEmpty&&!Printable.Contains(view)){
+    var border=Map(Printable);
+    using var pen=new Pen(SystemInformation.HighContrast?SystemColors.Highlight:Color.DarkOrange,2);
+    pen.DashStyle=System.Drawing.Drawing2D.DashStyle.Dash;
+    e.Graphics.DrawRectangle(pen,border.X,border.Y,border.Width,border.Height);
+   }
+   if(Page==HighlightedPage&&!HighlightedCode.IsEmpty){
+    var code=Map(HighlightedCode);
+    using var pen=new Pen(SystemInformation.HighContrast?SystemColors.Highlight:Color.DeepSkyBlue,3);
+    e.Graphics.DrawRectangle(pen,code.X,code.Y,code.Width,code.Height);
+   }
+  }finally{e.Graphics.Restore(saved);}
   if(Focused)ControlPaint.DrawFocusRectangle(e.Graphics,new Rectangle(3,3,ClientSize.Width-6,ClientSize.Height-6));
  }
  protected override void Dispose(bool disposing){if(disposing)ClearPages();base.Dispose(disposing);}
 }
 internal sealed class PrintResult:IDisposable {
+ public RectangleF[] LabelBounds;
  public ZebraSettings Zebra;public PreviewTrace Trace;public PrintDiagnostics Diagnostics;public PreflightReport Report;public bool RequiresReview;public string ProfileWarning;public PrinterProfile Profile;public bool IgnoreDriverMargins;public double OffsetX,OffsetY,ScaleX=1,ScaleY=1;public Image Image;public SizeF Paper;public RectangleF Printable;public string[] Printers,Warnings;public PaperSize[] Papers;public PrinterSettings Printer;public PageSettings Settings;public int Count;public string Error;public bool Sent,Cancelled;public string HistoryWarning;public PrintPanel.ReadabilityRun Readability;
  public void Dispose(){if(Image!=null){Image.Dispose();Image=null;}}
 }
 public partial class PrintPanel:UserControl {
- bool calibrationTargetMode;TableLayoutPanel advancedFields;ModernButton driverProperties;PreflightReport currentReport;string approvedFingerprint;readonly Label jobSummary=new Label();
+ bool calibrationTargetMode;TableLayoutPanel advancedFields;ModernButton driverProperties;PreflightReport currentReport;string approvedFingerprint;readonly Label jobSummary=new Label(),jobBreakdown=new Label();
  string initialPrinterName;OutputPlan outputPlan;LabelSettings snapshot;readonly LabelSettings sourceTemplate;readonly PrintCanvas preview=new PrintCanvas();
  readonly ModernComboBox printers=new ModernComboBox(),zoom=new ModernComboBox(),papers=new ModernComboBox();
  readonly NumericUpDown copies=new ClickWheelNumericUpDown(),page=new ClickWheelNumericUpDown();readonly CheckBox landscape=new CheckBox();
@@ -60,9 +82,18 @@ public partial class PrintPanel:UserControl {
   Add(fields,new Label{Text=Loc.T("Etiketa")+": "+snapshot.Width.ToString("0.##")+" × "+snapshot.Height.ToString("0.##")+" mm",AutoSize=true,Padding=new Padding(0,6,0,6)});
   OrganizePrintSettings(side);FitCommonSettings(side,fields);
   var right=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3};right.RowStyles.Add(new RowStyle(SizeType.AutoSize));right.RowStyles.Add(new RowStyle(SizeType.AutoSize));right.RowStyles.Add(new RowStyle(SizeType.Percent,100));body.Controls.Add(right,1,0);var tools=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill,Padding=new Padding(4)};right.Controls.Add(tools,0,0);
-  zoom.Width=140;zoom.DropDownStyle=ComboBoxStyle.DropDownList;zoom.Items.AddRange(new object[]{Loc.T("Celá strana"),"50 %","100 %","150 %","200 %","400 %"});zoom.SelectedIndex=0;zoom.SelectedIndexChanged+=delegate{preview.Zoom=zoom.SelectedIndex==0?0:new[]{.5,1,1.5,2,4}[zoom.SelectedIndex-1];preview.AutoScrollPosition=Point.Empty;preview.Invalidate();};tools.Controls.Add(zoom);
-  pageTools.AutoSize=true;pageTools.Visible=false;pageTools.Controls.Add(new Label{Text=Loc.T("Strana:"),AutoSize=true});page.Minimum=page.Maximum=1;page.Width=65;pageTools.Controls.Add(page);pageTotal.AutoSize=true;pageTools.Controls.Add(pageTotal);tools.Controls.Add(pageTools);var jobFields=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1,Padding=new Padding(8,0,8,4),MaximumSize=new Size(0,150),AutoScroll=true};jobFields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));jobSummary.MaximumSize=new Size(0,0);Add(jobFields,jobSummary);InitializeJobInfo(jobFields,plan!=null);Add(printDetails,jobInfo);jobFields.SizeChanged+=delegate{LayoutPrintSummary();};jobFields.VisibleChanged+=delegate{LayoutPrintSummary();};jobSummary.FontChanged+=delegate{LayoutPrintSummary();};jobSummary.SizeChanged+=delegate{LayoutPrintSummary();};jobInfo.TextChanged+=delegate{LayoutPrintSummary();};right.Controls.Add(jobFields,0,1);preview.Dock=DockStyle.Fill;right.Controls.Add(preview,0,2);
-  var footer=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,AutoSize=true,MinimumSize=new Size(0,60)};footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));layout.Controls.Add(footer,0,2);info.Dock=DockStyle.Fill;info.AutoEllipsis=true;info.TextAlign=ContentAlignment.MiddleLeft;footer.Controls.Add(info,0,0);var actions=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill,WrapContents=false};footer.Controls.Add(actions,1,0);printBack=Button(Loc.T("Späť do editora"),Back);printBack.Width=160;actions.Controls.Add(printBack);print.Text=Loc.T("Tlačiť");print.AutoSize=true;print.AutoSizeMode=AutoSizeMode.GrowAndShrink;print.MinimumSize=new Size(130,42);print.FlatStyle=FlatStyle.Flat;print.Click+=delegate{Submit();};actions.Controls.Add(print);print.Enabled=false;
+  BuildPreviewModes(tools);
+  pageTools.AutoSize=true;pageTools.Visible=false;pageTools.Controls.Add(new Label{Text=Loc.T("Strana:"),AutoSize=true});page.Minimum=page.Maximum=1;page.Width=65;pageTools.Controls.Add(page);pageTotal.AutoSize=true;pageTools.Controls.Add(pageTotal);tools.Controls.Add(pageTools);var jobFields=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1,Padding=new Padding(8,0,8,4),Margin=Padding.Empty};
+  jobFields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+  jobSummary.Font=UiFonts.Get(Font.Size,FontStyle.Bold);
+  Add(jobFields,jobSummary);
+  InitializeJobInfo(printDetails,jobFields,plan!=null);
+  jobBreakdown.AutoSize=true;
+  jobBreakdown.UseMnemonic=false;
+  Add(printDetails,jobBreakdown);
+  right.Controls.Add(jobFields,0,1);
+  preview.Dock=DockStyle.Fill;right.Controls.Add(preview,0,2);
+  var footer=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,AutoSize=true,MinimumSize=new Size(0,60)};footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));layout.Controls.Add(footer,0,2);info.Dock=DockStyle.Fill;info.AutoEllipsis=true;info.TextAlign=ContentAlignment.MiddleLeft;footer.Controls.Add(info,0,0);var actions=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill,WrapContents=false};footer.Controls.Add(actions,1,0);printBack=Button(Loc.T("Späť do editora"),Back);printBack.Width=160;actions.Controls.Add(printBack);print.AutoSize=true;print.AutoSizeMode=AutoSizeMode.GrowAndShrink;print.MinimumSize=new Size(130,42);print.FlatStyle=FlatStyle.Flat;print.Click+=delegate{Submit();};actions.Controls.Add(print);print.Enabled=false;BuildRepairAction(actions);
   printers.SelectedIndexChanged+=delegate{if(!updating)SelectPrinter(Convert.ToString(printers.SelectedItem));};papers.SelectedIndexChanged+=delegate{if(!updating&&selectedPage!=null&&papers.SelectedItem is PaperSize){selectedPage.PaperSize=(PaperSize)papers.SelectedItem;Schedule();}};landscape.CheckedChanged+=delegate{if(!updating&&selectedPage!=null){selectedPage.Landscape=landscape.Checked;Schedule();}};page.ValueChanged+=delegate{if(!updating)Schedule();};debounce.Tick+=delegate{debounce.Stop();StartRequest(false,false);};info.Text=Loc.T("Načítavam tlačiarne…");
  }
  public static LabelSettings CloneLabel(LabelSettings source){using(var stream=new System.IO.MemoryStream()){var xml=new System.Xml.Serialization.XmlSerializer(typeof(LabelSettings));xml.Serialize(stream,source);stream.Position=0;return (LabelSettings)xml.Deserialize(stream);}}
@@ -70,12 +101,12 @@ public partial class PrintPanel:UserControl {
  static void Add(TableLayoutPanel p,Control c){c.Dock=DockStyle.Top;c.Margin=new Padding(0,4,0,6);c.TabIndex=p.Controls.Count;p.Controls.Add(c,0,p.RowCount++);p.RowStyles.Add(new RowStyle(SizeType.AutoSize));if(c.AutoSize&&(c is Label||c is CheckBox)){var check=c as CheckBox;if(check!=null)check.AutoSize=false;EventHandler fit=delegate{int width=Math.Max(40,p.ClientSize.Width-p.Padding.Horizontal-c.Margin.Horizontal);if(c.MaximumSize.Width!=width)c.MaximumSize=new Size(width,0);if(check!=null){using(var g=check.CreateGraphics()){int glyph=CheckBoxRenderer.GetGlyphSize(g,System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal).Width;check.Height=Math.Max(glyph+6,TextRenderer.MeasureText(check.Text,check.Font,new Size(Math.Max(1,width-glyph-8-check.Padding.Horizontal),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+6+check.Padding.Vertical);}}};p.SizeChanged+=fit;c.FontChanged+=fit;c.TextChanged+=fit;fit(null,EventArgs.Empty);}}
  static ModernButton Button(string text,Action action){var b=new ModernButton{Text=text,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,MinimumSize=new Size(0,38),FlatStyle=FlatStyle.Flat};b.Click+=delegate{action();};return b;}
  public void Style(Action<Control> apply,bool dark){calibrationStyle=apply;calibrationDark=dark;apply(this);preview.BackColor=dark?Color.FromArgb(14,21,32):Color.FromArgb(233,237,243);print.BackColor=StudioTheme.Accent;print.ForeColor=Color.White;print.FlatAppearance.BorderColor=StudioTheme.Accent;}
- void Schedule(){if(sending)return;readabilityButton.Enabled=false;printDiagnostics=null;diagnosticsButton.Enabled=false;currentReport=null;version++;print.Enabled=false;preview.ClearPages();info.Text=Loc.T("Pripravujem náhľad…");debounce.Stop();debounce.Start();}
+ void Schedule(){if(sending)return;readabilityButton.Enabled=false;printDiagnostics=null;diagnosticsButton.Enabled=false;currentReport=null;version++;print.Enabled=false;UpdateRepairAction();preview.ClearPages();info.Text=Loc.T("Pripravujem náhľad…");debounce.Stop();debounce.Start();}
  public void SelectPrinter(string name){if(sending||calibrationTargetMode)return;InvalidatePreviewCache();requestedProfile=null;selectedPrinter=null;selectedPage=null;knownPapers=null;updating=true;try{ApplyZebra(new ZebraSettings{Dpi=snapshot.Dpi});if(!string.IsNullOrEmpty(name)&&!printers.Items.Contains(name))printers.Items.Add(name);printers.SelectedItem=name;profileName.Clear();RefreshProfiles(name,null);}finally{updating=false;}printerName.Text=name;printerTip.SetToolTip(printers,name);printerTip.SetToolTip(printerName,name);StartRequest(false,false,name);}
  public void RefreshPreview(){StartRequest(false,false);}
  void StartRequest(bool discover,bool send){StartRequest(discover,send,null);}
  void StartRequest(bool discover,bool send,string requested){if(closed||sending&&!send)return;if(jobError!=null){print.Enabled=false;info.Text=jobError;return;}var trace=new PreviewTrace();if(discover)InvalidatePreviewCache();int setupRevision=driverRevision;debounce.Stop();int ticket=++version;string name=requested??Convert.ToString(printers.SelectedItem);var printer=selectedPrinter==null?null:(PrinterSettings)selectedPrinter.Clone();var settings=selectedPage==null?null:(PageSettings)selectedPage.Clone();var cachedPapers=discover?null:knownPapers;int index=(int)page.Value-1;short count=(short)copies.Value;double correctionX=(double)offsetX.Value,correctionY=(double)offsetY.Value,correctionScaleX=(double)scaleX.Value/100,correctionScaleY=(double)scaleY.Value/100;bool ignoreMargins=ignoreDriverMargins.Checked;var zebra=ReadZebra();var sendZebra=zebraSender;var profile=requestedProfile;requestedProfile=null;var availableProfiles=profiles==null?null:new List<PrinterProfile>(profiles.Profiles);if(profile==null&&profiles!=null&&!string.IsNullOrEmpty(name))profile=profiles.Find(name);if(profile!=null)profile=profile.Copy();
-  if(calibrationTargetMode){correctionX=correctionY=0;correctionScaleX=correctionScaleY=1;count=1;}printDiagnostics=null;diagnosticsButton.Enabled=false;busy=true;print.Enabled=false;if(!send)preview.ClearPages();info.Text=Loc.T(send?"Odosielam do tlačiarne…":discover?"Načítavam tlačiarne…":"Pripravujem náhľad…");if(send){sending=true;UpdateZebraEnabled();printers.Enabled=papers.Enabled=landscape.Enabled=copies.Enabled=mediaProfiles.Enabled=ignoreDriverMargins.Enabled=offsetX.Enabled=offsetY.Enabled=scaleX.Enabled=scaleY.Enabled=false;}
+  if(calibrationTargetMode){correctionX=correctionY=0;correctionScaleX=correctionScaleY=1;count=1;}printDiagnostics=null;diagnosticsButton.Enabled=false;busy=true;print.Enabled=false;UpdateRepairAction();if(!send)preview.ClearPages();info.Text=Loc.T(send?"Odosielam do tlačiarne…":discover?"Načítavam tlačiarne…":"Pripravujem náhľad…");if(send){sending=true;UpdateZebraEnabled();printers.Enabled=papers.Enabled=landscape.Enabled=copies.Enabled=mediaProfiles.Enabled=ignoreDriverMargins.Enabled=offsetX.Enabled=offsetY.Enabled=scaleX.Enabled=scaleY.Enabled=false;}
   var renderLabel=CloneLabel(snapshot);var renderPlan=outputPlan;var cachedReadability=ownsPreparedPlan?readability:null;readabilityButton.Enabled=false;
   var history=send&&!calibrationTargetMode?printHistory:null;
   bool keepCopy=archivePrint.Checked;
@@ -115,7 +146,7 @@ public partial class PrintPanel:UserControl {
        historyEntry.Media=historySettings.DisplayName;
       }catch(Exception ex){DiagnosticLog.Write("print-history-settings",ex);}
      }
-     DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,"submit",null);if(zebra.Enabled){sendZebra(doc,geometry,zebra,count);result.Sent=true;}else{doc.PrintController=new StandardPrintController();doc.Print();result.Cancelled=doc.Cancelled;result.Sent=!doc.Cancelled;}DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,result.Cancelled?"cancelled":"submitted",null);}else{result.Paper=new SizeF(Math.Max((float)(doc.WidthMm*doc.ScaleX+Math.Max(0,doc.OffsetX)),geometry.Bounds.Width*.254f),Math.Max((float)(doc.HeightMm*doc.ScaleY+Math.Max(0,doc.OffsetY)),geometry.Bounds.Height*.254f));result.Image=PreviewImage(doc,renderPlan,Math.Max(0,Math.Min(doc.PageCount-1,index)),result.Paper,trace);var a=geometry.PrintableArea;result.Printable=new RectangleF(a.X*.254f,a.Y*.254f,a.Width*.254f,a.Height*.254f);}}
+     DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,"submit",null);if(zebra.Enabled){sendZebra(doc,geometry,zebra,count);result.Sent=true;}else{doc.PrintController=new StandardPrintController();doc.Print();result.Cancelled=doc.Cancelled;result.Sent=!doc.Cancelled;}DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,result.Cancelled?"cancelled":"submitted",null);}else{result.Paper=new SizeF(Math.Max((float)(doc.WidthMm*doc.ScaleX+Math.Max(0,doc.OffsetX)),geometry.Bounds.Width*.254f),Math.Max((float)(doc.HeightMm*doc.ScaleY+Math.Max(0,doc.OffsetY)),geometry.Bounds.Height*.254f));int shownPage=Math.Max(0,Math.Min(doc.PageCount-1,index));var calibration=new PrintCalibration{X=doc.OffsetX,Y=doc.OffsetY,ScaleX=doc.ScaleX,ScaleY=doc.ScaleY};result.LabelBounds=renderPlan.PlacementsForPage(shownPage).ConvertAll(item=>calibration.Transform(item.Bounds)).ToArray();result.Image=PreviewImage(doc,renderPlan,shownPage,result.Paper,trace);var a=geometry.PrintableArea;result.Printable=new RectangleF(a.X*.254f,a.Y*.254f,a.Width*.254f,a.Height*.254f);}}
   }catch(OperationCanceledException){result.Cancelled=true;}catch(Exception ex){string id=send?DiagnosticLog.WritePrintTo(DiagnosticLog.DirectoryPath,result.Diagnostics,"failed",ex):DiagnosticLog.Write("print-preview",ex);result.Error=ex.Message+(id==null?"":"\r\n"+Loc.T("Diagnostický záznam")+": "+id);}
    try {
     if(!recoveryRefused) {
@@ -132,30 +163,29 @@ public partial class PrintPanel:UserControl {
    if(result.Error!=null){info.Text=Loc.T(sending?"Tlač sa nepodarila: ":"Náhľad nie je dostupný: ")+result.Error;print.Enabled=false;}
    else if(result.RequiresReview){info.Text=Loc.T("Nastavenia alebo upozornenia sa zmenili. Skontrolujte výstup znova.");print.Enabled=currentReport!=null&&!currentReport.Blocking;}
    else if(result.Cancelled){info.Text=Loc.T("Tlač bola zrušená.");print.Enabled=true;}else if(result.Sent){info.Text=Loc.T("Úloha bola odoslaná do tlačového systému Windows.");print.Enabled=true;}
-   else{preview.SetPage(result.Image,result.Paper,result.Printable);result.Image=null;preview.Page=(int)page.Value-1;paperInfo.Text=printDiagnostics==null?"":printDiagnostics.Summary();info.Text=warnings.Length==0?Loc.T("Pripravené"):Loc.T(currentReport!=null&&currentReport.Blocking?"Výstup blokujú chyby":"Skontrolujte upozornenia")+" ("+warnings.Length+")";info.AccessibleDescription=string.Join("\r\n",warnings);printerTip.SetToolTip(info,info.AccessibleDescription);print.Enabled=currentReport!=null&&!currentReport.Blocking;PreviewBuilds++;}
-  }finally{updating=false;sending=false;busy=false;printers.Enabled=papers.Enabled=landscape.Enabled=mediaProfiles.Enabled=ignoreDriverMargins.Enabled=offsetX.Enabled=offsetY.Enabled=scaleX.Enabled=scaleY.Enabled=!calibrationTargetMode;copies.Enabled=!calibrationTargetMode&&copies.Maximum>1;driverProperties.Enabled=!calibrationTargetMode;UpdateZebraEnabled();}if(result.HistoryWarning!=null)info.Text+="  "+result.HistoryWarning;if(result.Trace!=null&&result.Error==null&&!result.Sent&&!result.Cancelled&&!result.RequiresReview)LastPreviewPerformance=new PreviewPerformance(result.Trace);if(PreviewReady!=null)PreviewReady(this,EventArgs.Empty);
+   else{preview.SetPage(result.Image,result.Paper,result.Printable);result.Image=null;SetPreviewLabels(result.LabelBounds,(int)page.Value-1);paperInfo.Text=printDiagnostics==null?"":printDiagnostics.Summary();info.Text=warnings.Length==0?Loc.T("Pripravené"):Loc.T(currentReport!=null&&currentReport.Blocking?"Výstup blokujú chyby":"Skontrolujte upozornenia")+" ("+warnings.Length+")";info.AccessibleDescription=string.Join("\r\n",warnings);printerTip.SetToolTip(info,info.AccessibleDescription);print.Enabled=currentReport!=null&&!currentReport.Blocking;PreviewBuilds++;}
+  }finally{updating=false;sending=false;busy=false;printers.Enabled=papers.Enabled=landscape.Enabled=mediaProfiles.Enabled=ignoreDriverMargins.Enabled=offsetX.Enabled=offsetY.Enabled=scaleX.Enabled=scaleY.Enabled=!calibrationTargetMode;copies.Enabled=!calibrationTargetMode&&copies.Maximum>1;driverProperties.Enabled=!calibrationTargetMode;UpdateZebraEnabled();UpdateRepairAction();}if(result.HistoryWarning!=null)info.Text+="  "+result.HistoryWarning;if(result.Trace!=null&&result.Error==null&&!result.Sent&&!result.Cancelled&&!result.RequiresReview)LastPreviewPerformance=new PreviewPerformance(result.Trace);if(PreviewReady!=null)PreviewReady(this,EventArgs.Empty);
  }
  public bool ConfigurePrinter(Func<PrintDialog,DialogResult> show){if(selectedPrinter==null||sending||busy||calibrationTargetMode)return false;try{using(var dialog=new PrintDialog{PrinterSettings=(PrinterSettings)selectedPrinter.Clone(),UseEXDialog=true,AllowSomePages=false,AllowSelection=false,AllowCurrentPage=false,AllowPrintToFile=false}){dialog.PrinterSettings.DefaultPageSettings.PaperSize=selectedPage.PaperSize;dialog.PrinterSettings.DefaultPageSettings.Landscape=selectedPage.Landscape;dialog.PrinterSettings.Copies=(short)copies.Value;if(show(dialog)!=DialogResult.OK)return false;string previousPrinter=selectedPrinter.PrinterName;InvalidatePreviewCache();selectedPrinter=(PrinterSettings)dialog.PrinterSettings.Clone();selectedPage=(PageSettings)dialog.PrinterSettings.DefaultPageSettings.Clone();if(!string.Equals(previousPrinter,selectedPrinter.PrinterName,StringComparison.OrdinalIgnoreCase)){updating=true;try{ApplyZebra(new ZebraSettings{Dpi=snapshot.Dpi});}finally{updating=false;}}knownPapers=null;copies.Value=Math.Min(copies.Maximum,Math.Max(1,(int)selectedPrinter.Copies));StartRequest(false,false);return true;}}catch(Exception ex){info.Text=ex.Message;return false;}}
  void UpdateOutputSummary(){
-  var summary=new OutputSummary(outputPlan,(int)copies.Value).ToString().Replace("\r\n"," · ").Replace("\n"," · ");
-  jobSummary.Text=recoveredCopy>0?string.Format(Loc.T("Dotlač kópie {0}"),recoveredCopy)+" · "+summary:summary;
-  LayoutPrintSummary();
+  var summary=new OutputSummary(outputPlan,(int)copies.Value);
+  string totals=string.Format(Loc.T("Etikety spolu: {0:N0} · Strany spolu: {1:N0}"),summary.TotalLabels,summary.TotalPages);
+  jobSummary.Text=recoveredCopy>0?string.Format(Loc.T("Dotlač kópie {0}"),recoveredCopy)+" · "+totals:totals;
+  jobBreakdown.Text=summary.ToString();
+  print.Text=string.Format(Loc.T("Vytlačiť ({0:N0})"),summary.TotalLabels);
  }
- void Review(bool submit){
+ void Review(){
   if(currentReport==null||sending||busy)return;
   var report=currentReport;
   var owner=FindForm();
-  using(var dialog=new OutputReviewDialog(report,(int)copies.Value,Loc.T("Tlačiť"),printerName.Text,Font,owner==null?null:owner.Icon,!replaying)){
+  using(var dialog=new OutputReviewDialog(report,(int)copies.Value,print.Text,printerName.Text,Font,owner==null?null:owner.Icon,EditIssueRequested!=null&&!replaying)){
    if(calibrationStyle!=null)calibrationStyle(dialog);
    if(dialog.ShowDialog(this)!=DialogResult.OK){
-    if(dialog.EditIssue!=null&&EditIssueRequested!=null){
-     if(BackRequested!=null)BackRequested(this,EventArgs.Empty);
-     EditIssueRequested(dialog.EditIssue);
-    }
+    if(dialog.EditIssue!=null)GoToRepair(dialog.EditIssue);
     return;
    }
   }
-  if(!submit||!Ready||!ReferenceEquals(report,currentReport))return;
+  if(!Ready||!ReferenceEquals(report,currentReport))return;
   var recovery=authorizeRecovery==null?null:authorizeRecovery();
   if(authorizeRecovery!=null&&recovery==null)return;
   if(!Ready||!ReferenceEquals(report,currentReport))return;
@@ -169,7 +199,7 @@ public partial class PrintPanel:UserControl {
   copies.Enabled=false;
   UpdateOutputSummary();
  }
- void Submit(){if(!Ready||sending)return;Review(true);}
+ void Submit(){if(!Ready||sending)return;Review();}
  void Back(){if(sending){info.Text=Loc.T("Odosielanie už prebieha. Úlohu môžete zrušiť vo fronte Windows.");}if(BackRequested!=null)BackRequested(this,EventArgs.Empty);}
  protected override bool ProcessCmdKey(ref Message msg,Keys key){if(key==Keys.Escape){Back();return true;}return base.ProcessCmdKey(ref msg,key);}
  protected override void Dispose(bool disposing){if(disposing){lock(deliveryGate){closed=true;version++;if(delivery!=null){delivery.Dispose();delivery=null;}}PrintWorker.Cancel(this);previewCache.Dispose();debounce.Dispose();printerTip.Dispose();preview.ClearPages();}base.Dispose(disposing);}
