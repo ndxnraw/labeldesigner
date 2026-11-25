@@ -9,6 +9,14 @@ public static class TextAutoLayout {
   double oldWidth=text.Width,anchor=text.X+oldWidth/2;
   double maximum=Math.Max(1,Math.Min(500,labelWidth-Math.Max(0,text.X)-3));
   if(text.Center){double margin=Math.Min(3,labelWidth*.05);maximum=Math.Max(1,2*Math.Min(anchor-margin,labelWidth-margin-anchor));}
+  if(text.Styles.Count>0){
+   double natural=Math.Max(1,RichFieldLayout.NaturalWidth(text)+.7);
+   text.Width=Math.Round(Math.Min(maximum,natural),4);
+   if(text.Center&&Math.Abs(oldWidth-text.Width)>.0000001)text.X=anchor-text.Width/2;
+   double height=RichFieldLayout.WrappedHeight(text,text.Width)+.5;
+   text.Height=Math.Round(Math.Max(text.Height,Math.Min(Math.Max(1,labelHeight-Math.Max(0,text.Y)-3),height)),4);
+   return;
+  }
   using(var bitmap=new Bitmap(1,1))using(var g=Graphics.FromImage(bitmap))using(var family=VectorArt.Family(text.FontName))using(var font=new Font(family,(float)text.Size,VectorArt.Style(family,text.Bold)))using(var format=new StringFormat(StringFormat.GenericTypographic)){
    g.PageUnit=GraphicsUnit.Millimeter;format.FormatFlags|=StringFormatFlags.MeasureTrailingSpaces;
    double natural=1;foreach(string line in (text.Text??"").Replace("\r\n","\n").Split('\n'))natural=Math.Max(natural,g.MeasureString(line.Length==0?" ":line,font,10000,format).Width+.7);

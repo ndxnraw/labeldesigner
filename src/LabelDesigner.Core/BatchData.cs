@@ -107,6 +107,15 @@ public static partial class BatchData {
    }values[column-1]=value;}data.Rows.Add(values.ToArray());}output.Add(data);}return output;}}
  public static string Value(string[] row,int column){return column>=0&&column<row.Length?row[column]:"";}
  public static Dictionary<string,string> Variables(LabelSettings template,int index,DateTime instant){var result=new Dictionary<string,string>(StringComparer.Ordinal);foreach(var variable in template.Variables){if(!Regex.IsMatch(variable.Name??"",@"^[\p{L}_][\p{L}\p{N}_]*$")||result.ContainsKey(variable.Name))throw new InvalidDataException(Loc.T("Neplatný alebo duplicitný názov premennej"));string value;if(variable.Type=="Number"){if(variable.Digits<1||variable.Digits>30)throw new InvalidDataException(Loc.T("Neplatný počet číslic"));value=checked(variable.Start+variable.Step*index).ToString("D"+variable.Digits,CultureInfo.InvariantCulture);}else if(variable.Type=="Date")value=(variable.FixedDate?variable.Date:instant.Date).AddMonths(variable.Months).AddDays(variable.Days).ToString(variable.Format,CultureInfo.InvariantCulture);else if(variable.Type=="Fixed")value=variable.FixedValue;else throw new InvalidDataException(Loc.T("Neplatný typ premennej"));result.Add(variable.Name,variable.Prefix+value+variable.Suffix);}WorkContext.Check();return result;}
- internal static string Expand(string text,Dictionary<string,string> values){return Regex.Replace(text??"",@"\{([\p{L}_][\p{L}\p{N}_]*)\}",m=>{if(!values.ContainsKey(m.Groups[1].Value))throw new InvalidDataException(Loc.T("Neznáma premenná")+": "+m.Groups[1].Value);return values[m.Groups[1].Value];});}
+ internal static string Expand(string text,Dictionary<string,string> values){return StyledText.Variable.Replace(text??"",match=>VariableValue(match,values));}
+ internal static void Expand(TextItem text,Dictionary<string,string> values){
+  XmlConvert.VerifyXmlChars(text.Text??"");
+  StyledText.Expand(text,match=>XmlConvert.VerifyXmlChars(VariableValue(match,values)));
+ }
+ static string VariableValue(Match match,Dictionary<string,string> values){
+  string name=match.Groups[1].Value;
+  if(!values.TryGetValue(name,out string value))throw new InvalidDataException(Loc.T("Neznáma premenná")+": "+name);
+  return value;
+ }
 }
 }

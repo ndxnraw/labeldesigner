@@ -46,7 +46,12 @@ namespace EanEtikety {
     };
     label.Ean=resolve("code",label.Ean);
     foreach(var ai in label.ApplicationIdentifiers)ai.Data=resolve("code",ai.Data);
-    for(int i=0;i<label.Texts.Count;i++)label.Texts[i].Text=resolve("text:"+i,label.Texts[i].Text);
+    for(int i=0;i<label.Texts.Count;i++) {
+     var text=label.Texts[i];
+     try { Expand(text,values); }
+     catch(InvalidDataException ex){AddFieldIssue(record,columns,"text:"+i,ex.Message);StyledText.ReplaceField(text,"");}
+     catch(XmlException){AddFieldIssue(record,columns,"text:"+i,Loc.T("Hodnota obsahuje nepovolený znak."));StyledText.ReplaceField(text,"");}
+    }
     for(int i=0;i<label.Symbols.Count;i++) {
      var symbol=label.Symbols[i];
      string target="symbol:"+i;
@@ -68,7 +73,7 @@ namespace EanEtikety {
   static void SetBoundValue(LabelSettings label,string target,string value) {
    if(target=="code")label.Ean=value;
    else if(target.StartsWith("text:",StringComparison.Ordinal))
-    label.Texts[int.Parse(target.Substring(5),CultureInfo.InvariantCulture)].Text=value;
+    StyledText.ReplaceField(label.Texts[int.Parse(target.Substring(5),CultureInfo.InvariantCulture)],value);
    else if(target.StartsWith("symbol:",StringComparison.Ordinal)) {
     var symbol=label.Symbols[int.Parse(target.Substring(7),CultureInfo.InvariantCulture)];
     if(symbol.Matrix!=null)symbol.Matrix.Data=value;
@@ -107,13 +112,13 @@ namespace EanEtikety {
     for(int i=0;i<label.Texts.Count;i++) {
      if(label.Texts[i].Text.Length<=4000)continue;
      AddFieldIssue(record,columns,"text:"+i,Loc.T("Text je príliš dlhý."));
-     label.Texts[i].Text="";
+     StyledText.ReplaceField(label.Texts[i],"");
     }
     Engine.Validate(label);
    }
    for(int i=0;i<label.Texts.Count;i++) {
     var text=label.Texts[i];
-    if(text.MinimumFitSize<=0||LabelChecks.TextFits(text,label.Dpi))continue;
+    if((text.MinimumFitSize<=0&&text.Styles.Count==0)||LabelChecks.TextFits(text,label.Dpi))continue;
     string target="text:"+i;
     string field=string.Format(Loc.T("Text {0}"),i+1);
     record.AddIssue(columns.TryGetValue(target,out int column)?column:-1,target,field+" — "+Loc.T("Text sa nezmestí do poľa"),false);

@@ -62,6 +62,11 @@ wrapping and minimum-size warnings. It compares fitted artwork between rapid
 template entry, batch data, print and PDF/SVG/Word/ZPL output.
 BackgroundBatchTests verifies that the quick-print form displays overflow at
 the editable field and allows the user to continue to output review.
+EditorRefinementTests also exercises mixed bold and italic spans, repeated
+variable substitutions, edits and undo, fitting, the print preview and
+PDF, SVG, Word and ZPL export. UpdateTests exercises managed package cleanup
+with isolated builds and verifies that rollback and the startup shortcut
+continue to resolve to retained installations.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.

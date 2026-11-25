@@ -11,6 +11,7 @@ public sealed class UpdatesDialog:Form {
   var check=Button("Skontrolovať aktualizácie",CheckOnline);Add(fields,check);download.Text=Loc.T("Stiahnuť a pripraviť");download.Height=42;download.Enabled=false;download.Click+=delegate{Download();};Add(fields,download);Add(fields,Button("Použiť ručne stiahnutý ZIP…",Import));
   activate.Text=Loc.T("Spustiť pripravenú verziu…");activate.Height=42;activate.Enabled=false;activate.Click+=delegate{RequestActivation();};Add(fields,activate);
   rollback.Text=Loc.T("Návrat na predchádzajúcu verziu…");rollback.Height=42;rollback.Enabled=false;rollback.Click+=delegate{RequestRollback();};Add(fields,rollback);
+  Add(fields,Button("Uvoľniť miesto po aktualizáciách…",Cleanup));
   Add(fields,new Label{Text=Loc.T("Nová verzia sa pripraví samostatne. Pred spustením sa vytvorí záloha nastavení; pôvodné súbory zostanú na mieste."),AutoSize=true,MaximumSize=new Size(620,0)});var close=Button("Zavrieť",()=>Close());Add(fields,close);CancelButton=close;
   try{var p=UpdatePackage.Read(Path.Combine(running,"package-manifest.xml"));information.Text=Loc.T("Nainštalovaná zostava")+": "+p.PackageId.Substring(0,12)+" / "+p.Family;}catch{information.Text=Loc.T("Vývojová alebo staršia inštalácia bez identifikácie balíka.");}
   try{var state=service.State();rollback.Enabled=state.Previous!=null&&state.AuthorizedRoots.Exists(r=>UpdateActivation.SamePath(r,running));if(state.Current!=null&&!UpdateActivation.SamePath(state.Current.Directory,running)){prepared=state.Current.Directory;activate.Enabled=true;}}catch(Exception ex){information.Text=ex.Message;}
@@ -26,6 +27,13 @@ public sealed class UpdatesDialog:Form {
  void Ready(string path){var candidate=UpdatePackage.Read(Path.Combine(path,"package-manifest.xml"));try{var current=UpdatePackage.Read(Path.Combine(running,"package-manifest.xml"));if(current.PackageId==candidate.PackageId){prepared=null;activate.Enabled=false;information.Text=Loc.T("Používate aktuálnu zostavu.");return;}}catch{}prepared=path;activate.Enabled=true;information.Text=Loc.T("Balík je overený a pripravený. Spustenie vyžaduje vaše potvrdenie.");}
  void RequestActivation(){if(prepared==null||!confirm(Loc.T("Spustiť novú verziu a zavrieť toto okno programu? Neuložený dokument môžete uložiť alebo aktualizáciu zrušiť.")))return;RequestedDirectory=prepared;RollbackRequested=false;DialogResult=DialogResult.OK;Close();}
  void RequestRollback(){if(!rollback.Enabled||!confirm(Loc.T("Vrátiť sa na predchádzajúcu verziu? Súčasné nastavenia zostanú zachované.")))return;RollbackRequested=true;DialogResult=DialogResult.OK;Close();}
+ void Cleanup(){
+  if(!confirm(Loc.T("Odstrániť overené staršie zostavy z úložiska aktualizácií? Aktívna verzia a možnosť návratu zostanú dostupné.")))return;
+  try{
+   if(Work("Čistím úložisko aktualizácií…",()=>service.Cleanup(running,prepared),out UpdateCleanupResult result))
+    information.Text=result.Count==0?Loc.T("Žiadne zostavy na odstránenie."):string.Format(Loc.T("Odstránené zostavy: {0}. Uvoľnené miesto: {1:N1} MiB."),result.Count,result.Bytes/1048576d);
+  }catch(Exception ex){information.Text=ex.Message;}
+ }
 }
 public partial class MainForm {
  Func<UpdateActivation> updateActivationFactory=UpdateActivation.Default;Func<string,bool> updateLauncher=UpdateActivation.Launch;string updateRunningDirectory=AppDomain.CurrentDomain.BaseDirectory;

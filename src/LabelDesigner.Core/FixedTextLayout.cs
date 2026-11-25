@@ -27,6 +27,7 @@ namespace EanEtikety {
 
    GraphicsPath MakePath(double points) {
     WorkContext.Check();
+    if (text.Styles.Count > 0) return RichFieldLayout.Outline(text, points);
     var path = new GraphicsPath();
     try {
      path.AddString(value, family, style, (float)(points * 25.4 / 72), box, format);

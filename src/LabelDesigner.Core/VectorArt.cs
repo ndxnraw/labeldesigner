@@ -36,7 +36,7 @@ public static class VectorArt {
   for(int i=0;i<s.Texts.Count;i++){
    WorkContext.Check();
    var t=s.Texts[i];var box=Rect(t.X,t.Y,t.Width,t.Height);
-   if(t.MinimumFitSize>0){
+   if(t.MinimumFitSize>0||t.Styles.Count>0){
     if(!string.IsNullOrWhiteSpace(t.Text))scene.Shapes.Add(new ArtShape{Path=FixedTextLayout.Build(t,out _,out _),Clip=box,Element=i});
    }else Text(scene,t.Text,t.FontName,t.Size,t.Bold,t.Center,box,false,i);
   }

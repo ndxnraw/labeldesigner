@@ -69,7 +69,11 @@ namespace EanEtikety {
 
   static void ApplyValue(LabelSettings label,int index,string value,bool fromTemplate,Dictionary<string,string> variables) {
    Func<string,string> content=text=>XmlConvert.VerifyXmlChars(fromTemplate?BatchData.Expand(text,variables):text??"");
-   if(index>=0){label.Texts[index].Text=content(value);return;}
+   if(index>=0){
+    if(fromTemplate)BatchData.Expand(label.Texts[index],variables);
+    else StyledText.Edit(label.Texts[index],XmlConvert.VerifyXmlChars(value??""));
+    return;
+   }
    var symbol=index<=-3?label.Symbols[-3-index]:null;
    if(symbol!=null&&symbol.Matrix!=null){symbol.Matrix.Data=content(value);return;}
    bool gs1=UsesAiLines(label,index);

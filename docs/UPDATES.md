@@ -37,9 +37,18 @@ ho spustite s `--no-update-redirect`. Potom použite návrat v ponuke Aktualizá
 Pôvodné súbory zostávajú na mieste. Zmenená/poškodená predchádzajúca inštalácia
 sa nespustí cez správcu. Vždy možno ručne rozbaliť dôveryhodný ZIP do nového priečinka.
 
-Pripravené verzie a história sú v LocalAppData/NDLabelMaker/Updates, podľa runtime.
-Zálohy sú v `settings-backups`. Staršie priečinky možno po overení aktívnej verzie
-odstrániť ručne; správca neodstraňuje pôvodné inštalácie ani projekty.
+## Uvoľnenie miesta
+
+V okne **Aktualizácie** zvoľte **Uvoľniť miesto po aktualizáciách…**.
+Po potvrdení program odstráni staršie overené zostavy, ktoré eviduje vo svojom
+úložisku. Rovnakú kontrolu vykoná po spustení novej verzie pri aktualizácii.
+Čistenie funguje offline.
+
+Aktívna zostava, zostava pre návrat a zostavy potrebné pre záložnú históriu
+zostávajú dostupné. Program ponechá bežiace a pripravené zostavy aj priečinky
+s neznámym alebo upraveným obsahom. Ručne rozbalený priečinok mimo úložiska
+môže ďalej slúžiť ako cieľ skratky. Projekty, tlačové profily a zálohy nastavení
+v priečinku `settings-backups` zostávajú na mieste.
 
 ## Bez internetu
 

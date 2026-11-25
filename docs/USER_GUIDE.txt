@@ -157,6 +157,17 @@ nahradené položky. Poškodené šablóny sú v náhľade označené a preskoč
 Pre presný návrat odstráňte aj položky pridané pôvodnou
 obnovou. Zálohy fungujú offline.
 
+FORMÁTOVANIE ČASTÍ TEXTU
+Označte textové pole a vo Vlastnostiach otvorte Formátovať časti textu….
+V editore označte slovo alebo úsek a použite Tučné, Kurzíva, Ctrl+B alebo
+Ctrl+I. Obe zvýraznenia možno kombinovať. Skratky fungujú aj pri úprave textu
+priamo na plátne alebo vo Vlastnostiach.
+
+Pri formátovaní premennej označte celý zápis vrátane zložených zátvoriek.
+Dosadená hodnota použije štýl na začiatku zástupného textu. Pri mapovaní
+stĺpca na celé textové pole hodnota preberie štýl jeho prvého znaku.
+Zalamovanie a prispôsobenie písma počítajú s oboma štýlmi spoločne.
+
 PRISPÔSOBENIE TEXTU PEVNÉMU POĽU
 Označte text a vo Vlastnostiach zapnite Prispôsobiť text pevnému poľu.
 Nastavte šírku, výšku, požadovanú veľkosť písma a Minimálne písmo (pt).

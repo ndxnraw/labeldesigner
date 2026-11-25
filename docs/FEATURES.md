@@ -16,6 +16,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Formátovanie častí textu** umožňuje použiť tučné písmo a kurzívu v jednom
+  poli. Hodnoty premenných preberajú štýl zástupného textu a všetky štýly sa
+  spoločne zalamujú aj prispôsobujú pevnej ploche.
+- **Uvoľnenie miesta po aktualizáciách** odstráni overené staršie spravované
+  zostavy. Aktívna verzia a možnosť návratu zostávajú dostupné.
 - **Prispôsobenie textu pevnému poľu** zalomí text a podľa potreby zmenší
   písmo po nastavené minimum. Rovnako funguje pri rýchlej tlači zo šablóny,
   dávkach a exportoch. Ak sa text stále nezmestí, kontrola zobrazí upozornenie.

@@ -23,6 +23,97 @@ class EditorRefinementTests {
  static object Call(object target,string name,params object[] args){return target.GetType().GetMethod(name,BindingFlags.Instance|BindingFlags.NonPublic).Invoke(target,args);}
  static void Sizing(){Check(LabelSettings.Default().DigitSize==12,"new caption 12pt");Check(LabelSettings.Default().Texts[0].AutoWidth,"startup text opts in");var old=ProjectXml.Decode<TextItem>("<TextItem><Text>Legacy</Text><Width>54</Width></TextItem>");Check(!old.AutoWidth&&old.Width==54,"legacy manual dimensions");var t=new TextItem{Text="Short",AutoWidth=true,X=3,Y=3};TextAutoLayout.Fit(t,60,45);double shortWidth=t.Width;Check(shortWidth<40,"short text content width");t.Text="Longer product name";TextAutoLayout.Fit(t,60,45);Check(t.Width>shortWidth&&t.Width<=54,"typing grows width");t.Text="A";TextAutoLayout.Fit(t,60,45);Check(t.Width<shortWidth,"deleting shrinks width");Check(ProjectXml.Clone(LabelSettings.Default()).Texts[0].AutoWidth,"auto width XML");}
  static void MoreSizing(){var offCenter=new TextItem{AutoWidth=true,Center=true,X=3,Y=3,Width=10,Text="Long off-center product title"};TextAutoLayout.Fit(offCenter,60,45);Check(offCenter.X>=2.999&&offCenter.Width<=10.001,"off-center text grows within available width");var s=LabelSettings.Default();double center=s.Texts[0].X+s.Texts[0].Width/2;s.Texts[0].Text="A";TextAutoLayout.Apply(s);Check(Math.Abs(center-s.Texts[0].X-s.Texts[0].Width/2)<.001,"center anchor retained");s.Texts[0].Text="Žltý čaj\r\nNový riadok";TextAutoLayout.Apply(s);Check(s.Texts[0].Height>6&&s.Texts[0].Width<54,"Unicode multiline fit");double first=s.Texts[0].Width;TextAutoLayout.Apply(s);Check(Math.Abs(first-s.Texts[0].Width)<.0001,"auto layout idempotent");s.Texts[0].Text="{serial}";s.Variables.Add(new VariableField{Name="serial",Type="Fixed",FixedValue="Long batch product name"});var row=BatchData.Record(s,new string[0],new System.Collections.Generic.List<ColumnBinding>(),-1,0,1,DateTime.Today);Check(row.Error==null&&row.Label.Texts[0].Text=="Long batch product name","batch expands automatic text");var expected=ProjectXml.Decode<TextItem>(ProjectXml.Encode(s.Texts[0]));expected.Text="Long batch product name";TextAutoLayout.Fit(expected,60,45);Check(Math.Abs(row.Label.Texts[0].Width-expected.Width)<.001,"batch geometry fits expanded content");var manual=new TextItem{Text="Fixed",X=3,Y=3,Width=40,Height=8};TextAutoLayout.Fit(manual,60,45);Check(manual.Width==40&&manual.Height==8,"manual fields remain untouched");foreach(double width in new[]{10d,20,30,40,60}){var startup=StartupLayout.Create(new StartupProfile{Width=width,Height=45});Check(startup.DigitSize>=10,"small label caption floor "+width);Engine.Validate(startup);}var old=ProjectXml.Decode<LabelSettings>("<LabelSettings><DigitSize>5.5</DigitSize></LabelSettings>");Check(old.DigitSize==5.5,"saved caption size preserved");Check(ProjectXml.Decode<LabelSettings>("<LabelSettings/>").DigitSize==8,"legacy absent caption unchanged");}
+ static void StyledField(string dir){
+  var label=LabelSettings.Default();label.HideBarcode=true;label.Texts.Clear();
+  var field=new TextItem{Text="Šarža: {lot} / {lot}",X=3,Y=5,Width=24,Height=9,Size=16,MinimumFitSize=6};
+  label.Texts.Add(field);
+  StyledText.Toggle(field,0,6,TextEmphasis.Bold);
+  StyledText.Toggle(field,7,5,TextEmphasis.Italic);
+  StyledText.Toggle(field,15,5,TextEmphasis.Bold|TextEmphasis.Italic);
+  label.Variables.Add(new VariableField{Name="lot",Type="Fixed",FixedValue="ABC 29041"});
+  var file=Path.Combine(dir,"styled.ean.xml");Engine.Save(file,label);label=Engine.Load(file);
+  label.QuickPrintFields.Add(0);
+  var record=BatchData.Record(label,Array.Empty<string>(),new System.Collections.Generic.List<ColumnBinding>(),-1,0,17,DateTime.Today);
+  Check(record.Error==null,"styled variables prepare a batch record");
+  var resolved=record.Label.Texts[0];
+  Check(resolved.Text=="Šarža: ABC 29041 / ABC 29041","styled placeholders expand");
+  Check(StyledText.At(resolved,0)==TextEmphasis.Bold&&StyledText.At(resolved,7)==TextEmphasis.Italic&&
+   StyledText.At(resolved,resolved.Text.Length-1)==(TextEmphasis.Bold|TextEmphasis.Italic),"each replacement keeps its token style");
+  var quick=QuickPrint.Prepare(label,null,DateTime.Today);
+  Check(quick.CanPrint&&ProjectXml.Encode(quick.Label.Texts[0])==ProjectXml.Encode(resolved),"quick template uses the same styled variable expansion");
+  var mapped=BatchData.Record(label,new[]{"Mapped"},new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Column=0,Target="text:0"}},-1,0,18,DateTime.Today);
+  Check(mapped.Error==null&&StyledText.At(mapped.Label.Texts[0],5)==TextEmphasis.Bold,"whole-field mapping extends the first character's style");
+  double actual=FixedTextLayout.Resolve(resolved,out bool fits);
+  Check(actual>=6&&actual<16&&fits,"mixed styles wrap and shrink within fixed limits");
+  var plan=OutputPlan.Create(record.Label);
+  using var scene=plan.Scene(0);
+  string path=VectorArt.PathData(scene.Shapes[0].Path,true);
+  var bare=ProjectXml.Clone(record.Label);bare.Texts[0].Styles.Clear();
+  using(var plain=VectorArt.Build(bare))
+   Check(path!=VectorArt.PathData(plain.Shapes[0].Path,true),"style changes rendered geometry");
+  using(var doc=new LabelPrintDocument(record.Label,plan)){
+   using(var preview=doc.CreatePreview(0,new SizeF(60,45)))
+    Check(preview.Width>0&&preview.Height>0,"formatted field renders in the print preview");
+   using var pixels=new Bitmap(480,360);
+   pixels.SetResolution(203.2f,203.2f);
+   using(var g=Graphics.FromImage(pixels)){
+    g.Clear(Color.White);
+    doc.RenderPrinterPage(g,0,new RectangleF(0,0,240,180),0,0,false);
+   }
+   Check(Array.Exists(Engine.Packed(pixels,true),dot=>dot!=0),"formatted field produces ink through Windows print rendering");
+  }
+  foreach(string format in new[]{"svg","pdf","docx","zpl"})JobOutput.Export(Path.Combine(dir,"styled."+format),format,plan,203.2);
+  Check(File.ReadAllText(Path.Combine(dir,"styled.svg")).Contains(path),"SVG contains the fitted mixed style path");
+  Check(System.Text.Encoding.ASCII.GetString(File.ReadAllBytes(Path.Combine(dir,"styled.pdf"))).Contains(VectorArt.PathData(scene.Shapes[0].Path,false)),"PDF contains the fitted mixed style path");
+  using(var word=System.IO.Compression.ZipFile.OpenRead(Path.Combine(dir,"styled.docx")))
+  using(var reader=new StreamReader(word.GetEntry("word/media/part1.svg").Open()))
+   Check(reader.ReadToEnd().Contains(path),"Word contains the fitted mixed style path");
+  using(var raster=JobOutput.Raster(scene,203.2))
+  using(var zpl=ZplImport.Render(File.ReadAllText(Path.Combine(dir,"styled.zpl")),203.2,60,45,out _))
+   Check(Convert.ToBase64String(Engine.Packed(raster,true))==Convert.ToBase64String(Engine.Packed(zpl,true)),"ZPL retains the fitted mixed style dots");
+  StyledText.Edit(resolved,"Nové "+resolved.Text);
+  Check(StyledText.At(resolved,5)==TextEmphasis.Bold&&StyledText.At(resolved,12)==TextEmphasis.Italic,"ordinary text edits rebase spans");
+ }
+ static void StyledEditor(string dir){
+  using var main=new MainForm(Path.Combine(dir,"styled-editor.xml"));
+  main.StartPosition=FormStartPosition.Manual;main.Location=new Point(-20000,-20000);
+  main.Show();Application.DoEvents();
+  var source=LabelSettings.Default();
+  source.Texts[0].Bold=false;
+  source.Texts[0].Text="Šarža:\r\n{lot}";
+  int token=source.Texts[0].Text.IndexOf('{');
+  StyledText.Toggle(source.Texts[0],token,5,TextEmphasis.Italic);
+  Call(main,"Apply",source);Call(main,"ResetHistory",true);
+  F<PreviewPanel>(main,"preview").SelectElement(0);
+  Exception error=null;bool opened=false;
+  using(var timer=new Timer{Interval=35}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==main||dialog.Text!=Loc.T("Formátovať časti textu…"))continue;
+     timer.Stop();opened=true;
+     try{
+      var edit=(RichTextBox)dialog.Controls.Find("styledTextEditor",true)[0];
+      edit.Select(edit.Text.IndexOf('{'),5);
+      using(var font=edit.SelectionFont)Check(font!=null&&font.Italic,"styles restored after CRLF in the editor");
+      edit.Select(0,6);Key(edit,Keys.Control|Keys.B);
+      using(var font=edit.SelectionFont)Check(font!=null&&font.Bold&&!font.Italic,"keyboard bold applies to the selected text");
+      ((Button)dialog.AcceptButton).PerformClick();
+     }catch(Exception ex){error=ex;dialog.Close();}
+     break;
+    }
+   };
+   timer.Start();F<Button>(main,"styleTextButton").PerformClick();
+  }
+  if(error!=null)throw error;
+  Check(opened,"formatting editor opened from inspector");
+  var current=((LabelSettings)Call(main,"Read")).Texts[0];
+  Check(StyledText.At(current,0)==TextEmphasis.Bold&&StyledText.At(current,current.Text.IndexOf('{'))==TextEmphasis.Italic,
+   "formatting editor saves both selected styles");
+  Call(main,"StepHistory",false);
+  var restored=((LabelSettings)Call(main,"Read")).Texts[0];
+  Check(StyledText.At(restored,0)==TextEmphasis.Regular,"one undo restores the original formatting");
+  Call(main,"Apply",LabelSettings.Default());main.Close();
+ }
  static void FixedText(string dir){
   const string content="Žltý čaj z horskej záhrady";
   var label=LabelSettings.Default();label.HideBarcode=true;label.Texts.Clear();
@@ -131,5 +222,5 @@ class EditorRefinementTests {
  static void WheelEditing(string dir){using(var main=new MainForm(Path.Combine(dir,"wheel-prefs.xml"))){main.StartPosition=FormStartPosition.Manual;main.Location=new Point(-20000,-20000);main.Show();main.Hide();main.Show();Application.DoEvents();var values=F<System.Collections.Generic.Dictionary<string,NumericUpDown>>(main,"nums");var number=values["BarX"];var other=values["BarY"];other.Focus();decimal original=number.Value;Wheel(number,120);Check(number.Value==original,"hover wheel does not change numeric value");number.Focus();Wheel(number,120);Check(number.Value==original,"focus without click does not arm wheel");ClickValue(number);Wheel(number,120);Check(number.Value>original,"clicked numeric field retains wheel editing");other.Focus();number.Focus();decimal previous=number.Value;Wheel(number,-120);Check(number.Value==previous,"leaving numeric field revokes wheel editing");ClickValue(number);Wheel(number,-120);Check(number.Value<previous,"negative wheel edits activated field");foreach(var value in values.Values)Check(value.GetType().Name=="ClickWheelNumericUpDown","all editor numeric fields use wheel guard");Call(main,"Apply",LabelSettings.Default());main.Close();}}
  static void TabCaptions(){foreach(string lang in Loc.Codes)foreach(float size in new[]{10.5f,15.75f,21f}){Loc.Language=lang;using(var form=new Form{ClientSize=new Size(360,550),StartPosition=FormStartPosition.Manual,Location=new Point(-20000,-20000)})using(var tabs=new ModernTabs{Dock=DockStyle.Fill,Font=UiFonts.Get(size)}){form.Controls.Add(tabs);foreach(string title in new[]{"Médium","Kalibrácia","Zebra","Detaily"})tabs.AddPage(Loc.T(title));form.Show();Application.DoEvents();var header=F<FlowLayoutPanel>(tabs,"header");foreach(Control button in header.Controls){int needed=TextRenderer.MeasureText(button.Text,button.Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+12;Check(button.Width>=needed,"complete tab caption "+lang+" / "+button.Text+" @ "+size);Check(button.Right<=header.ClientSize.Width&&button.Bottom<=header.ClientSize.Height,"tab header stays within viewport");}form.Close();}}Loc.Language="sk";}
  static void WheelViewport(){using(var form=new Form{ClientSize=new Size(400,180),StartPosition=FormStartPosition.Manual,Location=new Point(-20000,-20000)})using(var panel=new Panel{Dock=DockStyle.Fill,AutoScroll=true,AutoScrollMinSize=new Size(0,800)})using(var number=new ClickWheelNumericUpDown{Location=new Point(10,10),Minimum=0,Maximum=10,Value=5}){form.Controls.Add(panel);panel.Controls.Add(number);form.Show();form.Hide();form.Show();Application.DoEvents();Wheel(number,-120);Check(number.Value==5,"unarmed scroll preserves value");Check(panel.AutoScrollPosition.Y<0,"unarmed wheel scrolls enclosing viewport");panel.AutoScrollPosition=Point.Empty;ClickValue(number);Wheel(number,120);Check(number.Value>5,"clicked wheel increments value");decimal edited=number.Value;Check(panel.AutoScrollPosition.Y==0,"armed wheel does not scroll viewport");number.ReadOnly=true;Wheel(number,-120);Check(number.Value==edited,"read-only wheel preserves value");number.ReadOnly=false;number.Value=10;Wheel(number,120);Check(number.Value==10,"wheel respects numeric maximum");number.DownButton();Check(number.Value==9,"spinner remains usable");number.UpButton();Check(number.Value==10,"spinner increment remains usable");form.Close();}}
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);PdfWorkspace(args[0]);LayerActionCaptions(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);PdfWorkspace(args[0]);LayerActionCaptions(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }
