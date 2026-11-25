@@ -148,16 +148,20 @@ Physical darkness/readability still require a user-controlled trial on the Zebra
 navigation, localized field names, focus repaint, safe tiny bounds, scrollable
 keyboard-reachable messages, DPI-aware preferences/text dialogs and actionable
 errors retaining diagnostic detail. It exercises four languages, both themes and
-100/125/150/200% synthetic bounds/font scaling; physical monitor transitions,
-screen readers and Windows contrast themes still require manual verification.
+100/125/150/200% synthetic bounds/font scaling. The application management
+dialog tests keyboard access to all three pages, a pinned Close action, and
+the system palette in the high-contrast rendering branch. Physical monitor
+transitions, screen readers and Windows contrast themes require manual verification.
 See [ACCESSIBILITY](ACCESSIBILITY.md).
 `UpdateTests` covers bounded package validation, fake GitHub transport, offline
 operation, cancellation, exact inventories, settings backup, activation/rollback,
 failed-launch recovery and explicit consent, including unsaved-document cancellation
-in the real editor. No production update is activated. After packaging both variants,
-run `scripts/test-update-packages.ps1` to validate the actual ZIPs/index through the
-production preparer and run both extracted programs' self-tests. Reports are under
-`build/update-package-results/`; modern self-tests disable installed-runtime lookup.
+in the real editor. The dialog tests a trusted local ZIP, an offline recheck
+that preserves the prepared update, and declining activation via the default
+confirmation choice. No production update is activated. After packaging,
+run `scripts/test-update-packages.ps1` to validate the actual ZIP/index through the
+production preparer and run the extracted program's self-test. Reports are under
+`build/update-package-results/`; self-tests disable installed-runtime lookup.
 The additional suites cover CSV/XLSX batch data, workspace dialogs, undo/redo,
 recovery, embedded images, QR/Data Matrix decoding and multipage export.
 `PrintMediaTests` covers nonblocking media mismatch, independent vector previews,

@@ -1,10 +1,12 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Collections.Generic;
 namespace EanEtikety {
 public static class StudioTheme {
- public static Color Bg(bool dark){return SystemInformation.HighContrast?SystemColors.Control:ColorTranslator.FromHtml(dark?"#111722":"#F4F6F9");}
- public static Color Panel(bool dark){return SystemInformation.HighContrast?SystemColors.Control:ColorTranslator.FromHtml(dark?"#192231":"#FFFFFF");}
- public static Color Text(bool dark){return SystemInformation.HighContrast?SystemColors.ControlText:ColorTranslator.FromHtml(dark?"#EDF2FA":"#182235");}
- public static Color Edge(bool dark){return SystemInformation.HighContrast?SystemColors.WindowText:ColorTranslator.FromHtml(dark?"#778BA7":"#7D8CA2");}
+ static Func<bool> detectHighContrast=()=>SystemInformation.HighContrast;
+ internal static bool HighContrast=>detectHighContrast();
+ public static Color Bg(bool dark){return HighContrast?SystemColors.Control:ColorTranslator.FromHtml(dark?"#111722":"#F4F6F9");}
+ public static Color Panel(bool dark){return HighContrast?SystemColors.Control:ColorTranslator.FromHtml(dark?"#192231":"#FFFFFF");}
+ public static Color Text(bool dark){return HighContrast?SystemColors.ControlText:ColorTranslator.FromHtml(dark?"#EDF2FA":"#182235");}
+ public static Color Edge(bool dark){return HighContrast?SystemColors.WindowText:ColorTranslator.FromHtml(dark?"#778BA7":"#7D8CA2");}
  public static readonly Color Accent=Color.FromArgb(36,88,211);
 }
 public sealed class StudioMenuColors:ProfessionalColorTable {
@@ -13,13 +15,13 @@ public sealed class StudioMenuColors:ProfessionalColorTable {
  public override Color ImageMarginGradientBegin{get{return StudioTheme.Panel(dark);}}
  public override Color ImageMarginGradientMiddle{get{return StudioTheme.Panel(dark);}}
  public override Color ImageMarginGradientEnd{get{return StudioTheme.Panel(dark);}}
- public override Color MenuItemSelected{get{return dark?Color.FromArgb(35,65,110):Color.FromArgb(214,228,255);}}
+ public override Color MenuItemSelected{get{return StudioTheme.HighContrast?SystemColors.Highlight:dark?Color.FromArgb(35,65,110):Color.FromArgb(214,228,255);}}
  public override Color MenuItemSelectedGradientBegin{get{return MenuItemSelected;}}
  public override Color MenuItemSelectedGradientEnd{get{return MenuItemSelected;}}
  public override Color MenuItemPressedGradientBegin{get{return MenuItemSelected;}}
  public override Color MenuItemPressedGradientMiddle{get{return MenuItemSelected;}}
  public override Color MenuItemPressedGradientEnd{get{return MenuItemSelected;}}
- public override Color MenuItemBorder{get{return StudioTheme.Accent;}}
+ public override Color MenuItemBorder{get{return StudioTheme.HighContrast?SystemColors.HighlightText:StudioTheme.Accent;}}
  public override Color MenuBorder{get{return StudioTheme.Edge(dark);}}
 }
 public partial class MainForm {

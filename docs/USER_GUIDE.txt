@@ -143,7 +143,7 @@ náhľad s rozložením na médiu a zadaným počtom kusov. Uložená šablóna
 si ponechá svoje pôvodné údaje.
 
 PRENOSNÁ ZÁLOHA ŠABLÓN, PROFILOV A DÁVOK
-Otvorte Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
+Otvorte Nástroje → Kontrola a údržba → Správa aplikácie… → Zálohy. Vyberte šablóny,
 profily médií, dávky s uzávierkami alebo ich kombináciu a použite
 Exportovať zálohu do ZIPu….
 Šablóny obsahujú uložené predvoľby dávok. Profily obsahujú nastavenia média,
@@ -308,7 +308,7 @@ nahradení cieľa je export dokončený; neskoré stlačenie Zrušiť ho nevrát
 Už odoslanú fyzickú tlačovú úlohu rušte vo fronte tlačiarne vo Windows.
 
 DIAGNOSTIKA
-Nástroje → Kontrola a údržba → Diagnostika otvorí posledné lokálne záznamy chýb.
+Nástroje → Kontrola a údržba → Správa aplikácie… → Diagnostika zobrazí posledné lokálne záznamy chýb.
 Uložiť diagnostiku vytvorí textovú kópiu zobrazených záznamov.
 Pri chybe je uvedený identifikátor záznamu na dohľadanie udalosti.
 Log obsahuje UTC čas, druh operácie, typ a miesto chyby a identifikátor
@@ -408,7 +408,7 @@ vyprázdni pomocnú pamäť. Pred odoslaním tlače sa údaje ovládača vždy n
 nanovo a skontroluje sa celý dokument. Zmenené údaje vyžiadajú nové potvrdenie.
 
 ZDROJE A OVERENIE
-Nástroje → Kontrola a údržba → Aktualizácie skontroluje verejné vydanie iba po stlačení tlačidla.
+Nástroje → Kontrola a údržba → Správa aplikácie… → Aktualizácie zobrazuje nainštalovanú zostavu a stav. Verejné vydanie sa skontroluje až po stlačení tlačidla.
 Stiahnutie a príprava program neprepíšu. Spustenie vyžaduje potvrdenie;
 neuložený dokument môžete uložiť alebo prechod zrušiť. Profily, kalibrácie
 a šablóny zostávajú zachované a pred prechodom sa vytvorí lokálna záloha.

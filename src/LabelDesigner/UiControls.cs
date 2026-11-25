@@ -33,7 +33,7 @@ public class ModernComboBox:ComboBox {
  protected override void OnHandleDestroyed(EventArgs e){base.OnHandleDestroyed(e);if(nativeFont!=IntPtr.Zero){DeleteObject(nativeFont);nativeFont=IntPtr.Zero;}}
 
  public ModernComboBox(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer,true);FlatStyle=FlatStyle.Flat;AutoSize=true;}
- protected override void OnPaint(PaintEventArgs e){bool hc=SystemInformation.HighContrast;Color back=hc?SystemColors.Window:BackColor,ink=!Enabled?SystemColors.GrayText:hc?SystemColors.WindowText:ForeColor;e.Graphics.Clear(back);if(Width<4||Height<4)return;using(var pen=new Pen(hc?SystemColors.WindowText:Color.FromArgb(85,107,128)))e.Graphics.DrawRectangle(pen,0,0,Width-1,Height-1);if(Width>32)TextRenderer.DrawText(e.Graphics,Text,Font,new Rectangle(9,1,Width-32,Height-2),ink,TextFormatFlags.Left|TextFormatFlags.VerticalCenter|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);if(Width>24)using(var pen=new Pen(ink,1.5f)){int x=Width-17,y=Height/2;e.Graphics.DrawLines(pen,new[]{new Point(x-4,y-2),new Point(x,y+2),new Point(x+4,y-2)});}if(Focused&&Width>32&&Height>6)ControlPaint.DrawFocusRectangle(e.Graphics,new Rectangle(3,3,Width-27,Height-6),ink,back);}
+ protected override void OnPaint(PaintEventArgs e){bool hc=StudioTheme.HighContrast;Color back=hc?SystemColors.Window:BackColor,ink=!Enabled?SystemColors.GrayText:hc?SystemColors.WindowText:ForeColor;e.Graphics.Clear(back);if(Width<4||Height<4)return;using(var pen=new Pen(hc?SystemColors.WindowText:Color.FromArgb(85,107,128)))e.Graphics.DrawRectangle(pen,0,0,Width-1,Height-1);if(Width>32)TextRenderer.DrawText(e.Graphics,Text,Font,new Rectangle(9,1,Width-32,Height-2),ink,TextFormatFlags.Left|TextFormatFlags.VerticalCenter|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);if(Width>24)using(var pen=new Pen(ink,1.5f)){int x=Width-17,y=Height/2;e.Graphics.DrawLines(pen,new[]{new Point(x-4,y-2),new Point(x,y+2),new Point(x+4,y-2)});}if(Focused&&Width>32&&Height>6)ControlPaint.DrawFocusRectangle(e.Graphics,new Rectangle(3,3,Width-27,Height-6),ink,back);}
  protected override void OnSelectedIndexChanged(EventArgs e){base.OnSelectedIndexChanged(e);if(valueTip!=null)valueTip.SetToolTip(this,Text);Invalidate();}
  protected override void OnTextChanged(EventArgs e){base.OnTextChanged(e);if(valueTip!=null)valueTip.SetToolTip(this,Text);}
  protected override void OnGotFocus(EventArgs e){base.OnGotFocus(e);Invalidate();}
@@ -53,7 +53,7 @@ public class ModernButton:Button {
  protected virtual bool SelectedVisual{get{return false;}}
  public ModernButton(){SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);}
  protected override void OnPaint(PaintEventArgs e){
-  var g=e.Graphics;bool hc=SystemInformation.HighContrast,hot=Enabled&&ClientRectangle.Contains(PointToClient(Cursor.Position));
+  var g=e.Graphics;bool hc=StudioTheme.HighContrast,hot=Enabled&&ClientRectangle.Contains(PointToClient(Cursor.Position));
   Color back=hc?(hot||SelectedVisual?SystemColors.Highlight:SystemColors.Control):hot?FlatAppearance.MouseOverBackColor:BackColor;
   Color ink=!Enabled?SystemColors.GrayText:hc?(hot||SelectedVisual?SystemColors.HighlightText:SystemColors.ControlText):ForeColor;
   g.Clear(hc?SystemColors.Control:Parent==null?BackColor:Parent.BackColor);if(Width<4||Height<4)return;
@@ -71,6 +71,7 @@ public class ModernButton:Button {
 public class ModernTabs:TableLayoutPanel {
  public bool Dark=true;FlowLayoutPanel header;Panel body;List<Button> buttons=new List<Button>();List<Panel> pages=new List<Panel>();int selected;bool refreshing;
  internal int CompactColumns;
+ internal bool SingleTabStop;
  sealed class TabButton:ModernButton {
   readonly ModernTabs owner;readonly int index;
   public TabButton(ModernTabs owner,int index){this.owner=owner;this.index=index;AccessibleRole=AccessibleRole.PageTab;UseMnemonic=false;}
@@ -87,18 +88,18 @@ public class ModernTabs:TableLayoutPanel {
   public void NotifySelection(){AccessibilityNotifyClients(AccessibleEvents.Selection,-1);AccessibilityNotifyClients(AccessibleEvents.StateChange,-1);}
   protected override bool ProcessCmdKey(ref Message msg,Keys key){int count=owner.pages.Count;if(count>0&&(key==Keys.Left||key==Keys.Right||key==Keys.Home||key==Keys.End)){owner.SelectedIndex=key==Keys.Home?0:key==Keys.End?count-1:(index+(key==Keys.Right?1:count-1))%count;owner.buttons[owner.selected].Focus();return true;}return base.ProcessCmdKey(ref msg,key);}
  }
- public ModernTabs(){ColumnCount=1;RowCount=2;RowStyles.Add(new RowStyle(SizeType.Absolute,47));RowStyles.Add(new RowStyle(SizeType.Percent,100));header=new FlowLayoutPanel{Dock=DockStyle.Fill,WrapContents=false,Margin=new Padding(0),AccessibleRole=AccessibleRole.PageTabList};body=new Panel{Dock=DockStyle.Fill,Margin=new Padding(0)};Controls.Add(header,0,0);Controls.Add(body,0,1);}
+ public ModernTabs(){ColumnCount=1;ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));RowCount=2;RowStyles.Add(new RowStyle(SizeType.Absolute,47));RowStyles.Add(new RowStyle(SizeType.Percent,100));header=new FlowLayoutPanel{Dock=DockStyle.Fill,WrapContents=false,Margin=new Padding(0),AccessibleRole=AccessibleRole.PageTabList};body=new Panel{Dock=DockStyle.Fill,Margin=new Padding(0)};Controls.Add(header,0,0);Controls.Add(body,0,1);}
  public Panel AddPage(string title){int i=pages.Count;var page=new Panel{Dock=DockStyle.Fill,AutoScroll=true,AccessibleName=title,AccessibleRole=AccessibleRole.PropertyPage};var button=new TabButton(this,i){Text=title,AccessibleName=title,Width=203,Height=43,FlatStyle=FlatStyle.Flat,Margin=new Padding(0,0,5,0),TabIndex=i};button.Click+=delegate{SelectedIndex=i;};buttons.Add(button);pages.Add(page);header.Controls.Add(button);body.Controls.Add(page);RefreshTabs();return page;}
  [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public int SelectedIndex{get{return selected;}set{if(value<0||value>=pages.Count)throw new ArgumentOutOfRangeException("value");int old=selected;selected=value;RefreshTabs();if(old!=selected){((TabButton)buttons[old]).NotifySelection();((TabButton)buttons[selected]).NotifySelection();}}}
  public void SetTitle(int index,string title){buttons[index].Text=title;buttons[index].AccessibleName=title;pages[index].AccessibleName=title;RefreshTabs();}
  protected override bool ProcessCmdKey(ref Message msg,Keys key){if(pages.Count>0&&(key==(Keys.Control|Keys.PageDown)||key==(Keys.Control|Keys.PageUp))){SelectedIndex=(selected+(key==(Keys.Control|Keys.PageDown)?1:pages.Count-1))%pages.Count;buttons[selected].Focus();return true;}return base.ProcessCmdKey(ref msg,key);}
  protected override void OnSizeChanged(EventArgs e){base.OnSizeChanged(e);if(header!=null&&buttons.Count>0)RefreshTabs();}
- protected override void OnLayout(LayoutEventArgs e){base.OnLayout(e);RefreshTabs();}
+ protected override void OnLayout(LayoutEventArgs e){RefreshTabs();base.OnLayout(e);}
  protected override void OnFontChanged(EventArgs e){base.OnFontChanged(e);RefreshTabs();}
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);RefreshTabs();}
  public void RefreshTabs(){if(refreshing||header==null||buttons==null||buttons.Count==0)return;refreshing=true;try{
-  int available=Math.Max(1,header.ClientSize.Width-header.Padding.Horizontal);
-  int height=CompactColumns>0?36:Math.Max(43,(int)Math.Ceiling(43*Font.Height/(double)UiFonts.Default.Height));
+  int available=Math.Max(1,ClientSize.Width-Padding.Horizontal-header.Padding.Horizontal);
+  int minimumHeight=CompactColumns>0?36:Math.Max(43,(int)Math.Ceiling(43*Font.Height/(double)UiFonts.Default.Height));
   var widths=new int[buttons.Count];int total=0;bool oversized=false;
   for(int i=0;i<buttons.Count;i++){
    var button=buttons[i];
@@ -106,15 +107,28 @@ public class ModernTabs:TableLayoutPanel {
     int minimum=1;
     foreach(string word in button.Text.Split(' ',StringSplitOptions.RemoveEmptyEntries))
      minimum=Math.Max(minimum,TextRenderer.MeasureText(word,button.Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16);
-    widths[i]=Math.Max(available/CompactColumns-5,Math.Min(Math.Max(1,available-5),minimum));
+    int equalWidth=buttons.Count>CompactColumns?available/CompactColumns-5:1;
+    widths[i]=Math.Max(equalWidth,Math.Min(Math.Max(1,available-5),minimum));
    } else widths[i]=TextRenderer.MeasureText(button.Text,button.Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16;
    total+=widths[i]+5;oversized|=widths[i]>available;
   }
-  int extra=total<=available?(available-total)/buttons.Count:0,rows=1,rowWidth=0;
+  int extra=total<=available?(available-total)/buttons.Count:0,rowWidth=0,rowStart=0,rowHeight=0,headerHeight=0;
   header.WrapContents=!oversized;header.AutoScroll=oversized;
-  for(int i=0;i<buttons.Count;i++){var b=buttons[i];b.Width=widths[i]+extra;b.Margin=new Padding(0,0,5,4);if(!oversized&&rowWidth>0&&rowWidth+b.Width+5>available){rows++;rowWidth=0;}rowWidth+=b.Width+5;height=Math.Max(height,TextRenderer.MeasureText(b.Text,b.Font,new Size(Math.Max(1,b.Width-16),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+12);}
-  RowStyles[0].Height=rows*(height+4)+(oversized?SystemInformation.HorizontalScrollBarHeight:0);bool hc=SystemInformation.HighContrast;
-  for(int i=0;i<pages.Count;i++){var b=buttons[i];b.Height=height;pages[i].Visible=i==selected;b.BackColor=i==selected?(hc?SystemColors.Highlight:Color.FromArgb(25,80,131)):BackColor;b.ForeColor=i==selected?(hc?SystemColors.HighlightText:Color.White):ForeColor;b.FlatAppearance.BorderColor=hc?SystemColors.WindowText:i==selected?Color.FromArgb(0,143,255):Dark?Color.FromArgb(56,75,92):Color.FromArgb(190,204,219);}
+  void FinishRow(int end){
+   for(int i=rowStart;i<end;i++)buttons[i].Height=rowHeight;
+   headerHeight+=rowHeight+4;
+   rowStart=end;rowHeight=0;rowWidth=0;
+  }
+  for(int i=0;i<buttons.Count;i++){
+   var b=buttons[i];b.Width=widths[i]+extra;b.Margin=new Padding(0,0,5,4);
+   if(!oversized&&rowWidth>0&&rowWidth+b.Width+5>available)FinishRow(i);
+   rowWidth+=b.Width+5;
+   int captionHeight=TextRenderer.MeasureText(b.Text,b.Font,new Size(Math.Max(1,b.Width-16),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height;
+   rowHeight=Math.Max(rowHeight,Math.Max(minimumHeight,captionHeight+12));
+  }
+  FinishRow(buttons.Count);
+  RowStyles[0].Height=headerHeight+(oversized?SystemInformation.HorizontalScrollBarHeight:0);bool hc=StudioTheme.HighContrast;
+  for(int i=0;i<pages.Count;i++){var b=buttons[i];b.TabStop=!SingleTabStop||i==selected;pages[i].Visible=i==selected;b.BackColor=i==selected?(hc?SystemColors.Highlight:Color.FromArgb(25,80,131)):BackColor;b.ForeColor=i==selected?(hc?SystemColors.HighlightText:Color.White):ForeColor;b.FlatAppearance.BorderColor=hc?SystemColors.WindowText:i==selected?Color.FromArgb(0,143,255):Dark?Color.FromArgb(56,75,92):Color.FromArgb(190,204,219);}
   Invalidate(true);
  }finally{refreshing=false;}}
 }

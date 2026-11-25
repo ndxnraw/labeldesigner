@@ -1,6 +1,8 @@
 # Riadené aktualizácie — Pre-release
 
-Nástroje → Kontrola a údržba → Aktualizácie ponúka kontrolu a prípravu nového balíka. Pri štarte,
+Nástroje → Kontrola a údržba → Správa aplikácie… → Aktualizácie ponúka
+kontrolu a prípravu nového balíka. Nainštalovaná zostava je uvedená nad stavom
+aktualizácie a hlavné tlačidlo sa mení podľa dostupného kroku. Pri štarte,
 časovačom ani na pozadí editora sa internet nekontroluje. Verejný repozitár
 `ndxnraw/labeldesigner` nevyžaduje účet ani token. Bez internetu zostáva editor,
 tlač, export aj spustenie už pripravenej verzie použiteľné.
@@ -33,13 +35,13 @@ tlače z existujúceho `startup.xml.workspace`.
    Súčasné nastavenia sa automaticky neprepisujú starou zálohou.
 
 Pri probléme s novou verziou podržte **Shift počas spustenia pôvodného EXE** alebo
-ho spustite s `--no-update-redirect`. Potom použite návrat v ponuke Aktualizácie.
+ho spustite s `--no-update-redirect`. Potom použite návrat na karte Aktualizácie.
 Pôvodné súbory zostávajú na mieste. Zmenená/poškodená predchádzajúca inštalácia
 sa nespustí cez správcu. Vždy možno ručne rozbaliť dôveryhodný ZIP do nového priečinka.
 
 ## Uvoľnenie miesta
 
-V okne **Aktualizácie** zvoľte **Uvoľniť miesto po aktualizáciách…**.
+Na karte **Aktualizácie** zvoľte **Uvoľniť miesto po aktualizáciách…**.
 Po potvrdení program odstráni staršie overené zostavy, ktoré eviduje vo svojom
 úložisku. Rovnakú kontrolu vykoná po spustení novej verzie pri aktualizácii.
 Čistenie funguje offline.

@@ -33,6 +33,12 @@ Nastavenia a úprava textového poľa majú posúvateľný obsah a samostatný p
 Pri zmenšení zostáva dostupné zavretie alebo potvrdenie. Escape ruší/zatvára dialóg;
 v úprave textu zostáva Enter v samotnom viacriadkovom texte novým riadkom.
 
+V **Nástroje → Kontrola a údržba → Správa aplikácie…** sú karty Aktualizácie,
+Zálohy a Diagnostika. Karty rešpektujú systémové kontrastné farby a spoločné
+tlačidlo Zavrieť ostáva viditeľné aj pri posúvaní obsahu. Záznamy diagnostiky
+sa dajú označiť a kopírovať klávesnicou. Pri potvrdeniach aktualizácií,
+návratu a čistenia je predvolená voľba Nie.
+
 Chyby aplikácie obsahujú vysvetlenie a odporúčaný postup pre chýbajúce oprávnenie,
 nedostupný súbor/zariadenie alebo neplatné údaje. Pôvodné podrobnosti a existujúci
 diagnostický odkaz zostávajú zachované. Správa nemení údaje ani automaticky
@@ -44,6 +50,8 @@ neopakuje zlyhanú operáciu.
 malé rozmery, návrat po zmene veľkosti, dlhé hlásenia a skutočné dialógy. Karty
 sa skúšajú s písmom pri 100/125/150/200 %; dialógy so synteticky zväčšenými
 rozmermi aj písmom v obmedzenom priestore. Skúšajú sa oba motívy a štyri jazyky.
+Správa aplikácie sa skúša aj pri vynútenej vetve vysokého kontrastu so
+systémovými farbami a písmom do 200 %.
 Staršie sady ďalej overujú tlačový náhľad, aktualizačné potvrdenia, koncepty,
 export a ochranu neuloženého dokumentu.
 

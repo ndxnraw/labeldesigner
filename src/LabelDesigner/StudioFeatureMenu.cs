@@ -3,8 +3,12 @@ namespace EanEtikety {
 sealed class StudioFeatureRenderer:ToolStripProfessionalRenderer {
  public StudioFeatureRenderer(bool dark):base(new StudioMenuColors(dark)){}
  protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e){
-  if(e.Item.Enabled)e.ArrowColor=e.Item.ForeColor;
+  if(e.Item.Enabled)e.ArrowColor=StudioTheme.HighContrast&&e.Item.Selected?SystemColors.HighlightText:e.Item.ForeColor;
   base.OnRenderArrow(e);
+ }
+ protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e){
+  if(StudioTheme.HighContrast&&e.Item.Enabled&&e.Item.Selected)e.TextColor=SystemColors.HighlightText;
+  base.OnRenderItemText(e);
  }
 }
 sealed class StudioIconMenuItem:ToolStripMenuItem {
@@ -30,8 +34,7 @@ public partial class MainForm {
   projectMenu.Items.AddRange(new ToolStripItem[]{open,save,saveAs,new ToolStripSeparator(),
    FeatureItem("Šablóny a nedávne projekty",HeaderIcon.Library,ShowLibrary),
    FeatureItem("Upraviteľné polia šablóny…",HeaderIcon.AddText,ConfigureQuickPrintFields),
-   FeatureItem("Automatické ukladanie",HeaderIcon.AutoSave,RecoveryPreferences),
-   FeatureItem(WorkspaceBackupTitle,HeaderIcon.Library,ShowWorkspaceBackup)});
+   FeatureItem("Automatické ukladanie",HeaderIcon.AutoSave,RecoveryPreferences)});
  }
  void BuildInsertMenu() {
   PrepareFeatureMenu(insertMenu);
@@ -51,8 +54,7 @@ public partial class MainForm {
   layout.DropDownItems.Add(FeatureItem("Samolepiace hárky",HeaderIcon.Table,EditSheet));
   var maintenance=FeatureGroup("Kontrola a údržba",HeaderIcon.Tools);
   maintenance.DropDownItems.Add(FeatureItem("História tlače",HeaderIcon.Print,ShowPrintHistory));
-  maintenance.DropDownItems.Add(FeatureItem("Diagnostika",HeaderIcon.Diagnostics,ShowDiagnostics));
-  maintenance.DropDownItems.Add(FeatureItem("Aktualizácie",HeaderIcon.Update,ShowUpdates));
+  maintenance.DropDownItems.Add(FeatureItem("Správa aplikácie…",HeaderIcon.Tools,ShowApplicationManagement));
   var help=FeatureGroup("Nastavenia a pomoc",HeaderIcon.Settings);
   help.DropDownItems.Add(FeatureItem("Nastavenia",HeaderIcon.Settings,StudioPreferences));
   help.DropDownItems.Add(FeatureItem("Návod",HeaderIcon.Help,Help));

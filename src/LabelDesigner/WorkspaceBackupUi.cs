@@ -4,38 +4,36 @@ using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
 using System.Windows.Forms;
+using static EanEtikety.ManagementLayout;
 
 namespace EanEtikety {
  public partial class MainForm {
   const string WorkspaceBackupTitle="Prenosná záloha a obnova…";
   const string WorkspaceRestoreTitle="Náhľad obnovy pracovných údajov";
 
-  void ShowWorkspaceBackup() {
-   if(workspace==null)return;
-   var service=new WorkspaceBackup(workspace.DirectoryPath,LocalPrintHistory());
-   using(var dialog=FeatureForm(WorkspaceBackupTitle,650,405)){
-    var stack=FeatureStack(dialog);
-    var templates=Check(stack,"Šablóny",true);
-    var profiles=Check(stack,"Profily médií",true);
-    var batches=Check(stack,"Dávky a uzávierky",false);
-    StackAdd(stack,new Label{AutoSize=true,MaximumSize=new Size(470,0),Text=Loc.T(
-     "Záloha dávok obsahuje identifikátory, počty a uzávierky. Obsah na dotlač sa uchováva v histórii tlače.")});
-    var actions=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill};
-    var export=Btn(Loc.T("Exportovať zálohu do ZIPu…"),()=>ExportWorkspace(dialog,service,templates.Checked,profiles.Checked,batches.Checked));
-    var restore=Btn(Loc.T("Otvoriť ZIP na obnovu…"),()=>RestoreWorkspace(dialog,service));
-    var close=Btn(Loc.T("Zavrieť"),dialog.Close);
-    actions.Controls.Add(export);actions.Controls.Add(restore);actions.Controls.Add(close);
-    StackAdd(stack,actions);
-    EventHandler update=delegate{export.Enabled=templates.Checked||profiles.Checked||batches.Checked;};
-    templates.CheckedChanged+=update;profiles.CheckedChanged+=update;batches.CheckedChanged+=update;
-    dialog.CancelButton=close;
-    ApplyColors(dialog);
-    dialog.ShowDialog(this);
+  void BuildWorkspaceBackupPage(Form dialog,Panel page) {
+   var rows=ScrollRows(page);
+   if(workspace==null){
+    ManagementLayout.AddRow(rows,Description("Pracovné úložisko nie je dostupné."));
+    return;
    }
+   var service=new WorkspaceBackup(workspace.DirectoryPath,LocalPrintHistory());
+   ManagementLayout.AddRow(rows,Description("Vyberte, čo má obsahovať záloha."));
+   var templates=Check(rows,"Šablóny",true);
+   var profiles=Check(rows,"Profily médií",true);
+   var batches=Check(rows,"Dávky a uzávierky",false);
+   ManagementLayout.AddRow(rows,Description("Záloha dávok obsahuje identifikátory, počty a uzávierky. Obsah na dotlač sa uchováva v histórii tlače."));
+   var export=Action("Exportovať zálohu do ZIPu…",()=>ExportWorkspace(dialog,service,templates.Checked,profiles.Checked,batches.Checked));
+   ManagementLayout.AddRow(rows,export);
+   ManagementLayout.AddRow(rows,Action("Otvoriť ZIP na obnovu…",()=>RestoreWorkspace(dialog,service)));
+   EventHandler update=delegate{export.Enabled=templates.Checked||profiles.Checked||batches.Checked;};
+   templates.CheckedChanged+=update;
+   profiles.CheckedChanged+=update;
+   batches.CheckedChanged+=update;
   }
 
   void ExportWorkspace(Form parent,WorkspaceBackup service,bool templates,bool profiles,bool batches) {
-   using(var pick=new SaveFileDialog{Filter="ZIP (*.zip)|*.zip",DefaultExt="zip",AddExtension=true,FileName="LabelDesigner-workspace.zip"}){
+   using(var pick=new SaveFileDialog{Title=Loc.T("Exportovať zálohu do ZIPu…"),Filter="ZIP (*.zip)|*.zip",DefaultExt="zip",AddExtension=true,FileName="LabelDesigner-workspace.zip"}){
     if(pick.ShowDialog(parent)!=DialogResult.OK)return;
     string path=pick.FileName;
     try{
@@ -47,7 +45,7 @@ namespace EanEtikety {
   }
 
   void RestoreWorkspace(Form parent,WorkspaceBackup service) {
-   using(var pick=new OpenFileDialog{Filter="ZIP (*.zip)|*.zip"}){
+   using(var pick=new OpenFileDialog{Title=Loc.T("Otvoriť ZIP na obnovu…"),Filter="ZIP (*.zip)|*.zip"}){
     if(pick.ShowDialog(parent)!=DialogResult.OK)return;
     try{
      WorkspaceRestoreReview review;
@@ -120,10 +118,11 @@ namespace EanEtikety {
     footer.Controls.Add(batchDetails);
     var status=new Label{AutoSize=true,UseMnemonic=false,MaximumSize=new Size(590,0)};
     footer.Controls.Add(status);
-    var actions=new FlowLayoutPanel{AutoSize=true,Dock=DockStyle.Fill};
+    var actions=new UiMessageBox.ActionRow();
     var restore=Btn(Loc.T("Obnoviť pracovné údaje"),()=>dialog.DialogResult=DialogResult.OK);
-    var cancel=Btn(Loc.T("Zrušiť"),dialog.Close);
-    actions.Controls.Add(restore);actions.Controls.Add(cancel);root.Controls.Add(actions,0,5);
+    var cancel=Btn(Loc.T("Zrušiť"),()=>dialog.DialogResult=DialogResult.Cancel);
+    cancel.DialogResult=DialogResult.Cancel;
+    actions.AddAction(restore);actions.AddAction(cancel);root.Controls.Add(actions,0,5);
     dialog.CancelButton=cancel;
 
     WorkspaceRestorePlan candidate=null;

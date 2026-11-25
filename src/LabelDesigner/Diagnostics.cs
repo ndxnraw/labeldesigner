@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
-using System.Reflection;
 using System.Windows.Forms;
+using static EanEtikety.ManagementLayout;
 
 namespace EanEtikety {
  public static class DiagnosticLog {
@@ -29,9 +29,37 @@ namespace EanEtikety {
   public static string ReadRecent(){lock(gate){string path=Path.Combine(DirectoryPath,"application.log");if(!File.Exists(path))return "";string text=File.ReadAllText(path);return text.Length>100000?text.Substring(text.Length-100000):text;}}
  }
  public partial class MainForm {
-  void ShowDiagnostics(){using(var window=FeatureForm("Diagnostika",800,540)){
-   var text=new TextBox{Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Both,WordWrap=false,Dock=DockStyle.Fill,Text=DiagnosticLog.ReadRecent()};window.Controls.Add(text);
-   var save=Btn(Loc.T("Uložiť diagnostiku…"),delegate{try{using(var dialog=new SaveFileDialog{Filter="Text|*.txt",FileName="ND-LabelDesigner-diagnostics.txt"})if(dialog.ShowDialog(window)==DialogResult.OK)AtomicOutput.Save(dialog.FileName,p=>File.WriteAllText(p,text.Text,new UTF8Encoding(false)));}catch(Exception ex){Error(ex);}});save.Dock=DockStyle.Bottom;window.Controls.Add(save);ApplyColors(window);window.ShowDialog(this);
-  }}
+  Button BuildDiagnosticsPage(Form window,Panel page){
+   page.AutoScroll=false;
+   var layout=Rows();
+   layout.Padding=new Padding(0,4,0,0);
+   page.Controls.Add(layout);
+   var log=new TextBox{Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Vertical,WordWrap=true,
+    AccessibleName=Loc.T("Výpis diagnostiky")};
+   ManagementLayout.AddRow(layout,log,SizeType.Percent);
+   log.Margin=new Padding(0,2,0,2);
+   var save=Action("Uložiť výpis…",()=>{
+    try{
+     using(var dialog=new SaveFileDialog{Title=Loc.T("Uložiť diagnostiku…"),Filter="Text|*.txt",FileName="ND-LabelDesigner-diagnostics.txt"})
+      if(dialog.ShowDialog(window)==DialogResult.OK)
+       AtomicOutput.Save(dialog.FileName,p=>File.WriteAllText(p,log.Text,new UTF8Encoding(false)));
+    }catch(Exception ex){Error(ex);}
+   });
+   save.Enabled=false;
+   save.Visible=false;
+   page.VisibleChanged+=delegate{
+    save.Visible=page.Visible;
+    if(!page.Visible)return;
+    try{
+     string recent=DiagnosticLog.ReadRecent();
+     save.Enabled=recent.Length>0;
+     log.Text=save.Enabled?recent:Loc.T("Diagnostika zatiaľ neobsahuje žiadne záznamy.");
+    }catch(Exception ex) when(ex is IOException || ex is UnauthorizedAccessException){
+     save.Enabled=false;
+     log.Text=Loc.T("Diagnostiku sa nepodarilo načítať.")+Environment.NewLine+ex.Message;
+    }
+   };
+   return save;
+  }
  }
 }

@@ -17,14 +17,30 @@ class UpdateTests {
  sealed class PendingHttp:HttpMessageHandler{protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token){var t=new TaskCompletionSource<HttpResponseMessage>();token.Register(()=>t.TrySetCanceled());return t.Task;}}
  sealed class CancelStream:MemoryStream{readonly Action cancel;public CancelStream(byte[] data,Action cancel):base(data){this.cancel=cancel;}public override Task<int> ReadAsync(byte[] buffer,int offset,int count,CancellationToken token){int read=Read(buffer,offset,Math.Min(10,count));cancel();return Task.FromResult(read);}}
  static HttpResponseMessage Response(byte[] bytes){return new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(bytes)};}
+ static byte[] ReleaseBody(UpdateOffer offer,byte[] xml){
+  return Encoding.UTF8.GetBytes("{\"id\":1,\"tag_name\":\"Pre-release\",\"target_commitish\":\""+offer.SourceCommit+
+   "\",\"draft\":false,\"prerelease\":true,\"assets\":[{\"id\":2,\"name\":\"UPDATE-INDEX.xml\",\"size\":"+xml.Length+
+   ",\"digest\":\"sha256:"+UpdateFiles.Digest(xml)+"\"},{\"id\":3,\"name\":\""+offer.AssetName+"\",\"size\":"+offer.Size+
+   ",\"digest\":\"sha256:"+offer.Sha256+"\"}]}");
+ }
+ static FakeHttp OfferRelease(UpdatePackage package,string zip){
+  byte[] payload=File.ReadAllBytes(zip);
+  var offer=new UpdateOffer{Family=package.Family,SourceCommit=package.SourceCommit,PackageId=package.PackageId,
+   Sha256=UpdateFiles.Hash(zip),AssetName=UpdateFiles.AssetName(package.Family),Size=payload.Length};
+  var index=new UpdateIndex{SourceCommit=offer.SourceCommit};index.Packages.Add(offer);
+  byte[] xml=Encoding.UTF8.GetBytes(ProjectXml.Encode(index));
+  byte[] release=ReleaseBody(offer,xml);
+  return new FakeHttp{Reply=request=>Response(request.RequestUri.AbsolutePath.EndsWith("/2")?xml:
+   request.RequestUri.AbsolutePath.EndsWith("/3")?payload:release)};
+ }
  static void Network(){UpdatePackage p;string zip=Fixture("network",UpdateFiles.CurrentFamily,out p);var bytes=File.ReadAllBytes(zip);var offer=new UpdateOffer{Family=p.Family,SourceCommit=p.SourceCommit,PackageId=p.PackageId,Sha256=UpdateFiles.Hash(zip),AssetName=UpdateFiles.AssetName(p.Family),Size=bytes.Length};var index=new UpdateIndex{SourceCommit=p.SourceCommit};index.Packages.Add(offer);var xml=Encoding.UTF8.GetBytes(ProjectXml.Encode(index));
   index.Validate();
   index.Packages.Clear();Reject(index.Validate,"index requires one offer");
   index.Packages.Add(offer);index.Packages.Add(offer);Reject(index.Validate,"index rejects extra offers");
   index.Packages.RemoveAt(1);
   offer.Family="framework";Reject(index.Validate,"retired Framework offer rejected");offer.Family=p.Family;
-  string json="{\"id\":1,\"tag_name\":\"Pre-release\",\"target_commitish\":\""+p.SourceCommit+"\",\"draft\":false,\"prerelease\":true,\"assets\":[{\"id\":2,\"name\":\"UPDATE-INDEX.xml\",\"size\":"+xml.Length+",\"digest\":\"sha256:"+UpdateFiles.Digest(xml)+"\"},{\"id\":3,\"name\":\""+offer.AssetName+"\",\"size\":"+bytes.Length+",\"digest\":\"sha256:"+offer.Sha256+"\"}]}";
-  var handler=new FakeHttp{Reply=request=>Response(request.RequestUri.AbsolutePath.EndsWith("/2")?xml:request.RequestUri.AbsolutePath.EndsWith("/3")?bytes:Encoding.UTF8.GetBytes(json))};using(var client=new UpdateNetwork(handler)){Check(handler.Requests==0,"constructing updater never contacts network");var found=client.Check(p.Family);Check(found.PackageId==p.PackageId&&found.AssetId==3,"online check pins release/index/asset identity");string downloaded=client.Download(found,Path.Combine(root,"downloads"));Check(UpdateFiles.Hash(downloaded)==offer.Sha256,"streamed download verified");handler.Reply=request=>Response(new byte[]{0});Reject(()=>client.Download(found,Path.Combine(root,"bad-download")),"truncated download rejected");Check(Directory.GetFiles(Path.Combine(root,"bad-download")).Length==0,"failed download leaves no completed ZIP");}
+  byte[] release=ReleaseBody(offer,xml);
+  var handler=new FakeHttp{Reply=request=>Response(request.RequestUri.AbsolutePath.EndsWith("/2")?xml:request.RequestUri.AbsolutePath.EndsWith("/3")?bytes:release)};using(var client=new UpdateNetwork(handler)){Check(handler.Requests==0,"constructing updater never contacts network");var found=client.Check(p.Family);Check(found.PackageId==p.PackageId&&found.AssetId==3,"online check pins release/index/asset identity");string downloaded=client.Download(found,Path.Combine(root,"downloads"));Check(UpdateFiles.Hash(downloaded)==offer.Sha256,"streamed download verified");handler.Reply=request=>Response(new byte[]{0});Reject(()=>client.Download(found,Path.Combine(root,"bad-download")),"truncated download rejected");Check(Directory.GetFiles(Path.Combine(root,"bad-download")).Length==0,"failed download leaves no completed ZIP");}
   foreach(string url in new[]{"http://github.com/a","https://evil.example/a","https://github.com:444/a","https://user@github.com/a","https://127.0.0.1/a"})Check(!UpdateNetwork.AllowedUrl(new Uri(url)),"reject network target "+url);
   var redirect=new FakeHttp{Reply=request=>{var r=new HttpResponseMessage(HttpStatusCode.Redirect);r.Headers.Location=new Uri("http://evil.example/a");return r;}};using(var client=new UpdateNetwork(redirect)){Reject(()=>client.Check(p.Family),"unsafe redirect rejected");Check(redirect.Requests==1,"unsafe redirect never requested");}
   using(var client=new UpdateNetwork(new FakeHttp{Reply=request=>{throw new HttpRequestException("offline");}}))Reject(()=>client.Check(p.Family),"offline failure handled without activation");
@@ -78,8 +94,46 @@ class UpdateTests {
  static readonly System.Reflection.BindingFlags Hidden=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
  static void Set(object o,string name,object value){o.GetType().GetField(name,Hidden).SetValue(o,value);}static object Call(object o,string name,params object[] args){return o.GetType().GetMethod(name,Hidden).Invoke(o,args);}
  static void Ui(){UpdatePackage a,b;string az=Fixture("ui-old",UpdateFiles.CurrentFamily,out a),bz=Fixture("ui-next",UpdateFiles.CurrentFamily,out b);string original=UpdatePreparation.Prepare(az,UpdateFiles.Hash(az),a.Family,Path.Combine(root,"ui-original"));string prefs=Path.Combine(root,"ui-prefs.xml");var service=new UpdateActivation(Path.Combine(root,"ui-store"),a.Family,prefs);string next=UpdatePreparation.Prepare(bz,UpdateFiles.Hash(bz),b.Family,service.PackagesRoot);int requests=0;
-  using(var dialog=new UpdatesDialog(service,original,null)){Set(dialog,"networkFactory",(Func<UpdateNetwork>)(()=>{requests++;throw new Exception("network must require click");}));Check(requests==0,"update UI constructor does not contact network");Check(!dialog.PrepareLocal(bz,"none",false),"untrusted local import never starts");Call(dialog,"Ready",next);Set(dialog,"confirm",(Func<string,bool>)(message=>false));Call(dialog,"RequestActivation");Check(dialog.RequestedDirectory==null&&service.State().Current==null,"declined restart never activates");Set(dialog,"confirm",(Func<string,bool>)(message=>true));Call(dialog,"RequestActivation");Check(dialog.RequestedDirectory==next&&service.State().Current==null,"accepted dialog requests switch but cannot bypass document-close gate");}
-  foreach(string language in Loc.Codes){Loc.Language=language;using(var view=new UpdatesDialog(service,original,null)){view.StartPosition=FormStartPosition.Manual;view.Location=new Point(-20000,-20000);view.Show();view.ClientSize=new Size(520,400);Application.DoEvents();var button=(Button)view.GetType().GetField("activate",Hidden).GetValue(view);var scroll=(Panel)view.Controls[0];scroll.ScrollControlIntoView(button);Application.DoEvents();var bounds=scroll.RectangleToClient(button.RectangleToScreen(button.ClientRectangle));Check(bounds.Top>=0&&bounds.Bottom<=scroll.ClientSize.Height,"activation reachable in minimum dialog "+language);Check(language=="sk"||Loc.T("Skontrolovať aktualizácie")!="Skontrolovať aktualizácie","update menu translated "+language);if(language=="sk"){using(var image=new Bitmap(view.Width,view.Height)){view.DrawToBitmap(image,new Rectangle(0,0,image.Width,image.Height));image.Save(Path.Combine(root,"updates-dialog.png"));}}view.Close();}}Loc.Language="sk";using(var form=new MainForm(prefs)){form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();Application.DoEvents();Set(form,"updateRunningDirectory",original);int launches=0;Set(form,"updateLauncher",(Func<string,bool>)(exe=>{launches++;return true;}));Set(form,"dirty",true);bool asked=false;using(var timer=new System.Windows.Forms.Timer{Interval=20}){timer.Tick+=delegate{var forms=new List<Form>();foreach(Form open in Application.OpenForms)forms.Add(open);foreach(var open in forms)if(open!=form&&open.Text==Loc.T("Neuložené nastavenie")){asked=true;open.DialogResult=DialogResult.Cancel;open.Close();timer.Stop();break;}};timer.Start();Call(form,"CompleteUpdateSwitch",service,next,false);timer.Stop();}Check(asked&&!form.IsDisposed&&launches==0&&service.State().Current==null,"unsaved-document cancellation preserves running editor and activation state");Set(form,"dirty",false);form.Close();}
+  using(var dialog=new UpdatesDialog(service,original,null)){
+   Set(dialog,"networkFactory",(Func<UpdateNetwork>)(()=>{requests++;throw new HttpRequestException("offline");}));
+   var primary=(Button)dialog.GetType().GetField("primary",Hidden).GetValue(dialog);
+   var information=(Label)dialog.GetType().GetField("information",Hidden).GetValue(dialog);
+   dialog.StartPosition=FormStartPosition.Manual;dialog.Location=new Point(-20000,-20000);dialog.Show();
+   Check(requests==0&&primary.Text==Loc.T("Skontrolovať aktualizácie"),"opening updates stays offline");
+   Check(!dialog.PrepareLocal(bz,"none",false),"untrusted local import never starts");
+   string checksum=Path.Combine(root,"ui-checksum.txt");
+   File.WriteAllText(checksum,UpdateFiles.Hash(bz)+"  "+Path.GetFileName(bz));
+   Check(dialog.PrepareLocal(bz,checksum,true)&&requests==0,"trusted offline import prepares without contacting network");
+   Check(primary.Text==Loc.T("Spustiť pripravenú verziu…"),"primary action changes to activation");
+   Call(dialog,"CheckOnline");
+   Check(requests==1&&information.Text.Contains("offline")&&primary.Text==Loc.T("Spustiť pripravenú verziu…"),"failed explicit recheck keeps prepared local package");
+   string onlineZip=Fixture("ui-online",UpdateFiles.CurrentFamily,out var online);
+   Set(dialog,"networkFactory",(Func<UpdateNetwork>)(()=>new UpdateNetwork(OfferRelease(online,onlineZip))));
+   Call(dialog,"CheckOnline");
+   Check(primary.Text==Loc.T("Stiahnuť a pripraviť")&&((Button)dialog.GetType().GetField("restartPrepared",Hidden).GetValue(dialog)).Visible,
+    "a new online offer can replace a prepared local package while keeping its restart action");
+   primary.PerformClick();
+   Check(primary.Text==Loc.T("Spustiť pripravenú verziu…"),"downloaded package becomes primary activation");
+   next=Path.Combine(service.PackagesRoot,online.PackageId);
+   bool safeDefault=false;
+   using(var timer=new System.Windows.Forms.Timer{Interval=20}){
+    timer.Tick+=delegate{
+     foreach(Form window in Application.OpenForms)if(window!=dialog){
+      timer.Stop();
+      safeDefault=window.AcceptButton==window.CancelButton&&((Button)window.CancelButton).DialogResult==DialogResult.No;
+      window.DialogResult=DialogResult.No;
+      break;
+     }
+    };
+    timer.Start();
+    Call(dialog,"RequestActivation");
+   }
+   Check(safeDefault&&dialog.RequestedDirectory==null&&service.State().Current==null,"declined restart never activates and No is the default");
+   Set(dialog,"confirm",(Func<string,bool>)(message=>true));
+   Call(dialog,"RequestActivation");
+   Check(dialog.RequestedDirectory==next&&service.State().Current==null,"accepted dialog requests switch but cannot bypass document-close gate");
+  }
+  foreach(string language in Loc.Codes){Loc.Language=language;using(var view=new UpdatesDialog(service,original,null)){view.StartPosition=FormStartPosition.Manual;view.Location=new Point(-20000,-20000);view.Show();view.ClientSize=new Size(520,400);Application.DoEvents();Call(view,"Ready",next);var button=(Button)view.GetType().GetField("primary",Hidden).GetValue(view);var scroll=(Panel)view.Controls.Find("updatePage",true)[0];scroll.ScrollControlIntoView(button);Application.DoEvents();var bounds=scroll.RectangleToClient(button.RectangleToScreen(button.ClientRectangle));Check(bounds.Top>=0&&bounds.Bottom<=scroll.ClientSize.Height,"activation reachable in minimum dialog "+language);Check(language=="sk"||Loc.T("Skontrolovať aktualizácie")!="Skontrolovať aktualizácie","update menu translated "+language);if(language=="sk"){using(var image=new Bitmap(view.Width,view.Height)){view.DrawToBitmap(image,new Rectangle(0,0,image.Width,image.Height));image.Save(Path.Combine(root,"updates-dialog.png"));}}view.Close();}}Loc.Language="sk";using(var form=new MainForm(prefs)){form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();Application.DoEvents();Set(form,"updateRunningDirectory",original);int launches=0;Set(form,"updateLauncher",(Func<string,bool>)(exe=>{launches++;return true;}));Set(form,"dirty",true);bool asked=false;using(var timer=new System.Windows.Forms.Timer{Interval=20}){timer.Tick+=delegate{var forms=new List<Form>();foreach(Form open in Application.OpenForms)forms.Add(open);foreach(var open in forms)if(open!=form&&open.Text==Loc.T("Neuložené nastavenie")){asked=true;open.DialogResult=DialogResult.Cancel;open.Close();timer.Stop();break;}};timer.Start();Call(form,"CompleteUpdateSwitch",service,next,false);timer.Stop();}Check(asked&&!form.IsDisposed&&launches==0&&service.State().Current==null,"unsaved-document cancellation preserves running editor and activation state");Set(form,"dirty",false);form.Close();}
  }
  [STAThread]static void Main(string[] args){root=args[0];Directory.CreateDirectory(root);try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Packages();Network();Activation();Cleanup();Ui();File.WriteAllText(Path.Combine(root,"passed.txt"),"PASS "+checks+" update integrity, network, activation, rollback and consent checks; no production update launched");}catch(Exception ex){File.WriteAllText(Path.Combine(root,"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

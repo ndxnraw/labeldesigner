@@ -1062,3 +1062,15 @@ Pripravte dávku, aby sa zobrazil náhľad.	Prepare the batch to see the preview
 Vyplniť a tlačiť…	Fill and print…	Vyplnit a tisknout…	Kitöltés és nyomtatás…
 Upraviť šablónu	Edit template	Upravit šablonu	Sablon szerkesztése
 Správa šablóny	Manage template	Správa šablony	Sablon kezelése
+Správa aplikácie	Application management	Správa aplikace	Alkalmazáskezelés
+Správa aplikácie…	Application management…	Správa aplikace…	Alkalmazáskezelés…
+Zálohy	Backups	Zálohy	Biztonsági mentések
+Kontrola aktualizácií sa spustí na vyžiadanie.	Updates are checked on request.	Kontrola aktualizací se spustí na vyžádání.	A program kérésre keres frissítéseket.
+Ručne stiahnutý ZIP môžete overiť a pripraviť aj bez internetu.	You can verify and prepare a manually downloaded ZIP offline.	Ručně stažený ZIP můžete ověřit a připravit i bez internetu.	A kézzel letöltött ZIP internetkapcsolat nélkül is ellenőrizhető és előkészíthető.
+Vyberte kontrolný súčet SHA-256	Select the SHA-256 checksum	Vyberte kontrolní součet SHA-256	Válassza ki a SHA-256 ellenőrzőösszeget
+Pracovné úložisko nie je dostupné.	The workspace is unavailable.	Pracovní úložiště není dostupné.	A munkaterület nem érhető el.
+Vyberte, čo má obsahovať záloha.	Select what to include in the backup.	Vyberte, co má záloha obsahovat.	Válassza ki, mi kerüljön a biztonsági mentésbe.
+Výpis diagnostiky	Diagnostic log	Diagnostický výpis	Diagnosztikai napló
+Diagnostika zatiaľ neobsahuje žiadne záznamy.	There are no diagnostic entries yet.	Diagnostika zatím neobsahuje žádné záznamy.	Még nincsenek diagnosztikai bejegyzések.
+Diagnostiku sa nepodarilo načítať.	Could not load diagnostics.	Diagnostiku se nepodařilo načíst.	A diagnosztikai napló betöltése sikertelen.
+Uložiť výpis…	Save log…	Uložit výpis…	Napló mentése…
