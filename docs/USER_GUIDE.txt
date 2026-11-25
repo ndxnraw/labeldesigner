@@ -157,6 +157,18 @@ nahradené položky. Poškodené šablóny sú v náhľade označené a preskoč
 Pre presný návrat odstráňte aj položky pridané pôvodnou
 obnovou. Zálohy fungujú offline na .NET Framework 4.8 aj .NET 10.
 
+ČIARY A OBDĹŽNIKY
+V ponuke Nástroje → Vložiť použite Pridať čiaru… alebo Pridať obdĺžnik….
+Dĺžku, hrúbku a polohu zadáte v jednotkách projektu. Obrys obdĺžnika
+s hrúbkou 0 sa nevykreslí. Priehľadná výplň ponechá obsah pod rámčekom
+viditeľný. Biela výplň prekryje obsah nižších vrstiev a v ZPL sa na jej
+miesto neposiela čierna tlačová bodka.
+
+Dvojklik na čiaru alebo rámček otvorí jeho nastavenia. Prvky sa dajú
+presúvať, otáčať, zoskupovať a meniť poradie. Kontrola etikety aj kontrola
+pred výstupom upozornia, keď tvar zasiahne do voľného okraja alebo prekryje
+kód. Veľmi tenký obrys si pri tepelnej tlači overte v rozlíšení média.
+
 PRESNÉ PRESÚVANIE NA PLÁTNE
 Pri presúvaní prvku alebo výberu ukážu vodiace čiary blízke zarovnanie
 hrán a stredov s okrajom etikety alebo s iným prvkom. Popis pri kurzore

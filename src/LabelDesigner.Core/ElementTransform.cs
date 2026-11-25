@@ -20,6 +20,17 @@ public static class ElementTransform {
  public static PointF[] Corners(ElementEdit e){var b=LocalBounds(e);var a=new[]{new PointF(b.Left,b.Top),new PointF(b.Right,b.Top),new PointF(b.Right,b.Bottom),new PointF(b.Left,b.Bottom)};using(var m=Matrix(e.Rotation,Center(e)))m.TransformPoints(a);return a;}
  public static RectangleF Bounds(ElementEdit e){double a=e.Rotation*Math.PI/180,c=Math.Abs(Math.Cos(a)),s=Math.Abs(Math.Sin(a)),w=e.Width*c+e.Height*s,h=e.Width*s+e.Height*c;return new RectangleF((float)(e.X+(e.Width-w)/2),(float)(e.Y+(e.Height-h)/2),(float)w,(float)h);}
  public static bool Contains(ElementEdit e,PointF canvas){return e!=null&&LocalBounds(e).Contains(Rotate(canvas,Center(e),-e.Rotation));}
+ public static bool ContainsShape(ElementEdit element,ShapeContent shape,PointF canvas,float tolerance){
+  var bounds=LocalBounds(element);
+  var point=Rotate(canvas,Center(element),-element.Rotation);
+  if(shape.IsLine||shape.Fill==ShapeFill.Transparent)bounds.Inflate(tolerance,tolerance);
+  if(!bounds.Contains(point))return false;
+  if(shape.IsLine||shape.Fill!=ShapeFill.Transparent)return true;
+  float inset=(float)shape.Stroke+2*tolerance;
+  if(inset*2>=Math.Min(bounds.Width,bounds.Height))return true;
+  bounds.Inflate(-inset,-inset);
+  return !bounds.Contains(point);
+ }
  public static bool Outside(LabelSettings s,ElementEdit e){if(e==null)return false;var b=Bounds(e);return Engine.Outside(s,b.X,b.Y,b.Width,b.Height);}
  public static RectangleF Bounds(RectangleF r,double rotation,PointF center){using(var p=new GraphicsPath()){p.AddRectangle(r);using(var m=Matrix(rotation,center))p.Transform(m);return p.GetBounds();}}
  public static string Number(double n){return n.ToString("0.########",CultureInfo.InvariantCulture);}

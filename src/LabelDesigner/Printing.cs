@@ -24,7 +24,13 @@ public class LabelPrintDocument:PrintDocument {
   // Record vector artwork independently of a printer DC so bad driver bounds
   // cannot hide document content in the preview.
   System.Drawing.Imaging.Metafile image;
-  using(var bitmap=new Bitmap(1,1))using(var reference=Graphics.FromImage(bitmap)){IntPtr hdc=reference.GetHdc();try{image=new System.Drawing.Imaging.Metafile(hdc,new RectangleF(0,0,paper.Width,paper.Height),System.Drawing.Imaging.MetafileFrameUnit.Millimeter,System.Drawing.Imaging.EmfType.EmfPlusDual);}finally{reference.ReleaseHdc(hdc);}}
+  using(var bitmap=new Bitmap(1,1))using(var reference=Graphics.FromImage(bitmap)){
+   // A memory DC can report physical dimensions that disagree with the logical DPI used to record the page.
+   var frame=new RectangleF(0,0,paper.Width*reference.DpiX/25.4f,paper.Height*reference.DpiY/25.4f);
+   IntPtr hdc=reference.GetHdc();
+   try{image=new System.Drawing.Imaging.Metafile(hdc,frame,System.Drawing.Imaging.MetafileFrameUnit.Pixel,System.Drawing.Imaging.EmfType.EmfPlusDual);}
+   finally{reference.ReleaseHdc(hdc);}
+  }
   try{using(var graphics=Graphics.FromImage(image))RenderPage(graphics,pageIndex);if(image.GetMetafileHeader().MetafileSize>32*1024*1024)throw new InvalidOperationException(Loc.T("Náhľad prekročil limit 32 MB. Zjednodušte dokument."));return image;}catch{image.Dispose();throw;}
  }
  protected override void OnPrintPage(PrintPageEventArgs e){RenderPrinterPage(e.Graphics,page++,e.PageSettings.PrintableArea,e.PageSettings.HardMarginX,e.PageSettings.HardMarginY,PrintController.IsPreview);e.HasMorePages=page<PageCount&&!(PrintController.IsPreview&&PreviewPageIndex>=0);base.OnPrintPage(e);}

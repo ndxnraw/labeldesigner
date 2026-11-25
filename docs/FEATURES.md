@@ -18,6 +18,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Čiary a obdĺžniky** sa dajú vložiť a upravovať ako samostatné prvky.
+  Obdĺžnik má voliteľný čierny obrys a priehľadnú, čiernu alebo bielu
+  výplň. Kontrola rozlíši voľný okraj kódu od jeho prekrytia.
 - **Presné rozmiestňovanie na plátne** zobrazuje vodiace čiary pri presúvaní
   prvku alebo skupiny, pravítka v mm alebo cm a vzdialenosti od okrajov.
   Prichytávanie sa dá vypnúť v ponuke Panely alebo dočasne klávesom Alt.

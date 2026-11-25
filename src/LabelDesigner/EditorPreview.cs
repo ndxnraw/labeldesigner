@@ -62,7 +62,17 @@ public partial class PreviewPanel:Panel {
   }
   return fallback;
  }
- public bool ContainsElement(int index,Point p){return Settings!=null&&ElementTransform.Contains(Element(index),CanvasPoint(p));}
+ public bool ContainsElement(int index,Point p){
+  var element=Element(index);
+  if(element==null)return false;
+  var point=CanvasPoint(p);
+  var shape=index<=-3?Settings.Symbols[-3-index].Shape:null;
+  if(shape==null)return ElementTransform.Contains(element,point);
+  var canvas=LabelRectangle();
+  if(canvas.Width<=0||canvas.Height<=0)return false;
+  float tolerance=(float)(3*DeviceDpi/96d*Math.Max(Settings.Width/canvas.Width,Settings.Height/canvas.Height));
+  return ElementTransform.ContainsShape(element,shape,point,tolerance);
+ }
  int HandleAt(Point p){if(Handles().Length>0){var rot=RotationHandle();if(!rot.IsEmpty&&Math.Abs(rot.X-p.X)<=8&&Math.Abs(rot.Y-p.Y)<=8)return 8;}var a=Handles();for(int i=0;i<a.Length;i++)if(Math.Abs(p.X-a[i].X)<=6&&Math.Abs(p.Y-a[i].Y)<=6)return i;return -1;}
  Cursor ResizeCursor(int h){double angle=(h==0||h==4?45:h==2||h==6?135:h==1||h==5?90:0)+(Element(SelectedIndex)==null?0:Element(SelectedIndex).Rotation);int sector=(int)Math.Round(ElementTransform.Normalize(angle)/45)%4;return sector==0?Cursors.SizeWE:sector==1?Cursors.SizeNWSE:sector==2?Cursors.SizeNS:Cursors.SizeNESW;}
  int Hit(Point p){if(Settings==null)return -2;var indices=Elements.Indices(Settings);indices.Sort((x,y)=>Elements.Layer(Settings,y).CompareTo(Elements.Layer(Settings,x)));foreach(int i in indices)if(ContainsElement(i,p))return i;return -2;}
@@ -91,9 +101,10 @@ public partial class PreviewPanel:Panel {
   if(handle<0){a.X=Clamp(a.X+dx,-500,500);a.Y=Clamp(a.Y+dy,-500,500);return a;}
   else {
    bool aspect=a.Index<=-3&&(Settings.Symbols[-3-a.Index].Matrix!=null||Settings.Symbols[-3-a.Index].Image!=null&&Settings.Symbols[-3-a.Index].Image.KeepAspect);bool corner=handle%2==0;double minW=original.Index==-1?Math.Max(1,Math.Ceiling(Engine.Modules(Settings)*25.4/Settings.Dpi*100)/100):1;
-   if(corner){double factor=1+((west?-dx:dx)*a.Width+(north?-dy:dy)*a.Height)/(a.Width*a.Width+a.Height*a.Height);double min=Math.Max(Math.Max(minW/a.Width,1/a.Height),a.Index<=-3?0:4/a.Font);double max=Math.Min(Math.Min(500/a.Width,500/a.Height),a.Index<=-3?double.MaxValue:(a.Index==-1?72:144)/a.Font);factor=Clamp(factor,min,max);a.Width*=factor;a.Height*=factor;if(a.Index>-3)a.Font*=factor;}
+   double minH=a.Index<=-3&&Settings.Symbols[-3-a.Index].Shape!=null&&Settings.Symbols[-3-a.Index].Shape.IsLine?ShapeContent.MinimumLineThickness:1;
+   if(corner){double factor=1+((west?-dx:dx)*a.Width+(north?-dy:dy)*a.Height)/(a.Width*a.Width+a.Height*a.Height);double min=Math.Max(Math.Max(minW/a.Width,minH/a.Height),a.Index<=-3?0:4/a.Font);double max=Math.Min(Math.Min(500/a.Width,500/a.Height),a.Index<=-3?double.MaxValue:(a.Index==-1?72:144)/a.Font);factor=Clamp(factor,min,max);a.Width*=factor;a.Height*=factor;if(a.Index>-3)a.Font*=factor;}
    else if(handle==3||handle==7)a.Width=Clamp(a.Width+(west?-dx:dx),minW,500);
-   else a.Height=Clamp(a.Height+(north?-dy:dy),1,500);
+   else a.Height=Clamp(a.Height+(north?-dy:dy),minH,500);
    if(aspect&&!corner){if(handle==3||handle==7)a.Height=a.Width*original.Height/original.Width;else a.Width=a.Height*original.Width/original.Height;}if(a.Index==-1){double extra=Engine.ExtraHeight(Settings,a.Width,a.Font);a.Height=Clamp(a.Height,extra+1,extra+500);}
    if(west)a.X=original.X+original.Width-a.Width;if(north)a.Y=original.Y+original.Height-a.Height;
   }

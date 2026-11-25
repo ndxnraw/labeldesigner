@@ -52,6 +52,11 @@ Revision301Tests checks canvas placement with and without snapping, including
 an Alt override while the pointer is stationary. It exercises rotated group
 bounds at fit and scrolled zoom, edge measurements in project units, ruler
 hit testing, undo and persistence of the canvas preferences.
+SymbolTests exercises native shape insertion and editing, thin rotated lines,
+hollow and filled rectangles, and barcode quiet-zone and overlap checks.
+It compares the editor artwork, vector print preview, Windows print drawing,
+and decoded graphics from single-label ZPL and the direct Zebra print path
+without a physical printer. It also checks vector output in PDF, SVG, and Word.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.

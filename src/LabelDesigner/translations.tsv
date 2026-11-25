@@ -998,3 +998,16 @@ Pravítka	Rulers	Pravítka	Vonalzók
 Prichytávať pri presúvaní	Snap while moving	Přichytávat při přesouvání	Igazítás mozgatáskor
 Vľavo {0} · Vpravo {1}	Left {0} · Right {1}	Vlevo {0} · Vpravo {1}	Bal {0} · Jobb {1}
 Hore {0} · Dole {1}	Top {0} · Bottom {1}	Nahoře {0} · Dole {1}	Felül {0} · Alul {1}
+Čiara	Line	Čára	Vonal
+Obdĺžnik	Rectangle	Obdélník	Téglalap
+Pridať čiaru…	Add line…	Přidat čáru…	Vonal hozzáadása…
+Pridať obdĺžnik…	Add rectangle…	Přidat obdélník…	Téglalap hozzáadása…
+Dĺžka	Length	Délka	Hosszúság
+Hrúbka čiary	Line thickness	Tloušťka čáry	Vonalvastagság
+Hrúbka obrysu	Outline thickness	Tloušťka obrysu	Körvonal vastagsága
+Výplň tvaru	Shape fill	Výplň tvaru	Alakzat kitöltése
+Priehľadná	Transparent	Průhledná	Átlátszó
+Čierna	Black	Černá	Fekete
+Biela	White	Bílá	Fehér
+Neplatný obrys alebo výplň tvaru.	Invalid shape outline or fill.	Neplatný obrys nebo výplň tvaru.	Érvénytelen körvonal vagy kitöltés.
+Čiara alebo obdĺžnik prekrýva kód.	A line or rectangle overlaps the code.	Čára nebo obdélník překrývá kód.	Vonal vagy téglalap takarja a kódot.
