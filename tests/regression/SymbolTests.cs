@@ -3,6 +3,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Windows.Forms;
@@ -110,10 +111,10 @@ class SymbolTests {
   baseline.Unit="cm";
   Call(form,"Apply",baseline);
   Call(form,"ResetHistory",true);
-  Call(form,"BuildFeatureMenu");
-  var insert=(ToolStripMenuItem)((ContextMenuStrip)Get(form,"featureMenu")).Items[1];
-  var line=(ToolStripMenuItem)insert.DropDownItems[5];
-  var rectangle=(ToolStripMenuItem)insert.DropDownItems[6];
+  Call(form,"BuildInsertMenu");
+  var insert=(ContextMenuStrip)Get(form,"insertMenu");
+  var line=insert.Items.OfType<ToolStripMenuItem>().Single(item=>item.Text==Loc.T("Pridať čiaru…"));
+  var rectangle=insert.Items.OfType<ToolStripMenuItem>().Single(item=>item.Text==Loc.T("Pridať obdĺžnik…"));
   Check(line.Text==Loc.T("Pridať čiaru…")&&rectangle.Text==Loc.T("Pridať obdĺžnik…"),"shape commands in Insert menu");
   ShapeDialog("Čiara",line.PerformClick,dialog=>{
    ((NumericUpDown)ShapeField(dialog,"shapeWidth")).Value=2.4m;

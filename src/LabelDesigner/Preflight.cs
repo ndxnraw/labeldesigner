@@ -12,6 +12,7 @@ namespace EanEtikety {
   public IssueView(){
    var layout=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=3,ColumnCount=1};layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));layout.RowStyles.Add(new RowStyle(SizeType.Percent,100));Controls.Add(layout);
    counts.AutoSize=true;counts.Dock=DockStyle.Top;counts.UseMnemonic=false;layout.Controls.Add(counts);filter.DropDownStyle=ComboBoxStyle.DropDownList;filter.Items.AddRange(new object[]{Loc.T("Všetky problémy"),Loc.T("Chyby"),Loc.T("Upozornenia")});filter.SelectedIndex=0;filter.Dock=DockStyle.Top;filter.AccessibleName=Loc.T("Filter problémov");layout.Controls.Add(filter);
+   layout.SizeChanged+=delegate{counts.MaximumSize=new Size(Math.Max(1,layout.ClientSize.Width-counts.Margin.Horizontal),0);};
    list.Dock=DockStyle.Fill;list.HorizontalScrollbar=true;list.IntegralHeight=false;list.AccessibleName=Loc.T("Kontrola etikety");layout.Controls.Add(list);filter.SelectedIndexChanged+=delegate{RefreshItems();};list.SelectedIndexChanged+=delegate{if(!refreshing&&SelectedIssueChanged!=null)SelectedIssueChanged(SelectedIssue);};
   }
   public void SetIssues(List<LabelIssue> values){issues=new List<LabelIssue>(values);RefreshItems();}

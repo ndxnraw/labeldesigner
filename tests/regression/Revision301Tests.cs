@@ -38,11 +38,11 @@ class Revision301Tests {
    p.Pointer(from,to);
    Equal(p.Element(0).X,0,"regular drag snaps to the edge");
    p.Alt=true;p.Frame();
-   Equal(p.Element(0).X,10+(to.X-from.X)/scale,"pressing Alt frees the position without another mouse message");
+   Equal(p.Element(0).X,10+(double)((to.X-from.X)/scale),"pressing Alt frees the position without another mouse message");
    p.Alt=false;p.Frame();
    Equal(p.Element(0).X,0,"releasing Alt restores snapping");
    p.Alt=true;p.Release(to);
-   Equal(p.Element(0).X,10+(to.X-from.X)/scale,"releasing the mouse with Alt preserves the unsnapped position");
+   Equal(p.Element(0).X,10+(double)((to.X-from.X)/scale),"releasing the mouse with Alt preserves the unsnapped position");
   }
  }
  static void PrecisionCanvas(){
@@ -95,7 +95,7 @@ class Revision301Tests {
    double scale=p.LabelRectangle().Width/s.Width;
    var end=new Point(start.X+(int)Math.Round(63*scale)-2,start.Y);
    Mouse(p,"OnMouseDown",start);Mouse(p,"OnMouseMove",end);
-   Equal(p.Element(0).X,10+(end.X-start.X)/(float)scale,"free group movement follows the cursor");
+   Equal(p.Element(0).X,10+(double)((end.X-start.X)/(float)scale),"free group movement follows the cursor");
    Check(Field<SnapResult>(p,"snap").X!=null,"free drag retains guide");
    Call(p,"ProcessCmdKey",new Message(),Keys.Escape);
    Equal(p.Element(0).X,10,"Escape restores group");

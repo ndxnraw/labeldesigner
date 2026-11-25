@@ -8,21 +8,57 @@ sealed class StudioFeatureRenderer:ToolStripProfessionalRenderer {
  }
 }
 sealed class StudioIconMenuItem:ToolStripMenuItem {
- public StudioIconMenuItem(string text,HeaderIcon icon,Color color,int size):base(text){ForeColor=color;Image=HeaderActionButton.MenuImage(icon,color,size);}
+ readonly HeaderIcon icon;
+ public StudioIconMenuItem(string text,HeaderIcon icon,Color color,int size):base(text){this.icon=icon;RefreshIcon(color,size);}
+ public void RefreshIcon(Color color,int size){var old=Image;ForeColor=color;Image=HeaderActionButton.MenuImage(icon,color,size);old?.Dispose();}
  protected override void Dispose(bool disposing){if(disposing&&Image!=null){var old=Image;Image=null;old.Dispose();}base.Dispose(disposing);}
 }
 public partial class MainForm {
  ToolStripMenuItem FeatureGroup(string text,HeaderIcon icon){var item=FeatureItem(text,icon,null);item.DropDown.Renderer=featureMenu.Renderer;item.DropDown.ForeColor=featureMenu.ForeColor;featureMenu.Items.Add(item);return item;}
  ToolStripMenuItem FeatureItem(string text,HeaderIcon icon,Action action){var item=new StudioIconMenuItem(Loc.T(text),icon,StudioTheme.Text(dark),(int)Math.Round(20*PanelScale));if(action!=null)item.Click+=delegate{try{action();}catch(Exception ex){Error(ex);}};return item;}
- void GroupedFeatureMenu(){while(featureMenu.Items.Count>0){var old=featureMenu.Items[0];featureMenu.Items.RemoveAt(0);old.Dispose();}featureMenu.Renderer=new StudioFeatureRenderer(dark);featureMenu.ForeColor=StudioTheme.Text(dark);featureMenu.ImageScalingSize=new Size((int)(20*PanelScale),(int)(20*PanelScale));
-  var project=FeatureGroup("Projekt",HeaderIcon.Library);project.DropDownItems.Add(FeatureItem("Šablóny a nedávne projekty",HeaderIcon.Library,ShowLibrary));project.DropDownItems.Add(FeatureItem("Automatické ukladanie",HeaderIcon.AutoSave,RecoveryPreferences));
-  project.DropDownItems.Add(FeatureItem(WorkspaceBackupTitle,HeaderIcon.Library,ShowWorkspaceBackup));
-  project.DropDownItems.Add(FeatureItem("Upraviteľné polia šablóny…",HeaderIcon.AddText,ConfigureQuickPrintFields));
-  var insert=FeatureGroup("Vložiť",HeaderIcon.AddText);insert.DropDownItems.Add(FeatureItem("Pridať text",HeaderIcon.AddText,AddText));insert.DropDownItems.Add(FeatureItem("Vložiť obrázok",HeaderIcon.Image,AddImage));insert.DropDownItems.Add(FeatureItem("Pridať kód…",HeaderIcon.Barcode,delegate{ChooseBarcode(false);}));insert.DropDownItems.Add(FeatureItem("Pridať 2D kód",HeaderIcon.Barcode,AddMatrix));insert.DropDownItems.Add(FeatureItem("Pridať čiarový kód",HeaderIcon.Barcode,AddBarcodeObject));
-  insert.DropDownItems.Add(FeatureItem("Pridať čiaru…",HeaderIcon.Image,delegate{EditShape(-2,true);}));insert.DropDownItems.Add(FeatureItem("Pridať obdĺžnik…",HeaderIcon.Image,delegate{EditShape(-2,false);}));
-  var data=FeatureGroup("Dáta",HeaderIcon.Data);data.DropDownItems.Add(FeatureItem("Dávka a premenné",HeaderIcon.Data,ShowBatch));data.DropDownItems.Add(FeatureItem("História tlače",HeaderIcon.Print,ShowPrintHistory));
-  var layout=FeatureGroup("Rozloženie",HeaderIcon.Panels);layout.DropDownItems.Add(FeatureItem("Rozloženie a výber",HeaderIcon.Panels,ShowArrange));layout.DropDownItems.Add(FeatureItem("Samolepiace hárky",HeaderIcon.Table,EditSheet));
-  var maintenance=FeatureGroup("Kontrola a údržba",HeaderIcon.Tools);maintenance.DropDownItems.Add(FeatureItem("Kontrola etikety",HeaderIcon.Check,ShowChecks));maintenance.DropDownItems.Add(FeatureItem("Diagnostika",HeaderIcon.Diagnostics,ShowDiagnostics));maintenance.DropDownItems.Add(FeatureItem("Aktualizácie",HeaderIcon.Update,ShowUpdates));
+ void PrepareFeatureMenu(ContextMenuStrip menu) {
+  while(menu.Items.Count>0){var old=menu.Items[0];menu.Items.RemoveAt(0);old.Dispose();}
+  menu.Renderer=new StudioFeatureRenderer(dark);
+  menu.ForeColor=StudioTheme.Text(dark);
+  menu.ImageScalingSize=new Size((int)(20*PanelScale),(int)(20*PanelScale));
+ }
+ void BuildProjectMenu() {
+  PrepareFeatureMenu(projectMenu);
+  var open=FeatureItem("Otvoriť",HeaderIcon.Open,Open);open.ShortcutKeyDisplayString="Ctrl+O";
+  var save=FeatureItem("Uložiť",HeaderIcon.Save,Save);save.ShortcutKeyDisplayString="Ctrl+S";
+  var saveAs=FeatureItem("Uložiť ako",HeaderIcon.SaveAs,SaveAs);saveAs.ShortcutKeyDisplayString="Ctrl+Shift+S";
+  projectMenu.Items.AddRange(new ToolStripItem[]{open,save,saveAs,new ToolStripSeparator(),
+   FeatureItem("Šablóny a nedávne projekty",HeaderIcon.Library,ShowLibrary),
+   FeatureItem("Upraviteľné polia šablóny…",HeaderIcon.AddText,ConfigureQuickPrintFields),
+   FeatureItem("Automatické ukladanie",HeaderIcon.AutoSave,RecoveryPreferences),
+   FeatureItem(WorkspaceBackupTitle,HeaderIcon.Library,ShowWorkspaceBackup)});
+ }
+ void BuildInsertMenu() {
+  PrepareFeatureMenu(insertMenu);
+  insertMenu.Items.AddRange(new ToolStripItem[]{
+   FeatureItem("Pridať text",HeaderIcon.AddText,AddText),
+   FeatureItem("Vložiť obrázok",HeaderIcon.Image,AddImage),
+   FeatureItem("Pridať kód…",HeaderIcon.Barcode,()=>ChooseBarcode(false)),
+   FeatureItem("Pridať čiaru…",HeaderIcon.Image,()=>EditShape(-2,true)),
+   FeatureItem("Pridať obdĺžnik…",HeaderIcon.Image,()=>EditShape(-2,false)),
+   FeatureItem("Symbol Zálohované",HeaderIcon.Deposit,()=>EditSymbol(-2))});
+  if(hideBarcode)insertMenu.Items.Insert(3,FeatureItem("Obnoviť hlavný kód",HeaderIcon.Barcode,AddBarcodeObject));
+ }
+ void GroupedFeatureMenu() {
+  PrepareFeatureMenu(featureMenu);
+  var layout=FeatureGroup("Rozloženie",HeaderIcon.Panels);
+  layout.DropDownItems.Add(FeatureItem("Rozloženie a výber",HeaderIcon.Panels,ShowArrange));
+  layout.DropDownItems.Add(FeatureItem("Samolepiace hárky",HeaderIcon.Table,EditSheet));
+  var maintenance=FeatureGroup("Kontrola a údržba",HeaderIcon.Tools);
+  maintenance.DropDownItems.Add(FeatureItem("Kontrola etikety",HeaderIcon.Check,ShowChecks));
+  maintenance.DropDownItems.Add(FeatureItem("História tlače",HeaderIcon.Print,ShowPrintHistory));
+  maintenance.DropDownItems.Add(FeatureItem("Diagnostika",HeaderIcon.Diagnostics,ShowDiagnostics));
+  maintenance.DropDownItems.Add(FeatureItem("Aktualizácie",HeaderIcon.Update,ShowUpdates));
+  var help=FeatureGroup("Nastavenia a pomoc",HeaderIcon.Settings);
+  help.DropDownItems.Add(FeatureItem("Nastavenia",HeaderIcon.Settings,StudioPreferences));
+  help.DropDownItems.Add(FeatureItem("Návod",HeaderIcon.Help,Help));
+  help.DropDownItems.Add(FeatureItem("O aplikácii",HeaderIcon.About,()=>UiMessageBox.Show(this,
+   "ND LabelDesigner — Pre-release\r\n\r\nCreated by Daniel Návojský (ndxnraw) using Codex | 2026",Loc.T("O aplikácii"))));
  }
 }
 }

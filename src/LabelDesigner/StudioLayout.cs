@@ -33,47 +33,84 @@ public partial class MainForm {
   studio=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=4,Padding=new Padding(6,0,6,6)};studio.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));studio.RowStyles.Add(new RowStyle(SizeType.Absolute,44));studio.RowStyles.Add(new RowStyle(SizeType.Absolute,46));studio.RowStyles.Add(new RowStyle(SizeType.Percent,100));studio.RowStyles.Add(new RowStyle(SizeType.Absolute,34));Controls.Add(studio);
   var top=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,Margin=new Padding(0)};headerSurface=top;top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));top.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));studio.Controls.Add(top,0,0);
 
-  var commands=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,WrapContents=false,Margin=new Padding(0)};headerCommands=commands;top.Controls.Add(commands,1,0);commands.Controls.Add(HeaderAction("Otvoriť",HeaderIcon.Open,"Ctrl+O",Open));commands.Controls.Add(HeaderAction("Uložiť",HeaderIcon.Save,"Ctrl+S",Save));commands.Controls.Add(HeaderAction("Uložiť ako",HeaderIcon.SaveAs,"Ctrl+Shift+S",SaveAs));
-  exportMenu=new UiContextMenuStrip();foreach(string format in new[]{"pdf","docx","zpl","svg"}){string item=format;exportMenu.Items.Add(format=="docx"?"Word":format.ToUpperInvariant(),null,delegate{Export(item);});}var export=HeaderAction("Exportovať",HeaderIcon.Export,null,delegate{});export.Click+=delegate{exportMenu.Show(export,0,export.Height);};commands.Controls.Add(export);printPrimary=HeaderAction("Tlačiť",HeaderIcon.Print,"Ctrl+P",PrintLabel);printPrimary.TabIndex=commands.Controls.Count;commands.Controls.Add(printPrimary);
-  var tools=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=false,AutoScroll=false,WrapContents=true,Margin=new Padding(0)};editorTools=tools;tools.SizeChanged+=delegate{UpdateToolbarLayout();};studio.Controls.Add(tools,0,1);tools.Controls.Add(HeaderAction("Pridať text",HeaderIcon.AddText,null,AddText));tools.Controls.Add(HeaderAction("Symbol Zálohované",HeaderIcon.Deposit,null,delegate{EditSymbol(-2);}));
-  var view=new UiContextMenuStrip();viewMenu=view;view.Items.Add(Loc.T("Ľavý panel"),null,delegate{SetStudioPanel(0,studioBody.ColumnStyles[0].Width==0);});view.Items.Add(Loc.T("Vlastnosti"),null,delegate{SetStudioPanel(2,studioBody.ColumnStyles[2].Width==0);});view.Items.Add(Loc.T("Obnoviť rozloženie"),null,delegate{ResetStudioPanels();});view.Items.Add(Loc.T("Tabuľka"),null,delegate{tableSplit.Panel2Collapsed=!tableSplit.Panel2Collapsed;});AddCanvasViewOptions(view);var viewButton=HeaderAction("Panely",HeaderIcon.Panels,null,delegate{});viewButton.Click+=delegate{view.Show(viewButton,0,viewButton.Height);};tools.Controls.Add(viewButton);
-  zoomMenu=new UiContextMenuStrip();foreach(double value in new[]{0d,.5,1,1.5,2}){double selectedZoom=value;var item=new ToolStripMenuItem(value==0?Loc.T("Prispôsobiť"):(value*100)+" %");item.Click+=delegate{preview.ViewZoom=selectedZoom;};zoomMenu.Items.Add(item);}zoomMenu.Opening+=delegate{for(int i=0;i<zoomMenu.Items.Count;i++)((ToolStripMenuItem)zoomMenu.Items[i]).Checked=preview.ViewZoom==new[]{0d,.5,1,1.5,2}[i];};var zoom=HeaderAction("Priblíženie",HeaderIcon.Zoom,null,delegate{});zoom.Click+=delegate{zoomMenu.Show(zoom,0,zoom.Height);};tools.Controls.Add(zoom);
-  tools.Controls.Add(HeaderAction("Nastavenia",HeaderIcon.Settings,null,StudioPreferences));tools.Controls.Add(HeaderAction("Návod",HeaderIcon.Help,null,Help));tools.Controls.Add(HeaderAction("O aplikácii",HeaderIcon.About,null,delegate{UiMessageBox.Show(this,"ND LabelDesigner — Pre-release\r\n\r\nCreated by Daniel Návojský (ndxnraw) using Codex | 2026",Loc.T("O aplikácii"));}));
-
-  MergeToolbar(top,commands,tools);
+  BuildEditorCommands(top);
   tableSplit=new SplitContainer{Dock=DockStyle.Fill,Orientation=Orientation.Horizontal,Panel2Collapsed=true,SplitterWidth=6,Panel1MinSize=180,Panel2MinSize=100};studio.Controls.Add(tableSplit,0,2);grid.Dock=DockStyle.Fill;for(int i=1;i<=5;i++)grid.Columns[i].DefaultCellStyle.Format="0.###";tableSplit.Panel2.Controls.Add(grid);
   studioBody=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=3,RowCount=1};studioBody.RowStyles.Add(new RowStyle(SizeType.Percent,100));studioBody.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,240));studioBody.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));studioBody.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,300));tableSplit.Panel1.Controls.Add(studioBody);
   var left=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Margin=new Padding(0,0,8,0)};studioBody.Controls.Add(left,0,0);var leftStack=Stack();left.Controls.Add(leftStack);
-  var tabs=new ModernTabs{Height=440,Dock=DockStyle.Top};StackAdd(leftStack,tabs);var lp=Stack();tabs.AddPage(Loc.T("Etiketa")).Controls.Add(lp);var pp=Stack();tabs.AddPage(Loc.T("Papier")).Controls.Add(pp);
+  var lp=Stack();var pp=Stack();
   MoveField(basic,units,lp);foreach(string key in new[]{"Width","Height"})MoveField(basic,nums[key],lp);MoveField(basic,dpi,lp);
   var fields=new List<Control>();foreach(Control child in paper.Controls)if(!(child is Label))fields.Add(child);foreach(var child in fields)MoveField(paper,child,pp);
-  InitializeEditorWorkspace(leftStack,left,tabs);
-  preview.Dock=DockStyle.Fill;preview.Compact=true;studioBody.Controls.Add(preview,1,0);
+  InitializeEditorWorkspace(leftStack,left,lp,pp);
+  studioBody.Controls.Add(BuildCanvasArea(),1,0);
   inspectorHost=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Margin=new Padding(8,0,0,0)};studioBody.Controls.Add(inspectorHost,2,0);codeInspector=Stack();inspectorHost.Controls.Add(codeInspector);
-  StackAdd(codeInspector,new Label{Text=Loc.T("Čiarový kód"),Font=new Font(Font,FontStyle.Bold),AutoSize=true});codeRotation=AddRotationField(codeInspector);MoveField(basic,kind,codeInspector);MoveField(basic,ean,codeInspector);StackAdd(codeInspector,formatHint);var gsParent=gs1Mode.Parent;MoveField(basic,gsParent,codeInspector);foreach(string key in new[]{"BarX","BarY","BarWidth","BarHeight","DigitSize"})MoveField(basic,nums[key],codeInspector);MoveField(basic,digits,codeInspector);centerBarcode=Btn(Loc.T("Centrovať kód"),CenterBarcode);StackAdd(codeInspector,centerBarcode);
-  BuildInspector();InitializeSelectionInspector();InitializeRotationMenu();status.Dock=DockStyle.Fill;status.AutoEllipsis=true;status.Padding=new Padding(4,7,0,0);var footer=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=3,Margin=new Padding(0)};footer.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,100));footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));footer.Controls.Add(new Label{Name="AppVersion",Text="Pre-release",Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleLeft},0,0);footer.Controls.Add(status,1,0);footer.Controls.Add(new Label{Name="AuthorSignature",Text="Created by Daniel Návojský (ndxnraw) using Codex | 2026",AutoSize=true,Anchor=AnchorStyles.Right,TextAlign=ContentAlignment.MiddleRight,Margin=new Padding(8,0,4,0)},2,0);studio.Controls.Add(footer,0,3);status.Cursor=Cursors.Hand;status.Click+=delegate{try{FocusProblems();}catch(Exception ex){Error(ex);}};
+  StackAdd(codeInspector,new Label{Text=Loc.T("Čiarový kód"),Font=new Font(Font,FontStyle.Bold),AutoSize=true});MoveField(basic,kind,codeInspector);MoveField(basic,ean,codeInspector);StackAdd(codeInspector,formatHint);var gsParent=gs1Mode.Parent;MoveField(basic,gsParent,codeInspector);InspectorHeading(codeInspector,"Poloha a rozmery");MoveInspectorPair(basic,codeInspector,nums["BarX"],nums["BarY"]);MoveInspectorPair(basic,codeInspector,nums["BarWidth"],nums["BarHeight"]);codeRotation=AddRotationField(codeInspector);InspectorHeading(codeInspector,"Popis kódu");MoveField(basic,nums["DigitSize"],codeInspector);MoveField(basic,digits,codeInspector);centerBarcode=Btn(Loc.T("Centrovať kód"),CenterBarcode);StackAdd(codeInspector,centerBarcode);
+  BuildInspector();InitializeSelectionInspector();InitializeRotationMenu();BuildEditorStatus();
   // Keep legacy export enable-state controls and preferences alive without displaying them.
   old.Visible=false;Controls.Remove(old);old.Parent=new Panel();legacyStudio=old.Parent;
   preview.ElementSelected+=delegate{SyncStudio();};grid.CellEnter+=delegate{if(!loading)SyncStudio();};grid.CellClick+=delegate{if(!loading)SyncStudio();};grid.CellValueChanged+=delegate{if(!loading)SyncStudio();};preview.SizeChanged+=delegate{PositionInlineText();};preview.Scroll+=delegate{PositionInlineText();};preview.EditFinished+=delegate{SyncStudio();};TextChanged+=delegate{UpdateWindowTitle();};
 
-  Disposed+=delegate{captionDelay.Dispose();headerTips.Dispose();legacyStudio.Dispose();zoomMenu.Dispose();exportMenu.Dispose();view.Dispose();};LoadStudioLayout();studioPanelsReady=true;FormClosing+=delegate{SaveStudioLayout();};MinimumSize=new Size(1024,640);Size=new Size(1440,900);ApplyTheme();Gs1State();SyncStudio();InitializeWindowHeader();ResumeLayout(true);UpdateToolbarLayout();
+  Disposed+=delegate{captionDelay.Dispose();headerTips.Dispose();legacyStudio.Dispose();foreach(var menu in new[]{zoomMenu,exportMenu,viewMenu,projectMenu,insertMenu})menu.Dispose();};LoadStudioLayout();studioPanelsReady=true;FormClosing+=delegate{SaveStudioLayout();};MinimumSize=new Size(1024,640);Size=new Size(1440,900);ApplyTheme();Gs1State();SyncStudio();InitializeWindowHeader();ResumeLayout(true);UpdateToolbarLayout();
  }
  Control legacyStudio;Button centerBarcode;
  class StudioItem{public int Index;public string Name;public override string ToString(){return Name;}}
- void BuildInspector(){textInspector=Stack();inspectorHost.Controls.Add(textInspector);selectionTitle=new Label{AutoSize=true,Font=new Font(Font,FontStyle.Bold)};StackAdd(textInspector,selectionTitle);textRotation=AddRotationField(textInspector);inspectText=new TextEditBox{Multiline=true,Height=64,MaxLength=4000};StackField(textInspector,Loc.T("Text"),inspectText);inspectText.TextChanged+=delegate{if(!studioSync&&!loading)CommitInspectorText();};inspectText.KeyDown+=InspectorTextKey;((TextEditBox)inspectText).EndRequested+=commit=>InspectorTextKey(inspectText,new KeyEventArgs(commit?Keys.Enter:Keys.Escape));inspectText.Validated+=delegate{FinishTextEditing(true);};((TextEditBox)inspectText).FormatRequested+=style=>ApplySelectionStyle(inspectText,style);styleTextButton=Btn(Loc.T("Formátovať časti textu…"),EditTextStyles);styleTextButton.Name="styleText";StackAdd(textInspector,styleTextButton);
-  inspectNumbers=new NumericUpDown[5];for(int i=0;i<5;i++){var n=new ClickWheelNumericUpDown{DecimalPlaces=3,Minimum=i<2?-500:i==4?4:1,Maximum=i==4?144:500,Increment=.1m};inspectNumbers[i]=n;int field=i;StackField(textInspector,new[]{"X (mm)","Y (mm)",Loc.T("Šírka")+" (mm)",Loc.T("Výška")+" (mm)",Loc.T("Písmo (pt)")}[i],n);n.ValueChanged+=delegate{if(!studioSync){if((field==2||field==3)&&inspectAutoWidth!=null)inspectAutoWidth.Checked=false;CommitInspector();}};}
-  inspectFont=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList};foreach(var item in ((DataGridViewComboBoxColumn)grid.Columns[8]).Items)inspectFont.Items.Add(item);StackField(textInspector,Loc.T("Font"),inspectFont);inspectFont.SelectedIndexChanged+=delegate{if(!studioSync)CommitInspector();};inspectBold=new CheckBox{Text=Loc.T("Tučné"),AutoSize=true};inspectCenter=new CheckBox{Text=Loc.T("Na stred"),AutoSize=true};StackAdd(textInspector,inspectBold);StackAdd(textInspector,inspectCenter);inspectBold.CheckedChanged+=delegate{if(!studioSync)CommitInspector();};inspectCenter.CheckedChanged+=delegate{if(!studioSync)CommitInspector();};inspectAutoWidth=new CheckBox{Text=Loc.T("Šírka podľa textu"),AutoSize=true};StackAdd(textInspector,inspectAutoWidth);inspectAutoWidth.CheckedChanged+=delegate{TextSizingChanged(false);};BuildTextFitInspector();StackAdd(textInspector,Btn(Loc.T("Odstrániť prvok"),RemoveText));
+ void BuildInspector(){
+  textInspector=Stack();
+  inspectorHost.Controls.Add(textInspector);
+  selectionTitle=InspectorHeading(textInspector,"Text");
+  inspectText=new TextEditBox{Multiline=true,Height=64,MaxLength=4000,HideSelection=false};
+  inspectText.FontChanged+=delegate{inspectText.Height=Math.Max(64,inspectText.Font.Height*2+10);};
+  BuildInspectorFormatting();
+  StackField(textInspector,Loc.T("Obsah"),inspectText);
+  inspectText.TextChanged+=delegate{if(!studioSync&&!loading)CommitInspectorText();};
+  inspectText.KeyDown+=InspectorTextKey;
+  ((TextEditBox)inspectText).EndRequested+=commit=>InspectorTextKey(inspectText,new KeyEventArgs(commit?Keys.Enter:Keys.Escape));
+  inspectText.Validated+=delegate{FinishTextEditing(true);};
+  ((TextEditBox)inspectText).FormatRequested+=style=>ApplySelectionStyle(inspectText,style);
+
+  inspectNumbers=new NumericUpDown[5];
+  for(int i=0;i<inspectNumbers.Length;i++){
+   int field=i;
+   var number=new ClickWheelNumericUpDown{DecimalPlaces=3,Minimum=i<2?-500:i==4?4:1,Maximum=i==4?144:500,Increment=.1m};
+   inspectNumbers[i]=number;
+   number.ValueChanged+=delegate{
+    if(studioSync)return;
+    if((field==2||field==3)&&inspectAutoWidth!=null)inspectAutoWidth.Checked=false;
+    CommitInspector();
+   };
+  }
+  typographyHeading=InspectorHeading(textInspector,"Typografia");
+  inspectFont=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList};
+  foreach(var item in ((DataGridViewComboBoxColumn)grid.Columns[8]).Items)inspectFont.Items.Add(item);
+  typographyFields=InspectorPair(textInspector,Loc.T("Font"),inspectFont,Loc.T("Veľkosť (pt)"),inspectNumbers[4]);
+  inspectFont.SelectedIndexChanged+=delegate{if(!studioSync)CommitInspector();};
+  inspectBold=new CheckBox{Text=Loc.T("Tučné písmo v celom poli"),AutoSize=true};
+  inspectCenter=new CheckBox{Text=Loc.T("Na stred"),AutoSize=true};
+  StackAdd(textInspector,inspectBold);
+  StackAdd(textInspector,inspectCenter);
+  inspectBold.CheckedChanged+=delegate{if(!studioSync)CommitInspector();};
+  inspectCenter.CheckedChanged+=delegate{if(!studioSync)CommitInspector();};
+
+  InspectorHeading(textInspector,"Poloha a rozmery");
+  InspectorPair(textInspector,"X (mm)",inspectNumbers[0],"Y (mm)",inspectNumbers[1]);
+  InspectorPair(textInspector,Loc.T("Šírka")+" (mm)",inspectNumbers[2],Loc.T("Výška")+" (mm)",inspectNumbers[3]);
+  textRotation=AddRotationField(textInspector);
+  fitHeading=InspectorHeading(textInspector,"Prispôsobenie textu");
+  inspectAutoWidth=new CheckBox{Text=Loc.T("Šírka podľa textu"),AutoSize=true};
+  StackAdd(textInspector,inspectAutoWidth);
+  inspectAutoWidth.CheckedChanged+=delegate{TextSizingChanged(false);};
+  BuildTextFitInspector();
+  StackAdd(textInspector,Btn(Loc.T("Odstrániť prvok"),RemoveSelected));
  }
  void SyncStudio(){if(studio==null||studioSync)return;studioSync=true;try{UpdateWindowTitle();foreach(ToolStripItem item in exportMenu.Items)item.Enabled=pdf.Enabled;printPrimary.Enabled=pdf.Enabled;int index=preview.SelectedIndex;if(textEditBefore!=null&&textEditIndex!=index)FinishTextEditing(true);SyncElementList();
-  SyncRotation();bool locked=elementMetadata.Exists(m=>m.Index==index&&m.Locked);textInspector.Enabled=!locked;foreach(DataGridViewRow row in grid.Rows)row.ReadOnly=elementMetadata.Exists(m=>m.Index==row.Index&&m.Locked);bool mainLocked=elementMetadata.Exists(m=>m.Index==-1&&m.Locked);codeInspector.Enabled=!mainLocked;centerBarcode.Enabled=!mainLocked&&!hideBarcode;centerBarcode.Visible=index==-1;if(ShowSelectionInspector())return;bool isCode=index==-1||index==-2;codeInspector.Visible=isCode;textInspector.Visible=!isCode;if(isCode)return;var el=preview.Element(index);if(el==null)return;bool text=index>=0;UpdateUnitLabels(textInspector);selectionTitle.Text=text?Loc.T("Text"):symbols[-3-index].Name;InspectorVisible(inspectText,text);styleTextButton.Visible=text;InspectorVisible(inspectFont,text);InspectorVisible(inspectNumbers[4],text);inspectBold.Visible=inspectCenter.Visible=inspectAutoWidth.Visible=inspectFixedFit.Visible=text;if(!text)InspectorVisible(inspectFitMinimum,false);inspectNumbers[4].Enabled=text;
+  SyncRotation();bool locked=elementMetadata.Exists(m=>m.Index==index&&m.Locked);textInspector.Enabled=!locked;foreach(DataGridViewRow row in grid.Rows)row.ReadOnly=elementMetadata.Exists(m=>m.Index==row.Index&&m.Locked);bool mainLocked=elementMetadata.Exists(m=>m.Index==-1&&m.Locked);codeInspector.Enabled=!mainLocked;centerBarcode.Enabled=!mainLocked&&!hideBarcode;centerBarcode.Visible=index==-1;if(ShowSelectionInspector())return;bool isCode=index==-1||index==-2;codeInspector.Visible=isCode;textInspector.Visible=!isCode;if(isCode)return;var el=preview.Element(index);if(el==null)return;bool text=index>=0;UpdateUnitLabels(textInspector);selectionTitle.Text=text?Loc.T("Text"):symbols[-3-index].Name;InspectorVisible(inspectText,text);formattingBar.Visible=typographyHeading.Visible=typographyFields.Visible=fitHeading.Visible=text;inspectBold.Visible=inspectCenter.Visible=inspectAutoWidth.Visible=inspectFixedFit.Visible=text;if(!text)InspectorVisible(inspectFitMinimum,false);inspectNumbers[4].Enabled=text;
   bool line=index<=-3&&symbols[-3-index].Shape!=null&&symbols[-3-index].Shape.IsLine;
   double[] values={el.X/unitFactor,el.Y/unitFactor,el.Width/unitFactor,el.Height/unitFactor,el.Font};for(int i=0;i<5;i++){inspectNumbers[i].Minimum=i<2?-500/(decimal)unitFactor:i==4?4:(i==3&&line?(decimal)ShapeContent.MinimumLineThickness:1)/(decimal)unitFactor;inspectNumbers[i].Maximum=i==4?144:500/(decimal)unitFactor;if(!inspectNumbers[i].ContainsFocus)inspectNumbers[i].Value=Math.Max(inspectNumbers[i].Minimum,Math.Min(inspectNumbers[i].Maximum,(decimal)values[i]));}
-  if(text){var row=grid.Rows[index];if(!inspectText.ContainsFocus||inspectedTextIndex!=index)inspectText.Text=Convert.ToString(row.Cells[0].Value);if(!inspectFont.Items.Contains(row.Cells[8].Value))inspectFont.Items.Add(row.Cells[8].Value);inspectFont.SelectedItem=row.Cells[8].Value;inspectBold.Checked=Convert.ToBoolean(row.Cells[6].Value);inspectCenter.Checked=Convert.ToBoolean(row.Cells[7].Value);SyncTextFitInspector(row);inspectedTextIndex=index;}
+  if(text){var row=grid.Rows[index];if(!inspectText.ContainsFocus||inspectedTextIndex!=index)inspectText.Text=Convert.ToString(row.Cells[0].Value);if(!inspectFont.Items.Contains(row.Cells[8].Value))inspectFont.Items.Add(row.Cells[8].Value);inspectFont.SelectedItem=row.Cells[8].Value;inspectBold.Checked=Convert.ToBoolean(row.Cells[6].Value);inspectCenter.Checked=Convert.ToBoolean(row.Cells[7].Value);SyncTextFitInspector(row);inspectedTextIndex=index;RefreshInspectorFormatting();}
  }finally{studioSync=false;}}
  void InspectorVisible(Control c,bool visible){c.Visible=visible;var label=textInspector.GetControlFromPosition(0,textInspector.GetRow(c)-1);if(label is Label)label.Visible=visible;}
  void CommitInspector(){if(studioSync||loading||preview.Selection.Count!=1||elementMetadata.Exists(m=>m.Index==preview.SelectedIndex&&m.Locked))return;int index=preview.SelectedIndex;if(index>=0&&index<grid.Rows.Count){loading=true;try{var r=grid.Rows[index];WriteStyledText(r,inspectText.Text);for(int i=0;i<5;i++)r.Cells[i+1].Value=(double)inspectNumbers[i].Value;r.Cells[6].Value=inspectBold.Checked;r.Cells[7].Value=inspectCenter.Checked;r.Cells[9].Value=inspectAutoWidth.Checked;inspectFitMinimum.Maximum=inspectNumbers[4].Value;r.Cells[MinimumFitColumn].Value=inspectFixedFit.Checked?(double)inspectFitMinimum.Value:0d;if(inspectFont.SelectedItem!=null)r.Cells[8].Value=inspectFont.SelectedItem;}finally{loading=false;}StoreAutoGeometry(index);Changed(this,EventArgs.Empty);}else if(index<=-3&&-3-index<symbols.Count){var symbol=symbols[-3-index];symbol.X=(double)inspectNumbers[0].Value*unitFactor;symbol.Y=(double)inspectNumbers[1].Value*unitFactor;symbol.Width=(double)inspectNumbers[2].Value*unitFactor;symbol.Height=(double)inspectNumbers[3].Value*unitFactor;if(symbol.Matrix!=null&&BarcodeCatalog.Square(symbol.Matrix.Type))symbol.Height=symbol.Width;Changed(this,EventArgs.Empty);}}
- void StyleStudioMenus(){foreach(var menu in new[]{featureMenu,exportMenu,viewMenu,zoomMenu,rotationMenu})if(menu!=null){menu.Renderer=new ToolStripProfessionalRenderer(new StudioMenuColors(dark));menu.ForeColor=StudioTheme.Text(dark);}}
- void RefreshStudioMenus(){RefreshHeaderActions();foreach(var menu in new[]{exportMenu,viewMenu,zoomMenu,rotationMenu})if(menu!=null)foreach(ToolStripItem item in menu.Items){item.Text=Loc.T(item.Text);var dropdown=item as ToolStripDropDownItem;if(dropdown!=null)foreach(ToolStripItem child in dropdown.DropDownItems)child.Text=Loc.T(child.Text);}}
+ void StyleStudioMenus(){foreach(var menu in new[]{featureMenu,projectMenu,insertMenu,exportMenu,viewMenu,zoomMenu,rotationMenu,layerMenu})if(menu!=null){menu.Renderer=new StudioFeatureRenderer(dark);menu.ForeColor=StudioTheme.Text(dark);if(menu==layerMenu)foreach(ToolStripItem item in menu.Items)if(item is StudioIconMenuItem icon)icon.RefreshIcon(menu.ForeColor,(int)(20*PanelScale));}}
+ void RefreshStudioMenus(){RefreshHeaderActions();foreach(var menu in new[]{exportMenu,viewMenu,zoomMenu,rotationMenu,layerMenu})if(menu!=null)foreach(ToolStripItem item in menu.Items){item.Text=Loc.T(item.Text);var dropdown=item as ToolStripDropDownItem;if(dropdown!=null)foreach(ToolStripItem child in dropdown.DropDownItems)child.Text=Loc.T(child.Text);}RefreshCanvasZoom();UpdateToolbarLayout();}
  void LoadStudioLayout(){try{string path=startupPath+".layout";if(!File.Exists(path))return;var v=File.ReadAllLines(path);tableSplit.Panel2Collapsed=v[0]!="1";LoadStudioPanels(v);LoadCanvasViewOptions(v);int size;if(v.Length>3&&int.TryParse(v[3],out size))Shown+=delegate{if(!tableSplit.Panel2Collapsed)tableSplit.SplitterDistance=Math.Max(tableSplit.Panel1MinSize,Math.Min(tableSplit.Height-tableSplit.Panel2MinSize-6,size));};}catch(Exception ex){System.Diagnostics.Trace.WriteLine(ex);}}
  void SaveStudioLayout(){try{RememberStudioPanelWidths();Atomic(startupPath+".layout",delegate(string p){Directory.CreateDirectory(Path.GetDirectoryName(p));File.WriteAllLines(p,new[]{tableSplit.Panel2Collapsed?"0":"1",studioBody.ColumnStyles[0].Width>0?"1":"0",studioBody.ColumnStyles[2].Width>0?"1":"0",tableSplit.SplitterDistance.ToString(),leftPanelWidth.ToString(System.Globalization.CultureInfo.InvariantCulture),inspectorPanelWidth.ToString(System.Globalization.CultureInfo.InvariantCulture),preview.ShowRulers?"1":"0",preview.SnapToGuides?"1":"0"});});}catch(Exception ex){System.Diagnostics.Trace.WriteLine(ex);}}
  void StudioPreferences(){using(var dialog=new Form{Text=Loc.T("Nastavenia"),Size=new Size(440,330),MinimumSize=new Size(360,260),StartPosition=FormStartPosition.CenterParent,Font=Font,ShowInTaskbar=false,AutoScaleMode=AutoScaleMode.Dpi}){
@@ -82,6 +119,25 @@ public partial class MainForm {
   try{StackField(stack,Loc.T("Jazyk"),language);StackAdd(stack,Btn(Loc.T("Zmeniť tému"),delegate{ToggleTheme();ApplyColors(dialog);}));StackAdd(stack,Btn(Loc.T("Uložiť nastavenia spustenia"),SaveStartup));ApplyColors(dialog);dialog.ShowDialog(this);}
   finally{oldParent.Controls.Add(language);oldParent.Controls.SetChildIndex(language,Math.Min(oldIndex,oldParent.Controls.Count-1));}
  }SyncStudio();}
- protected override bool ProcessCmdKey(ref Message msg,Keys key){keyboardHeaderFocus=(key&Keys.KeyCode)==Keys.Tab;if(key==Keys.F6||key==(Keys.Shift|Keys.F6)){CycleEditorSection(key==(Keys.Shift|Keys.F6));return true;}if(key==Keys.F8){FocusProblems();return true;}if(key==Keys.F4){FocusInspector();return true;}if(key==Keys.F2&&elementList.Focused){EditSelection();return true;}if(!EditingText()&&(key==(Keys.Control|Keys.Z)||key==(Keys.Control|Keys.Y))){StepHistory(key==(Keys.Control|Keys.Y));return true;}if(!EditingText()&&(key==(Keys.Control|Keys.OemCloseBrackets)||key==(Keys.Control|Keys.OemOpenBrackets))){RotateSelected(key==(Keys.Control|Keys.OemCloseBrackets)?90:-90);return true;}if((key==(Keys.Control|Keys.C)||key==(Keys.Control|Keys.V))&&!EditingText()){if(key==(Keys.Control|Keys.C))CopyElement();else PasteElement();return true;}if(key==Keys.Delete&&(elementList.Focused||preview.Focused)){RemoveSelected();return true;}if(key==(Keys.Control|Keys.O)){Open();return true;}if(key==(Keys.Control|Keys.S)){Save();return true;}if(key==(Keys.Control|Keys.Shift|Keys.S)){SaveAs();return true;}if(key==(Keys.Control|Keys.P)){PrintLabel();return true;}return base.ProcessCmdKey(ref msg,key);}
+ protected override bool ProcessCmdKey(ref Message msg,Keys key){
+  keyboardHeaderFocus=(key&Keys.KeyCode)==Keys.Tab;
+  if(key==(Keys.Control|Keys.Oemplus)||key==(Keys.Control|Keys.Shift|Keys.Oemplus)||key==(Keys.Control|Keys.Add)){AdjustCanvasZoom(true);return true;}
+  if(key==(Keys.Control|Keys.OemMinus)||key==(Keys.Control|Keys.Subtract)){AdjustCanvasZoom(false);return true;}
+  if(key==(Keys.Control|Keys.D0)||key==(Keys.Control|Keys.NumPad0)){preview.ViewZoom=0;return true;}
+  if(key==Keys.F6||key==(Keys.Shift|Keys.F6)){CycleEditorSection(key==(Keys.Shift|Keys.F6));return true;}
+  if(key==Keys.F8){FocusProblems();return true;}
+  if(key==Keys.F4){FocusInspector();return true;}
+  if((key==(Keys.Shift|Keys.F10)||key==Keys.Apps)&&elementList!=null&&elementList.Focused){OpenLayerMenuFromKeyboard();return true;}
+  if((key==Keys.F2||key==Keys.Enter)&&elementList!=null&&elementList.Focused){EditSelection();return true;}
+  if(!EditingText()&&(key==(Keys.Control|Keys.Z)||key==(Keys.Control|Keys.Y))){StepHistory(key==(Keys.Control|Keys.Y));return true;}
+  if(!EditingText()&&(key==(Keys.Control|Keys.OemCloseBrackets)||key==(Keys.Control|Keys.OemOpenBrackets))){RotateSelected(key==(Keys.Control|Keys.OemCloseBrackets)?90:-90);return true;}
+  if((key==(Keys.Control|Keys.C)||key==(Keys.Control|Keys.V))&&!EditingText()){if(key==(Keys.Control|Keys.C))CopyElement();else PasteElement();return true;}
+  if(key==Keys.Delete&&(elementList.Focused||preview.Focused)){RemoveSelected();return true;}
+  if(key==(Keys.Control|Keys.O)){Open();return true;}
+  if(key==(Keys.Control|Keys.S)){Save();return true;}
+  if(key==(Keys.Control|Keys.Shift|Keys.S)){SaveAs();return true;}
+  if(key==(Keys.Control|Keys.P)){PrintLabel();return true;}
+  return base.ProcessCmdKey(ref msg,key);
+ }
 }
 }

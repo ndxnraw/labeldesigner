@@ -5,7 +5,8 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 namespace EanEtikety {
 public partial class PreviewPanel:Panel {
- public bool Compact;double viewZoom;[System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public double ViewZoom {get{return viewZoom;}set{StopDrag();viewZoom=value;AutoScrollPosition=Point.Empty;Invalidate();}}
+ public bool Compact;double viewZoom;internal event EventHandler ZoomChanged;
+ [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]public double ViewZoom {get{return viewZoom;}set{if(viewZoom==value)return;StopDrag();viewZoom=value;AutoScrollPosition=Point.Empty;Invalidate();ZoomChanged?.Invoke(this,EventArgs.Empty);}}
  public VectorScene Scene;public bool Dark=true;public event Action<int> TextEditRequested;public Bitmap Image;public string Caption="";public LabelSettings Settings;
  public event Action<ElementEdit> ElementEdited;public event Action EditFinished;
  public event Action<int> ElementSelected;public event Action<int> SymbolEditRequested;

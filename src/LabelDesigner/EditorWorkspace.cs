@@ -2,18 +2,57 @@ using System;using System.Collections.Generic;using System.Drawing;using System.
 namespace EanEtikety {
  public partial class MainForm {
   ModernTabs workspaceTabs;IssueView problemView;TableLayoutPanel selectionInspector;Label selectionOverview;readonly List<Button> selectionActions=new List<Button>();
-  void InitializeEditorWorkspace(TableLayoutPanel stack,Panel left,ModernTabs documentTabs){
-   workspaceTabs=new ModernTabs{Dock=DockStyle.Fill};var layers=workspaceTabs.AddPage(Loc.T("Prvky"));var problems=workspaceTabs.AddPage(Loc.T("Kontrola"));
-   var layerLayout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2,AutoScroll=true};layerLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));layerLayout.RowStyles.Add(new RowStyle(SizeType.Percent,100));layerLayout.RowStyles.Add(new RowStyle(SizeType.Absolute,90));layers.Controls.Add(layerLayout);
-   elementList=new ListBox{Dock=DockStyle.Fill,BorderStyle=BorderStyle.None,IntegralHeight=false,SelectionMode=SelectionMode.MultiExtended,HorizontalScrollbar=true,AccessibleName=Loc.T("Prvky")};layerLayout.Controls.Add(elementList,0,0);
-   var actions=new TableLayoutPanel{Name="layerActions",Dock=DockStyle.Fill,ColumnCount=2,RowCount=2,Margin=new Padding(0)};actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,50));actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,50));actions.RowStyles.Add(new RowStyle(SizeType.Percent,50));actions.RowStyles.Add(new RowStyle(SizeType.Percent,50));layerLayout.Controls.Add(actions,0,1);
-   AddLayerAction(actions,"Do popredia",()=>Arrange("front"));AddLayerAction(actions,"Do pozadia",()=>Arrange("back"));AddLayerAction(actions,"Zamknúť / odomknúť",ToggleSelectionLock);AddLayerAction(actions,"Upraviť prvok",EditSelection);
-   FitLayerActions(layerLayout,actions);
-   elementList.SelectedIndexChanged+=delegate{if(!studioSync)SelectFromLayerList();};elementList.DoubleClick+=delegate{EditSelection();};
+  void InitializeEditorWorkspace(TableLayoutPanel stack,Panel left,Control labelSettings,Control paperSettings){
+   workspaceTabs=new ModernTabs{Dock=DockStyle.Fill,AccessibleName=Loc.T("Panely editora"),CompactColumns=2};
+   var layers=workspaceTabs.AddPage(Loc.T("Prvky"));
+   var problems=workspaceTabs.AddPage(Loc.T("Kontrola"));
+   workspaceTabs.AddPage(Loc.T("Etiketa")).Controls.Add(labelSettings);
+   workspaceTabs.AddPage(Loc.T("Papier")).Controls.Add(paperSettings);
+   elementList=new ListBox{Dock=DockStyle.Fill,BorderStyle=BorderStyle.None,IntegralHeight=false,SelectionMode=SelectionMode.MultiExtended,HorizontalScrollbar=true,AccessibleName=Loc.T("Prvky")};
+   layers.Controls.Add(elementList);
+   BuildLayerMenu();
+   elementList.SelectedIndexChanged+=delegate{if(!studioSync)SelectFromLayerList();};
+   elementList.DoubleClick+=delegate{EditSelection();};
    problemView=new IssueView{Dock=DockStyle.Fill};problemView.SelectedIssueChanged+=SelectEditorIssue;problems.Controls.Add(problemView);
-   StackAdd(stack,workspaceTabs);workspaceTabs.Dock=DockStyle.Fill;left.AutoScroll=false;stack.AutoSize=false;stack.Dock=DockStyle.Fill;stack.RowStyles[0]=new RowStyle(SizeType.Percent,55);stack.RowStyles[1]=new RowStyle(SizeType.Percent,45);documentTabs.Dock=DockStyle.Fill;
+   StackAdd(stack,workspaceTabs);
+   workspaceTabs.Margin=Padding.Empty;
+   workspaceTabs.Dock=DockStyle.Fill;
+   left.AutoScroll=false;
+   stack.Padding=new Padding(8,4,0,0);
+   stack.AutoSize=false;
+   stack.Dock=DockStyle.Fill;
+   stack.RowStyles[0]=new RowStyle(SizeType.Percent,100);
   }
-  void AddLayerAction(TableLayoutPanel panel,string text,Action action){var button=Btn(Loc.T(text),delegate{try{action();}catch(Exception ex){Error(ex);}});button.AutoSize=false;button.Dock=DockStyle.Fill;button.Margin=new Padding(2);button.MinimumSize=Size.Empty;button.AccessibleName=Loc.T(text);int index=panel.Controls.Count;panel.Controls.Add(button,index%2,index/2);}
+  void BuildLayerMenu(){
+   layerMenu=new UiContextMenuStrip();
+   var edit=FeatureItem("Upraviť prvok",HeaderIcon.AddText,EditSelection);
+   edit.ShortcutKeyDisplayString="F2";
+   layerMenu.Items.AddRange(new ToolStripItem[]{edit,
+    FeatureItem("Do popredia",HeaderIcon.Panels,()=>Arrange("front")),
+    FeatureItem("Do pozadia",HeaderIcon.Panels,()=>Arrange("back")),
+    FeatureItem("Zamknúť / odomknúť",HeaderIcon.Settings,ToggleSelectionLock),
+    new ToolStripSeparator(),FeatureItem("Odstrániť prvok",HeaderIcon.Tools,RemoveSelected)});
+   layerMenu.Opening+=delegate(object sender,System.ComponentModel.CancelEventArgs args){
+    var selection=SelectedElements();
+    args.Cancel=selection.Count==0;
+    edit.Enabled=selection.Count==1&&!elementMetadata.Exists(m=>m.Index==selection[0]&&m.Locked);
+   };
+   elementList.ContextMenuStrip=layerMenu;
+   elementList.MouseDown+=delegate(object sender,MouseEventArgs args){
+    if(args.Button!=MouseButtons.Right)return;
+    int index=elementList.IndexFromPoint(args.Location);
+    if(index>=0&&!elementList.GetSelected(index)){
+     preview.SelectElement(((StudioItem)elementList.Items[index]).Index);
+    }
+   };
+   Disposed+=delegate{layerMenu.Dispose();};
+  }
+  UiContextMenuStrip layerMenu;
+  void OpenLayerMenuFromKeyboard(){
+   int index=elementList.SelectedIndex;
+   var row=index>=0?elementList.GetItemRectangle(index):Rectangle.Empty;
+   layerMenu.Show(elementList,new Point(row.Left+12,Math.Max(0,Math.Min(row.Bottom,elementList.ClientSize.Height))));
+  }
   void InitializeSelectionInspector(){selectionInspector=Stack();inspectorHost.Controls.Add(selectionInspector);selectionOverview=new FocusText{AutoSize=true,UseMnemonic=false,Font=new Font(Font,FontStyle.Bold)};StackAdd(selectionInspector,selectionOverview);
    string[] names={"Zoskupiť","Rozoskupiť","Rozloženie a výber","Odstrániť prvok"};
    for(int i=0;i<names.Length;i++){int command=i;var button=Btn(Loc.T(names[i]),delegate{try{if(command==0)Arrange("group");else if(command==1)Arrange("ungroup");else if(command==2)ShowArrange();else RemoveSelected();}catch(Exception ex){Error(ex);}});selectionActions.Add(button);StackAdd(selectionInspector,button);}
@@ -42,12 +81,20 @@ namespace EanEtikety {
   void ToggleSelectionLock(){var selected=SelectedElements();bool unlock=selected.Count>0&&selected.TrueForAll(index=>elementMetadata.Exists(m=>m.Index==index&&m.Locked));Arrange(unlock?"unlock":"lock");}
   void EditSelection(){if(preview.Selection.Count!=1)return;int index=preview.SelectedIndex;if(elementMetadata.Exists(m=>m.Index==index&&m.Locked))return;if(index==-1){FocusInspector();return;}if(index>=0)BeginInlineText(index);else if(index<=-3)EditSymbol(index);}
   void SelectEditorIssue(LabelIssue issue){if(issue==null||issue.Element==-2)return;preview.SelectElement(issue.Element);preview.ProblemElements.Clear();preview.ProblemElements.Add(issue.Element);preview.Invalidate();}
-  void SyncIssueViews(){if(problemView==null)return;problemView.SetIssues(labelIssues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+" ("+labelIssues.Count+")");}
+  void SyncIssueViews(){if(problemView==null)return;problemView.SetIssues(labelIssues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+(labelIssues.Count==0?"":" ("+labelIssues.Count+")"));}
   void FocusProblems(){if(workspaceTabs==null)return;if(studioBody.ColumnStyles[0].Width==0)SetStudioPanel(0,true);workspaceTabs.SelectedIndex=1;problemView.FocusList();}
   void FocusInspector(){if(studioBody.ColumnStyles[2].Width==0)SetStudioPanel(2,true);if(preview.Selection.Count!=1){selectionOverview.Focus();return;}if(preview.SelectedIndex==-1)ean.Focus();else if(preview.SelectedIndex>=0)inspectText.Focus();else inspectNumbers[0].Focus();}
   void CycleEditorSection(bool backwards){
-   if(studioBody==null)return;var left=studioBody.GetControlFromPosition(0,0);Control[] sections={left,preview,inspectorHost};int current=preview.ContainsFocus?1:inspectorHost.ContainsFocus?2:left.ContainsFocus?0:backwards?0:2;
-   for(int step=1;step<=sections.Length;step++){int next=(current+(backwards?sections.Length-step:step))%sections.Length;if(next==0&&studioBody.ColumnStyles[0].Width==0||next==2&&studioBody.ColumnStyles[2].Width==0)continue;var target=sections[next];if(next==1){if(preview.Focus())return;}else if(target.SelectNextControl(null,true,true,true,false))return;}
+   if(studioBody==null)return;
+   var left=studioBody.GetControlFromPosition(0,0);
+   Control[] sections={headerCommands,left,preview.Parent,inspectorHost};
+   int current=Array.FindIndex(sections,section=>section.ContainsFocus);
+   if(current<0)current=backwards?0:sections.Length-1;
+   for(int step=1;step<=sections.Length;step++){
+    int next=(current+(backwards?sections.Length-step:step))%sections.Length;
+    if(next==1&&studioBody.ColumnStyles[0].Width==0||next==3&&studioBody.ColumnStyles[2].Width==0)continue;
+    if(next==2?preview.Focus():sections[next].SelectNextControl(null,true,true,true,false))return;
+   }
   }
  }
 }

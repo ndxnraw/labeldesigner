@@ -1021,3 +1021,21 @@ Odstrániť overené staršie zostavy z úložiska aktualizácií? Aktívna verz
 Čistím úložisko aktualizácií…	Cleaning update storage…	Čistím úložiště aktualizací…	Frissítési tárhely tisztítása…
 Žiadne zostavy na odstránenie.	No builds to remove.	Žádná sestavení k odstranění.	Nincs törölhető verzió.
 Odstránené zostavy: {0}. Uvoľnené miesto: {1:N1} MiB.	Builds removed: {0}. Space freed: {1:N1} MiB.	Odstraněná sestavení: {0}. Uvolněné místo: {1:N1} MiB.	Törölt verziók: {0}. Felszabadított hely: {1:N1} MiB.
+Zobrazenie	View	Zobrazení	Nézet
+Tlač…	Print…	Tisk…	Nyomtatás…
+Príkazy editora	Editor commands	Příkazy editoru	Szerkesztőparancsok
+Plátno etikety	Label canvas	Plátno etikety	Címkevászon
+Mierka plátna	Canvas zoom	Měřítko plátna	Vászon nagyítása
+Zmenšiť náhľad	Zoom out	Oddálit náhled	Előnézet kicsinyítése
+Zväčšiť náhľad	Zoom in	Přiblížit náhled	Előnézet nagyítása
+Stav editora	Editor status	Stav editoru	Szerkesztő állapota
+Nastavenia a pomoc	Settings and help	Nastavení a nápověda	Beállítások és súgó
+Panely editora	Editor panels	Panely editoru	Szerkesztőpanelek
+Poloha a rozmery	Position and size	Poloha a rozměry	Elhelyezés és méret
+Obsah	Content	Obsah	Tartalom
+Typografia	Typography	Typografie	Tipográfia
+Prispôsobenie textu	Text fitting	Přizpůsobení textu	Szöveg igazítása
+Tučné písmo v celom poli	Bold throughout the field	Tučné písmo v celém poli	Félkövér a teljes mezőben
+Formátovanie textu	Text formatting	Formátování textu	Szövegformázás
+Rozšírené formátovanie…	Advanced formatting…	Pokročilé formátování…	Speciális formázás…
+Obnoviť hlavný kód	Restore main code	Obnovit hlavní kód	Fő kód visszaállítása

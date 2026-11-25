@@ -62,6 +62,12 @@ wrapping and minimum-size warnings. It compares fitted artwork between rapid
 template entry, batch data, print and PDF/SVG/Word/ZPL output.
 BackgroundBatchTests verifies that the quick-print form displays overflow at
 the editable field and allows the user to continue to output review.
+EditorRefinementTests opens the unified editor at 1024 × 640 and checks the
+toolbar, layer tabs, property layout and canvas zoom at 100%, 150% and 200%
+font sizes. It dispatches the zoom shortcuts, F4, F8, Shift+F10 and Enter. It
+also verifies formatting the selection through Ctrl+I and its accessible
+pressed state. The font changes are synthetic and do not switch monitors.
+
 EditorRefinementTests also exercises mixed bold and italic spans, repeated
 variable substitutions, edits and undo, fitting, the print preview and
 PDF, SVG, Word and ZPL export. UpdateTests exercises managed package cleanup

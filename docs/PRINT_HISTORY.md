@@ -1,6 +1,6 @@
 # História tlače
 
-Otvorte **Nástroje → Dáta → História tlače**. Každý riadok zobrazuje čas
+Otvorte **Nástroje → Kontrola a údržba → História tlače**. Každý riadok zobrazuje čas
 pokusu o odoslanie, tlačiareň, profil alebo média, počty vrátane opakovaní
 a výsledok. **Odoslané** znamená prijatie úlohy tlačovým systémom. Pri
 prerušení zistite vytlačený rozsah podľa hárkov alebo etikiet.
@@ -45,7 +45,7 @@ a údaje frontu sa naďalej riadia limitmi histórie tlače. Pri starších
 záznamoch sa využijú zachované väzby. Údaje odstránené pred zavedením
 tejto funkcie sa nedajú obnoviť.
 
-Prenos medzi počítačmi je dostupný cez **Nástroje → Projekt →
+Prenos medzi počítačmi je dostupný cez **Projekt →
 Prenosná záloha a obnova… → Dávky a uzávierky**. ZIP prenáša pôvodné
 ID a uložené počty aj uzávierky. Náhľad rozlišuje nové dávky, zhodné
 údaje a konflikty. Pri konflikte môžete použiť údaje zo zálohy pre

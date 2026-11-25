@@ -6,11 +6,14 @@
 
 - **Tab / Shift+Tab:** postup medzi dostupnými ovládacími prvkami. Vlastné tlačidlá
   a rozbaľovacie polia prekresľujú označenie aktívneho prvku pri zmene výberu.
-- **F6 / Shift+F6:** nasledujúca / predchádzajúca oblasť editora: nastavenia a prvky,
-  plátno, vlastnosti. Skryté panely sa preskočia.
+- **F6 / Shift+F6:** presun medzi príkazovou lištou, ľavými kartami, plátnom
+  a vlastnosťami. Skryté panely sa preskočia.
 - **F4:** vlastnosti výberu; v prípade potreby sa panel zobrazí. Pri prázdnom výbere
   možno klávesnicou prečítať vysvetlenie, prečo sa neponúkajú úpravy.
-- **F8:** panel kontroly dokumentu. **F2** v zozname prvkov upraví vybraný prvok.
+- **F8** otvorí kontrolu dokumentu. V zozname prvkov **F2** alebo **Enter** upraví
+  výber a **Shift+F10** otvorí jeho ponuku akcií.
+- **Ctrl+plus / Ctrl+mínus** mení mierku plátna a **Ctrl+0** ju prispôsobí oknu.
+  Rovnaké akcie sú pod plátnom.
 - **Ctrl+PageUp / Ctrl+PageDown:** prepínanie kariet. Keď má výber hlavička karty,
   fungujú aj šípky doľava/doprava a Home/End. Šípky v textovom poli nemenia kartu.
 

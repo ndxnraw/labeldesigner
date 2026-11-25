@@ -6,14 +6,13 @@ Rozbaľte celý balík Windows-NET10-x64 do samostatného priečinka.
 Balík obsahuje .NET 10 a funguje offline bez inštalácie runtime.
 
 NOVÉ FUNKCIE Pre-release
-Nástroje sú zoskupené: Projekt (šablóny, automatické ukladanie), Vložiť (text, obrázky,
-kódy), Dáta (dávky a premenné), Rozloženie (výber a hárky), Kontrola a údržba
-(kontrola etikety, diagnostika, aktualizácie). Skupiny aj príkazy majú ikony.
+Lišta ponúka Projekt, Vložiť, Dávka, Zobrazenie, Nástroje, Exportovať a Tlač.
+V ponuke Projekt otvoríte a uložíte súbory alebo vyberiete šablónu.
+Vložiť obsahuje text, obrázok, výber kódu, tvary a symbol Zálohované.
 Centrovať kód je vo vlastnostiach vybraného hlavného kódu; zamknutý kód sa nemení.
 Panely si po skrytí a opätovnom otvorení zachovávajú šírku aj po reštarte.
-Ponuka Nástroje: automatické ukladanie, šablóny a nedávne projekty,
-dávky CSV/XLSX a premenné, samolepiace hárky, vlastné obrázky,
-výber 1D / 2D / GS1 kódov, rozloženie a kontrola etikety.
+Ponuka Nástroje obsahuje rozloženie vrátane hárkov, kontrolu a údržbu,
+históriu tlače, aktualizácie, nastavenia a pomoc.
 Späť/Znova: Ctrl+Z/Ctrl+Y alebo dve ikony na hornej lište.
 Ctrl/Shift pridáva prvky do výberu; ťahanie prázdnej plochy vytvorí výberový obdĺžnik.
 Podrobný postup a limity: docs/FEATURES.md.
@@ -25,9 +24,10 @@ s aktuálnou témou. Ovládanie okien zostáva natívne. Systémové dialógy
 a vlastnosti ovládačov tlačiarní spravuje Windows.
 
 PRVKY A KONTROLA PRED VÝSTUPOM
-Pod nastaveniami etikety a papiera sú trvalé karty Prvky a Kontrola.
+Ľavý panel spoločných kariet obsahuje Prvky, Kontrolu, Etiketu a Papier.
 Prvky sú zoradené od popredia a zdieľajú výber s plátnom. Zoznam označuje
-skupiny a zamknuté prvky; tlačidlá menia poradie, zámok alebo otvoria úpravu.
+skupiny a zamknuté prvky. Kontextovú ponuku otvorte pravým tlačidlom alebo
+Shift+F10. V nej zmeníte poradie, zamknutie alebo otvoríte úpravu prvku.
 Viacnásobný výber ukazuje spoločné akcie, aby sa omylom neupravoval iba prvý prvok.
 F2 v zozname upraví odomknutý prvok, F4 otvorí vlastnosti, F8 kontrolu.
 Ctrl+PageUp/PageDown prepína karty vo vybranom paneli.
@@ -115,7 +115,7 @@ po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
 RÝCHLE VYPLNENIE A TLAČ ŠABLÓNY
-Otvorte Nástroje → Projekt → Šablóny a nedávne projekty. Vyberte šablónu
+Otvorte Projekt → Šablóny a nedávne projekty. Vyberte šablónu
 a cez Upraviteľné polia šablóny… označte texty alebo kódy, ktoré sa majú
 vypĺňať pri tlači. Z aktuálneho návrhu môžete polia vybrať aj v ponuke
 Projekt a potom návrh uložiť ako šablónu.
@@ -129,7 +129,7 @@ náhľad s rozložením na médiu a zadaným počtom kusov. Uložená šablóna
 si ponechá svoje pôvodné údaje.
 
 PRENOSNÁ ZÁLOHA ŠABLÓN, PROFILOV A DÁVOK
-Otvorte Nástroje → Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
+Otvorte Projekt → Prenosná záloha a obnova…. Vyberte šablóny,
 profily médií, dávky s uzávierkami alebo ich kombináciu a použite
 Exportovať zálohu do ZIPu….
 Šablóny obsahujú uložené predvoľby dávok. Profily obsahujú nastavenia média,
@@ -158,7 +158,9 @@ Pre presný návrat odstráňte aj položky pridané pôvodnou
 obnovou. Zálohy fungujú offline.
 
 FORMÁTOVANIE ČASTÍ TEXTU
-Označte textové pole a vo Vlastnostiach otvorte Formátovať časti textu….
+Označte časť textu vo Vlastnostiach a použite B alebo I nad poľom.
+Výber možno formátovať aj cez Ctrl+B alebo Ctrl+I. Tlačidlo … otvorí
+samostatný editor rozšíreného formátovania.
 V editore označte slovo alebo úsek a použite Tučné, Kurzíva, Ctrl+B alebo
 Ctrl+I. Obe zvýraznenia možno kombinovať. Skratky fungujú aj pri úprave textu
 priamo na plátne alebo vo Vlastnostiach.
@@ -181,7 +183,7 @@ ani pri minime, kontrola označí pole alebo riadok. Pokračovanie vyžaduje
 potvrdenie upozornenia pred tlačou alebo exportom, kde sa presah oreže.
 
 ČIARY A OBDĹŽNIKY
-V ponuke Nástroje → Vložiť použite Pridať čiaru… alebo Pridať obdĺžnik….
+V ponuke Vložiť použite Pridať čiaru… alebo Pridať obdĺžnik….
 Dĺžku, hrúbku a polohu zadáte v jednotkách projektu. Obrys obdĺžnika
 s hrúbkou 0 sa nevykreslí. Priehľadná výplň ponechá obsah pod rámčekom
 viditeľný. Biela výplň prekryje obsah nižších vrstiev a v ZPL sa na jej
@@ -198,7 +200,9 @@ hrán a stredov s okrajom etikety alebo s iným prvkom. Popis pri kurzore
 uvádza vzdialenosť obrysu výberu od štyroch okrajov v mm alebo cm.
 Záporná vzdialenosť označuje presah mimo etikety.
 
-V ponuke Panely možno prepnúť Pravítka a Prichytávať pri presúvaní.
+V ponuke Zobrazenie možno prepnúť Pravítka a Prichytávať pri presúvaní.
+Pod plátnom je mierka náhľadu s približovaním, odďaľovaním a prispôsobením.
+Použiť možno aj Ctrl+plus alebo Ctrl+mínus. Ctrl+0 vráti prispôsobenie.
 Podržaním Alt počas presunu sa prichytávanie dočasne vypne. Vodiace čiary
 zostanú viditeľné. Esc obnoví pôvodnú polohu a po pustení myši sa celý
 presun dá vrátiť jedným krokom Späť. Pomôcky sa zobrazujú iba v editore.
@@ -225,8 +229,8 @@ aj písmo, hrany šírku/výšku. Esc zruší rozpracovaný presun alebo zmenu.
 Dvojklik otvorí textový vstup priamo na plátne. Font, veľkosť, tučné písmo a centrovanie
 sú vo vlastnostiach textu. Symbol Zálohované si zachováva vektorovú kvalitu.
 
-Tabuľku otvoríte cez Panely → Tabuľka; jej výšku zmeníte ťahaním predelu.
-Ponuka Panely skryje bočné panely alebo obnoví rozloženie. Rozloženie sa
+Tabuľku otvoríte cez Zobrazenie → Tabuľka. Jej výšku zmeníte ťahaním predelu.
+Ponuka Zobrazenie skryje bočné panely alebo obnoví rozloženie. Rozloženie sa
 pamätá samostatne od dokumentu. Menšie okná umožňujú rolovanie nastavení.
 Priblíženie sa týka len obrazovky. Voľba Prispôsobiť ukáže celú etiketu.
 
@@ -430,7 +434,7 @@ Pri malom okne a veľkom písme sú horné tlačové nastavenia aj obsah kariet 
 Korekcie, mierka, DPI, tmavosť Zebra a ignorovanie okrajov majú vysvetlenia priamo v okne.
 
 HISTÓRIA TLAČE
-Nástroje → Dáta → História tlače zobrazí pokusy o odoslanie tlače.
+Nástroje → Kontrola a údržba → História tlače zobrazí pokusy o odoslanie tlače.
 Vyberte odoslanú úlohu a stlačte Skontrolovať front tlače. Ak už úloha vo fronte
 nie je, história naďalej zobrazuje posledný známy stav a čas jeho zistenia.
 Ak chcete použiť opakovanie, v tlačovom okne na karte Detaily zapnite uloženie obsahu úlohy.

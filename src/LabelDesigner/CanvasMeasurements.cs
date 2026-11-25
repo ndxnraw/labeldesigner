@@ -38,8 +38,8 @@ namespace EanEtikety {
    get { return snapToGuides; }
    set { snapToGuides = value; }
   }
-  int RulerWidth { get { return (int)Math.Ceiling(38 * DeviceDpi / 96d); } }
-  int RulerHeight { get { return (int)Math.Ceiling(24 * DeviceDpi / 96d); } }
+  int RulerWidth => Math.Max((int)Math.Ceiling(38 * DeviceDpi / 96d),Font.Height*2+7);
+  int RulerHeight => Math.Max((int)Math.Ceiling(24 * DeviceDpi / 96d),Font.Height+9);
   double MeasurementUnit { get { return Settings.Unit == "cm" ? 10 : 1; } }
   string UnitName { get { return Settings.Unit == "cm" ? "cm" : "mm"; } }
   bool OverRuler(Point point) {
@@ -98,7 +98,8 @@ namespace EanEtikety {
    var state = graphics.Save();
    graphics.SetClip(horizontal ? Rectangle.FromLTRB(start, 0, end, RulerHeight) :
     Rectangle.FromLTRB(0, start, RulerWidth, end), System.Drawing.Drawing2D.CombineMode.Intersect);
-   double step = RulerStep(Math.Max(0.001, (horizontal ? 54 : 38) * DeviceDpi / (96d * scale)));
+   double labelSpacing=Math.Max((horizontal ? 54 : 38) * DeviceDpi / 96d,Font.Height*(horizontal?2.5:1.4));
+   double step = RulerStep(Math.Max(0.001,labelSpacing/scale));
    double minor = step / 5;
    int first = (int)Math.Max(0, Math.Ceiling((start - origin) / (minor * scale)));
    int last = (int)Math.Floor(Math.Min(length / minor, (end - origin) / (minor * scale)) + 1e-8);

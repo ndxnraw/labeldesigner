@@ -70,6 +70,7 @@ public class ModernButton:Button {
 }
 public class ModernTabs:TableLayoutPanel {
  public bool Dark=true;FlowLayoutPanel header;Panel body;List<Button> buttons=new List<Button>();List<Panel> pages=new List<Panel>();int selected;bool refreshing;
+ internal int CompactColumns;
  sealed class TabButton:ModernButton {
   readonly ModernTabs owner;readonly int index;
   public TabButton(ModernTabs owner,int index){this.owner=owner;this.index=index;AccessibleRole=AccessibleRole.PageTab;UseMnemonic=false;}
@@ -96,9 +97,19 @@ public class ModernTabs:TableLayoutPanel {
  protected override void OnFontChanged(EventArgs e){base.OnFontChanged(e);RefreshTabs();}
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);RefreshTabs();}
  public void RefreshTabs(){if(refreshing||header==null||buttons==null||buttons.Count==0)return;refreshing=true;try{
-  int available=Math.Max(1,header.ClientSize.Width-header.Padding.Horizontal),height=Math.Max(43,(int)Math.Ceiling(43*Font.Height/(double)UiFonts.Default.Height));
+  int available=Math.Max(1,header.ClientSize.Width-header.Padding.Horizontal);
+  int height=CompactColumns>0?36:Math.Max(43,(int)Math.Ceiling(43*Font.Height/(double)UiFonts.Default.Height));
   var widths=new int[buttons.Count];int total=0;bool oversized=false;
-  for(int i=0;i<buttons.Count;i++){widths[i]=TextRenderer.MeasureText(buttons[i].Text,buttons[i].Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16;total+=widths[i]+5;oversized|=widths[i]>available;}
+  for(int i=0;i<buttons.Count;i++){
+   var button=buttons[i];
+   if(CompactColumns>0) {
+    int minimum=1;
+    foreach(string word in button.Text.Split(' ',StringSplitOptions.RemoveEmptyEntries))
+     minimum=Math.Max(minimum,TextRenderer.MeasureText(word,button.Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16);
+    widths[i]=Math.Max(available/CompactColumns-5,Math.Min(Math.Max(1,available-5),minimum));
+   } else widths[i]=TextRenderer.MeasureText(button.Text,button.Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16;
+   total+=widths[i]+5;oversized|=widths[i]>available;
+  }
   int extra=total<=available?(available-total)/buttons.Count:0,rows=1,rowWidth=0;
   header.WrapContents=!oversized;header.AutoScroll=oversized;
   for(int i=0;i<buttons.Count;i++){var b=buttons[i];b.Width=widths[i]+extra;b.Margin=new Padding(0,0,5,4);if(!oversized&&rowWidth>0&&rowWidth+b.Width+5>available){rows++;rowWidth=0;}rowWidth+=b.Width+5;height=Math.Max(height,TextRenderer.MeasureText(b.Text,b.Font,new Size(Math.Max(1,b.Width-16),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+12);}

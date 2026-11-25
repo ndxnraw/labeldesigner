@@ -18,6 +18,102 @@ namespace EanEtikety {
  public partial class MainForm {
   const string TextStylesColumn = "textStyles";
   Button styleTextButton;
+  FlowLayoutPanel formattingBar;
+  SelectionFormatButton boldSelection,italicSelection;
+
+  sealed class SelectionFormatButton : ModernButton {
+   CheckState selectionState;
+   public void SetSelectionState(CheckState state) {
+    if(selectionState==state)return;
+    selectionState=state;
+    AccessibilityNotifyClients(AccessibleEvents.StateChange,-1);
+   }
+   protected override bool SelectedVisual=>selectionState==CheckState.Checked;
+   protected override AccessibleObject CreateAccessibilityInstance()=>new FormatAccess(this);
+   sealed class FormatAccess : ControlAccessibleObject {
+    readonly SelectionFormatButton button;
+    public FormatAccess(SelectionFormatButton value):base(value){button=value;}
+    public override AccessibleStates State=>base.State|(button.selectionState switch {
+     CheckState.Checked=>AccessibleStates.Pressed,
+     CheckState.Indeterminate=>AccessibleStates.Mixed,
+     _=>AccessibleStates.None
+    });
+   }
+  }
+
+  void BuildInspectorFormatting() {
+   formattingBar=new FlowLayoutPanel{AutoSize=true,WrapContents=true,AccessibleName=Loc.T("Formátovanie textu")};
+   boldSelection=AddFormatButton("B","Tučné","Ctrl+B",TextEmphasis.Bold);
+   italicSelection=AddFormatButton("I","Kurzíva","Ctrl+I",TextEmphasis.Italic);
+   styleTextButton=Btn("…",EditTextStyles);
+   styleTextButton.Name="styleText";
+   styleTextButton.AccessibleName=Loc.T("Rozšírené formátovanie…");
+   styleTextButton.MinimumSize=new Size(36,36);
+   styleTextButton.Padding=Padding.Empty;
+   headerTips.SetToolTip(styleTextButton,styleTextButton.AccessibleName);
+   formattingBar.Controls.Add(styleTextButton);
+   StackAdd(textInspector,formattingBar);
+   formattingBar.Margin=new Padding(0,0,0,2);
+   inspectText.KeyUp+=delegate{RefreshInspectorFormatting();};
+   inspectText.MouseUp+=delegate{RefreshInspectorFormatting();};
+   inspectText.TextChanged+=delegate{RefreshInspectorFormatting();};
+   inspectText.GotFocus+=delegate{RefreshInspectorFormatting();};
+  }
+
+  SelectionFormatButton AddFormatButton(string caption,string title,string shortcut,TextEmphasis emphasis) {
+   var button=new SelectionFormatButton {
+    Text=caption,Name="format"+emphasis,AutoSize=true,MinimumSize=new Size(36,36),
+    FlatStyle=FlatStyle.Flat,AccessibleName=Loc.T(title),AccessibleRole=AccessibleRole.PushButton,
+    AccessibleDescription=shortcut,Margin=new Padding(0,4,4,2)
+   };
+   headerTips.SetToolTip(button,Loc.T(title)+" ("+shortcut+")");
+   button.Click+=delegate{
+    int start=inspectText.SelectionStart,length=inspectText.SelectionLength;
+    ApplySelectionStyle(inspectText,emphasis);
+    inspectText.Focus();
+    inspectText.Select(start,length);
+    RefreshInspectorFormatting();
+   };
+   formattingBar.Controls.Add(button);
+   return button;
+  }
+
+  void RefreshInspectorFormatting() {
+   if(formattingBar==null)return;
+   int index=preview.SelectedIndex;
+   var item=index>=0&&index<grid.Rows.Count?StyledGridText(grid.Rows[index]):null;
+   int start=inspectText.SelectionStart;
+   int end=item==null?start:Math.Min(start+inspectText.SelectionLength,item.Text.Length);
+   TextEmphasis present=TextEmphasis.Regular,absent=TextEmphasis.Regular;
+   if(start<end) {
+    var inherited=item.Bold?TextEmphasis.Bold:TextEmphasis.Regular;
+    int position=start;
+    foreach(var span in item.Styles) {
+     if(span.Start>=end)break;
+     if(span.Start+span.Length<=position)continue;
+     if(span.Start>position)Include(inherited);
+     Include(span.Emphasis);
+     position=span.Start+span.Length;
+    }
+    if(position<end)Include(inherited);
+   }
+   Refresh(boldSelection,TextEmphasis.Bold,"B");
+   Refresh(italicSelection,TextEmphasis.Italic,"I");
+
+   void Include(TextEmphasis value) {
+    present|=value;
+    absent|=(TextEmphasis.Bold|TextEmphasis.Italic)&~value;
+   }
+   void Refresh(SelectionFormatButton button,TextEmphasis emphasis,string caption) {
+    bool on=(present&emphasis)!=0,off=(absent&emphasis)!=0;
+    button.SetSelectionState(on?(off?CheckState.Indeterminate:CheckState.Checked):CheckState.Unchecked);
+    button.Text=caption+(on?(off?" –":" ✓"):"");
+    button.BackColor=SystemInformation.HighContrast?SystemColors.Control:
+     on?StudioTheme.Accent:dark?Color.FromArgb(33,51,69):Color.FromArgb(227,237,249);
+    button.ForeColor=on&&!SystemInformation.HighContrast?Color.White:StudioTheme.Text(dark);
+    button.Invalidate();
+   }
+  }
 
   static TextItem StyledGridText(DataGridViewRow row) => new() {
    Text = Convert.ToString(row.Cells[0].Value) ?? "",
@@ -49,6 +145,7 @@ namespace EanEtikety {
    timer.Stop();
    UpdatePreview();
    PositionInlineText();
+   RefreshInspectorFormatting();
   }
 
   void EditTextStyles() {

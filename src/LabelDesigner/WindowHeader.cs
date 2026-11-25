@@ -18,10 +18,6 @@ public partial class MainForm {
  void RefreshHeaderSurface(){if(headerSurface==null)return;Color background=StudioTheme.Panel(dark);studio.BackColor=background;headerSurface.BackColor=background;headerCommands.BackColor=background;if(IsHandleCreated)SetTitleTheme();headerSurface.Invalidate(true);}
  // Calculate from child preferred sizes, never from the wrapped panel's current height.
  public static int ToolbarHeight(FlowLayoutPanel panel,int width,int minimum){int x=0,row=0,total=0;foreach(Control c in panel.Controls){if(!c.Visible)continue;Size size=c.AutoSize?c.GetPreferredSize(Size.Empty):c.Size;int w=size.Width+c.Margin.Horizontal,h=Math.Max(size.Height,c.Height)+c.Margin.Vertical;if(x>0&&x+w>width){total+=row;x=0;row=0;}x+=w;row=Math.Max(row,h);}return Math.Max(minimum,total+row+panel.Padding.Vertical);}
- void MergeToolbar(TableLayoutPanel top,FlowLayoutPanel commands,FlowLayoutPanel tools){
-  top.ColumnStyles.Clear();top.ColumnCount=1;top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));top.SetColumn(commands,0);commands.AutoSize=false;commands.WrapContents=true;
-  while(tools.Controls.Count>0){var c=tools.Controls[0];c.TabIndex=commands.Controls.Count;commands.Controls.Add(c);}studio.Controls.Remove(tools);editorTools=commands;tools.Dispose();studio.RowStyles[1].Height=0;commands.SizeChanged+=delegate{UpdateToolbarLayout();};
- }
  void UpdateToolbarLayout(){if(studio==null||editorTools==null||layingOutHeader||WindowState==FormWindowState.Minimized||ClientSize.Width<=0||editorTools.Width<=0)return;layingOutHeader=true;try{float dpi=DeviceDpi/96f;studio.RowStyles[1].Height=0;float height=ToolbarHeight(editorTools,editorTools.ClientSize.Width,(int)Math.Ceiling(44*dpi));if(Math.Abs(studio.RowStyles[0].Height-height)>.5)studio.RowStyles[0].Height=height;}finally{layingOutHeader=false;}}
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);if(studio!=null)ApplyTheme();}
  protected override void OnResize(EventArgs e){base.OnResize(e);if(WindowState==FormWindowState.Minimized){if(headerSurface!=null)HideHeaderHints();return;}UpdateToolbarLayout();}

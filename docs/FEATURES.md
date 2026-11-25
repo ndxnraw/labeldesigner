@@ -72,18 +72,21 @@ Názov produktu je naďalej Pre-release.
   kontroluje modul, voľné okraje, orez a skúšobné načítanie pri rozlíšení
   tlačiarne. Pozri [Kontrola čitateľnosti pred tlačou](BARCODE_READABILITY.md).
 
-- **História tlače:** cez **Nástroje → Dáta → História tlače** sa zobrazia
+- **História tlače:** cez **Nástroje → Kontrola a údržba → História tlače** sa zobrazia
   odoslané, zrušené a neúspešné pokusy o tlač. Ak bolo v karte **Detaily**
   zapnuté uloženie obsahu úlohy, z histórie sa dá pripraviť opakovanie celku,
   vybraných strán alebo pôvodných záznamov dávky. Pred tlačou sa otvorí náhľad
   s uloženými nastaveniami a vyžiada sa nové predtlačové potvrdenie. Pozri
   [História tlače](PRINT_HISTORY.md).
 
-- **Prehľadnejšie príkazy a GS1:** Nástroje sú v piatich skupinách s ikonami.
-  Lišta už nemá Vybrať kód, Tabuľka ani Centrovať kód; tabuľka je v ponuke Panely
-  a centrovanie vo vlastnostiach hlavného kódu. Panely po opätovnom zobrazení
-  zachovávajú šírku. GS1 editor ponúka pomenované polia, rýchle voľby, vyhľadávanie,
-  formáty a chyby pri poli, náhľad, zmenu poradia a bezpečné zrušenie.
+- **Pracovný priestor editora:** Projekt, Vložiť, Dávka, Zobrazenie, Nástroje,
+  Exportovať a Tlač sú na jednej lište. Vľavo sú karty Prvky, Kontrola, Etiketa
+  a Papier. Vlastnosti združujú obsah, typografiu, polohu a rozmery. Tučné písmo
+  a kurzívu možno použiť priamo na výber v textovom poli. Mierka pod plátnom mení
+  iba jeho zobrazenie. Tabuľku otvoríte v ponuke Zobrazenie a centrovanie je vo
+  vlastnostiach hlavného kódu. Bočné panely si uchovávajú šírku.
+- **GS1 editor:** pomenované polia, rýchle voľby, vyhľadávanie, formáty a chyby
+  pri poli, náhľad, zmena poradia a bezpečné zrušenie.
 - **Ochrana ovládania kolieskom:** číselné polia a zatvorené rozbaľovacie ponuky
   vyžadujú kliknutie a zameranie; samotný hover alebo prechod klávesom Tab nemení
   hodnotu. Otvorené zoznamy a klávesnicový výber zostávajú dostupné. Tlačové
