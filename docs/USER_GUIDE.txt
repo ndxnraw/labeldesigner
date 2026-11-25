@@ -2,8 +2,8 @@ ND LabelDesigner — Pre-release — Windows
 Aktualizované 18. novembra 2026
 
 Rozbaľte celý ZIP a spustite ND-LabelDesigner.exe.
-Pri kompatibilnom balíku ponechajte vedľa EXE konfiguráciu, zxing.dll a LabelDesigner.Core.dll.
-Kompatibilný balík potrebuje .NET Framework 4.8/4.8.1. Moderný balík Windows-NET10-x64 obsahuje runtime a nepotrebuje jeho inštaláciu. Oba sú určené pre Windows 10/11. Rozbaľte celý vybraný ZIP do vlastného priečinka; súbory rôznych balíkov nemiešajte.
+Rozbaľte celý balík Windows-NET10-x64 do samostatného priečinka.
+Balík obsahuje .NET 10 a funguje offline bez inštalácie runtime.
 
 NOVÉ FUNKCIE Pre-release
 Nástroje sú zoskupené: Projekt (šablóny, automatické ukladanie), Vložiť (text, obrázky,
@@ -57,7 +57,7 @@ ho importujte alebo zrušte zahrnutie chybného riadka pre aktuálnu tlač.
 Ak majú byť hodnoty, napríklad sériové čísla, jedinečné, vyberte v mapovaní
 Stĺpec s jedinečnými hodnotami. Rovnaké neprázdne hodnoty vo vstupnej tabuľke
 vytvoria upozornenia aj pre prvý výskyt. Porovnanie zachová úvodné nuly,
-medzery a veľkosť písmen. Táto kontrola funguje lokálne na oboch verziách.
+medzery a veľkosť písmen. Táto kontrola funguje lokálne.
 
 PREDVOĽBY PRE OPAKOVANÉ DÁVKY
 Naimportujte tabuľku, priraďte stĺpce a otvorte Predvoľby dávky…. Zadajte názov
@@ -76,7 +76,7 @@ uložte predvoľbu znova.
 Náhľad prvých záznamov… ukáže pôvodné číslo riadka a hodnoty z namapovaných
 stĺpcov pre prvých päť dátových záznamov. Pri tabuľke bez hlavičky potvrďte
 pozície pred prípravou dávky. Nový import alebo zmena priradenia vyžiada nové
-potvrdenie. Funkcie sú dostupné offline na .NET Framework 4.8 aj .NET 10.
+potvrdenie. Funkcie sú dostupné offline.
 
 POROVNANIE OPAKOVANÝCH DÁVOK
 Importujte aktuálnu tabuľku, priraďte stĺpce a stlačte Pripraviť dávku.
@@ -155,7 +155,7 @@ Po potvrdení obnovy vznikne pred zápisom ZIP v susednom priečinku .workspace.
 Jeho umiestnenie sa zobrazí po obnove. Otvorením tohto ZIPu sa dajú obnoviť
 nahradené položky. Poškodené šablóny sú v náhľade označené a preskočia sa.
 Pre presný návrat odstráňte aj položky pridané pôvodnou
-obnovou. Zálohy fungujú offline na .NET Framework 4.8 aj .NET 10.
+obnovou. Zálohy fungujú offline.
 
 ČIARY A OBDĹŽNIKY
 V ponuke Nástroje → Vložiť použite Pridať čiaru… alebo Pridať obdĺžnik….

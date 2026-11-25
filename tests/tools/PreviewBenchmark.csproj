@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
- <PropertyGroup><OutputType>WinExe</OutputType><UseWindowsForms>true</UseWindowsForms><AssemblyName>PrintPreviewBenchmark</AssemblyName><StartupObject>MigrationTestHost</StartupObject><AppConfig Condition="'$(TargetFramework)' == 'net48'">../../src/LabelDesigner/app.config</AppConfig></PropertyGroup>
+ <PropertyGroup><OutputType>WinExe</OutputType><UseWindowsForms>true</UseWindowsForms><AssemblyName>PrintPreviewBenchmark</AssemblyName><StartupObject>MigrationTestHost</StartupObject></PropertyGroup>
  <ItemGroup><Compile Include="PrintPreviewBenchmark.cs"/><Compile Include="MigrationTestHost.cs"/><ProjectReference Include="../../src/LabelDesigner/LabelDesigner.csproj"/></ItemGroup>
- <ItemGroup Condition="'$(TargetFramework)' == 'net48'"><Reference Include="System.IO.Compression"/><Reference Include="System.IO.Compression.FileSystem"/></ItemGroup>
 </Project>

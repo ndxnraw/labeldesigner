@@ -8,8 +8,8 @@ From the checkout root:
 
 This rebuilds ZXing, shared Core and the app, compiles and runs all 32 registered suites. Each must exit
 successfully and produce `passed.txt`. Failures return a nonzero status. Test binaries
-go to `build/tests/`; timestamped reports, screenshots and generated exports go to
-`build/test-results/`. These are ignored, not source fixtures.
+go to `build/sdk-bin/RegressionTests/`. Timestamped reports, screenshots and exports go to
+`build/sdk-test-results/net10.0-windows/`.
 
 `tests/regression/` covers UI, rotation, GS1, symbols, startup preferences, rendering
 and compatibility. `tests/integration/` covers import and output formats.
@@ -181,17 +181,17 @@ No print job is submitted; preview/media capabilities use Microsoft Print to PDF
 `PlatformMigrationTests` verifies a core without dependencies on the app or Windows
 Forms, old XML and variable-template round trips, frozen job values, Windows-1250
 CSV, fresh-process CP850 ZPL import, shared PDF/DOCX/SVG/ZPL outputs with exact page
-dimensions, minimum editor size and a contained properties panel. Framework retains
-its original physical minimum; modern WinForms preserves the logical minimum across
-DPI transitions. The same suite
-sources are compiled on both runtimes; `scripts/test-suites.json` is their single list.
+dimensions, minimum editor size and a contained properties panel. The suite
+also reads a project and library template from the existing XML format and an
+existing Zebra media profile, then verifies their on-disk content stays intact.
+`scripts/test-suites.json` is the list of standard .NET 10 suites.
 
-Run `scripts/test-sdk.ps1` for the complete modern .NET 10 suite and
-`scripts/test-sdk.ps1 -Framework net48` for SDK-compiled Framework tests. Both accept
-`-Suites` like the legacy runner and reject unknown names. Results are separated under
-`build/sdk-test-results/<target>/<timestamp>/`. SDK tests use a small STA host with the
-product's DPI mode and locate fixture/source files independently of binary-directory
-depth. A failing suite is never silently skipped. No test requires a physical print job.
+Run `scripts/test-sdk.ps1 -Suites UpdateTests,PlatformMigrationTests` for the
+update and data-migration checks. The tests use a small STA host with the
+application's DPI mode and locate fixtures independently of binary-directory depth.
+Run `tests/tools/TestPublishedUpdate.ps1` for the publication identity checks and
+`scripts/test-update-packages.ps1` after packaging for the single-offer index,
+verified extraction and self-test. No test requires a physical print job.
 `tests/fixtures/` contains committed legacy input documents; the `work` segment
 inside fixture paths is historical fixture organization, not an external workspace.
 Revision-number class names identify old regression cases, not product releases.
@@ -204,19 +204,13 @@ Do not run competing test suites in the same output directory.
 
 ## Preview performance comparison
 
-`scripts/measure-preview.ps1 -Runtime compatible -Results build/preview-compatible`
-and `-Runtime modern -Results build/preview-modern` run the optional benchmark
-sequentially against Microsoft Print to PDF; no jobs are submitted. The modern
-command requires the SDK. `-Executable` can measure an archived benchmark build
-without rebuilding it. Reports include stage timings, UI tick gaps and whole-process
-resource observations. Use the same benchmark source, machine and driver for both
-sides; do not run other suites concurrently. See [PREVIEW_PERFORMANCE](PREVIEW_PERFORMANCE.md)
-for the baseline instrumentation and the measured seventh-package comparison.
-
-`tests/tools/` contains the original optional benchmark, screenshot and barcode-data
-utilities. They are not pass/fail regression suites and are not run by the standard
-runner. They can be compiled against `build/app/ND-LabelDesigner.exe` with the same
-framework references as `scripts/test.ps1` and supplied an output-directory argument.
+`scripts/measure-preview.ps1 -Results build/preview-modern` runs the optional
+.NET 10 benchmark against Microsoft Print to PDF without submitting a job.
+`-Executable` runs a previously built .NET 10 benchmark. Reports include
+stage timings, UI tick gaps and whole-process resource observations.
+Use the same benchmark source, machine and driver and run it separately from
+the regression suites. See [PREVIEW_PERFORMANCE](PREVIEW_PERFORMANCE.md) for the
+baseline instrumentation and the historical seventh-package comparison.
 
 Optional independent raster comparisons in `tests/export/` require Python with
 Pillow and numpy, Node.js with sharp, and Poppler's `pdftoppm` on PATH. These tools

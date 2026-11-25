@@ -3,11 +3,9 @@
 Owner: Daniel Návojský / [@ndxnraw](https://github.com/ndxnraw).
 The canonical source is `main` in `ndxnraw/LabelDesigner`.
 
-Use 64-bit Windows 10/11, Git, Windows PowerShell 5.1 and .NET Framework
-4.8 or 4.8.1. The build uses the framework's bundled C# compiler, Windows Forms,
-System.Drawing and System.IO.Compression. No Visual Studio, NuGet restore,
-Node.js, Python, downloaded SDK or files outside the clone are required for
-the application and standard tests. Source Sans 3 is committed with its license.
+Use supported 64-bit Windows, Git, PowerShell and the .NET 10 SDK in `global.json`.
+Source Sans 3 is committed with its license. See [BUILD](BUILD.md) for the
+self-contained package and runtime pack requirements.
 
 Start with [HANDOFF](HANDOFF.md), then run `scripts\test.cmd`.
 Edit Windows UI/driver integration in `src/LabelDesigner/` and shared document,
@@ -17,14 +15,13 @@ through GDI+ and WPF geometry. Control localization belongs to `UiLocalization` 
 the app; text localization and embedded rendering fonts live in Core.
 Add regression coverage in
 `tests/regression/` or integration coverage in `tests/integration/` and register
-new suites in `scripts/test.ps1`. Optional export analysis lives in `tests/export/`.
+new suites in `scripts/test-suites.json`. Optional export analysis lives in `tests/export/`.
 Build scripts resolve paths relative to themselves, not a developer's home folder.
 
-Standard SDK projects and `LabelDesigner.sln` target Framework 4.8 and .NET 10 Windows.
-Use `scripts/build-sdk.ps1`, `scripts/test-sdk.ps1` and `scripts/publish-modern.ps1`;
-see [BUILD](BUILD.md). Preserve the legacy compiler path as a compatible offline
-fallback. Mixed files were split along existing class boundaries; public domain
-names and XML schema did not change. Do not introduce dependencies from Core to UI.
+Standard SDK projects and `LabelDesigner.sln` target .NET 10 Windows. Use
+`scripts/build-sdk.ps1`, `scripts/test-sdk.ps1` and `scripts/publish-modern.ps1`.
+Preserve project, template and printer profile XML compatibility and local
+operation of the installed application.
 
 The product version is always `Pre-release`. AssemblyVersion, AssemblyFileVersion
 and Windows manifest identity retain `3.1.0.0` as internal compatibility metadata.

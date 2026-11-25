@@ -6,16 +6,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>../../assets/app.ico</ApplicationIcon>
-    <AppConfig Condition="'$(TargetFramework)' == 'net48'">app.config</AppConfig>
     <Version>3.1.0</Version><AssemblyVersion>3.1.0.0</AssemblyVersion><FileVersion>3.1.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs"/>
     <ProjectReference Include="../LabelDesigner.Core/LabelDesigner.Core.csproj"/>
     <EmbeddedResource Include="../../assets/app.ico" LogicalName="AppLogo.ico"/>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <Reference Include="System.Net.Http"/><Reference Include="System.Runtime.Serialization"/>
-    <Reference Include="System.IO.Compression"/><Reference Include="System.IO.Compression.FileSystem"/>
   </ItemGroup>
 </Project>

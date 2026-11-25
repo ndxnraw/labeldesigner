@@ -15,16 +15,10 @@ jobs:
       - name: Test publication identity checks
         shell: pwsh
         run: ./tests/tools/TestPublishedUpdate.ps1
-      - name: Build and test
-        shell: cmd
-        run: scripts\test.cmd
-      - name: Build and validate package
-        shell: cmd
-        run: scripts\package.cmd
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - name: Build both SDK targets
+      - name: Build .NET 10
         shell: powershell
         run: .\scripts\build-sdk.ps1
       - name: Test modern Windows runtime
@@ -33,17 +27,9 @@ jobs:
       - name: Publish and validate self-contained modern package
         shell: powershell
         run: .\scripts\publish-modern.ps1
-      - name: Verify managed update packages and extracted applications
+      - name: Verify the managed update package and extracted application
         shell: powershell
         run: .\scripts\test-update-packages.ps1
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ND-LabelDesigner-Pre-release-Windows
-          path: |
-            build/packages/ND-LabelDesigner-Pre-release-Windows.zip
-            build/packages/SHA256SUMS.txt
-            build/packages/UPDATE-INDEX.xml
-          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: ND-LabelDesigner-Pre-release-Windows-NET10-x64
@@ -57,7 +43,6 @@ jobs:
         with:
           name: test-results
           path: |
-            build/test-results/
             build/sdk-test-results/
             build/update-package-results/
           if-no-files-found: ignore

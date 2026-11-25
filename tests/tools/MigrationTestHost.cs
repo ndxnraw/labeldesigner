@@ -7,9 +7,7 @@ using System.Windows.Forms;
 static class MigrationTestHost {
  [STAThread]static int Main(string[] args){
   try{
-#if NETCOREAPP
    Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-#endif
    var assembly=Assembly.GetExecutingAssembly();
    var suite=assembly.GetType(assembly.GetName().Name,true);
    suite.GetMethod("Main",BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic).Invoke(null,new object[]{args});

@@ -9,7 +9,7 @@ public sealed class UpdateFile {public string Path,Sha256;public long Size;}
   foreach(var f in Files){if(f==null)throw new InvalidDataException("Invalid update file.");UpdateFiles.SafeName(f.Path);if(!names.Add(f.Path)||f.Path=="package-manifest.xml"||!UpdateFiles.Hex(f.Sha256,64)||f.Size<=0||f.Size>128L*1024*1024)throw new InvalidDataException("Invalid update file.");total=checked(total+f.Size);}
   if(total>512L*1024*1024)throw new InvalidDataException("Expanded update is too large.");
   foreach(var name in names)foreach(var other in names)if(other.StartsWith(name+"/",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("File/directory collision.");
-  foreach(var name in Family=="framework"?new[]{"ND-LabelDesigner.exe","ND-LabelDesigner.exe.config","LabelDesigner.Core.dll","zxing.dll"}:new[]{"ND-LabelDesigner.exe","ND-LabelDesigner.dll","ND-LabelDesigner.runtimeconfig.json","LabelDesigner.Core.dll","zxing.dll","coreclr.dll","hostfxr.dll","System.Private.CoreLib.dll"})if(!names.Contains(name))throw new InvalidDataException("Incomplete update package.");
+  foreach(var name in new[]{"ND-LabelDesigner.exe","ND-LabelDesigner.dll","ND-LabelDesigner.runtimeconfig.json","LabelDesigner.Core.dll","zxing.dll","coreclr.dll","hostfxr.dll","System.Private.CoreLib.dll"})if(!names.Contains(name))throw new InvalidDataException("Incomplete update package.");
   if(PackageId!=ComputeId())throw new InvalidDataException("Package identity mismatch.");
  }
  public string ComputeId(){var ordered=new List<UpdateFile>(Files);ordered.Sort((a,b)=>StringComparer.Ordinal.Compare(a.Path,b.Path));var text=new StringBuilder("1\nPre-release\n"+Family+"\n"+SourceCommit+"\n");foreach(var f in ordered)text.Append(f.Path).Append('|').Append(f.Size.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append('|').Append(f.Sha256).Append('\n');return UpdateFiles.Digest(Encoding.UTF8.GetBytes(text.ToString()));}
@@ -20,18 +20,20 @@ public sealed class UpdateFile {public string Path,Sha256;public long Size;}
 public sealed class UpdateOffer {public string Family,SourceCommit,PackageId,AssetName,Sha256;public long Size;[XmlIgnore]public long AssetId;}
 [XmlRoot("LabelDesignerUpdates")]public sealed class UpdateIndex {
  public int Format=1;public string Product="Pre-release",SourceCommit;public List<UpdateOffer> Packages=new List<UpdateOffer>();
- public void Validate(){if(Format!=1||Product!="Pre-release"||!UpdateFiles.Hex(SourceCommit,40)||Packages==null||Packages.Count!=2)throw new InvalidDataException("Invalid update index.");var families=new HashSet<string>();foreach(var p in Packages)if(p==null||!UpdateFiles.FamilyValid(p.Family)||!families.Add(p.Family)||p.SourceCommit!=SourceCommit||p.AssetName!=UpdateFiles.AssetName(p.Family)||!UpdateFiles.Hex(p.PackageId,64)||!UpdateFiles.Hex(p.Sha256,64)||p.Size<=0||p.Size>256L*1024*1024)throw new InvalidDataException("Invalid update offer.");}
+ public void Validate(){
+  if(Format!=1||Product!="Pre-release"||!UpdateFiles.Hex(SourceCommit,40)||Packages==null||Packages.Count!=1)
+   throw new InvalidDataException("Invalid update index.");
+  var offer=Packages[0];
+  if(offer==null||!UpdateFiles.FamilyValid(offer.Family)||offer.SourceCommit!=SourceCommit||
+     offer.AssetName!=UpdateFiles.AssetName(offer.Family)||!UpdateFiles.Hex(offer.PackageId,64)||
+     !UpdateFiles.Hex(offer.Sha256,64)||offer.Size<=0||offer.Size>256L*1024*1024)
+   throw new InvalidDataException("Invalid update offer.");
+ }
 }
 public static class UpdateFiles {
- public static string CurrentFamily{get{
-#if NETCOREAPP
- return "net10-x64";
-#else
- return "framework";
-#endif
- }}
- public static bool FamilyValid(string s){return s=="framework"||s=="net10-x64";}
- public static string AssetName(string family){if(!FamilyValid(family))throw new ArgumentException("family");return family=="framework"?"ND-LabelDesigner-Pre-release-Windows.zip":"ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip";}
+ public const string CurrentFamily="net10-x64";
+ public static bool FamilyValid(string s){return s==CurrentFamily;}
+ public static string AssetName(string family){if(!FamilyValid(family))throw new ArgumentException("family");return "ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip";}
  public static bool Hex(string s,int n){if(s==null||s.Length!=n)return false;foreach(char c in s)if(!(c>='0'&&c<='9')&&!(c>='a'&&c<='f'))return false;return true;}
  public static string Digest(byte[] bytes){using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(bytes)).Replace("-","").ToLowerInvariant();}
  public static string Hash(string path){using(var s=File.OpenRead(path))using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(s)).Replace("-","").ToLowerInvariant();}

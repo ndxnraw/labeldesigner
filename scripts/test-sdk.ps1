@@ -1,5 +1,6 @@
-param([ValidateSet('net48','net10.0-windows')][string]$Framework='net10.0-windows',[string[]]$Suites)
+param([string[]]$Suites)
 . (Join-Path $PSScriptRoot 'sdk-common.ps1')
+$framework='net10.0-windows'
 $names=Get-Content (Join-Path $PSScriptRoot 'test-suites.json') -Raw|ConvertFrom-Json
 if($Suites){foreach($suite in $Suites){if($suite -notin $names){throw "Unknown test suite: $suite"}}}
 $resultRoot=Join-Path $repoRoot ('build/sdk-test-results/'+$Framework+'/'+(Get-Date -Format 'yyyyMMdd-HHmmss'))
@@ -9,7 +10,7 @@ try{
  foreach($name in $names){
   if($Suites -and $name -notin $Suites){continue}
   $buildLog=Join-Path $resultRoot ($name+'-build.log')
-  & $dotnet build tests/RegressionTests.csproj -c Release "-p:TargetFrameworks=$Framework" "-p:SuiteName=$name" --disable-build-servers --nologo *> $buildLog
+  & $dotnet build tests/RegressionTests.csproj -c Release "-p:SuiteName=$name" --disable-build-servers --nologo *> $buildLog
   if($LASTEXITCODE -ne 0){Get-Content $buildLog -Tail 30;throw "Test compilation failed: $name"}
   $testExe=Join-Path $repoRoot "build/sdk-bin/RegressionTests/$name/Release/$Framework/$name.exe"
   $caseRoot=Join-Path $resultRoot $name;New-Item $caseRoot -ItemType Directory -Force|Out-Null

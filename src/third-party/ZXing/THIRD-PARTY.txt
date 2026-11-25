@@ -13,7 +13,7 @@ Local compatibility changes for the .NET Framework C# 5 compiler:
 - QRCodeWriter.cs: nameof(code) replaced by the literal "code".
 - qrcode/encoder/Encoder.cs: null-conditional encoding.WebName access expanded.
 
-Build zxing.dll from the supplied source with scripts/build-zxing.ps1.
+The .NET 10 SDK builds zxing.dll from the supplied source via ZXing.csproj.
 ND LabelDesigner uses offline 1D, QR, Data Matrix, Aztec, PDF417 and GS1 encoding.
 Local functional change (2026-11-17): DataMatrixWriter.cs uses ECC200 ASCII
 encoding for GS1 compact-mode requests, with leading/separator FNC1 and digit

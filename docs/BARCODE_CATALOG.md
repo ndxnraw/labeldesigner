@@ -38,7 +38,7 @@ Katalóg má 21 možností (vrátane GS1 variantov):
   GS1-128 si zachováva limit 48 dátových znakov vrátane AI; 2D tento limit nemá.
 
 Generovanie, náhľad, dávkové premenné, uloženie projektov, tlač a exporty
-fungujú bez internetu na .NET Framework 4.8 aj .NET 10. Staršie projekty
+fungujú bez internetu na .NET 10. Staršie projekty
 zachovávajú typy a údaje; nové typy vyžadujú túto alebo novšiu aplikáciu.
 Poštové, zdravotnícke, kompozitné a platobné šablóny tento balík nezavádza.
 Výber rodín bol inšpirovaný [katalógom TEC-IT](https://barcode.tec-it.com/en/);
@@ -50,7 +50,7 @@ aplikácia nepoužíva jeho službu ani obrázky.
 typov, FNC1 metadáta, percentá a oddeľovače GS1, Unicode, geometriu a predtlačovú
 kontrolu PDF417, XML/schránku, SVG a vyhľadávanie/aplikovanie/zrušenie dialógu
 vo všetkých štyroch jazykoch. Plessey má známu testovaciu sekvenciu s CRC;
-nemá dekódovací test. Celý štandardný runner obsahuje 32 sád pre oba runtime.
+nemá dekódovací test. Štandardná testovacia sada pre .NET 10 obsahuje 32 skupín testov.
 Skutočnú kvalitu na konkrétnom médiu a čítačke treba overiť vytlačenou etiketou.
 
 Pribalený ZXing `DataMatrixWriter` má lokálnu úpravu vetvy GS1: používa ECC200

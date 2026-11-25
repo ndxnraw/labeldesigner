@@ -18,12 +18,35 @@ function Get-ReleaseAsset($name) {
     return $assets[0]
 }
 
+function Open-VerifiedAsset($asset, [long]$limit) {
+    if ($asset.size -gt $limit) { throw "Published asset is too large: $($asset.name)" }
+    $binaryHeaders = $headers.Clone()
+    $binaryHeaders.Accept = 'application/octet-stream'
+    $stream = (Invoke-WebRequest -Uri "$api/releases/assets/$($asset.id)" -Headers $binaryHeaders).RawContentStream
+    try {
+        if ($stream.Length -ne $asset.size) { throw "Published asset size mismatch: $($asset.name)" }
+        $stream.Position = 0
+        $sha = [Security.Cryptography.SHA256]::Create()
+        try { $digest = [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
+        finally { $sha.Dispose() }
+        if ("sha256:$digest" -cne $asset.digest) { throw "Published asset checksum mismatch: $($asset.name)" }
+        $stream.Position = 0
+        return $stream
+    } catch {
+        $stream.Dispose()
+        throw
+    }
+}
+
 if ($PSBoundParameters.ContainsKey('PublishedTarget') -and $PublishedTarget -cnotmatch '^[0-9a-f]{40}$') {
     throw 'The publication event must specify a full 40-character commit SHA.'
 }
 $release = Invoke-RestMethod -Uri "$api/releases/tags/Pre-release" -Headers $headers
 if ($release.id -le 0 -or $release.tag_name -cne 'Pre-release' -or $release.draft -or !$release.prerelease) {
     throw 'Expected the public Pre-release on GitHub.'
+}
+if (@($release.assets).Count -ne 3) {
+    throw 'Pre-release must contain one ZIP, one checksum and one update index.'
 }
 $commit = $release.target_commitish
 if ($commit -cnotmatch '^[0-9a-f]{40}$') {
@@ -42,20 +65,8 @@ if ($ref.type -cne 'commit' -or $ref.sha -cne $commit) {
     throw 'Pre-release target_commitish does not match its Git tag.'
 }
 
-$asset = Get-ReleaseAsset 'UPDATE-INDEX.xml'
-if ($asset.size -gt 512KB) { throw 'Published update index is too large.' }
-$binaryHeaders = $headers.Clone()
-$binaryHeaders.Accept = 'application/octet-stream'
-$response = Invoke-WebRequest -Uri "$api/releases/assets/$($asset.id)" -Headers $binaryHeaders
-$stream = $response.RawContentStream
+$stream = Open-VerifiedAsset (Get-ReleaseAsset 'UPDATE-INDEX.xml') 512KB
 try {
-    if ($stream.Length -ne $asset.size) { throw 'Published update index size mismatch.' }
-    $stream.Position = 0
-    $sha = [Security.Cryptography.SHA256]::Create()
-    try { $digest = [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
-    finally { $sha.Dispose() }
-    if ("sha256:$digest" -cne $asset.digest) { throw 'Published update index checksum mismatch.' }
-    $stream.Position = 0
     $settings = [Xml.XmlReaderSettings]::new()
     $settings.DtdProcessing = [Xml.DtdProcessing]::Prohibit
     $settings.XmlResolver = $null
@@ -72,20 +83,24 @@ $index = $document.LabelDesignerUpdates
 if ($index.Format -cne '1' -or $index.Product -cne 'Pre-release' -or $index.SourceCommit -cne $commit) {
     throw 'Published update index does not match the Pre-release commit.'
 }
-$families = [ordered]@{
-    'framework' = 'ND-LabelDesigner-Pre-release-Windows.zip'
-    'net10-x64' = 'ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip'
+$offers = @($index.Packages.UpdateOffer)
+if ($offers.Count -ne 1 -or $offers[0].Family -cne 'net10-x64') {
+    throw 'Published update index must contain one .NET 10 x64 offer.'
 }
-if (@($index.Packages.UpdateOffer).Count -ne $families.Count) {
-    throw 'Published update index must identify both package families.'
+$package = Get-ReleaseAsset 'ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip'
+$offer = $offers[0]
+if ($offer.SourceCommit -cne $commit -or $offer.AssetName -cne $package.name -or
+    $offer.PackageId -cnotmatch '^[0-9a-f]{64}$' -or $offer.Size -cne [string]$package.size -or
+    "sha256:$($offer.Sha256)" -cne $package.digest) {
+    throw 'Published update offer does not match the .NET 10 x64 ZIP.'
 }
-foreach ($family in $families.Keys) {
-    $offers = @($index.Packages.UpdateOffer | Where-Object Family -CEQ $family)
-    $package = Get-ReleaseAsset $families[$family]
-    if ($offers.Count -ne 1 -or $offers[0].SourceCommit -cne $commit -or
-        $offers[0].AssetName -cne $package.name -or $offers[0].PackageId -cnotmatch '^[0-9a-f]{64}$' -or
-        $offers[0].Size -cne [string]$package.size -or "sha256:$($offers[0].Sha256)" -cne $package.digest) {
-        throw "Published update offer does not match the release: $family"
-    }
+$checksum = Open-VerifiedAsset (Get-ReleaseAsset 'SHA256SUMS-NET10.txt') 16KB
+try {
+    $reader = [IO.StreamReader]::new($checksum)
+    try { $line = $reader.ReadToEnd().Trim() }
+    finally { $reader.Dispose() }
+} finally { $checksum.Dispose() }
+if ($line -cne "$($offer.Sha256)  $($package.name)") {
+    throw 'Published offline checksum does not match the .NET 10 x64 ZIP.'
 }
-Write-Output "Verified Pre-release $commit with both update offers."
+Write-Output "Verified Pre-release $commit with one .NET 10 x64 offer."

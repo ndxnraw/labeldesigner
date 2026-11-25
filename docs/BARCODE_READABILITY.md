@@ -24,5 +24,5 @@ s hranou nad 12 000 bodov môže dostať výsledok, že skúšobné načítanie 
 Predtlačová kontrola zobrazí najviac 100 jednotlivých upozornení na čitateľnosť
 a počet ďalších. Úplné výsledky zostanú v prehľade čitateľnosti.
 
-Kontrola funguje bez internetu na .NET Framework 4.8 aj .NET 10. Vplyv média,
+Kontrola funguje bez internetu na .NET 10. Vplyv média,
 tmavosti, skenera a mechaniky overte skúšobným výtlačkom na vybranej tlačiarni.

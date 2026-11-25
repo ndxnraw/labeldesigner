@@ -3,46 +3,31 @@
 Project: **ND LabelDesigner — Pre-release**. Owner: **Daniel Návojský / @ndxnraw**.
 Canonical repository: https://github.com/ndxnraw/LabelDesigner, branch `main`.
 
-## Install prerequisites
-
-Install Git for Windows and .NET Framework 4.8/4.8.1 on 64-bit Windows 10/11.
-Windows PowerShell 5.1 and the framework C# compiler are used by the scripts.
-For the complete UI/printing tests, enable Microsoft Print to PDF and Print Spooler
-and use a desktop session. No original computer, local cache, ZIP snapshot, secret,
-Node.js, Python or private dependency is needed for the standard workflow.
-
 ## Clone and validate
 
-Run these commands in PowerShell from a new empty parent directory:
+Install Git and the .NET 10 SDK specified in `global.json` on supported
+Windows x64. For the complete UI and printing tests, use a desktop session
+with Microsoft Print to PDF and Print Spooler enabled.
 
 ```powershell
 git clone --branch main https://github.com/ndxnraw/LabelDesigner.git
 cd LabelDesigner
-git switch main
 .\scripts\build.cmd
 .\scripts\test.cmd
 .\scripts\package.cmd
+.\scripts\test-update-packages.ps1
 git status --short
 ```
 
-Stop on any nonzero exit code. Expected outputs: application/config in `build/app/`,
-32 successful suites and reports in `build/test-results/`, validated
-`build/packages/ND-LabelDesigner-Pre-release-Windows.zip`. `git status --short`
-must be empty. Work only from this clone when validating the handoff.
+Expect 32 successful suites in `build/sdk-test-results/net10.0-windows/`
+and one self-contained Windows x64 ZIP, `SHA256SUMS-NET10.txt` and
+`UPDATE-INDEX.xml` in `build/packages/`. The extracted application must
+pass its self-test and Git status must be clean.
 
-## Continue development
-
-For the parallel .NET 10 Windows target, install the SDK specified in `global.json`,
-run `scripts/build-sdk.ps1`, `scripts/test-sdk.ps1` and `scripts/publish-modern.ps1`.
-The compatible commands above do not require the SDK. Keep the two ZIPs in separate
-folders; the modern x64 ZIP contains its runtime. See [BUILD](BUILD.md) for exact
-output paths, restore prerequisites and checksum files.
-
-After both packages, run `scripts/test-update-packages.ps1` to verify their managed
-update protocol and extracted self-tests. Publish both ZIPs, both checksum files and
-`UPDATE-INDEX.xml` together. See [UPDATES](UPDATES.md) for the explicit-confirmation
-workflow and offline import. The update manager itself first needs manual adoption
-from the new ZIP; older packages have no update manifest.
+Publish these three assets together and verify the full SHA of the release
+and tag using `scripts/test-published-update.ps1`. See [BUILD](BUILD.md) for
+restore prerequisites and [UPDATES](UPDATES.md) for the initial manual transition
+and offline import.
 
 Production sources are `src/LabelDesigner/` and `src/LabelDesigner.Core/`; tests are under `tests/`.
 Use a `codex/<description>` branch for ordinary new work unless instructed otherwise.

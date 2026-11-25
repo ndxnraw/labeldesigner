@@ -46,7 +46,6 @@ public partial class MainForm:Form {
   grid.CellClick+=delegate(object sender,DataGridViewCellEventArgs args){if(!loading&&args.RowIndex>=0)preview.SelectElement(args.RowIndex,false);};
   preview.DragStarted+=delegate{timer.Stop();if(history!=null){history.Record(Read());RefreshHistory();}};preview.ElementEdited+=EditElement;preview.EditFinished+=delegate{timer.Stop();UpdatePreview();if(history!=null&&ProjectXml.Encode(Read())==savedDocument){dirty=false;UpdateWindowTitle();}};preview.TextEditRequested+=BeginInlineText;preview.SymbolEditRequested+=EditSymbol;
   timer.Interval=300;timer.Tick+=delegate{timer.Stop();if(!preview.IsDragging)UpdatePreview();};AddPreferences(root);LoadStartup();BuildStudio();InitializeWorkspace();
-#if NETCOREAPP
 // The handwritten layout uses 96-DPI logical sizes. Complete its initial scale
 // before modern WinForms applies a later monitor-DPI transition.
 AutoScaleDimensions=new SizeF(96,96);PerformAutoScale();
@@ -54,7 +53,6 @@ AutoScaleDimensions=new SizeF(96,96);PerformAutoScale();
 EventHandler restoreMinimum=delegate{if(!IsDisposed&&!Disposing)MinimumSize=LogicalToDeviceUnits(new Size(1024,640));};
 Shown+=restoreMinimum;
 DpiChanged+=delegate{if(IsHandleCreated&&!IsDisposed&&!Disposing)BeginInvoke((Action)delegate{restoreMinimum(this,EventArgs.Empty);});};
-#endif
 FormClosing+=delegate(object sender,FormClosingEventArgs args){if(!CanDiscard())args.Cancel=true;};
  }
  void CenterBarcode(){if(elementMetadata.Exists(m=>m.Index==-1&&m.Locked))return;nums["BarX"].Value=(decimal)Display((N("Width")-N("BarWidth"))/2);preview.SelectElement(-1);timer.Stop();UpdatePreview();}
@@ -97,9 +95,7 @@ FormClosing+=delegate(object sender,FormClosingEventArgs args){if(!CanDiscard())
 }
 public static class Program {
  [STAThread]public static void Main(string[] args){
-#if NETCOREAPP
 Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-#endif
 Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);if(args.Length==2&&args[0]=="--self-test"){try{SelfTest(args[1]);Environment.ExitCode=0;}catch(Exception ex){Directory.CreateDirectory(args[1]);File.WriteAllText(Path.Combine(args[1],"failure.txt"),ex.ToString());Environment.ExitCode=1;}return;}if(args.Length==0&&(Control.ModifierKeys&Keys.Shift)==0&&UpdateActivation.TryStartupRedirect())return;Application.Run(new MainForm());}
  static void Assert(bool val,string what){if(!val)throw new Exception("Test zlyhal: "+what);}
  static void Reject(Action a,string what){bool rejected=false;try{a();}catch{rejected=true;}Assert(rejected,what);}

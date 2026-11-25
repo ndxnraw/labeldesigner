@@ -1,7 +1,6 @@
 # Prístupnosť a spoľahlivosť rozhrania — Pre-release
 
-Kompatibilná verzia pre .NET Framework 4.8 aj moderná verzia pre .NET 10 používajú
-rovnaké úpravy rozhrania. Nevyžadujú internet, konto ani nové knižnice.
+Úpravy rozhrania v zostave .NET 10 fungujú offline a bez účtu.
 
 ## Klávesnica a orientácia
 

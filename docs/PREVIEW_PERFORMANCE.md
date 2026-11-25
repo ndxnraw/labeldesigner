@@ -102,13 +102,12 @@ oneskorené výsledky a zavretie počas práce. Skutočná tlač sa nespúšťal
 Aktuálny variant sa zmeria z koreňa checkoutu:
 
 ```powershell
-.\scripts\measure-preview.ps1 -Runtime compatible -Results build/perf/compatible
-.\scripts\measure-preview.ps1 -Runtime modern -Results build/perf/modern
+.\scripts\measure-preview.ps1 -Results build/perf/modern
 ```
 
 Na zopakovanie pôvodného variantu použite samostatný checkout commitu `7e0b8b2`.
 Zo siedmeho balíka doň skopírujte `PreviewPerformance.cs`, benchmark a jeho projekt,
-zachovaný `MigrationTestHost.cs` a `measure-preview.ps1`. Aplikujte zdrojový vstup
+zachovaný `MigrationTestHost.cs` a `measure-preview.ps1` z toho istého balíka. Aplikujte zdrojový vstup
 `tests/fixtures/preview/phase6-timing.patch`. Zostavte a odmerajte obidva varianty
 rovnakými príkazmi, postupne bez ďalších testov. Tým sa doplnia len časovače;
 optimalizované helpery sa do pôvodného checkoutu nekopírujú.

@@ -1,13 +1,69 @@
-$ErrorActionPreference='Stop';$repoRoot=Split-Path $PSScriptRoot -Parent;$output=Join-Path $repoRoot 'build/packages';$target=Join-Path $output 'UPDATE-INDEX.xml'
+$ErrorActionPreference = 'Stop'
+$repoRoot = Split-Path $PSScriptRoot -Parent
+$output = Join-Path $repoRoot 'build/packages'
+$assetName = 'ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip'
+$path = Join-Path $output $assetName
+$target = Join-Path $output 'UPDATE-INDEX.xml'
+
 Add-Type -AssemblyName System.IO.Compression,System.IO.Compression.FileSystem
-$packages=@();foreach($name in @('ND-LabelDesigner-Pre-release-Windows.zip','ND-LabelDesigner-Pre-release-Windows-NET10-x64.zip')){
- $path=Join-Path $output $name;if(!(Test-Path -LiteralPath $path)){if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target};return};$zip=[IO.Compression.ZipFile]::OpenRead($path)
- try{$entry=$zip.GetEntry('package-manifest.xml');if(!$entry){if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target};return};$input=$entry.Open();$settings=New-Object Xml.XmlReaderSettings;$settings.DtdProcessing=[Xml.DtdProcessing]::Prohibit;$settings.XmlResolver=$null;$settings.MaxCharactersInDocument=524288;$reader=[Xml.XmlReader]::Create($input,$settings);try{$doc=New-Object Xml.XmlDocument;$doc.XmlResolver=$null;$doc.Load($reader)}finally{$reader.Dispose();$input.Dispose()}}finally{$zip.Dispose()}
- $m=$doc.LabelDesignerPackage;if(!$m -or $m.Product -cne 'Pre-release' -or $m.SourceCommit -cnotmatch '^[a-f0-9]{40}$' -or $m.PackageId -cnotmatch '^[a-f0-9]{64}$'){throw 'Invalid packaged update identity'}
- $packages+=@{Family=[string]$m.Family;SourceCommit=[string]$m.SourceCommit;PackageId=[string]$m.PackageId;AssetName=$name;Size=(Get-Item -LiteralPath $path).Length;Sha256=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()}
+$archive = [IO.Compression.ZipFile]::OpenRead($path)
+try {
+    $entry = $archive.GetEntry('package-manifest.xml')
+    if (!$entry -or $entry.Length -gt 512KB) { throw 'Missing or invalid package manifest.' }
+    $settings = [Xml.XmlReaderSettings]::new()
+    $settings.DtdProcessing = [Xml.DtdProcessing]::Prohibit
+    $settings.XmlResolver = $null
+    $settings.MaxCharactersInDocument = 512KB
+    $stream = $entry.Open()
+    try {
+        $reader = [Xml.XmlReader]::Create($stream, $settings)
+        try {
+            $document = [Xml.XmlDocument]::new()
+            $document.XmlResolver = $null
+            $document.Load($reader)
+        } finally { $reader.Dispose() }
+    } finally { $stream.Dispose() }
+} finally { $archive.Dispose() }
+
+$manifest = $document.LabelDesignerPackage
+$commit = (& git -C $repoRoot rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $commit -cnotmatch '^[a-f0-9]{40}$' -or !$manifest -or
+    $manifest.Format -cne '1' -or $manifest.Product -cne 'Pre-release' -or $manifest.Family -cne 'net10-x64' -or
+    $manifest.SourceCommit -cne $commit -or $manifest.PackageId -cnotmatch '^[a-f0-9]{64}$') {
+    throw 'ZIP manifest does not identify the current .NET 10 build.'
 }
-if($packages[0].SourceCommit -cne $packages[1].SourceCommit){if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target};Write-Host 'Update index deferred: package commits differ.';return}
-if($packages[0].Family -cne 'framework' -or $packages[1].Family -cne 'net10-x64'){throw 'Package platform mismatch'}
-$settings=New-Object Xml.XmlWriterSettings;$settings.Indent=$true;$settings.Encoding=New-Object Text.UTF8Encoding($false);$temp=$target+'.tmp';$writer=[Xml.XmlWriter]::Create($temp,$settings)
-try{$writer.WriteStartDocument();$writer.WriteStartElement('LabelDesignerUpdates');$writer.WriteElementString('Format','1');$writer.WriteElementString('Product','Pre-release');$writer.WriteElementString('SourceCommit',$packages[0].SourceCommit);$writer.WriteStartElement('Packages');foreach($p in $packages){$writer.WriteStartElement('UpdateOffer');foreach($key in @('Family','SourceCommit','PackageId','AssetName','Sha256','Size')){$writer.WriteElementString($key,[string]$p[$key])};$writer.WriteEndElement()};$writer.WriteEndElement();$writer.WriteEndElement();$writer.WriteEndDocument()}finally{$writer.Dispose()}
-Move-Item -LiteralPath $temp -Destination $target -Force;Write-Host "Validated update index: $target"
+$size = (Get-Item -LiteralPath $path).Length
+if ($size -le 0 -or $size -gt 256MB) { throw 'ZIP exceeds the updater size limit.' }
+$offer = [ordered]@{
+    Family = 'net10-x64'
+    SourceCommit = $commit
+    PackageId = [string]$manifest.PackageId
+    AssetName = $assetName
+    Sha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+    Size = $size.ToString([Globalization.CultureInfo]::InvariantCulture)
+}
+$writerSettings = [Xml.XmlWriterSettings]::new()
+$writerSettings.Indent = $true
+$writerSettings.Encoding = [Text.UTF8Encoding]::new($false)
+$temp = $target + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
+try {
+    $writer = [Xml.XmlWriter]::Create($temp, $writerSettings)
+    try {
+        $writer.WriteStartDocument()
+        $writer.WriteStartElement('LabelDesignerUpdates')
+        $writer.WriteElementString('Format', '1')
+        $writer.WriteElementString('Product', 'Pre-release')
+        $writer.WriteElementString('SourceCommit', $commit)
+        $writer.WriteStartElement('Packages')
+        $writer.WriteStartElement('UpdateOffer')
+        foreach ($field in $offer.GetEnumerator()) { $writer.WriteElementString($field.Key, $field.Value) }
+        $writer.WriteEndElement()
+        $writer.WriteEndElement()
+        $writer.WriteEndElement()
+        $writer.WriteEndDocument()
+    } finally { $writer.Dispose() }
+    Move-Item -LiteralPath $temp -Destination $target -Force
+} finally {
+    if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp }
+}
+Write-Host "Validated update index: $target"

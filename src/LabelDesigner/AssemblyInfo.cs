@@ -7,8 +7,5 @@ using System.Reflection;
 [assembly: AssemblyProduct("ND LabelDesigner — Pre-release")]
 
 
-#if !SDK_BUILD
-[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.8", FrameworkDisplayName=".NET Framework 4.8")]
-#endif
 
 [assembly: AssemblyInformationalVersion("Pre-release")]

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>LabelDesigner.Core</AssemblyName>
-    <UseWindowsForms Condition="'$(TargetFramework)' == 'net10.0-windows'">true</UseWindowsForms>
-    <UseWPF Condition="'$(TargetFramework)' == 'net10.0-windows'">true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs"/>
@@ -11,9 +11,5 @@
     <EmbeddedResource Include="../../assets/fonts/SourceSans3-Regular.ttf" LogicalName="Fonts.SourceSans3-Regular.ttf"/>
     <EmbeddedResource Include="../../assets/fonts/SourceSans3-Bold.ttf" LogicalName="Fonts.SourceSans3-Bold.ttf"/>
     <EmbeddedResource Include="../../assets/fonts/OFL.txt" LogicalName="Fonts.OFL.txt"/>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <Reference Include="System.Drawing"/><Reference Include="System.IO.Compression"/><Reference Include="System.IO.Compression.FileSystem"/>
-    <Reference Include="WindowsBase"/><Reference Include="PresentationCore"/>
   </ItemGroup>
 </Project>

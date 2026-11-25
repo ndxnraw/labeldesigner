@@ -119,7 +119,7 @@ monitormi s odlišným DPI ani fyzické tlačenie tým nie sú nahradené.
 ## Platformy a overenie
 
 Funkcie sú lokálne a nevyžadujú internet ani nové knižnice. Rovnaké projekty
-fungujú na .NET Framework 4.8/4.8.1 aj .NET 10 Windows. Automatické rozmery sa
+fungujú na .NET 10 pre Windows. Automatické rozmery sa
 počítajú aj po dosadení dávkových premenných, takže tlač a export zdieľajú geometriu.
 
 `EditorRefinementTests` overuje predvolené číslice a staré XML, prirodzenú šírku,

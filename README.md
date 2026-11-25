@@ -13,13 +13,14 @@ podrobnosti sú v [návode na aktualizácie](docs/UPDATES.md).
 Klávesnicové ovládanie, čitateľnosť dialógov a rozsah overenia opisuje
 [prístupnosť rozhrania](docs/ACCESSIBILITY.md).
 
-Rozbaľte ZIP a spustite `ND-LabelDesigner.exe`. Potrebný je Windows s .NET Framework 4.8 alebo 4.8.1.
+Rozbaľte ZIP pre Windows x64 do samostatného priečinka a spustite
+`ND-LabelDesigner.exe`. Balík obsahuje .NET 10 a aplikácia pracuje offline.
 
 Zdrojový kód je v C# / Windows Forms. Zostavenie: `scripts\build.cmd`, testy: `scripts\test.cmd`. Podrobnosti sú v [dokumentácii](docs/BUILD.md).
 
-Zdroj podporuje aj paralelné zostavenie pre .NET 10 LTS so spoločným jadrom.
-Moderný balík `Windows-NET10-x64` obsahuje potrebný runtime; kompatibilný balík
-naďalej používa .NET Framework 4.8. Oba používajú rovnaké projekty etikiet.
+Pri prechode zo staršieho Pre-release stiahnite prvý balík s jediným
+variantom ručne. Existujúce projekty, šablóny a profily tlače sa naďalej
+používajú v pôvodných formátoch a umiestneniach.
 
 Čitateľnejší popis EAN, samostatný GTIN-14 / GS1-128 a nastavenie tmavosti Zebra
 opisuje [návod EAN a Zebra](docs/BARCODES_ZEBRA.md).

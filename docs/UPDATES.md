@@ -5,6 +5,17 @@ Nástroje → Kontrola a údržba → Aktualizácie ponúka kontrolu a prípravu
 `ndxnraw/labeldesigner` nevyžaduje účet ani token. Bez internetu zostáva editor,
 tlač, export aj spustenie už pripravenej verzie použiteľné.
 
+## Prvý prechod na výhradne .NET 10
+
+Stiahnite si Windows x64 ZIP z Pre-release ručne, rozbaľte ho do nového
+priečinka a spustite `ND-LabelDesigner.exe`. Starší aktualizátor vyžaduje
+dve položky v indexe, preto je ručný krok potrebný aj pri prechode z jeho
+verzie .NET 10. Nasledujúce aktualizácie už používa nový aktualizátor.
+
+Projekty zostávajú v pôvodných priečinkoch. Aplikácia naďalej načítava
+nastavenia z `%LOCALAPPDATA%\NDLabelMaker\startup.xml` a šablóny a profily
+tlače z existujúceho `startup.xml.workspace`.
+
 ## Použitie
 
 1. Skontrolovať aktualizácie načíta údaje jediného vydania Pre-release.
@@ -16,8 +27,8 @@ tlač, export aj spustenie už pripravenej verzie použiteľné.
 4. Pred aktiváciou sa zálohujú nastavenia spustenia/rozloženia a pracovný priečinok
    s profilmi, kalibráciami a šablónami. Aktívne obnovovacie zámky sa nekopírujú.
 5. Ďalšie spustenie z už autorizovaného priečinka otvorí vybranú overenú verziu.
-   Toto presmerovanie používa len lokálnu históriu. Obe runtime rodiny majú
-   samostatné balíky a aktivačnú históriu; používateľské nastavenia zostávajú spoločné.
+   Toto presmerovanie používa len lokálnu históriu .NET 10 v priečinku
+   `Updates/net10-x64`.
 6. Návrat na predchádzajúcu verziu vyžaduje potvrdenie a overenie pôvodných súborov.
    Súčasné nastavenia sa automaticky neprepisujú starou zálohou.
 
@@ -33,14 +44,9 @@ odstrániť ručne; správca neodstraňuje pôvodné inštalácie ani projekty.
 ## Bez internetu
 
 Použiť ručne stiahnutý ZIP vyžaduje príslušný SHA256SUMS súbor a potvrdenie
-dôveryhodného pôvodu. Kompatibilný ZIP používa SHA256SUMS.txt, moderný
-SHA256SUMS-NET10.txt. Súčet potvrdzuje integritu; nejde o nezávislý digitálny
+dôveryhodného pôvodu. Balík používa `SHA256SUMS-NET10.txt`.
+Súčet potvrdzuje integritu; nejde o nezávislý digitálny
 podpis vydavateľa. Balíky získavajte z vlastného dôveryhodného zdroja.
-
-Prvé nasadenie správcu aktualizácií vyžaduje ručné rozbalenie ôsmeho balíka.
-Staršie ZIPy neobsahujú potrebný manifest. Online aktualizácie začnú fungovať po
-zverejnení oboch nových ZIPov a UPDATE-INDEX.xml. Staršie vydanie bez indexu
-sa rozpozná a ponúkne sa ručné stiahnutie.
 
 ## Protokol a integrita
 
@@ -48,8 +54,8 @@ sa rozpozná a ponúkne sa ručné stiahnutie.
 - Každý ZIP obsahuje package-manifest.xml s commitom, runtime rodinou a presným
   zoznamom veľkostí/SHA256 súborov. PackageId je SHA256 kanonického obsahu tohto
   zoznamu, produktu, rodiny a commitu. Manifest sám nie je súčasťou vlastného hashu.
-- UPDATE-INDEX.xml obsahuje oba PackageId, názvy ZIPov, veľkosti a SHA256.
-  Generuje sa až pri zhodných commitoch oboch zabalených variantov.
+- `UPDATE-INDEX.xml` obsahuje jedinú ponuku pre `net10-x64` s PackageId,
+  názvom ZIPu, veľkosťou a SHA-256. Commit pochádza z manifestu balíka.
 - Online kontrola zafixuje ID aktív a SHA256 z GitHub API. Overí index, zhodu
   commitu/rodiny a celý ZIP; nahradenie premenlivého vydania počas sťahovania
   nesmie podsunúť iný balík. Autoritatívny je explicitne vybraný verejný repozitár.
@@ -75,19 +81,18 @@ UpdateTests simuluje sieť bez živých zmien vydania a nespúšťa testovacie E
 Overuje offline stav, presmerovania, časový limit, zrušenie/truncation, súčty,
 škodlivé cesty, integritu, aktiváciu, návrat, obnovu histórie, pôvodné dáta
 a skutočné zrušenie zavretia editora pri neuloženom dokumente.
-`scripts/test-update-packages.ps1` navyše pripraví skutočné výsledné ZIPy cez
-produkčný overovač, porovná index a spustí rozbalené programy v režime self-test.
-Moderný self-test má vypnuté vyhľadávanie nainštalovaného runtime.
+`scripts/test-update-packages.ps1` pripraví výsledný ZIP cez produkčný
+overovač .NET 10, porovná index a spustí rozbalený program v režime
+self-test s vypnutým vyhľadávaním nainštalovaného runtime.
 
-Pri publikovaní sa nahráva **päť aktív**: oba ZIPy, oba SHA256SUMS súbory
-a UPDATE-INDEX.xml. Všetky musia pochádzať z otestovaného zostavenia. Po lokálnom
-commite obnovte metadáta balenia bez zmeny otestovaných binárnych súborov, aby
-SourceCommit zodpovedal publikovanému commitu. Index a ZIPy publikujte spoločne.
+Pri publikovaní nahrajte **tri aktíva** z otestovaného commitu. Vydanie
+obsahuje ZIP pre .NET 10 Windows x64, `SHA256SUMS-NET10.txt` a
+`UPDATE-INDEX.xml`. `SourceCommit` musí zodpovedať publikovanému commitu.
 
 V metadátach GitHub vydania nastavte `target_commitish` na plný 40-znakový
 SHA zo `SourceCommit` v indexe. Staršie aktualizátory odmietnu názov vetvy
 `main` aj vtedy, keď značka vydania a ZIPy ukazujú na správny commit.
 GitHub Actions po zverejnení alebo úprave verejného Pre-release automaticky
-porovná metadáta vydania, značku, index a údaje oboch ZIPov. Pri nezhode kontrola
+porovná metadáta vydania, značku, index a údaje ZIPu. Pri nezhode kontrola
 zlyhá v karte **Actions → Pre-release publication check**. Kontrola je dostupná
 aj ručne cez `pwsh -File scripts/test-published-update.ps1`.

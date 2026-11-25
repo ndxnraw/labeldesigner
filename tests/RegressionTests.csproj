@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType><UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>$(SuiteName)</AssemblyName><StartupObject>MigrationTestHost</StartupObject>
-    <AppConfig Condition="'$(TargetFramework)' == 'net48'">../src/LabelDesigner/app.config</AppConfig>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="regression/$(SuiteName).cs" Condition="Exists('regression/$(SuiteName).cs')"/>
@@ -11,5 +10,4 @@
     <Compile Include="tools/TestPaths.cs"/>
     <ProjectReference Include="../src/LabelDesigner/LabelDesigner.csproj"/>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'"><Reference Include="System.IO.Compression"/><Reference Include="System.IO.Compression.FileSystem"/><Reference Include="System.Net.Http"/><Reference Include="System.Runtime.Serialization"/></ItemGroup>
 </Project>
