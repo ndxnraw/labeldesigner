@@ -64,6 +64,15 @@ Stĺpec s jedinečnými hodnotami. Rovnaké neprázdne hodnoty vo vstupnej tabu�
 vytvoria upozornenia aj pre prvý výskyt. Porovnanie zachová úvodné nuly,
 medzery a veľkosť písmen. Táto kontrola funguje lokálne.
 
+KROKY DÁVKY
+Na karte Zdroj importujte CSV alebo XLSX, prípadne zadajte počet generovaných
+záznamov. Nastavenia CSV sú dostupné aj pred importom. Pri XLSX vyberte hárok.
+V kroku Mapovanie priraďte stĺpce a podľa potreby otvorte náhľad prvých záznamov.
+Pripraviť dávku otvorí Kontrolu so záznamami, náhľadom etikety, súhrnom,
+problémami dát a akciami porovnania, exportu a tlače.
+Generované záznamy alebo platná predvoľba s hlavičkou môžu prejsť zo Zdroja
+priamo do Kontroly. Pri chýbajúcich hlavičkách skontrolujte mapovanie.
+
 PREDVOĽBY PRE OPAKOVANÉ DÁVKY
 Naimportujte tabuľku, priraďte stĺpce a otvorte Predvoľby dávky…. Zadajte názov
 a zvoľte Uložiť aktuálne mapovanie. Predvoľba obsahuje oddeľovač, kódovanie,
@@ -105,7 +114,7 @@ Potvrdenie cez Použiť výber na tlač nahradí výber v dávkovom okne.
 Odtiaľ pokračujte cez Tlačiť vybrané na náhľad a predtlačovú kontrolu.
 
 ULOŽENÁ REFERENČNÁ DÁVKA
-Použite predvoľbu, pripravte aktuálnu dávku a otvorte Referenčná dávka….
+Použite predvoľbu, pripravte aktuálnu dávku a na karte Zdroj otvorte Referenčná dávka….
 Zvoľte Uložiť aktuálnu dávku ako referenciu…, vyberte identifikátor, ak
 ho predvoľba nemá, a potvrďte. Do referencie sa uložia všetky riadky
 pripravenej tabuľky s identifikátormi, pôvodnými číslami riadkov,
@@ -120,12 +129,12 @@ po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
 RÝCHLE VYPLNENIE A TLAČ ŠABLÓNY
-Otvorte Projekt → Šablóny a nedávne projekty. Vyberte šablónu
-a cez Upraviteľné polia šablóny… označte texty alebo kódy, ktoré sa majú
+Otvorte Projekt → Šablóny a nedávne projekty. Na karte Šablóny vyberte šablónu
+a cez Správa šablóny → Upraviteľné polia šablóny… označte texty alebo kódy, ktoré sa majú
 vypĺňať pri tlači. Z aktuálneho návrhu môžete polia vybrať aj v ponuke
 Projekt a potom návrh uložiť ako šablónu.
 
-Pre vybranú šablónu použite Rýchle vyplnenie a tlač…. Zadajte hodnoty
+Pre vybranú šablónu použite Vyplniť a tlačiť…, Enter alebo dvojklik. Zadajte hodnoty
 a počet etikiet. Chyby vybraných údajov sa zobrazia pri poliach.
 Počet zadajte ako celé číslo od 1 do 10000. Pri GS1-128 použite
 samostatný riadok pre každý identifikátor v tvare (AI)hodnota.

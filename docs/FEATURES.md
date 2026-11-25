@@ -89,6 +89,10 @@ Názov produktu je naďalej Pre-release.
   etikety. Súhrn zvýrazní výsledný počet etikiet a strán vrátane opakovaní.
   Kontrola ponúkne prechod na opraviteľný prvok alebo riadok dávky.
   Bezchybný export otvorí priamo uloženie súboru.
+- **Dávky a šablóny:** v dávke sú samostatné kroky Zdroj, Mapovanie a Kontrola.
+  Pri generovaných záznamoch alebo zhodnej predvoľbe s hlavičkou sa dá dávka
+  pripraviť už zo Zdroja. Knižnica má karty Šablóny a Nedávne projekty.
+  Vyplniť a tlačiť otvorí rýchlu tlač vybranej šablóny priamo z knižnice.
 - **GS1 editor:** pomenované polia, rýchle voľby, vyhľadávanie, formáty a chyby
   pri poli, náhľad, zmena poradia a bezpečné zrušenie.
 - **Ochrana ovládania kolieskom:** číselné polia a zatvorené rozbaľovacie ponuky

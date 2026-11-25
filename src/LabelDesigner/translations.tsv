@@ -1047,3 +1047,18 @@ Etikety spolu: {0:N0} · Strany spolu: {1:N0}	Total labels: {0:N0} · Total page
 Vytlačiť ({0:N0})	Print ({0:N0})	Vytisknout ({0:N0})	Nyomtatás ({0:N0})
 Prejsť na opravu	Go to fix	Přejít k opravě	Ugrás a javításhoz
 Prerušovaná čiara označuje hranicu tlačiteľnej oblasti.	The dashed line marks the edge of the printable area.	Přerušovaná čára označuje hranici tisknutelné oblasti.	A szaggatott vonal a nyomtatható terület határát jelzi.
+Kroky dávky	Batch steps	Kroky dávky	Köteg lépései
+Zdroj	Source	Zdroj	Forrás
+Mapovanie	Mapping	Mapování	Hozzárendelés
+Použiť generované záznamy	Use generated records	Použít generované záznamy	Generált rekordok használata
+Nastavenia CSV	CSV settings	Nastavení CSV	CSV-beállítások
+Pracovný hárok	Worksheet	Pracovní list	Munkalap
+Pokračovať na mapovanie	Continue to mapping	Pokračovat k mapování	Tovább a hozzárendeléshez
+Mapovanie stĺpcov	Column mapping	Mapování sloupců	Oszlopok hozzárendelése
+Späť na zdroj	Back to source	Zpět ke zdroji	Vissza a forráshoz
+Pripravené záznamy	Prepared records	Připravené záznamy	Előkészített rekordok
+Generované záznamy alebo import CSV / XLSX.	Generate records or import CSV / XLSX.	Generované záznamy nebo import CSV / XLSX.	Rekordok generálása vagy CSV / XLSX importálása.
+Pripravte dávku, aby sa zobrazil náhľad.	Prepare the batch to see the preview.	Připravte dávku, aby se zobrazil náhled.	Az előnézethez készítse elő a köteget.
+Vyplniť a tlačiť…	Fill and print…	Vyplnit a tisknout…	Kitöltés és nyomtatás…
+Upraviť šablónu	Edit template	Upravit šablonu	Sablon szerkesztése
+Správa šablóny	Manage template	Správa šablony	Sablon kezelése

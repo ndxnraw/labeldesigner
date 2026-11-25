@@ -196,6 +196,11 @@ repetitions, synchronized layer selection, group locks, protected multi-selectio
 properties, layer undo, keyboard panel access, export cancellation, and batch gates.
 It captures the minimum-size editor, both themes and the review in all four languages.
 No print job is submitted; preview/media capabilities use Microsoft Print to PDF.
+`BackgroundBatchTests` follows the Source, Mapping and Review steps for generated
+records and imported data. The tests check CSV and XLSX settings, direct
+preparation with a matching preset and navigation from a problem to its row.
+They also launch quick print from the template library and verify that the
+entered values leave the template and current editor document intact.
 `PlatformMigrationTests` verifies a core without dependencies on the app or Windows
 Forms, old XML and variable-template round trips, frozen job values, Windows-1250
 CSV, fresh-process CP850 ZPL import, shared PDF/DOCX/SVG/ZPL outputs with exact page

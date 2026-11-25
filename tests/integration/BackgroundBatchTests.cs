@@ -32,12 +32,22 @@ class BackgroundBatchTests {
  }}
  static void BatchUi(){using(var owner=new MainForm(Path.Combine(dir,"prefs.xml"))){owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();object controller=null;Exception failure=null;bool completed=false;
   using(var timer=new System.Windows.Forms.Timer{Interval=100}){timer.Tick+=delegate{foreach(Form form in Application.OpenForms)if(form!=owner&&form.Text==Loc.T("Dávka a premenné")){timer.Stop();try{
-   controller=form.Tag;Field<NumericUpDown>(controller,"generated").Value=2000;Call(controller,"Prepare");var old=Field<List<BatchRecord>>(controller,"batch");Check(old.Count==2000,"large batch preparation installed successful result");Check(Field<DataGridView>(controller,"records").VirtualMode,"batch grid uses virtual rows");
+   controller=form.Tag;var steps=Field<ModernTabs>(controller,"batchSteps");
+   Check(steps.SelectedIndex==0&&Field<NumericUpDown>(controller,"generated").Visible&&!Field<DataGridView>(controller,"mapping").Visible,"batch opens at its source");
+   Field<NumericUpDown>(controller,"generated").Value=2000;Call(controller,"ContinueFromSource");
+   var old=Field<List<BatchRecord>>(controller,"batch");Check(old.Count==2000,"large batch preparation installed successful result");
+   Check(steps.SelectedIndex==2&&Field<DataGridView>(controller,"records").Visible&&Field<DataGridView>(controller,"records").VirtualMode,"generated batch opens review with virtual rows");
    string original=ProjectXml.Encode((LabelSettings)Call(owner,"Read"));using(var cancelTimer=new System.Windows.Forms.Timer{Interval=5}){cancelTimer.Tick+=delegate{foreach(Form progress in Application.OpenForms)if(progress.Text==Loc.T("Pripravujem dávku…")){cancelTimer.Stop();Button(progress,Loc.T("Zrušiť")).PerformClick();break;}};cancelTimer.Start();Call(controller,"Prepare");}
    // A cancelled re-preparation must keep the complete previous snapshot.
    // No partial result or candidate mapping is committed to the editor.
    Check(object.ReferenceEquals(old,Field<List<BatchRecord>>(controller,"batch"))&&ProjectXml.Encode((LabelSettings)Call(owner,"Read"))==original,"cancel/completion race preserves consistent batch and project");
    var grid=Field<DataGridView>(controller,"records");grid.Rows[0].Cells[0].Value=false;grid.EndEdit();Check(!Field<List<bool>>(controller,"included")[0],"virtual checkbox edits update selected records");Call(controller,"SelectAll",false);Check(!Field<List<bool>>(controller,"included")[0],"virtual selection clears");Call(controller,"SelectAll",true);Check(Field<List<bool>>(controller,"included")[0],"virtual selection restores");
+   steps.SelectedIndex=0;
+   Check((bool)Call(controller,"LoadFile",Path.Combine(dir,"table.xlsx"),';',65001),"XLSX opens in the source step");
+   var sheet=Field<ComboBox>(controller,"sheet");
+   Check(sheet.Visible&&sheet.Text=="Data"&&!Field<ComboBox>(controller,"separator").Visible,
+    "XLSX shows the worksheet and hides CSV-only settings");
+   Check(Field<List<BatchRecord>>(controller,"batch").Count==0,"a new source clears previous review results");
    CsvIssuesUi(controller,form);
    ComparisonUi(controller,form);
    PresetUi(controller,form,owner);
@@ -129,7 +139,15 @@ class BackgroundBatchTests {
   var template=Engine.Load(path);
   Check(template.QuickPrintFields.Count==2,"library saves editable field selection");
   string before=File.ReadAllText(path);
-  VisitDialog("Rýchle vyplnenie a tlač…",()=>Call(owner,"ShowQuickPrint",owner,template),window=>{
+  string editorBefore=ProjectXml.Encode((LabelSettings)Call(owner,"Read"));
+  VisitDialog("Šablóny a nedávne projekty",()=>Call(owner,"ShowLibrary"),library=>{
+   var tabs=(ModernTabs)library.Controls.Find("templateLibraryTabs",true)[0];
+   var list=(ListView)library.Controls.Find("templateLibraryList",true)[0];
+   var quick=(Button)library.Controls.Find("openTemplateQuickPrint",true)[0];
+   Check(tabs.SelectedIndex==0&&list.Visible&&!quick.Enabled,"library opens in Templates with contextual quick print");
+   foreach(ListViewItem item in list.Items)if((string)item.Tag==path){item.Selected=true;item.Focused=true;break;}
+   Check(quick.Enabled&&quick.Text==Loc.T("Vyplniť a tlačiť…"),"selected template exposes primary quick print action");
+   VisitDialog("Rýchle vyplnenie a tlač…",()=>quick.PerformClick(),window=>{
    var text=(TextBox)window.Controls.Find("quickPrintValue0",true)[0];
    var barcode=(TextBox)window.Controls.Find("quickPrintValue-1",true)[0];
    var error=(Label)window.Controls.Find("quickPrintError-1",true)[0];
@@ -168,8 +186,13 @@ class BackgroundBatchTests {
     printing.Close();
    });
    window.Close();
+   });
+   tabs.SelectedIndex=1;
+   Check(!list.Visible&&!quick.Visible,"recent projects do not show template actions");
+   library.Close();
   });
-  Check(File.ReadAllText(path)==before,"printing does not save the edited values into the template");
+  Check(File.ReadAllText(path)==before&&ProjectXml.Encode((LabelSettings)Call(owner,"Read"))==editorBefore,
+   "quick print does not save entered values into the template or editor project");
  }
  static void VisitDialog(string title,Action show,Action<Form> inspect){
   Exception failure=null;bool visited=false;
@@ -196,12 +219,16 @@ class BackgroundBatchTests {
   var prepare=Field<Button>(controller,"prepareButton");
   var sample=Field<Button>(controller,"sampleButton");
   var presets=Button(window,Loc.T("Predvoľby dávky…"));
+  var steps=Field<ModernTabs>(controller,"batchSteps");
+  Action openPresets=()=>{steps.SelectedIndex=0;presets.PerformClick();};
+  Action openSample=()=>{steps.SelectedIndex=1;sample.PerformClick();};
+  Action prepareMapped=()=>{steps.SelectedIndex=1;prepare.PerformClick();};
   Action<string,int> map=(key,column)=>mapping.Rows[targets.IndexOf(key)].Cells["column"].Value=options.Items[column+1];
   Func<string,int> mapped=key=>options.Items.IndexOf(mapping.Rows[targets.IndexOf(key)].Cells["column"].Value)-1;
   File.WriteAllText(path,"Item;Case;Qty;Serial\r\n590123412345;858000000001;2;007");
   Check((bool)Call(controller,"LoadFile",path,';',65001),"open original supplier table");
   map("code",0);map("text:0",1);map("quantity",2);map("unique",3);
-  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>{
+  VisitDialog("Predvoľby dávky…",openPresets,dialog=>{
    ((TextBox)dialog.Controls.Find("batchPresetName",true)[0]).Text="Supplier A";
    Button(dialog,Loc.T("Uložiť aktuálne mapovanie")).PerformClick();
   });
@@ -210,14 +237,16 @@ class BackgroundBatchTests {
   File.WriteAllText(path,"Case;Serial;Qty;Item\n858000000001;007;3;590123412345");
   Check((bool)Call(controller,"LoadFile",path,';',65001)&&mapped("code")==3&&mapped("text:0")==0&&mapped("unique")==1,
    "active preset uses header names on next import");
-  VisitDialog("Náhľad prvých záznamov…",()=>sample.PerformClick(),dialog=>{
+  VisitDialog("Náhľad prvých záznamov…",openSample,dialog=>{
    var data=(DataGridView)dialog.Controls.Find("batchSample",true)[0];
    Check(data.RowCount==1&&Convert.ToInt32(data.Rows[0].Cells[0].Value)==2&&
     Convert.ToString(data.Rows[0].Cells[1].Value)=="590123412345"&&data.Columns[1].HeaderText.Contains("Item"),
     "sample gives original row, mapped code and source header");
    Button(dialog,Loc.T("Zavrieť")).PerformClick();
   });
-  prepare.PerformClick();
+  steps.SelectedIndex=0;
+  Call(controller,"ContinueFromSource");
+  Check(steps.SelectedIndex==2,"matching header-based preset skips manual mapping");
   var batch=Field<List<BatchRecord>>(controller,"batch");
   Check(batch.Count==1&&batch[0].Label.Ean=="590123412345"&&batch[0].Count==3,"prepared batch uses the exact preview mapping");
   SavedReferenceUi(controller,window,owner,path);
@@ -229,27 +258,27 @@ class BackgroundBatchTests {
   map("quantity",-1);
   Check(!prepare.Enabled,"removing the replacement leaves the original schema error unresolved");
   map("quantity",3);
-  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>Button(dialog,Loc.T("Ručné mapovanie")).PerformClick());
+  VisitDialog("Predvoľby dávky…",openPresets,dialog=>Button(dialog,Loc.T("Ručné mapovanie")).PerformClick());
   var header=Field<CheckBox>(controller,"header");
   header.Checked=false;
   Field<ModernComboBox>(controller,"separator").SelectedIndex=1;
   File.WriteAllText(path,"590123412345,\"A\",2\n858000000001,B,3");
   Check((bool)Call(controller,"LoadFile",path,',',65001),"headerless CSV imported");
   map("code",0);map("text:0",1);map("quantity",2);map("unique",-1);
-  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>{
+  VisitDialog("Predvoľby dávky…",openPresets,dialog=>{
    ((TextBox)dialog.Controls.Find("batchPresetName",true)[0]).Text="Positions";
    Button(dialog,Loc.T("Uložiť aktuálne mapovanie")).PerformClick();
   });
   setup=((LabelSettings)Call(owner,"Read")).Batch;
   Check(setup.Presets.Count==2&&setup.ActivePresetName=="Positions","multiple saved presets and positional mode persisted");
-  VisitDialog("Náhľad prvých záznamov…",()=>prepare.PerformClick(),dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
+  VisitDialog("Náhľad prvých záznamov…",prepareMapped,dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
   Check(Field<List<BatchRecord>>(controller,"batch").Count==0,"cancelling positional confirmation leaves batch unprepared");
-  VisitDialog("Náhľad prvých záznamov…",()=>prepare.PerformClick(),dialog=>Button(dialog,Loc.T("Potvrdiť mapovanie")).PerformClick());
+  VisitDialog("Náhľad prvých záznamov…",prepareMapped,dialog=>Button(dialog,Loc.T("Potvrdiť mapovanie")).PerformClick());
   Check(Field<List<BatchRecord>>(controller,"batch").Count==2,"confirming positional sample continues preparation");
   map("code",1);
-  VisitDialog("Náhľad prvých záznamov…",()=>prepare.PerformClick(),dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
+  VisitDialog("Náhľad prvých záznamov…",prepareMapped,dialog=>Button(dialog,Loc.T("Zrušiť")).PerformClick());
   Check(Field<List<BatchRecord>>(controller,"batch").Count==0,"changing a positional binding requires new confirmation");
-  VisitDialog("Predvoľby dávky…",()=>presets.PerformClick(),dialog=>{
+  VisitDialog("Predvoľby dávky…",openPresets,dialog=>{
    var list=(ListBox)dialog.Controls.Find("batchPresetList",true)[0];
    list.SelectedItem="Supplier A";
    Button(dialog,Loc.T("Použiť predvoľbu")).PerformClick();
@@ -262,6 +291,8 @@ class BackgroundBatchTests {
  }
  static void SavedReferenceUi(object controller,Form batchWindow,MainForm owner,string path){
   var referenceButton=Button(batchWindow,Loc.T("Referenčná dávka…"));
+  var steps=Field<ModernTabs>(controller,"batchSteps");
+  Action openReference=()=>{steps.SelectedIndex=0;referenceButton.PerformClick();};
   const string managerTitle="Referenčná dávka…";
   Func<BatchReference> read=()=>((LabelSettings)Call(owner,"Read")).Batch.Presets.Find(preset=>preset.Name=="Supplier A").Reference;
   Action<Form,string,bool> confirm=(manager,action,yes)=>VisitDialog("Potvrdenie referencie",
@@ -271,7 +302,7 @@ class BackgroundBatchTests {
     Button(dialog,Loc.T(yes?"Áno":"Nie")).PerformClick();
    });
   const string save="Uložiť aktuálnu dávku ako referenciu…";
-  VisitDialog(managerTitle,()=>referenceButton.PerformClick(),manager=>{
+  VisitDialog(managerTitle,openReference,manager=>{
    confirm(manager,save,true);
    Check(read()!=null&&read().RowCount==1,"saving the reference attaches it to the active project preset");
    VisitDialog("Uložená referenčná dávka",()=>Button(manager,Loc.T("Zobraziť referenciu")).PerformClick(),dialog=>{
@@ -296,7 +327,7 @@ class BackgroundBatchTests {
      Convert.ToString(details.Rows[0].Cells["after"].Value)=="4","saved reference feeds the existing comparison review");
     Button(dialog,Loc.T("Zavrieť")).PerformClick();
    });
-  VisitDialog(managerTitle,()=>referenceButton.PerformClick(),manager=>{
+  VisitDialog(managerTitle,openReference,manager=>{
    confirm(manager,save,false);
    Check(Convert.ToBase64String(read().PackedRows)==previous,"declining replacement keeps the original snapshot");
    confirm(manager,save,true);
@@ -456,12 +487,18 @@ class BackgroundBatchTests {
   File.WriteAllText(csv,"Code;Name\r\n590123412345;\"Good\r\nlabel\"\r\nnot a barcode;Bad code\r\n590123412345;Other");
   Check((bool)Call(controller,"LoadFile",csv,';',65001),"batch window imports CSV for data check");
   var mapping=Field<DataGridView>(controller,"mapping");
+  var steps=Field<ModernTabs>(controller,"batchSteps");
+  steps.SelectedIndex=0;
+  Check(Field<ComboBox>(controller,"separator").Visible&&!Field<ComboBox>(controller,"sheet").Visible,"CSV exposes only applicable source controls");
+  Call(controller,"ContinueFromSource");
+  Check(steps.SelectedIndex==1&&mapping.Visible&&!Field<DataGridView>(controller,"records").Visible,"manual CSV uses mapping before review");
   var targets=Field<List<string>>(controller,"targets");
   var source=(DataGridViewComboBoxColumn)mapping.Columns[1];
   mapping.Rows[targets.IndexOf("code")].Cells[1].Value=source.Items[1];
   mapping.Rows[targets.IndexOf("text:0")].Cells[1].Value=source.Items[2];
   Call(controller,"Prepare");
   var grid=Field<DataGridView>(controller,"records");
+  Check(steps.SelectedIndex==2&&grid.Visible&&!mapping.Visible,"prepared batch opens review and hides mapping");
   var print=Field<Button>(controller,"printSelected");
   var open=Button(batchWindow,Loc.T("Problémy vstupných dát…"));
   Check(open!=null&&open.Enabled&&!print.Enabled,"imported error enables review and blocks printing");

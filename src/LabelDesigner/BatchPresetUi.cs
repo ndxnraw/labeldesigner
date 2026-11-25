@@ -105,6 +105,7 @@ namespace EanEtikety {
     prepareButton.Enabled=!blocked;
     sampleButton.Enabled=!blocked&&CurrentTable!=null;
     referenceButton.Enabled=preset!=null;
+    RefreshSourceStep();
    }
 
    void ActivatePreset(BatchPreset preset) {

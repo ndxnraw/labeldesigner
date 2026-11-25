@@ -44,9 +44,10 @@ namespace EanEtikety {
    int selected=zoom.SelectedIndex;
    preview.ShowDetail=selected==LabelDetailMode;
    preview.Zoom=selected switch {1=>.5,2=>1,3=>1.5,4=>2,5=>4,_=>0};
-   preview.DetailBounds=pageLabels.Length==0?RectangleF.Empty:pageLabels[(int)detailIndex.Value-1];
-   preview.AccessibleDescription=preview.ShowDetail&&!preview.DetailBounds.IsEmpty&&
-    !preview.Printable.IsEmpty&&!preview.Printable.Contains(preview.DetailBounds)
+   var detail=pageLabels.Length==0?RectangleF.Empty:pageLabels[(int)detailIndex.Value-1];
+   preview.DetailBounds=detail;
+   preview.AccessibleDescription=preview.ShowDetail&&!detail.IsEmpty&&
+    !preview.Printable.IsEmpty&&!preview.Printable.Contains(detail)
     ?Loc.T("Prerušovaná čiara označuje hranicu tlačiteľnej oblasti."):"";
    detailTools.Visible=preview.ShowDetail&&pageLabels.Length>1;
    preview.AutoScrollPosition=Point.Empty;

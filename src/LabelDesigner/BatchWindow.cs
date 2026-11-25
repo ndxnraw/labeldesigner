@@ -18,8 +18,6 @@ namespace EanEtikety {
    string csvPath,tableSourcePath;char loadedSeparator;int loadedCodePage;bool updating,csvLineNumbers;
    public BatchWindow(MainForm main){
     owner=main;setup=main.batchSetup.Copy();window=main.FeatureForm("Dávka a premenné",1100,750);window.Tag=this;
-    var root=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=3,ColumnCount=2};root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,55));root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,45));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));window.Controls.Add(root);
-    var toolbar=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(toolbar,0,0);root.SetColumnSpan(toolbar,2);
     sheet.DropDownStyle=ComboBoxStyle.DropDownList;sheet.Width=160;
     header.Text=Loc.T("Prvý riadok je hlavička");header.AutoSize=true;
     separator.DropDownStyle=ComboBoxStyle.DropDownList;separator.Width=80;separator.Items.AddRange(new object[]{";",",","Tab"});
@@ -27,13 +25,11 @@ namespace EanEtikety {
     var preset=ActivePreset;
     SetSourceControls(preset==null?setup.Header:preset.Header,preset==null?setup.Separator:preset.Separator,preset==null?setup.CodePage:preset.CodePage);
     generated.Minimum=1;generated.Maximum=10000;generated.Value=Math.Min(10000,Math.Max(1,setup.GeneratedCount));generated.Width=75;
-    var left=new SplitContainer{Dock=DockStyle.Fill,Orientation=Orientation.Horizontal,SplitterDistance=200};root.Controls.Add(left,0,1);
     mapping.Dock=DockStyle.Fill;mapping.AllowUserToAddRows=mapping.AllowUserToDeleteRows=false;mapping.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;mapping.Columns.Add("target",Loc.T("Prvok"));mapping.Columns[0].ReadOnly=true;mapping.Columns.Add(new DataGridViewComboBoxColumn{Name="column",HeaderText=Loc.T("Stĺpec")});
     mapping.Columns.Add("schema",Loc.T("Kontrola hlavičky"));mapping.Columns["schema"].ReadOnly=true;mapping.Columns["schema"].Visible=false;
     foreach(DataGridViewColumn field in mapping.Columns)field.SortMode=DataGridViewColumnSortMode.NotSortable;
-    left.Panel1.Controls.Add(mapping);
     records.Dock=DockStyle.Fill;records.VirtualMode=true;records.AllowUserToAddRows=records.AllowUserToDeleteRows=false;records.SelectionMode=DataGridViewSelectionMode.FullRowSelect;records.MultiSelect=false;records.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;
-    records.Columns.Add(new DataGridViewCheckBoxColumn{Name="include",HeaderText=Loc.T("Zahrnúť")});records.Columns.Add("row",Loc.T("Riadok"));records.Columns.Add("count",Loc.T("Počet etikiet"));records.Columns.Add("error",Loc.T("Chyba"));for(int i=1;i<4;i++)records.Columns[i].ReadOnly=true;left.Panel2.Controls.Add(records);
+    records.Columns.Add(new DataGridViewCheckBoxColumn{Name="include",HeaderText=Loc.T("Zahrnúť")});records.Columns.Add("row",Loc.T("Riadok"));records.Columns.Add("count",Loc.T("Počet etikiet"));records.Columns.Add("error",Loc.T("Chyba"));for(int i=1;i<4;i++)records.Columns[i].ReadOnly=true;
     records.CellValueNeeded+=delegate(object sender,DataGridViewCellValueEventArgs e){if(e.RowIndex<0||e.RowIndex>=batch.Count)return;var record=batch[e.RowIndex];e.Value=e.ColumnIndex==0?(object)included[e.RowIndex]:e.ColumnIndex==1?(object)record.Row:e.ColumnIndex==2?(object)record.Count:record.Error??(record.Issues.Count>0?Loc.T("Upozornenie"):Loc.T("Pripravené"));};
     records.CellValuePushed+=delegate(object sender,DataGridViewCellValueEventArgs e){if(e.ColumnIndex==0&&e.RowIndex>=0&&e.RowIndex<included.Count){included[e.RowIndex]=Convert.ToBoolean(e.Value);UpdateSelectionSummary();}};
     records.CurrentCellDirtyStateChanged+=delegate{if(records.IsCurrentCellDirty)records.CommitEdit(DataGridViewDataErrorContexts.Commit);};
@@ -44,27 +40,17 @@ namespace EanEtikety {
     previewPane.SizeChanged+=delegate{previewCaption.MaximumSize=new Size(Math.Max(1,previewPane.ClientSize.Width-12),0);};
     previewPane.Controls.Add(previewCaption,0,0);
     view.Dock=DockStyle.Fill;view.SizeMode=PictureBoxSizeMode.Zoom;view.BackColor=Color.White;
-    view.AccessibleName=Loc.T("Náhľad etikety");previewPane.Controls.Add(view,0,1);root.Controls.Add(previewPane,1,1);
+    view.AccessibleName=Loc.T("Náhľad etikety");previewPane.Controls.Add(view,0,1);
     records.CurrentCellChanged+=delegate{ShowRecordPreview();};
-    toolbar.Controls.Add(owner.Btn(Loc.T("Import CSV / XLSX"),Import));toolbar.Controls.Add(separator);toolbar.Controls.Add(encoding);toolbar.Controls.Add(sheet);toolbar.Controls.Add(header);
-    toolbar.Controls.Add(owner.Btn(Loc.T("Premenné polia"),delegate{owner.EditVariables();Map();}));toolbar.Controls.Add(new Label{Text=Loc.T("Počet záznamov"),AutoSize=true,Margin=new Padding(3,8,3,0)});toolbar.Controls.Add(generated);
-    prepareButton=owner.Btn(Loc.T("Pripraviť dávku"),Prepare);toolbar.Controls.Add(prepareButton);
-    toolbar.Controls.Add(owner.Btn(Loc.T("Predvoľby dávky…"),ShowPresets));
-    sampleButton=owner.Btn(Loc.T("Náhľad prvých záznamov…"),ShowSample);toolbar.Controls.Add(sampleButton);
-    mappingInfo.AutoSize=true;mappingInfo.MaximumSize=new Size(435,0);mappingInfo.UseMnemonic=false;toolbar.Controls.Add(mappingInfo);
-    preparedInfo.AutoSize=true;preparedInfo.MaximumSize=new Size(400,0);preparedInfo.UseMnemonic=false;toolbar.Controls.Add(preparedInfo);
-    var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(actions,0,2);root.SetColumnSpan(actions,2);
-    actions.Controls.Add(owner.Btn(Loc.T("Vybrať všetko"),delegate{SelectAll(true);}));actions.Controls.Add(owner.Btn(Loc.T("Zrušiť výber"),delegate{SelectAll(false);}));exportSelected=owner.Btn(Loc.T("Exportovať vybrané"),Export);printSelected=owner.Btn(Loc.T("Tlačiť vybrané"),Print);actions.Controls.Add(exportSelected);actions.Controls.Add(printSelected);selectionInfo.AutoSize=true;selectionInfo.UseMnemonic=false;selectionInfo.MaximumSize=new Size(360,0);actions.Controls.Add(selectionInfo);
-    issuesButton=owner.Btn(Loc.T("Problémy vstupných dát…"),ShowIssues);actions.Controls.Add(issuesButton);
-    compareButton=owner.Btn(Loc.T("Porovnať dávku…"),CompareBatch);actions.Controls.Add(compareButton);
-    referenceButton=owner.Btn(Loc.T("Referenčná dávka…"),ShowBatchReference);actions.Controls.Add(referenceButton);
+    BuildBatchSteps(previewPane);
     sheet.SelectedIndexChanged+=delegate{if(!updating)Map();};header.CheckedChanged+=delegate{if(!updating)Map();};
     mapping.CurrentCellDirtyStateChanged+=delegate{if(!updating&&mapping.IsCurrentCellDirty)mapping.CommitEdit(DataGridViewDataErrorContexts.Commit);};
     mapping.CellValueChanged+=delegate(object sender,DataGridViewCellEventArgs args){
      if(!updating&&args.RowIndex>=0&&args.ColumnIndex==1){positionsConfirmed=false;Clear();UpdateMappingState();}
     };
     generated.ValueChanged+=delegate{if(!updating)Clear();};separator.SelectedIndexChanged+=Reload;encoding.SelectedIndexChanged+=Reload;
-    owner.ApplyColors(window);Map();preview=new BatchPreview(view,message=>preparedInfo.Text=message);
+    owner.ApplyColors(window);StyleBatchPrimaryActions();Map();preview=new BatchPreview(view,message=>preparedInfo.Text=message);
+    ShowRecordPreview();
    }
    char Separator{get{return separator.SelectedIndex==2?'\t':separator.Text[0];}}int CodePage{get{return encoding.SelectedIndex==0?65001:1250;}}
    void Clear(){records.RowCount=0;batch=new List<BatchRecord>();comparisonTable=null;included.Clear();preparedInfo.Text="";ShowRecordPreview();UpdateSelectionSummary();}
@@ -105,7 +91,7 @@ namespace EanEtikety {
     if(!owner.RunWork(window,"prepare-batch","Pripravujem dávku…",()=>BatchProcessing.Prepare(model,table,candidate.Header,candidate.Bindings,candidate.QuantityColumn,candidate.GeneratedCount,instant),out prepared))return;
     owner.ChangeDocument(s=>s.Batch=candidate);setup=candidate;Clear();batch=prepared;comparisonTable=table;
     csvLineNumbers=table!=null&&table.HasCsvLineNumbers;records.Columns["row"].HeaderText=SourceRowHeading;
-    foreach(var item in batch)included.Add(true);records.RowCount=batch.Count;UpdateSelectionSummary();preparedInfo.Text=Loc.T("Údaje pripravené")+": "+instant.ToString("g");if(batch.Count>0){records.CurrentCell=records.Rows[0].Cells[0];ShowRecordPreview();}
+    foreach(var item in batch)included.Add(true);records.RowCount=batch.Count;UpdateSelectionSummary();preparedInfo.Text=Loc.T("Údaje pripravené")+": "+instant.ToString("g");if(batch.Count>0){batchSteps.SelectedIndex=ReviewStep;records.CurrentCell=records.Rows[0].Cells[0];ShowRecordPreview();records.Focus();}
    }catch(Exception ex){owner.Error(ex);}}
    void SelectAll(bool selected){SetIncluded(record=>selected);}
    void SetIncluded(Predicate<BatchRecord> selected){
@@ -120,6 +106,7 @@ namespace EanEtikety {
    void NavigateRecord(int sourceRow){
     int index=batch.FindIndex(record=>record.Row==sourceRow);
     if(index<0)return;
+    batchSteps.SelectedIndex=ReviewStep;
     records.CurrentCell=records.Rows[index].Cells["row"];
     records.Focus();
    }
@@ -127,7 +114,7 @@ namespace EanEtikety {
     if(preview==null)return;
     int index=records.CurrentCell==null?-1:records.CurrentCell.RowIndex;
     var record=index>=0&&index<batch.Count?batch[index]:null;
-    previewCaption.Text=record==null?"":SourceRowHeading+" "+record.Row+(record.Error==null?"":
+    previewCaption.Text=record==null?Loc.T("Pripravte dávku, aby sa zobrazil náhľad."):SourceRowHeading+" "+record.Row+(record.Error==null?"":
      Environment.NewLine+Loc.T(record.PreviewLabel==null?"Náhľad tohto riadka nie je dostupný.":"Náhľad použiteľných prvkov. Záznam má chyby."));
     preview.Request(record==null?null:record.PreviewLabel);
    }

@@ -26,32 +26,5 @@ public partial class MainForm {
  void AddAccept(Form f,TableLayoutPanel stack,Action action){var ok=Btn(Loc.T("Použiť"),delegate{try{action();f.DialogResult=DialogResult.OK;}catch(Exception ex){Error(ex);}});var cancel=Btn(Loc.T("Zrušiť"),delegate{f.DialogResult=DialogResult.Cancel;});var row=new FlowLayoutPanel{AutoSize=true};row.Controls.Add(ok);row.Controls.Add(cancel);StackAdd(stack,row);f.AcceptButton=ok;f.CancelButton=cancel;ApplyColors(f);}
  void BuildFeatureMenu(){GroupedFeatureMenu();}
  void RecoveryPreferences(){if(workspace==null)return;using(var f=FeatureForm("Automatické ukladanie",420,270)){var p=FeatureStack(f);var enabled=Check(p,"Automatické ukladanie",workspace.Options.AutoSave);var interval=Number(p,"Interval (sekundy)",workspace.Options.IntervalSeconds,10,3600,0);AddAccept(f,p,delegate{workspace.Options.AutoSave=enabled.Checked;workspace.Options.IntervalSeconds=(int)interval.Value;workspace.SaveOptions();RestartRecovery();});f.ShowDialog(this);}}
- void ShowLibrary(){if(workspace==null)return;using(var f=FeatureForm("Šablóny a nedávne projekty",800,620))using(var images=new ImageList{ImageSize=new Size(160,110),ColorDepth=ColorDepth.Depth32Bit}){
-  var root=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=3,ColumnCount=1,Padding=new Padding(12)};root.RowStyles.Add(new RowStyle(SizeType.Percent,65));root.RowStyles.Add(new RowStyle(SizeType.Percent,35));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));f.Controls.Add(root);
-  var list=new ListView{Dock=DockStyle.Fill,View=View.LargeIcon,LargeImageList=images,MultiSelect=false};root.Controls.Add(list,0,0);var recent=new ListBox{Dock=DockStyle.Fill,HorizontalScrollbar=true};root.Controls.Add(recent,0,1);foreach(string path in workspace.Options.Recent)recent.Items.Add(path);
-  var thumbnails=new List<Bitmap>();Action refresh=delegate{list.Items.Clear();images.Images.Clear();foreach(var old in thumbnails)old.Dispose();thumbnails.Clear();foreach(string file in Directory.GetFiles(workspace.TemplatesPath,"*.ean.xml")){try{var s=Engine.Load(file);using(var scene=VectorArt.Build(s))using(var b=new Bitmap(160,110))using(var g=Graphics.FromImage(b)){g.Clear(Color.White);float scale=Math.Min(156/(float)s.Width,106/(float)s.Height);scene.Draw(g,new RectangleF(2,2,(float)s.Width*scale,(float)s.Height*scale),false);var thumbnail=(Bitmap)b.Clone();thumbnails.Add(thumbnail);images.Images.Add(thumbnail);}list.Items.Add(new ListViewItem(Path.GetFileName(file).Replace(".ean.xml",""),images.Images.Count-1){Tag=file});}catch(Exception ex){list.Items.Add(new ListViewItem(Path.GetFileName(file)+" — "+Loc.T("Chyba")){Tag=file,ToolTipText=ex.Message});}}};
-  try{using(WorkspaceBackup.LockDirectory(workspace.DirectoryPath)){
-   if(Directory.GetFiles(workspace.TemplatesPath,"*.ean.xml").Length==0){foreach(double width in new[]{60d,100d}){var s=StartupLayout.Create(new StartupProfile{Width=width,Height=width==60?45:60});ProjectXml.Save(Path.Combine(workspace.TemplatesPath,"Etiketa "+width+".ean.xml"),s);}}
-  }}catch(Exception ex){Error(ex);return;}
-  refresh();
-  var row=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};root.Controls.Add(row,0,2);
-  var quick=Btn(Loc.T("Rýchle vyplnenie a tlač…"),delegate{
-   if(list.SelectedItems.Count==0)return;
-   try{ShowQuickPrint(f,Engine.Load((string)list.SelectedItems[0].Tag));}catch(Exception ex){Error(ex);}
-  });
-  var fields=Btn(Loc.T("Upraviteľné polia šablóny…"),delegate{
-   if(list.SelectedItems.Count==0)return;
-   try{ConfigureLibraryQuickPrint(f,(string)list.SelectedItems[0].Tag);}catch(Exception ex){Error(ex);}
-  });
-  quick.Name="openTemplateQuickPrint";fields.Name="configureTemplateQuickPrint";
-  Action updateQuick=()=>quick.Enabled=fields.Enabled=list.SelectedItems.Count>0;
-  list.SelectedIndexChanged+=delegate{updateQuick();};
-  updateQuick();
-  row.Controls.Add(quick);row.Controls.Add(fields);
-  row.Controls.Add(Btn(Loc.T("Otvoriť šablónu"),delegate{if(list.SelectedItems.Count==0||!CanDiscard())return;try{var s=Engine.Load((string)list.SelectedItems[0].Tag);Apply(s);settingsPath=null;ResetHistory(false);Changed(this,EventArgs.Empty);f.Close();}catch(Exception ex){Error(ex);}}));
-  row.Controls.Add(Btn(Loc.T("Uložiť ako šablónu"),delegate{using(var name=FeatureForm("Názov šablóny",400,220)){var p=FeatureStack(name);var input=Input(p,"Názov šablóny",Loc.T("Moja etiketa"));AddAccept(name,p,delegate{if(string.IsNullOrWhiteSpace(input.Text)||input.Text.IndexOfAny(Path.GetInvalidFileNameChars())>=0)throw new Exception(Loc.T("Neplatný názov"));var path=Path.Combine(workspace.TemplatesPath,input.Text.Trim()+".ean.xml");var s=Read();using(WorkspaceBackup.LockDirectory(workspace.DirectoryPath)){if(File.Exists(path))throw new Exception(Loc.T("Názov už existuje"));Engine.Save(path,s);}refresh();});name.ShowDialog(f);}}));
-  row.Controls.Add(Btn(Loc.T("Odstrániť šablónu"),delegate{if(list.SelectedItems.Count>0&&UiMessageBox.Show(f,Loc.T("Odstrániť šablónu?"),Loc.T("Šablóny"),MessageBoxButtons.YesNo,MessageBoxIcon.Question)==DialogResult.Yes){try{using(WorkspaceBackup.LockDirectory(workspace.DirectoryPath))File.Delete((string)list.SelectedItems[0].Tag);refresh();}catch(Exception ex){Error(ex);}}}));
-  row.Controls.Add(Btn(Loc.T("Otvoriť nedávny projekt"),delegate{if(recent.SelectedItem==null)return;string path=(string)recent.SelectedItem;if(!File.Exists(path)){UiMessageBox.Show(f,Loc.T("Súbor sa nenašiel")+": "+path,Loc.T("Nedávne projekty"));workspace.Options.Recent.Remove(path);workspace.SaveOptions();recent.Items.Remove(path);return;}if(!CanDiscard())return;try{OpenImportedFile(path);f.Close();}catch(Exception ex){Error(ex);}}));ApplyColors(f);f.ShowDialog(this);foreach(var thumbnail in thumbnails)thumbnail.Dispose();
- }}
 }
 }
