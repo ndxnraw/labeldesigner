@@ -117,7 +117,10 @@ class BackgroundBatchTests {
  }
  static void QuickPrintUi(MainForm owner){
   string path=Path.Combine(Field<WorkspaceStore>(owner,"workspace").TemplatesPath,"Quick proof.ean.xml");
-  Engine.Save(path,LabelSettings.Default());
+  var settings=LabelSettings.Default();
+  settings.Texts[0].AutoWidth=false;
+  settings.Texts[0].MinimumFitSize=6;
+  Engine.Save(path,settings);
   VisitDialog("Upraviteľné polia šablóny…",()=>Call(owner,"ConfigureLibraryQuickPrint",owner,path),window=>{
    var fields=(CheckedListBox)window.Controls.Find("quickPrintFieldChoices",true)[0];
    fields.SetItemChecked(0,true);fields.SetItemChecked(1,true);
@@ -135,6 +138,13 @@ class BackgroundBatchTests {
    var timer=Stopwatch.StartNew();
    while(!next.Enabled&&timer.ElapsedMilliseconds<5000){Application.DoEvents();System.Threading.Thread.Sleep(10);}
    Check(next.Enabled&&preview.Image!=null,"form opens with rendered label");
+   var fitWarning=(Label)window.Controls.Find("quickPrintError0",true)[0];
+   text.Text=new string('W',250);
+   timer.Restart();
+   while((!next.Enabled||!fitWarning.Visible)&&timer.ElapsedMilliseconds<5000){Application.DoEvents();System.Threading.Thread.Sleep(10);}
+   Check(next.Enabled&&fitWarning.Visible&&fitWarning.Text==Loc.T("Text sa nezmestí do poľa")&&preview.Image!=null,
+    "fixed text overflow is shown at the editable field and can proceed to review");
+   text.Text=template.Texts[0].Text;
    barcode.Text="8580000000010";
    timer.Restart();
    while(!error.Visible&&timer.ElapsedMilliseconds<3000){Application.DoEvents();System.Threading.Thread.Sleep(10);}

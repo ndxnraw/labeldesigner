@@ -4,7 +4,7 @@ namespace EanEtikety {
 public static class TextAutoLayout {
  public static void Apply(LabelSettings label){foreach(var text in label.Texts)Fit(text,label.Width,label.Height);}
  public static void Fit(TextItem text,double labelWidth,double labelHeight){
-  if(text==null||!text.AutoWidth||(text.Text!=null&&text.Text.Length>4000))return;
+  if(text==null||!text.AutoWidth||text.MinimumFitSize>0||(text.Text!=null&&text.Text.Length>4000))return;
   if(double.IsNaN(text.Size)||double.IsInfinity(text.Size)||text.Size<4||text.Size>144||labelWidth<10||labelHeight<10)return;
   double oldWidth=text.Width,anchor=text.X+oldWidth/2;
   double maximum=Math.Max(1,Math.Min(500,labelWidth-Math.Max(0,text.X)-3));

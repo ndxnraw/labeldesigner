@@ -103,6 +103,7 @@ namespace EanEtikety {
    foreach(var issue in LabelChecks.Inspect(label))
     if(!issues.Exists(item=>item.Blocking&&item.Element==issue.Element))issues.Add(issue);
    foreach(int index in selected.Where(index=>index>=0)){
+    if(label.Texts[index].MinimumFitSize>0)continue;
     if(LabelChecks.TextFits(label.Texts[index],label.Dpi,true))continue;
     string message=Loc.T("Text sa nezmestí do poľa");
     var issue=issues.Find(item=>item.Element==index&&item.Message==message);

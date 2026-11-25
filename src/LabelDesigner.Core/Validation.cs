@@ -77,6 +77,7 @@ public static class LabelChecks {
   }
  }
  internal static bool TextFits(TextItem text,double dpi,bool checkWidth=false){
+  if(text.MinimumFitSize>0){FixedTextLayout.Resolve(text,out bool fits);return fits;}
   using(var bitmap=new Bitmap(1,1))using(var graphics=Graphics.FromImage(bitmap))
   using(var family=VectorArt.Family(text.FontName))
   using(var font=new Font(family,(float)(text.Size*dpi/72),VectorArt.Style(family,text.Bold),GraphicsUnit.Pixel))

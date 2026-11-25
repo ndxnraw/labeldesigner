@@ -57,6 +57,11 @@ hollow and filled rectangles, and barcode quiet-zone and overlap checks.
 It compares the editor artwork, vector print preview, Windows print drawing,
 and decoded graphics from single-label ZPL and the direct Zebra print path
 without a physical printer. It also checks vector output in PDF, SVG, and Word.
+EditorRefinementTests verifies the fixed-field controls, saved font sizes,
+wrapping and minimum-size warnings. It compares fitted artwork between rapid
+template entry, batch data, print and PDF/SVG/Word/ZPL output.
+BackgroundBatchTests verifies that the quick-print form displays overflow at
+the editable field and allows the user to continue to output review.
 `BarcodeZebraTests` checks exact queue matching for concurrent jobs, missing
 and inaccessible queues, preservation of the last observation, the timeout
 for a stalled provider, and status refresh in the actual history dialog.

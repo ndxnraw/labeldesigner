@@ -111,6 +111,13 @@ namespace EanEtikety {
     }
     Engine.Validate(label);
    }
+   for(int i=0;i<label.Texts.Count;i++) {
+    var text=label.Texts[i];
+    if(text.MinimumFitSize<=0||LabelChecks.TextFits(text,label.Dpi))continue;
+    string target="text:"+i;
+    string field=string.Format(Loc.T("Text {0}"),i+1);
+    record.AddIssue(columns.TryGetValue(target,out int column)?column:-1,target,field+" — "+Loc.T("Text sa nezmestí do poľa"),false);
+   }
    if(record.Error==null)record.Label=label;
    else record.PartialPreview=label;
   }

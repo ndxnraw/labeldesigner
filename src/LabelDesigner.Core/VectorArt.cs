@@ -33,7 +33,13 @@ public static class VectorArt {
   bearer=s.Kind==14?5*module:0;
  }
  internal static VectorScene Build(LabelSettings s,bool inspectCodes){WorkContext.Check();if(s.Variables.Count>0){var record=BatchData.Record(s,new string[0],new List<ColumnBinding>(),-1,0,1,DateTime.Today);if(record.Error!=null)throw new InvalidDataException(record.Error);s=record.Label;}Engine.Validate(s);var scene=new VectorScene{Width=s.Width,Height=s.Height};try{
-  for(int i=0;i<s.Texts.Count;i++){WorkContext.Check();var t=s.Texts[i];Text(scene,t.Text,t.FontName,t.Size,t.Bold,t.Center,Rect(t.X,t.Y,t.Width,t.Height),false,i);}
+  for(int i=0;i<s.Texts.Count;i++){
+   WorkContext.Check();
+   var t=s.Texts[i];var box=Rect(t.X,t.Y,t.Width,t.Height);
+   if(t.MinimumFitSize>0){
+    if(!string.IsNullOrWhiteSpace(t.Text))scene.Shapes.Add(new ArtShape{Path=FixedTextLayout.Build(t,out _,out _),Clip=box,Element=i});
+   }else Text(scene,t.Text,t.FontName,t.Size,t.Bold,t.Center,box,false,i);
+  }
   if(!s.HideBarcode){double k=s.Dpi/25.4;int m=Engine.Module(s),total=Engine.Modules(s),quiet=Engine.Quiet(s.Kind);string bits=Engine.CodeBits(s),value=Engine.Caption(s);
   int x,y,h,bearer;LinearOrigin(s,m,total,out x,out y,out h,out bearer);
   var bars=new GraphicsPath();

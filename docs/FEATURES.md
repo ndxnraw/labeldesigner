@@ -16,6 +16,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Prispôsobenie textu pevnému poľu** zalomí text a podľa potreby zmenší
+  písmo po nastavené minimum. Rovnako funguje pri rýchlej tlači zo šablóny,
+  dávkach a exportoch. Ak sa text stále nezmestí, kontrola zobrazí upozornenie.
 - **Čiary a obdĺžniky** sa dajú vložiť a upravovať ako samostatné prvky.
   Obdĺžnik má voliteľný čierny obrys a priehľadnú, čiernu alebo bielu
   výplň. Kontrola rozlíši voľný okraj kódu od jeho prekrytia.

@@ -23,6 +23,96 @@ class EditorRefinementTests {
  static object Call(object target,string name,params object[] args){return target.GetType().GetMethod(name,BindingFlags.Instance|BindingFlags.NonPublic).Invoke(target,args);}
  static void Sizing(){Check(LabelSettings.Default().DigitSize==12,"new caption 12pt");Check(LabelSettings.Default().Texts[0].AutoWidth,"startup text opts in");var old=ProjectXml.Decode<TextItem>("<TextItem><Text>Legacy</Text><Width>54</Width></TextItem>");Check(!old.AutoWidth&&old.Width==54,"legacy manual dimensions");var t=new TextItem{Text="Short",AutoWidth=true,X=3,Y=3};TextAutoLayout.Fit(t,60,45);double shortWidth=t.Width;Check(shortWidth<40,"short text content width");t.Text="Longer product name";TextAutoLayout.Fit(t,60,45);Check(t.Width>shortWidth&&t.Width<=54,"typing grows width");t.Text="A";TextAutoLayout.Fit(t,60,45);Check(t.Width<shortWidth,"deleting shrinks width");Check(ProjectXml.Clone(LabelSettings.Default()).Texts[0].AutoWidth,"auto width XML");}
  static void MoreSizing(){var offCenter=new TextItem{AutoWidth=true,Center=true,X=3,Y=3,Width=10,Text="Long off-center product title"};TextAutoLayout.Fit(offCenter,60,45);Check(offCenter.X>=2.999&&offCenter.Width<=10.001,"off-center text grows within available width");var s=LabelSettings.Default();double center=s.Texts[0].X+s.Texts[0].Width/2;s.Texts[0].Text="A";TextAutoLayout.Apply(s);Check(Math.Abs(center-s.Texts[0].X-s.Texts[0].Width/2)<.001,"center anchor retained");s.Texts[0].Text="Žltý čaj\r\nNový riadok";TextAutoLayout.Apply(s);Check(s.Texts[0].Height>6&&s.Texts[0].Width<54,"Unicode multiline fit");double first=s.Texts[0].Width;TextAutoLayout.Apply(s);Check(Math.Abs(first-s.Texts[0].Width)<.0001,"auto layout idempotent");s.Texts[0].Text="{serial}";s.Variables.Add(new VariableField{Name="serial",Type="Fixed",FixedValue="Long batch product name"});var row=BatchData.Record(s,new string[0],new System.Collections.Generic.List<ColumnBinding>(),-1,0,1,DateTime.Today);Check(row.Error==null&&row.Label.Texts[0].Text=="Long batch product name","batch expands automatic text");var expected=ProjectXml.Decode<TextItem>(ProjectXml.Encode(s.Texts[0]));expected.Text="Long batch product name";TextAutoLayout.Fit(expected,60,45);Check(Math.Abs(row.Label.Texts[0].Width-expected.Width)<.001,"batch geometry fits expanded content");var manual=new TextItem{Text="Fixed",X=3,Y=3,Width=40,Height=8};TextAutoLayout.Fit(manual,60,45);Check(manual.Width==40&&manual.Height==8,"manual fields remain untouched");foreach(double width in new[]{10d,20,30,40,60}){var startup=StartupLayout.Create(new StartupProfile{Width=width,Height=45});Check(startup.DigitSize>=10,"small label caption floor "+width);Engine.Validate(startup);}var old=ProjectXml.Decode<LabelSettings>("<LabelSettings><DigitSize>5.5</DigitSize></LabelSettings>");Check(old.DigitSize==5.5,"saved caption size preserved");Check(ProjectXml.Decode<LabelSettings>("<LabelSettings/>").DigitSize==8,"legacy absent caption unchanged");}
+ static void FixedText(string dir){
+  const string content="Žltý čaj z horskej záhrady";
+  var label=LabelSettings.Default();label.HideBarcode=true;label.Texts.Clear();
+  var field=new TextItem{Text=content,X=3,Y=6,Width=24,Height=9,Size=16,MinimumFitSize=6,Center=true};
+  label.Texts.Add(field);label.QuickPrintFields.Add(0);
+  bool fits;
+  double effective=FixedTextLayout.Resolve(field,out fits);
+  Check(fits&&effective>=6&&effective<16,"wrapped text shrinks to fit a fixed field");
+  using(var scene=VectorArt.Build(label)){
+   var shape=scene.Shapes[0];var bounds=shape.Path.GetBounds();
+   Check(bounds.Height>3&&bounds.Bottom<=15.01&&bounds.Right<=27.01&&shape.Clip==new RectangleF(3,6,24,9),"vector scene keeps the fixed field and all fitted lines");
+  }
+  Check(field.Size==16&&field.Width==24&&field.Height==9,"layout never rewrites requested geometry or font");
+  var saved=Path.Combine(dir,"fixed-fit.ean.xml");Engine.Save(saved,label);
+  var template=Engine.Load(saved);
+  Check(template.Texts[0].MinimumFitSize==6&&template.Texts[0].Size==16,"saved template retains both font sizes");
+  var quick=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0,content}},DateTime.Today);
+  var batch=BatchData.Record(template,new[]{content},new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Column=0,Target="text:0"}},-1,0,17,DateTime.Today);
+  Check(quick.CanPrint&&batch.Error==null,"fitted template and batch can print");
+  var plan=quick.CreatePlan(1);
+  using var printScene=plan.Scene(0);
+  var fittedPath=printScene.Shapes[0].Path;
+  string svgPath=VectorArt.PathData(fittedPath,true);
+  using(var batchScene=VectorArt.Build(batch.Label))
+   Check(VectorArt.PathData(batchScene.Shapes[0].Path,true)==svgPath,"batch and quick print use identical vector layout");
+  using(var doc=new LabelPrintDocument(quick.Label,plan)){
+   using(var image=doc.CreatePreview(0,new SizeF(60,45)))
+    Check(image.Width>0&&image.Height>0,"fit renders in the print preview");
+   using var printed=new Bitmap(480,360);
+   printed.SetResolution(203.2f,203.2f);
+   using(var graphics=Graphics.FromImage(printed)){
+    graphics.Clear(Color.White);
+    doc.RenderPrinterPage(graphics,0,new RectangleF(0,0,240,180),0,0,false);
+   }
+   var ink=Rectangle.Empty;
+   for(int y=0;y<printed.Height;y++)for(int x=0;x<printed.Width;x++){
+    if(printed.GetPixel(x,y).R>=128)continue;
+    var dot=new Rectangle(x,y,1,1);
+    ink=ink.IsEmpty?dot:Rectangle.Union(ink,dot);
+   }
+   var geometry=fittedPath.GetBounds();
+   Check(!ink.IsEmpty&&Math.Abs(ink.Left-geometry.Left*8)<=2&&Math.Abs(ink.Bottom-geometry.Bottom*8)<=2,
+    "Windows print drawing uses the fitted bounds in physical units");
+  }
+  string svg=Path.Combine(dir,"fixed-fit.svg");
+  foreach(string format in new[]{"svg","pdf","docx","zpl"})JobOutput.Export(Path.Combine(dir,"fixed-fit."+format),format,plan,203.2);
+  Check(File.ReadAllText(svg).Contains(" d=\""+svgPath+"\""),"SVG export uses exactly the fitted artwork");
+  Check(System.Text.Encoding.ASCII.GetString(File.ReadAllBytes(Path.Combine(dir,"fixed-fit.pdf"))).Contains(VectorArt.PathData(fittedPath,false)),"PDF contains the fitted path");
+  using(var word=System.IO.Compression.ZipFile.OpenRead(Path.Combine(dir,"fixed-fit.docx")))
+  using(var reader=new StreamReader(word.GetEntry("word/media/part1.svg").Open()))
+   Check(reader.ReadToEnd().Contains(" d=\""+svgPath+"\""),"Word contains the fitted path");
+  using(var raster=JobOutput.Raster(printScene,203.2))
+  using(var zpl=ZplImport.Render(File.ReadAllText(Path.Combine(dir,"fixed-fit.zpl")),203.2,60,45,out _))
+   Check(Convert.ToBase64String(Engine.Packed(zpl,true))==Convert.ToBase64String(Engine.Packed(raster,true)),"ZPL encodes exactly the fitted raster");
+  string tooLong=new string('W',250);
+  var overflow=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0,tooLong}},DateTime.Today);
+  Check(overflow.CanPrint&&overflow.Issues.Exists(i=>!i.Blocking&&i.Element==0),"quick print displays an opt-in overflow warning");
+  Check(FixedTextLayout.Resolve(overflow.Label.Texts[0],out fits)==6&&!fits,"unfitted text stops at the minimum");
+  batch=BatchData.Record(template,new[]{tooLong},new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Column=0,Target="text:0"}},-1,0,17,DateTime.Today);
+  Check(batch.Error==null&&batch.Issues.Exists(i=>!i.Blocking&&i.Column==0&&i.Row==17&&i.Message.StartsWith(string.Format(Loc.T("Text {0}"),1)+" — ")),"batch warning identifies mapped row, column and text field");
+  var report=PreflightReport.Inspect(overflow.CreatePlan(1));
+  Check(report.HasWarnings&&!report.CanProceed(false)&&report.CanProceed(true),"overflow requires explicit output review");
+  var narrow=new TextItem{Text="W",Width=1,Height=40,Size=14,MinimumFitSize=14};
+  Check(FixedTextLayout.Resolve(narrow,out fits)==14&&!fits,"single glyph wider than the field is reported");
+  var shortText=new TextItem{Text="Čaj",Width=25,Height=12,Size=12,MinimumFitSize=6};
+  Check(FixedTextLayout.Resolve(shortText,out fits)==12&&fits,"short text keeps nominal size");
+  shortText.Width=40;shortText.Height=20;shortText.Size=16;
+  foreach(string value in new[]{"jablko","Ária"}){
+   shortText.Text=value;
+   Check(FixedTextLayout.Resolve(shortText,out fits)==16&&fits,"normal left glyph bearing does not shrink "+value);
+  }
+ }
+ static void FixedTextEditor(string dir){
+  using var main=new MainForm(Path.Combine(dir,"fixed-fit-prefs.xml"));
+  main.StartPosition=FormStartPosition.Manual;main.Location=new Point(-20000,-20000);
+  main.Show();Application.DoEvents();
+  var preview=F<PreviewPanel>(main,"preview");
+  preview.SelectElement(0);
+  var fixedFit=F<CheckBox>(main,"inspectFixedFit");var minimum=F<NumericUpDown>(main,"inspectFitMinimum");
+  var autoWidth=F<CheckBox>(main,"inspectAutoWidth");
+  var before=((LabelSettings)Call(main,"Read")).Texts[0];
+  Check(!fixedFit.Checked&&autoWidth.Checked&&!minimum.Visible,"existing automatic width is preserved until fixed fit is selected");
+  fixedFit.Checked=true;minimum.Value=7;
+  var saved=((LabelSettings)Call(main,"Read")).Texts[0];
+  Check(fixedFit.Checked&&!autoWidth.Checked&&minimum.Visible&&saved.MinimumFitSize==7&&saved.Width==before.Width,"inspector sets fixed fit without resizing");
+  F<TextBox>(main,"inspectText").Text=new string('W',250);
+  Call(main,"UpdatePreview");
+  Check(preview.ProblemElements.Contains(0)&&preview.Settings.Texts[0].Size==before.Size,"editor flags overflow without permanently reducing font size");
+  Call(main,"Apply",LabelSettings.Default());main.Close();
+ }
  static void Key(Control control,Keys key){var message=new Message();object[] args={message,key};bool handled=(bool)control.GetType().GetMethod("ProcessCmdKey",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(control,args);Check(handled,"actual Enter/Escape command handled");Application.DoEvents();}
  static bool HasButton(Control parent,string text){foreach(Control child in parent.Controls){if(child is Button&&child.Text==text)return true;if(HasButton(child,text))return true;}return false;}
  static void Snapshot(Control control,string path){using(var bitmap=new Bitmap(control.Width,control.Height)){control.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));bitmap.Save(path);}}
@@ -41,5 +131,5 @@ class EditorRefinementTests {
  static void WheelEditing(string dir){using(var main=new MainForm(Path.Combine(dir,"wheel-prefs.xml"))){main.StartPosition=FormStartPosition.Manual;main.Location=new Point(-20000,-20000);main.Show();main.Hide();main.Show();Application.DoEvents();var values=F<System.Collections.Generic.Dictionary<string,NumericUpDown>>(main,"nums");var number=values["BarX"];var other=values["BarY"];other.Focus();decimal original=number.Value;Wheel(number,120);Check(number.Value==original,"hover wheel does not change numeric value");number.Focus();Wheel(number,120);Check(number.Value==original,"focus without click does not arm wheel");ClickValue(number);Wheel(number,120);Check(number.Value>original,"clicked numeric field retains wheel editing");other.Focus();number.Focus();decimal previous=number.Value;Wheel(number,-120);Check(number.Value==previous,"leaving numeric field revokes wheel editing");ClickValue(number);Wheel(number,-120);Check(number.Value<previous,"negative wheel edits activated field");foreach(var value in values.Values)Check(value.GetType().Name=="ClickWheelNumericUpDown","all editor numeric fields use wheel guard");Call(main,"Apply",LabelSettings.Default());main.Close();}}
  static void TabCaptions(){foreach(string lang in Loc.Codes)foreach(float size in new[]{10.5f,15.75f,21f}){Loc.Language=lang;using(var form=new Form{ClientSize=new Size(360,550),StartPosition=FormStartPosition.Manual,Location=new Point(-20000,-20000)})using(var tabs=new ModernTabs{Dock=DockStyle.Fill,Font=UiFonts.Get(size)}){form.Controls.Add(tabs);foreach(string title in new[]{"Médium","Kalibrácia","Zebra","Detaily"})tabs.AddPage(Loc.T(title));form.Show();Application.DoEvents();var header=F<FlowLayoutPanel>(tabs,"header");foreach(Control button in header.Controls){int needed=TextRenderer.MeasureText(button.Text,button.Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+12;Check(button.Width>=needed,"complete tab caption "+lang+" / "+button.Text+" @ "+size);Check(button.Right<=header.ClientSize.Width&&button.Bottom<=header.ClientSize.Height,"tab header stays within viewport");}form.Close();}}Loc.Language="sk";}
  static void WheelViewport(){using(var form=new Form{ClientSize=new Size(400,180),StartPosition=FormStartPosition.Manual,Location=new Point(-20000,-20000)})using(var panel=new Panel{Dock=DockStyle.Fill,AutoScroll=true,AutoScrollMinSize=new Size(0,800)})using(var number=new ClickWheelNumericUpDown{Location=new Point(10,10),Minimum=0,Maximum=10,Value=5}){form.Controls.Add(panel);panel.Controls.Add(number);form.Show();form.Hide();form.Show();Application.DoEvents();Wheel(number,-120);Check(number.Value==5,"unarmed scroll preserves value");Check(panel.AutoScrollPosition.Y<0,"unarmed wheel scrolls enclosing viewport");panel.AutoScrollPosition=Point.Empty;ClickValue(number);Wheel(number,120);Check(number.Value>5,"clicked wheel increments value");decimal edited=number.Value;Check(panel.AutoScrollPosition.Y==0,"armed wheel does not scroll viewport");number.ReadOnly=true;Wheel(number,-120);Check(number.Value==edited,"read-only wheel preserves value");number.ReadOnly=false;number.Value=10;Wheel(number,120);Check(number.Value==10,"wheel respects numeric maximum");number.DownButton();Check(number.Value==9,"spinner remains usable");number.UpButton();Check(number.Value==10,"spinner increment remains usable");form.Close();}}
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);PdfWorkspace(args[0]);LayerActionCaptions(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);PdfWorkspace(args[0]);LayerActionCaptions(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

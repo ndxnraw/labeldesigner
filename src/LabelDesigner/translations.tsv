@@ -1011,3 +1011,5 @@ Priehľadná	Transparent	Průhledná	Átlátszó
 Biela	White	Bílá	Fehér
 Neplatný obrys alebo výplň tvaru.	Invalid shape outline or fill.	Neplatný obrys nebo výplň tvaru.	Érvénytelen körvonal vagy kitöltés.
 Čiara alebo obdĺžnik prekrýva kód.	A line or rectangle overlaps the code.	Čára nebo obdélník překrývá kód.	Vonal vagy téglalap takarja a kódot.
+Prispôsobiť text pevnému poľu	Fit text to fixed field	Přizpůsobit text pevnému poli	Szöveg igazítása a rögzített mezőhöz
+Minimálne písmo (pt)	Minimum font size (pt)	Minimální velikost písma (pt)	Minimális betűméret (pt)

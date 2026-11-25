@@ -2,6 +2,8 @@ using System;using System.Collections.Generic;
 namespace EanEtikety {
 public class TextItem {
  public bool AutoWidth {get;set;}
+ public double MinimumFitSize {get;set;}
+ public bool ShouldSerializeMinimumFitSize(){return MinimumFitSize!=0;}
  public double Rotation {get;set;}
  public string Text {get;set;}
  public string FontName {get;set;}

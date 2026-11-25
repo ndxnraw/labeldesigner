@@ -157,6 +157,18 @@ nahradené položky. Poškodené šablóny sú v náhľade označené a preskoč
 Pre presný návrat odstráňte aj položky pridané pôvodnou
 obnovou. Zálohy fungujú offline.
 
+PRISPÔSOBENIE TEXTU PEVNÉMU POĽU
+Označte text a vo Vlastnostiach zapnite Prispôsobiť text pevnému poľu.
+Nastavte šírku, výšku, požadovanú veľkosť písma a Minimálne písmo (pt).
+Táto voľba vypne automatické rozširovanie poľa podľa obsahu.
+
+Aplikácia zalomí text a podľa potreby zmenší písmo po zadanú dolnú hranicu.
+Pole si ponechá rozmery a projekt si zapamätá pôvodnú veľkosť písma aj minimum.
+Výpočet sa opakuje po dosadení údajov v rýchlom formulári a pre každý riadok
+dávky. Náhľad, tlač a export používajú rovnaké rozloženie. Ak sa text nezmestí
+ani pri minime, kontrola označí pole alebo riadok. Pokračovanie vyžaduje
+potvrdenie upozornenia pred tlačou alebo exportom, kde sa presah oreže.
+
 ČIARY A OBDĹŽNIKY
 V ponuke Nástroje → Vložiť použite Pridať čiaru… alebo Pridať obdĺžnik….
 Dĺžku, hrúbku a polohu zadáte v jednotkách projektu. Obrys obdĺžnika
