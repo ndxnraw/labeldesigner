@@ -94,7 +94,7 @@ namespace EanEtikety {
 
   static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,bool editor) {
    Engine.ValidateDraft(template);
-   var label=ProjectXml.Clone(template);
+   var label=JobPreparation.CloneForPreparation(template);
    var selected=new HashSet<int>(editor?new List<int>():Selected(template));
    var issues=new List<LabelIssue>();
    var variables=BatchData.Variables(template,0,instant);
@@ -109,8 +109,8 @@ namespace EanEtikety {
     catch(Exception ex){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=ex.Message});}
    }
    var ruleErrors=new HashSet<string>(StringComparer.Ordinal);
-   var hidden=ConditionalVisibility.Apply(label,variables,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
-    message=>ruleErrors.Add(message));
+   var hidden=JobPreparation.ProjectArtwork(label,variables,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
+    (_,message)=>ruleErrors.Add(message));
    if(hidden.Count>0){
     issues.RemoveAll(issue=>hidden.Contains(issue.Element));
     var indices=Elements.Indices(label);

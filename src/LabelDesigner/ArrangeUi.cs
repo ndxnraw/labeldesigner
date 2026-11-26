@@ -24,6 +24,7 @@ public partial class MainForm {
   for(int i=0;i<selected.Count;i++)if(group.Items[i].SourceIndex!=-2)sourceIndices.TryAdd(group.Items[i].SourceIndex,selected[i]);
   for(int i=0;i<selected.Count;i++){
    var item=group.Items[i];
+   RemapPastedImage(item.Symbol,sourceIndices);
    if(item.Visibility==null&&item.GroupVisibility==null)continue;
    var meta=Elements.Meta(s,selected[i]);
    meta.Visibility=RemapPastedVisibility(item.Visibility,sourceIndices);

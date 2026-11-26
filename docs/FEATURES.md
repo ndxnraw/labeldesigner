@@ -16,6 +16,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Obrázky podľa údajov** vyberú PNG, JPEG alebo SVG uložené priamo
+  v šablóne podľa hodnoty poľa alebo premennej. Logo sa vycentruje
+  v pevnom ráme so zachovaným pomerom strán. Pre prázdnu alebo neznámu
+  hodnotu možno zastaviť výstup, vynechať obrázok alebo použiť predvolený.
 - **Podmienené zobrazenie** umožňuje zobraziť prvok alebo skupinu, keď je
   vyplnené zvolené pole alebo premenná, prípadne keď sa hodnota rovná
   zadanému textu. Vrstvy označia skryté prvky. Rýchla tlač, každý riadok

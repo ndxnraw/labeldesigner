@@ -1086,3 +1086,22 @@ Zdroj pravidla zobrazenia obsahuje chybu.	The visibility rule's data source cont
 Vždy	Always	Vždy	Mindig
 Zobraziť	Show	Zobrazit	Megjelenítés
 Premenná	Variable	Proměnná	Változó
+Obrázok podľa údajov	Mapped image	Obrázek podle údajů	Adatvezérelt kép
+Obrázok podľa údajov…	Map image from data…	Obrázek podle údajů…	Adatvezérelt kép…
+Obrázok	Image	Obrázek	Kép
+Obrázok {0}	Image {0}	Obrázek {0}	{0}. kép
+Priradené obrázky	Mapped images	Přiřazené obrázky	Hozzárendelt képek
+Ak chýba priradenie	When no image matches	Pokud chybí přiřazení	Ha nincs egyező kép
+Zastaviť výstup	Block output	Zastavit výstup	Kimenet letiltása
+Nechať rám prázdny	Leave the frame blank	Nechat rámeček prázdný	A keret maradjon üres
+Použiť predvolený obrázok	Use the default image	Použít výchozí obrázek	Alapértelmezett kép használata
+Predvolený obrázok	Default image	Výchozí obrázek	Alapértelmezett kép
+Vyberte zdroj obrázka.	Choose a data source for the image.	Vyberte zdroj obrázku.	Válassza ki a kép adatforrását.
+Pridajte aspoň jeden obrázok.	Add at least one image.	Přidejte alespoň jeden obrázek.	Adjon hozzá legalább egy képet.
+Hodnoty obrázkov musia byť vyplnené a jedinečné.	Image keys must be filled in and unique.	Hodnoty obrázků musí být vyplněné a jedinečné.	A képazonosítók legyenek kitöltve és egyediek.
+Chýba predvolený obrázok.	Choose a default image.	Chybí výchozí obrázek.	Válasszon alapértelmezett képet.
+Nahradiť obrázok	Replace image	Nahradit obrázek	Kép cseréje
+Neplatné mapovanie obrázka.	Invalid image mapping.	Neplatné mapování obrázku.	Érvénytelen kép-hozzárendelés.
+Zdroj obrázka už nie je dostupný.	The image data source is no longer available.	Zdroj obrázku již není dostupný.	A kép adatforrása már nem érhető el.
+Zdroj obrázka obsahuje chybu.	The image data source contains an error.	Zdroj obrázku obsahuje chybu.	A kép adatforrása hibás.
+Pre hodnotu chýba priradený obrázok.	No image matches the value.	Pro hodnotu chybí přiřazený obrázek.	Az értékhez nincs hozzárendelve kép.

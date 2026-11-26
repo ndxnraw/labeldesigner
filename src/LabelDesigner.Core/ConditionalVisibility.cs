@@ -17,7 +17,7 @@ namespace EanEtikety {
 
   // Apply only to an owned copy after data substitution. Frozen output can then
   // use the ordinary validators and renderers without evaluating rules again.
-  internal static HashSet<int> Apply(LabelSettings label,Dictionary<string,string> values,Func<int,bool> invalidSource,Action<string> report) {
+  internal static HashSet<int> FindHidden(LabelSettings label,Dictionary<string,string> values,Func<int,bool> invalidSource,Action<string> report) {
    var hidden=new HashSet<int>();
    if(!HasRules(label))return hidden;
    var indices=Elements.Indices(label);
@@ -55,14 +55,6 @@ namespace EanEtikety {
     meta.GroupVisibility=null;
    }
 
-   if(hidden.Count==0)return hidden;
-   // Preserve original layer and diagnostic identities across compacted arrays.
-   foreach(int index in indices){
-    if(hidden.Contains(index))continue;
-    var meta=Elements.Meta(label,index);
-    meta.SourceIndex??=index;
-   }
-   Elements.Remove(label,new List<int>(hidden));
    return hidden;
   }
  }

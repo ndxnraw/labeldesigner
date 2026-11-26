@@ -21,9 +21,45 @@ public static class Assets {
     };
    }
    return;}
-  var image=symbol.Image;double width=symbol.Width/image.CropWidth,height=symbol.Height/image.CropHeight,x0=symbol.X-image.CropX*width,y0=symbol.Y-image.CropY*height;
-  if(image.Mime=="image/svg+xml"){using(var imported=SafeSvg.Read(Encoding.UTF8.GetString(Convert.FromBase64String(image.Data))))using(var transform=new Matrix((float)(width/imported.Width),0,0,(float)(height/imported.Height),(float)x0,(float)y0)){foreach(var sh in imported.Shapes){var copy=sh.Copy();copy.Path.Transform(transform);copy.Clip=box;copy.Element=index;scene.Shapes.Add(copy);}}}
-  else{using(var stream=new MemoryStream(Convert.FromBase64String(image.Data)))using(var original=Image.FromStream(stream)){var b=new Bitmap(original);var rect=new RectangleF((float)x0,(float)y0,(float)width,(float)height);var path=new GraphicsPath();path.AddRectangle(rect);scene.Shapes.Add(new ArtShape{Path=path,Clip=box,Element=index,Bitmap=b,ImageBounds=rect});}}
+  var image=symbol.Image;
+  if(image.Mime=="image/svg+xml"){
+   using(var imported=SafeSvg.Read(Encoding.UTF8.GetString(Convert.FromBase64String(image.Data)))){
+    var placement=ImagePlacement(symbol,box,image,imported.Width,imported.Height);
+    using(var transform=new Matrix((float)(placement.Full.Width/imported.Width),0,0,(float)(placement.Full.Height/imported.Height),placement.Full.X,placement.Full.Y)){
+     foreach(var sh in imported.Shapes){
+      var copy=sh.Copy();copy.Path.Transform(transform);copy.Clip=placement.Clip;copy.Element=index;scene.Shapes.Add(copy);
+     }
+    }
+   }
+  }else{
+   using(var stream=new MemoryStream(Convert.FromBase64String(image.Data)))
+   using(var original=Image.FromStream(stream)){
+    var placement=ImagePlacement(symbol,box,image,original.Width,original.Height);
+    var path=new GraphicsPath();
+    try{
+     path.AddRectangle(placement.Full);
+     scene.Shapes.Add(new ArtShape{Path=path,Clip=placement.Clip,Element=index,Bitmap=new Bitmap(original),ImageBounds=placement.Full});
+    }catch{path.Dispose();throw;}
+   }
+  }
+ }
+ static (RectangleF Clip,RectangleF Full) ImagePlacement(SymbolItem symbol,RectangleF frame,ImageContent image,double pixelsWide,double pixelsHigh){
+  double width=symbol.Width,height=symbol.Height,x=symbol.X,y=symbol.Y;
+  if(image.FitFrame){
+   double cropWidth=pixelsWide*image.CropWidth,cropHeight=pixelsHigh*image.CropHeight;
+   double scale=Math.Min(width/cropWidth,height/cropHeight);
+   width=cropWidth*scale;height=cropHeight*scale;
+   x+=(symbol.Width-width)/2;y+=(symbol.Height-height)/2;
+  }
+  var clip=image.FitFrame?new RectangleF((float)x,(float)y,(float)width,(float)height):frame;
+  width/=image.CropWidth;height/=image.CropHeight;
+  var full=new RectangleF((float)(x-image.CropX*width),(float)(y-image.CropY*height),(float)width,(float)height);
+  return (clip,full);
+ }
+ internal static double ImageDpi(SymbolItem symbol){
+  var image=symbol.Image;
+  double horizontal=image.PixelWidth*image.CropWidth/symbol.Width,vertical=image.PixelHeight*image.CropHeight/symbol.Height;
+  return 25.4*(image.FitFrame?Math.Max(horizontal,vertical):Math.Min(horizontal,vertical));
  }
 }
 // Strict, offline SVG subset. Unknown constructs are rejected instead of producing an incomplete logo.

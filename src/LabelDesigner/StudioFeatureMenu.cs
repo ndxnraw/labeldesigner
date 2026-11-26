@@ -41,11 +41,12 @@ public partial class MainForm {
   insertMenu.Items.AddRange(new ToolStripItem[]{
    FeatureItem("Pridať text",HeaderIcon.AddText,AddText),
    FeatureItem("Vložiť obrázok",HeaderIcon.Image,AddImage),
+   FeatureItem(MappedImageTitle,HeaderIcon.Image,()=>EditMappedImage(-2)),
    FeatureItem("Pridať kód…",HeaderIcon.Barcode,()=>ChooseBarcode(false)),
    FeatureItem("Pridať čiaru…",HeaderIcon.Image,()=>EditShape(-2,true)),
    FeatureItem("Pridať obdĺžnik…",HeaderIcon.Image,()=>EditShape(-2,false)),
    FeatureItem("Symbol Zálohované",HeaderIcon.Deposit,()=>EditSymbol(-2))});
-  if(hideBarcode)insertMenu.Items.Insert(3,FeatureItem("Obnoviť hlavný kód",HeaderIcon.Barcode,AddBarcodeObject));
+  if(hideBarcode)insertMenu.Items.Insert(4,FeatureItem("Obnoviť hlavný kód",HeaderIcon.Barcode,AddBarcodeObject));
  }
  void GroupedFeatureMenu() {
   PrepareFeatureMenu(featureMenu);

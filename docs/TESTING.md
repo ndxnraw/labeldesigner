@@ -82,6 +82,11 @@ source attempt. A test transport captures the submitted copy count.
 Manual print result checks cover per-row totals across copies, metadata-only
 attempts, old archives, concurrent edits, bounds, cleanup and a recovery
 proposal through the actual history and print preview.
+`EditorRefinementTests` covers embedded PNG/SVG image mappings without the
+original files, frame geometry, generated values, original CSV issue positions,
+the three missing-value policies, editor and quick print rendering, PDF/SVG/Word,
+batch ZPL export and the Zebra raster path.
+
 `EditorRefinementTests` exercises visibility rules after field substitution,
 group copying, missing data sources, fixed geometry, conditional artwork in
 the editor, quick print, batches, preflight and PDF/SVG/Word/ZPL output. It

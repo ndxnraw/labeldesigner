@@ -11,6 +11,113 @@ class EditorRefinementTests {
    "<ElementMeta><Index>-3</Index><Group>optional</Group><Layer>103</Layer><GroupVisibility><Field>0</Field><Mode>Filled</Mode></GroupVisibility></ElementMeta></Metadata>");
   return ProjectXml.Decode<LabelSettings>(xml);
  }
+ static void MappedArtwork(string dir){
+  var label=LabelSettings.Default();label.HideBarcode=true;
+  label.Texts[0].Text="North";label.QuickPrintFields.Add(0);
+  string svgPath=Path.Combine(dir,"mapped-logo-source.svg");
+  File.WriteAllText(svgPath,"<svg xmlns='http://www.w3.org/2000/svg' width='96' height='32'><rect width='96' height='32' fill='#223344'/></svg>");
+  var embedded=Assets.Import(svgPath);
+  var image=ProjectXml.Encode(embedded);
+  image=image.Substring(image.IndexOf("<ImageContent",StringComparison.Ordinal)).Replace("ImageContent","Image");
+  var xml=ProjectXml.Encode(label).Replace("<Symbols />","<Symbols><SymbolItem><X>21</X><Y>17</Y><Width>24</Width><Height>18</Height>"+
+   "<ImageMapping><Field>0</Field><Missing>Error</Missing><Variants><ImageVariant><Key>North</Key><Name>logo.svg</Name>"+image+
+   "</ImageVariant></Variants></ImageMapping></SymbolItem></Symbols>");
+  var template=ProjectXml.Decode<LabelSettings>(xml);
+  var date=new DateTime(2026,11,26);
+  var current=QuickPrint.Prepare(template,null,date);
+  Check(current.CanPrint&&current.Label.Symbols[0].Image?.Data==embedded.Data,"quick print selects the embedded image");
+  string pngPath=Path.Combine(dir,"mapped-logo-source.png");
+  using(var bitmap=new Bitmap(32,96))using(var g=Graphics.FromImage(bitmap)){
+   g.Clear(Color.Black);bitmap.Save(pngPath);
+  }
+  var tall=Assets.Import(pngPath);
+  template.Symbols[0].ImageMapping.Variants.Add(new ImageVariant{Key="South",Name="tall.png",Image=tall});
+  string project=Path.Combine(dir,"mapped-images.ean.xml");
+  Engine.Save(project,template);
+  File.Delete(svgPath);File.Delete(pngPath);
+  template=Engine.Load(project);
+  Check(template.Symbols[0].ImageMapping.Variants.Count==2,"both images round-trip without their source files");
+  var south=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0," South "}},date);
+  Check(south.CanPrint&&south.Label.Symbols[0].Image.Data==tall.Data&&south.Label.Symbols[0].ImageMapping==null,"quick print uses filled field and freezes the chosen image");
+  using(var wideScene=VectorArt.Build(template))
+  using(var tallScene=VectorArt.Build(south.Label)){
+   var wideShape=wideScene.Shapes.Find(shape=>shape.Element==-3);
+   var tallShape=tallScene.Shapes.Find(shape=>shape.Element==-3);
+   Check(wideShape.Clip==new RectangleF(21,22,24,8)&&tallShape.ImageBounds==new RectangleF(30,17,6,18),"SVG and PNG are centered proportionally inside the fixed frame");
+  }
+  var binding=new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Target="text:0",Column=0}};
+  var northRow=BatchData.Record(template,new[]{"North"},binding,-1,0,6,date);
+  var southRow=BatchData.Record(template,new[]{"South"},binding,-1,1,7,date);
+  var missing=BatchData.Record(template,new[]{"south"},binding,-1,2,8,date);
+  Check(northRow.Label?.Symbols[0].Image.Data==embedded.Data&&southRow.Label?.Symbols[0].Image.Data==tall.Data,"batch selects independently per row");
+  Check(missing.Error!=null&&missing.Row==8&&missing.Issues.Exists(issue=>issue.Column==0&&issue.Blocking),"unmapped value reports its original row and column");
+  var optional=ProjectXml.Clone(template);
+  optional.Symbols[0].ImageMapping.Missing=MissingImage.Blank;
+  Check(BatchData.Record(optional,new[]{"other"},binding,-1,2,8,date).Label.Symbols.Count==0,"optional unknown value leaves the frame blank");
+  optional.Symbols[0].ImageMapping.Missing=MissingImage.Fallback;
+  optional.Symbols[0].ImageMapping.FallbackKey="South";
+  Check(BatchData.Record(optional,new[]{""},binding,-1,2,8,date).Label.Symbols[0].Image.Data==tall.Data,"empty value uses embedded fallback");
+  Elements.Remove(optional,new System.Collections.Generic.List<int>{0});
+  Check(!QuickPrint.Prepare(optional,null,date).CanPrint,"a removed source is reported even when fallback is selected");
+  var byVariable=ProjectXml.Clone(template);
+  byVariable.Variables.Add(new VariableField{Name="brand",Type="Fixed",FixedValue="South"});
+  byVariable.Symbols[0].ImageMapping.Variable="brand";
+  Check(JobPreparation.Resolve(byVariable,date).Symbols[0].Image.Data==tall.Data,"generated data can select a variant");
+  var hidden=ProjectXml.Clone(template);
+  Elements.Meta(hidden,0).Visibility=new VisibilityRule{Field=0,Mode=VisibilityMode.EqualsValue,Value="never"};
+  Check(QuickPrint.Prepare(hidden,null,date).Label.Symbols[0].Image.Data==embedded.Data,"source data survives conditional hiding of its field");
+  Elements.Meta(hidden,-3).Visibility=new VisibilityRule{Field=0,Mode=VisibilityMode.EqualsValue,Value="never"};
+  Check(BatchData.Record(hidden,new[]{"unknown"},binding,-1,3,9,date).Error==null,"hidden artwork does not require a mapping match");
+  var artworkOnly=ProjectXml.Clone(template);
+  Elements.Meta(artworkOnly,0).Visibility=new VisibilityRule{Field=0,Mode=VisibilityMode.EqualsValue,Value="never"};
+  var batch=OutputPlan.Create(new System.Collections.Generic.List<BatchRecord>{
+   BatchData.Record(artworkOnly,new[]{"North"},binding,-1,0,6,date),
+   BatchData.Record(artworkOnly,new[]{"South"},binding,-1,1,7,date)},template,date);
+  Check(!PreflightReport.Inspect(batch).Blocking,"preflight accepts both resolved images");
+  string output=Path.Combine(dir,"mapped-output");
+  Engine.Pdf(output+".pdf",template);Engine.Docx(output+".docx",template);Engine.Svg(output+".svg",template);Engine.Zpl(output+".zpl",template);
+  Check(File.ReadAllText(output+".svg").Contains("#223344"),"SVG export includes the selected vector image");
+  using(var word=System.IO.Compression.ZipFile.OpenRead(output+".docx"))
+   Check(System.Linq.Enumerable.Any(word.Entries,entry=>entry.FullName.StartsWith("word/media/",StringComparison.Ordinal)),"Word output contains embedded artwork");
+  JobOutput.Export(output+"-batch.zpl","zpl",batch,template.Dpi);
+  var pages=File.ReadAllText(output+"-batch.zpl").Split(new[]{"^XA"},StringSplitOptions.RemoveEmptyEntries);
+  Check(pages.Length==2&&pages[0]!=pages[1]&&pages[0].Contains("^GFA")&&pages[1].Contains("^GFA"),"ZPL exports distinct raster artwork per label");
+  var geometry=new PrinterPageGeometry(new Rectangle(0,0,237,178),new RectangleF(0,0,237,178),0,0,false);
+  using(var document=new LabelPrintDocument(template,batch))using(var stream=new MemoryStream()){
+   ZebraPrint.Render(document,geometry,new ZebraSettings{Enabled=true,Dpi=203.2},1,stream);
+   var printed=System.Text.Encoding.ASCII.GetString(stream.ToArray()).Split(new[]{"^XA"},StringSplitOptions.RemoveEmptyEntries);
+   Check(printed.Length==2&&printed[0]!=printed[1],"direct Zebra path prints distinct artwork per record");
+  }
+  using(var owner=new MainForm(Path.Combine(dir,"mapped-images-ui.xml"))){
+   owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+   Call(owner,"Apply",template);Application.DoEvents();
+   var preview=F<PreviewPanel>(owner,"preview");
+   Check(preview.Scene.Shapes.Exists(shape=>shape.Element==-3&&shape.Clip==new RectangleF(21,22,24,8)),"editor preview uses the mapped SVG");
+   bool opened=false;Exception failure=null;
+   using(var timer=new Timer{Interval=75}){
+    timer.Tick+=delegate{
+     foreach(Form window in Application.OpenForms)if(window!=owner){
+      timer.Stop();
+      try{
+       var options=(DataGridView)window.Controls.Find("imageVariants",true)[0];
+       var source=(ComboBox)window.Controls.Find("imageDataSource",true)[0];
+       opened=options.Rows.Count==2&&source.SelectedIndex>=0;
+       Snapshot(window,Path.Combine(dir,"mapped-image-dialog.png"));
+       ((ComboBox)window.Controls.Find("imageMissingPolicy",true)[0]).SelectedIndex=(int)MissingImage.Fallback;
+       ((ComboBox)window.Controls.Find("imageFallback",true)[0]).SelectedIndex=1;
+       window.DialogResult=DialogResult.OK;
+      }catch(Exception ex){failure=ex;window.DialogResult=DialogResult.Cancel;}
+      break;
+     }
+    };
+    timer.Start();Call(owner,"EditMappedImage",-3);
+   }
+   if(failure!=null)throw failure;
+   var edited=(LabelSettings)Call(owner,"Read");
+   Check(opened&&edited.Symbols[0].ImageMapping.FallbackKey=="South","mapping dialog applies the selected offline fallback");
+   Call(owner,"Apply",template);owner.Close();
+  }
+ }
  static void ConditionalOutput(string dir){
   var template=ConditionalTemplate();var instant=new DateTime(2026,11,26);
   var quick=QuickPrint.Prepare(template,null,instant);
@@ -326,7 +433,8 @@ class EditorRefinementTests {
   var list=F<ListBox>(form,"elementList");Check(list.ContextMenuStrip!=null,"layer operations are available in context");
   Call(form,"BuildInsertMenu");
   var insert=F<ContextMenuStrip>(form,"insertMenu");
-  Check(insert.Items.Count==6&&insert.Items[2].Text==Loc.T("Pridať kód…"),"one general code chooser alongside other elements");
+  Check(insert.Items.Count==7&&insert.Items[2].Text==Loc.T("Obrázok podľa údajov…")&&insert.Items[3].Text==Loc.T("Pridať kód…"),
+   "mapped image and one general code chooser alongside other elements");
   var input=F<TextBox>(form,"inspectText");
   input.Focus();input.Select(0,2);Key(input,Keys.Control|Keys.I);
   var styled=((LabelSettings)Call(form,"Read")).Texts[0];
@@ -359,5 +467,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

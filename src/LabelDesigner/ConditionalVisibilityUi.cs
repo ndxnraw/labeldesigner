@@ -19,11 +19,18 @@ namespace EanEtikety {
 
   Button VisibilityAction()=>Btn(Loc.T(VisibilityTitle),EditVisibility,HeaderIcon.Visibility);
 
-  sealed class VisibilitySource {
+  sealed class ArtworkDataSource {
    public readonly string Name,Variable;
    public readonly int Field;
-   public VisibilitySource(string name,int field=-2,string variable=null){Name=name;Field=field;Variable=variable;}
+   public ArtworkDataSource(string name,int field=-2,string variable=null){Name=name;Field=field;Variable=variable;}
    public override string ToString()=>Name;
+  }
+
+  static void AddArtworkSources(ComboBox choices,LabelSettings template){
+   foreach(int field in QuickPrint.Available(template))
+    choices.Items.Add(new ArtworkDataSource(QuickPrint.Name(template,field),field));
+   foreach(var variable in template.Variables)
+    choices.Items.Add(new ArtworkDataSource(Loc.T("Premenná")+" · "+variable.Name,variable:variable.Name));
   }
 
   void EditVisibility(){
@@ -47,10 +54,7 @@ namespace EanEtikety {
     mode.Name="visibilityMode";
     var source=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList,Name="visibilitySource"};
     StackField(rows,Loc.T("Zdroj údajov"),source);
-    foreach(int field in QuickPrint.Available(template))
-     source.Items.Add(new VisibilitySource(QuickPrint.Name(template,field),field));
-    foreach(var variable in template.Variables)
-     source.Items.Add(new VisibilitySource(Loc.T("Premenná")+" · "+variable.Name,variable:variable.Name));
+    AddArtworkSources(source,template);
     var expected=Input(rows,"Porovnávaná hodnota","");
     expected.Name="visibilityExpected";expected.MaxLength=4000;
     var footer=new UiMessageBox.ActionRow();
@@ -72,7 +76,7 @@ namespace EanEtikety {
      mode.SelectedIndex=rule==null?0:rule.Mode==VisibilityMode.Filled?1:2;
      source.SelectedIndex=-1;
      for(int i=0;rule!=null&&i<source.Items.Count;i++){
-      var item=(VisibilitySource)source.Items[i];
+      var item=(ArtworkDataSource)source.Items[i];
       if(item.Field==rule.Field&&item.Variable==rule.Variable){source.SelectedIndex=i;break;}
      }
      expected.Text=rule?.Value??"";
@@ -84,7 +88,7 @@ namespace EanEtikety {
     LoadRule();
     ApplyColors(dialog);
     if(dialog.ShowDialog(this)!=DialogResult.OK)return;
-    var data=(VisibilitySource)source.SelectedItem;
+    var data=(ArtworkDataSource)source.SelectedItem;
     var result=mode.SelectedIndex==0?null:new VisibilityRule{
      Field=data.Field,Variable=data.Variable,Mode=mode.SelectedIndex==1?VisibilityMode.Filled:VisibilityMode.EqualsValue,
      Value=mode.SelectedIndex==2?expected.Text:null

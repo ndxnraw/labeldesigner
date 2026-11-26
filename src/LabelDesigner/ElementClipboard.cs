@@ -18,12 +18,17 @@ public partial class MainForm {
   if(string.IsNullOrEmpty(copy.Variable))copy.Field=indices.TryGetValue(copy.Field,out int index)?index:-2;
   return copy;
  }
+ static void RemapPastedImage(SymbolItem symbol,Dictionary<int,int> indices){
+  var mapping=symbol?.ImageMapping;
+  if(mapping!=null&&string.IsNullOrEmpty(mapping.Variable))mapping.Field=indices.TryGetValue(mapping.Field,out int index)?index:-2;
+ }
  static void ValidatePaste(LabelSettings s){
-  if(ConditionalVisibility.HasRules(s))Engine.ValidateDraft(s);else Engine.Validate(s);
+  if(JobPreparation.HasDynamicArtwork(s))Engine.ValidateDraft(s);else Engine.Validate(s);
  }
  void PasteElementData(string xml){if(xml!=null&&xml.Contains("<ElementGroup")){PasteGroupData(xml);return;}var e=ElementTransfer.Decode(xml);var s=Read();int count=xml==lastPaste?pasteCount+1:1;double offset=Math.Min(40,count*2);int index;
   if(e.Text!=null){if(s.Texts.Count>=50)throw new InvalidOperationException(Loc.T("Povolených je najviac 50 textových polí."));e.Text.X=Math.Min(500,e.Text.X+offset);e.Text.Y=Math.Min(500,e.Text.Y+offset);index=s.Texts.Count;s.Texts.Add(e.Text);}else{if(s.Symbols.Count>=20)throw new InvalidOperationException(Loc.T("Najviac 20 symbolov."));e.Symbol.X=Math.Min(500,e.Symbol.X+offset);e.Symbol.Y=Math.Min(500,e.Symbol.Y+offset);index=-3-s.Symbols.Count;s.Symbols.Add(e.Symbol);}
   if(e.Visibility!=null)Elements.Meta(s,index).Visibility=RemapPastedVisibility(e.Visibility,new Dictionary<int,int>{{e.SourceIndex,index}});
+  RemapPastedImage(e.Symbol,new Dictionary<int,int>{{e.SourceIndex,index}});
   ValidatePaste(s);Apply(s);Changed(this,EventArgs.Empty);timer.Stop();preview.SelectElement(index);preview.Focus();lastPaste=xml;pasteCount=count;
  }
 }

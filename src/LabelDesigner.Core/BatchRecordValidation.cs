@@ -16,7 +16,7 @@ namespace EanEtikety {
    var record=new BatchRecord { Row=rowNumber, PreparedAt=instant };
    try {
     WorkContext.Check();
-    var label=ProjectXml.Clone(template);
+    var label=JobPreparation.CloneForPreparation(template);
     var columns=new Dictionary<string,int>(StringComparer.Ordinal);
     foreach(var binding in mappings) {
      if(binding.Column<0)continue;
@@ -61,10 +61,10 @@ namespace EanEtikety {
       foreach(var ai in symbol.Code.ApplicationIdentifiers)ai.Data=resolve(target,ai.Data);
      }
     }
-    if(ConditionalVisibility.HasRules(label)){
-     var ruleErrors=new HashSet<string>(StringComparer.Ordinal);
-     var hidden=ConditionalVisibility.Apply(label,values,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
-      message=>ruleErrors.Add(message));
+    if(JobPreparation.HasDynamicArtwork(label)){
+     var ruleErrors=new HashSet<(int Column,string Message)>();
+     var hidden=JobPreparation.ProjectArtwork(label,values,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
+      (index,message)=>ruleErrors.Add((index!=-2&&columns.TryGetValue(Elements.FieldTarget(index),out int column)?column:-1,message)));
      if(hidden.Count>0){
       record.Issues.RemoveAll(issue=>Elements.TryFieldIndex(issue.Target,out int index)&&hidden.Contains(index));
       record.Error=record.Issues.Find(issue=>issue.Blocking)?.Message;
@@ -75,7 +75,7 @@ namespace EanEtikety {
       columns=filteredColumns;
       foreach(var issue in record.Issues)if(issue.Target!=null&&remap.TryGetValue(issue.Target,out string target))issue.Target=target;
      }
-     foreach(string message in ruleErrors)record.AddIssue(-1,null,message);
+     foreach(var error in ruleErrors)record.AddIssue(error.Column,null,error.Message);
     }
     label.Variables.Clear();
     TextAutoLayout.Apply(label);

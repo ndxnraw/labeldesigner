@@ -7,7 +7,7 @@ public static class PreviewValidation {
 public partial class MainForm {
  void UpdatePreview(){if(IsDisposed||Disposing)return;TrackHistory();try{var raw=Read();LabelSettings s=raw;VectorScene scene;
   preview.HiddenElements.Clear();
-  if(ConditionalVisibility.HasRules(raw)){
+  if(JobPreparation.HasDynamicArtwork(raw)){
    var instant=currentTime();previewDay=instant.Date;
    var draft=QuickPrint.PrepareEditor(raw,instant);
    scene=PreviewValidation.Build(draft.Label,draft.Issues);

@@ -128,6 +128,20 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+OBRÁZKY PODĽA ÚDAJOV
+
+V ponuke Vložiť zvoľte Obrázok podľa údajov. Vyberte textové pole, kód
+alebo premennú. Vložte obrázky a v stĺpci Porovnávaná hodnota zadajte
+hodnotu pre každý z nich. Pri zhode sa ignorujú okrajové medzery a
+rozlišujú sa veľké a malé písmená. Obrázky sa uložia do projektu alebo
+šablóny a môžete ich použiť offline aj po prenesení na iný počítač.
+
+Pri chýbajúcej alebo neznámej hodnote vyberte zastavenie výstupu, prázdny
+rám alebo obrázok zo zoznamu ako predvolený. Veľkosť rámu nastavíte
+vo Vlastnostiach. Každý obrázok sa doň vycentruje bez zmeny pomeru strán.
+Pri dávke priraďte stĺpec k vybranému zdrojovému poľu. Pri rýchlej tlači
+môžete to isté pole zaradiť medzi upraviteľné polia šablóny.
+
 PODMIENENÉ ZOBRAZENIE
 
 Vyberte prvok alebo skupinu. Vo Vlastnostiach alebo v ponuke vrstvy
