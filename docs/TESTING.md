@@ -91,6 +91,10 @@ previews, and PDF/SVG/Word and per-record ZPL output.
 `EditorRefinementTests` checks block capture, library previews, insertion,
 independent copies, preserved translations and local rule dependencies.
 
+`EditorRefinementTests` verifies resize anchors, unchanged code dimensions,
+locked objects, sheet limits, multilingual overflow, template round trips and
+the resize dialog's paired previews and issue selection.
+
 `EditorRefinementTests` covers embedded PNG/SVG image mappings without the
 original files, frame geometry, generated values, original CSV issue positions,
 the three missing-value policies, editor and quick print rendering, PDF/SVG/Word,

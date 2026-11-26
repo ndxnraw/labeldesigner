@@ -128,6 +128,21 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+ZMENA ROZMEROV ETIKETY
+
+Otvorte Rozloženie → Zmeniť rozmery etikety a zadajte nový rozmer v mm.
+Náhľady porovnávajú pôvodnú etiketu s variantom v rovnakej mierke.
+Pre každý prvok zvoľte kotvu vodorovne a zvislo. Kotva zachová vzdialenosť
+od zvoleného okraja alebo stredu. Predvolené kotvy sú vľavo a hore.
+Zamknuté prvky ostávajú na mieste a kódy si zachovajú rozmery.
+Pri neotočenom texte voľba Oba okraje prispôsobí šírku jeho rámu.
+Variant uloží konkrétne rozmery textových rámov a ponechá zmenšovanie písma
+v pevnom poli. Preklady, vložené obrázky aj pravidlá ostávajú v šablóne.
+
+Kontrola zahŕňa všetky nastavené jazyky. Výber problému označí prvok
+a zobrazí príslušný jazyk. Uložiť ako novú šablónu pridá variant do
+knižnice. Pôvodná etiketa zostane otvorená v editore.
+
 OPAKOVANE POUŽITEĽNÉ BLOKY
 
 Vyberte prvky na plátne a zvoľte Rozloženie → Uložiť výber ako blok.

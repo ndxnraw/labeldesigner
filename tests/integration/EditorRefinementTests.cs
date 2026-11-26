@@ -1,5 +1,118 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void ResizeLabel(string dir){
+  var original=LabelSettings.Default();original.Width=100;original.Height=60;original.PageWidth=100;original.PageHeight=60;
+  original.BarX=54;original.BarY=25;
+  original.Texts.Clear();
+  original.Texts.Add(new TextItem{X=5,Y=4,Width=85,Height=8,Text="Original",Size=12,MinimumFitSize=8,AutoWidth=true});
+  original.Texts.Add(new TextItem{X=91,Y=4,Width=8,Height=5,Text="Side"});
+  original.Symbols.Add(new SymbolItem{X=70,Y=40,Width=12,Height=12,Matrix=new MatrixContent{Type="QR",Data="123456"}});
+  original.Symbols.Add(new SymbolItem{X=74,Y=8,Width=14,Height=10,Shape=new ShapeContent()});
+  Elements.Meta(original,-4).Locked=true;
+  original.Languages=new LabelLanguages{Codes=new(){"SK","EN"},Selected="SK"};
+  Elements.Meta(original,0).Translations=new(){new LanguageTranslation{Language="SK",Text="Krátky text"},new LanguageTranslation{Language="EN",Text=new string('W',140)}};
+  Elements.Meta(original,-3).Visibility=new VisibilityRule{Field=0,Mode=VisibilityMode.Filled};
+  string imagePath=Path.Combine(dir,"resized-logo.svg");
+  File.WriteAllText(imagePath,"<svg xmlns='http://www.w3.org/2000/svg' width='20' height='12'><rect width='20' height='12' fill='black'/></svg>");
+  var image=Assets.Import(imagePath);
+  original.Symbols.Add(new SymbolItem{X=25,Y=16,Width=10,Height=6,Image=image});
+  var options=new System.Collections.Generic.Dictionary<int,ResizeAnchor>{
+   {0,new(ResizeEdge.Stretch,ResizeEdge.Start)},{-1,new(ResizeEdge.End,ResizeEdge.End)},
+   {-3,new(ResizeEdge.Center,ResizeEdge.End)},{-4,new(ResizeEdge.End,ResizeEdge.End)}
+  };
+  var resized=LabelResize.Apply(original,70,45,options);
+  Check(resized.PageWidth==70&&resized.PageHeight==45&&original.Width==100&&original.Texts[0].Width==85,"resizing a single label updates its media and leaves the source intact");
+  Check(resized.BarX==24&&resized.BarY==10&&resized.BarWidth==original.BarWidth&&resized.BarHeight==original.BarHeight&&resized.DigitSize==original.DigitSize,
+   "right and bottom anchors move the main code while preserving its dimensions");
+  Check(resized.Symbols[0].X==55&&resized.Symbols[0].Y==25&&resized.Symbols[0].Width==12&&resized.Symbols[0].Height==12&&
+   resized.Symbols[1].X==74,"center offset is preserved and locked objects keep position");
+  Check(resized.Texts[0].Width==55&&resized.Texts[0].MinimumFitSize==8&&!resized.Texts[0].AutoWidth,"stretch preserves margins and fixed-text fitting");
+  string path=Path.Combine(dir,"resized-check.ean.xml");Engine.Save(path,resized);
+  resized=Engine.Load(path);
+  var review=LabelResize.Inspect(resized,new DateTime(2026,11,26));
+  Check(review.Exists(problem=>problem.Language=="EN"&&problem.Issue.Element==0&&problem.Issue.Message==Loc.T("Text sa nezmestí do poľa"))&&
+   review.Exists(problem=>problem.Issue.Element==1&&problem.Issue.Message==Loc.T("Prvok presahuje etiketu")),"captures text overflow in another language and identifies clipped elements");
+  Check(review.Exists(problem=>problem.Issue.Element==-5&&problem.Issue.Message==Loc.T("Prvok zasahuje do voľného priestoru kódu")),
+   "reports a new quiet-zone overlap after anchoring the code");
+  Check(resized.Languages.Codes.Count==2&&Elements.Meta(resized,-3).Visibility.Field==0&&resized.Symbols[2].Image.Data==image.Data,
+   "translations, visibility and embedded images survive a resized template round trip");
+  var sheet=ProjectXml.Clone(original);sheet.Layout.Enabled=true;sheet.Layout.Columns=2;sheet.Layout.Rows=1;
+  sheet.PageWidth=170;sheet.PageHeight=90;
+  var wider=LabelResize.Apply(sheet,85,45,options);
+  Check(wider.PageWidth==170&&wider.Layout.Columns==2&&LabelResize.Inspect(wider,DateTime.Today).Exists(p=>p.Issue.Message==Loc.T("Etikety presahujú papier")),
+   "sheet dimensions stay fixed and an oversized grid is reported");
+
+  string preferences=Path.Combine(dir,"resize-ui.xml");
+  using var owner=new MainForm(preferences);
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",original);
+  int step=0;Exception error=null;Form wizard=null;
+  var clock=System.Diagnostics.Stopwatch.StartNew();
+  using(var timer=new Timer{Interval=75}){
+   timer.Tick+=delegate{
+    try{
+     if(clock.ElapsedMilliseconds>25000)throw new Exception("Resize wizard verification timed out.");
+     if(step<=2){
+      foreach(Form window in Application.OpenForms)
+       if(window.Controls.Find("resizeWidth",true).Length>0){wizard=window;break;}
+      if(wizard==null)return;
+      Control Find(string name)=>wizard.Controls.Find(name,true)[0];
+      var save=(Button)Find("resizeSave");
+      var elements=(ListBox)Find("resizeElements");
+      if(step==0){
+       ((NumericUpDown)Find("resizeWidth")).Value=70;
+       ((NumericUpDown)Find("resizeHeight")).Value=45;
+       elements.SelectedIndex=2;
+       ((ComboBox)Find("resizeAnchorX")).SelectedIndex=2;
+       ((ComboBox)Find("resizeAnchorY")).SelectedIndex=2;
+       elements.SelectedIndex=0;
+       ((ComboBox)Find("resizeAnchorX")).SelectedIndex=3;
+       step=1;
+      }else if(step==1&&save.Enabled){
+       var problems=(ListBox)Find("resizeIssues");
+       int problem=-1;
+       for(int i=0;i<problems.Items.Count;i++)
+        if(problems.Items[i] is ResizeProblem item&&item.Language=="EN"&&item.Issue.Element==0){problem=i;break;}
+       Check(problem>=0,"wizard lists overflow for the English translation");
+       problems.SelectedIndex=problem;
+       Check(((ComboBox)Find("resizeLanguage")).SelectedItem as string=="EN"&&
+        (int)Find("resizeAfter").GetType().GetField("FocusedElement").GetValue(Find("resizeAfter"))==0,"selecting a problem highlights its element and chooses its language");
+       step=2;
+      }else if(step==2&&save.Enabled){
+       Check(Find("resizeBefore").GetType().GetField("Scene").GetValue(Find("resizeBefore")) is VectorScene&&
+        Find("resizeAfter").GetType().GetField("Scene").GetValue(Find("resizeAfter")) is VectorScene,"before and after previews are rendered");
+       wizard.Size=wizard.MinimumSize;wizard.PerformLayout();
+       bool VisibleInParents(Control control){
+        var area=control.RectangleToScreen(control.ClientRectangle);
+        for(var parent=control.Parent;parent!=null;parent=parent.Parent)
+         if(!parent.RectangleToScreen(parent.ClientRectangle).Contains(area))return false;
+        return true;
+       }
+       Check(Find("resizeBefore").Width>=150&&Find("resizeAfter").Height>=100&&
+        VisibleInParents(Find("resizeBefore"))&&VisibleInParents(Find("resizeAfter"))&&
+        VisibleInParents(Find("resizeAnchorX"))&&VisibleInParents(Find("resizeAnchorY"))&&VisibleInParents(save),
+        "both previews, anchor controls and saving remain visible at the minimum size");
+       Snapshot(wizard,Path.Combine(dir,"resize-wizard.png"));
+       step=3;save.PerformClick();
+      }
+     }else if(step==3){
+      foreach(Form window in Application.OpenForms){
+       var fields=window.Controls.Find("libraryTemplateName",true);
+       if(fields.Length==0)continue;
+       ((TextBox)fields[0]).Text="Resized label";
+       step=4;timer.Stop();window.AcceptButton.PerformClick();break;
+      }
+     }
+    }catch(Exception ex){error=ex;timer.Stop();if(wizard!=null)wizard.DialogResult=DialogResult.Cancel;}
+   };
+   timer.Start();Call(owner,"ShowResizeLabel");
+  }
+  if(error!=null)throw error;
+  var saved=Engine.Load(Path.Combine(preferences+".workspace","Templates","Resized label.ean.xml"));
+  Check(step==4&&saved.Width==70&&saved.Height==45&&saved.BarX==24&&saved.BarY==10&&saved.Texts[0].Width==55&&saved.Languages.Selected=="SK"&&
+   ((LabelSettings)Call(owner,"Read")).Width==100,"wizard saves the resized copy to the library and leaves the editor on the original");
+  Call(owner,"Apply",LabelSettings.Default());owner.Close();
+ }
  static void ReusableBlocks(string dir){
   var source=LabelSettings.Default();source.HideBarcode=true;source.Texts.Clear();
   source.Texts.Add(new TextItem{X=13,Y=9,Width=16,Height=7,Text="Lead"});
@@ -675,5 +788,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

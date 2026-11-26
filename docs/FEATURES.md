@@ -16,6 +16,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Sprievodca zmenou rozmerov** porovná pôvodnú etiketu a nový formát
+  v rovnakej mierke. Umožňuje ukotviť prvky, skontroluje všetky jazyky
+  a uloží upravený návrh ako novú šablónu.
 - **Opakovane použiteľné bloky** ukladajú výber prvkov do lokálnej knižnice.
   Náhľad zobrazuje spoločné rozmery a vloženie vytvorí upraviteľnú kópiu
   s prekladmi, obrázkami a pravidlami zobrazenia.

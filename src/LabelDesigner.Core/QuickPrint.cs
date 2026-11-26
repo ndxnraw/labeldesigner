@@ -94,6 +94,7 @@ namespace EanEtikety {
   public static QuickPrintDraft Prepare(LabelSettings template, IDictionary<int,string> values, DateTime instant)=>Prepare(template,values,instant,null,false);
   public static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language)=>Prepare(template,values,instant,language,false);
   public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant)=>Prepare(template,null,instant,null,true);
+  public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant,string language)=>Prepare(template,null,instant,language,true);
 
   static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,bool editor) {
    Engine.ValidateDraft(template);

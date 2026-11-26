@@ -152,22 +152,23 @@ namespace EanEtikety {
    return layout;
   }
 
-  void SaveLibraryTemplate(Form owner,Action refresh) {
+  bool SaveLibraryTemplate(Form owner,Action refresh,LabelSettings variant=null) {
    using var dialog=FeatureForm("Názov šablóny",400,220);
    var stack=FeatureStack(dialog);
    var input=Input(stack,"Názov šablóny",Loc.T("Moja etiketa"));
+   input.Name="libraryTemplateName";
    AddAccept(dialog,stack,delegate{
     if(string.IsNullOrWhiteSpace(input.Text)||input.Text.IndexOfAny(Path.GetInvalidFileNameChars())>=0)
      throw new InvalidOperationException(Loc.T("Neplatný názov"));
     string path=Path.Combine(workspace.TemplatesPath,input.Text.Trim()+".ean.xml");
-    var settings=Read();
+    var settings=variant??Read();
     using(WorkspaceBackup.LockDirectory(workspace.DirectoryPath)){
      if(File.Exists(path))throw new InvalidOperationException(Loc.T("Názov už existuje"));
      Engine.Save(path,settings);
     }
-    refresh();
+    refresh?.Invoke();
    });
-   dialog.ShowDialog(owner);
+   return dialog.ShowDialog(owner)==DialogResult.OK;
   }
  }
 }
