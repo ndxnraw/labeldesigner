@@ -170,11 +170,11 @@ namespace EanEtikety {
       if(draft==null){status.Text=preview.Failure;return;}
       foreach(var issue in draft.Issues){
        Label error;
-       if(!errors.TryGetValue(issue.Element,out error)||(!issue.Blocking&&error.Text.Length>0))continue;
+       if(!errors.TryGetValue(Elements.SourceIndex(draft.Label,issue.Element),out error)||(!issue.Blocking&&error.Text.Length>0))continue;
        error.Text=issue.Message;
        error.Visible=true;
       }
-      var general=draft.Issues.Find(issue=>issue.Blocking&&!errors.ContainsKey(issue.Element));
+      var general=draft.Issues.Find(issue=>issue.Blocking&&!errors.ContainsKey(Elements.SourceIndex(draft.Label,issue.Element)));
       status.Text=general!=null?general.Message:!draft.CanPrint?Loc.T("Opravte údaje pred tlačou."):
        draft.Issues.Count>0?Loc.T("Upozornenia skontrolujte v tlačovom náhľade."):Loc.T("Náhľad etikety");
       picture.Image=preview.Image;

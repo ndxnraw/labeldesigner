@@ -1074,3 +1074,15 @@ Výpis diagnostiky	Diagnostic log	Diagnostický výpis	Diagnosztikai napló
 Diagnostika zatiaľ neobsahuje žiadne záznamy.	There are no diagnostic entries yet.	Diagnostika zatím neobsahuje žádné záznamy.	Még nincsenek diagnosztikai bejegyzések.
 Diagnostiku sa nepodarilo načítať.	Could not load diagnostics.	Diagnostiku se nepodařilo načíst.	A diagnosztikai napló betöltése sikertelen.
 Uložiť výpis…	Save log…	Uložit výpis…	Napló mentése…
+Pravidlo zobrazenia…	Visibility rule…	Pravidlo zobrazení…	Megjelenítési szabály…
+Použiť na	Apply to	Použít na	Alkalmazás erre
+Ak je pole vyplnené	When the field is filled	Když je pole vyplněné	Ha a mező ki van töltve
+Ak sa hodnota rovná	When the value equals	Když se hodnota rovná	Ha az érték megegyezik
+Zdroj údajov	Data source	Zdroj dat	Adatforrás
+Porovnávaná hodnota	Value to match	Porovnávaná hodnota	Összehasonlítandó érték
+Skryté pravidlom	Hidden by rule	Skryto pravidlem	Szabály által elrejtve
+Zdroj pravidla zobrazenia už nie je dostupný.	The visibility rule's data source is no longer available.	Zdroj pravidla zobrazení už není dostupný.	A megjelenítési szabály adatforrása már nem érhető el.
+Zdroj pravidla zobrazenia obsahuje chybu.	The visibility rule's data source contains an error.	Zdroj pravidla zobrazení obsahuje chybu.	A megjelenítési szabály adatforrása hibás.
+Vždy	Always	Vždy	Mindig
+Zobraziť	Show	Zobrazit	Megjelenítés
+Premenná	Variable	Proměnná	Változó

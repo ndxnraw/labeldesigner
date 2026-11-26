@@ -1,5 +1,93 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static LabelSettings ConditionalTemplate(){
+  var label=LabelSettings.Default();
+  label.Texts[0].Text="   ";
+  label.Texts.Add(new TextItem{X=3,Y=32,Width=30,Height=8,Text="Visible"});
+  label.Symbols.Add(new SymbolItem{X=36,Y=24,Width=18,Height=18,Matrix=new MatrixContent{Data=""}});
+  label.QuickPrintFields.AddRange(new[]{0,-3});
+  var xml=ProjectXml.Encode(label).Replace("<Metadata />",
+   "<Metadata><ElementMeta><Index>0</Index><Group>optional</Group><Layer>0</Layer><GroupVisibility><Field>0</Field><Mode>Filled</Mode></GroupVisibility></ElementMeta>"+
+   "<ElementMeta><Index>-3</Index><Group>optional</Group><Layer>103</Layer><GroupVisibility><Field>0</Field><Mode>Filled</Mode></GroupVisibility></ElementMeta></Metadata>");
+  return ProjectXml.Decode<LabelSettings>(xml);
+ }
+ static void ConditionalOutput(string dir){
+  var template=ConditionalTemplate();var instant=new DateTime(2026,11,26);
+  var quick=QuickPrint.Prepare(template,null,instant);
+  Check(quick.CanPrint&&quick.Label.Symbols.Count==0&&quick.Label.Texts.Count==1,"empty field hides the group before validation");
+  Check(quick.Label.Texts[0].Y==32&&template.Texts.Count==2&&template.Symbols.Count==1,"fixed geometry and template unchanged");
+  var shown=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0,"Lot"},{-3,"https://example.com"}},instant);
+  Check(shown.CanPrint&&shown.Label.Symbols.Count==1,"quick print restores visible group from entered data");
+  var invalid=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0,"Lot"}},instant);
+  Check(!invalid.CanPrint,"visible invalid QR still blocks quick print");
+  var mapped=new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Target="text:0",Column=0},new ColumnBinding{Target="symbol:0",Column=1}};
+  var absent=BatchData.Record(template,new[]{"",""},mapped,-1,0,2,instant);
+  var present=BatchData.Record(template,new[]{"Lot","https://example.com"},mapped,-1,1,3,instant);
+  Check(absent.Error==null&&absent.Label.Symbols.Count==0&&present.Error==null&&present.Label.Symbols.Count==1,"batch evaluates each mapped record");
+  var ignored=BatchData.Record(template,new[]{"","!ERROR: invalid optional content"},mapped,-1,2,4,instant);
+  var badSource=BatchData.Record(template,new[]{"!ERROR: invalid source",""},mapped,-1,3,5,instant);
+  Check(ignored.Error==null&&badSource.Error!=null,"hidden content can be ignored but a faulty rule source blocks output");
+  var exact=ProjectXml.Clone(template);
+  exact.Variables.Add(new VariableField{Name="segment",Type="Fixed",FixedValue="  promo  "});
+  foreach(var meta in exact.Metadata)meta.GroupVisibility=new VisibilityRule{Variable="segment",Mode=VisibilityMode.EqualsValue,Value="promo"};
+  exact.Symbols[0].Matrix.Data="https://example.com";
+  Check(JobPreparation.Resolve(exact,instant).Symbols.Count==1,"equals trims whitespace from resolved variable");
+  exact.Variables[0].FixedValue="Promo";
+  Check(JobPreparation.Resolve(exact,instant).Symbols.Count==0,"equals is deterministic and case-sensitive");
+  string project=Path.Combine(dir,"conditional.ean.xml");
+  Engine.Save(project,template);
+  Check(ConditionalVisibility.HasRules(Engine.Load(project)),"project round trip preserves group rule");
+  var removed=Engine.Load(project);
+  Elements.Remove(removed,new System.Collections.Generic.List<int>{0});
+  Check(QuickPrint.Prepare(removed,null,instant).Issues.Exists(i=>i.Blocking&&i.Message==Loc.T("Zdroj pravidla zobrazenia už nie je dostupný.")),"removed data source is actionable");
+  var plan=quick.CreatePlan(1);
+  Check(!PreflightReport.Inspect(plan).Blocking,"preflight inspects output only");
+  string file=Path.Combine(dir,"conditional");
+  Engine.Pdf(file+".pdf",template);Engine.Docx(file+".docx",template);
+  Engine.Svg(file+".svg",template);Engine.Zpl(file+".zpl",template);
+  var expected=ProjectXml.Clone(quick.Label);
+  Check(File.ReadAllText(file+".svg")==VectorArt.Svg(expected),"SVG uses the same visible geometry");
+  Engine.Zpl(file+"-visible.zpl",expected);
+  Check(File.ReadAllText(file+".zpl").Split(new[]{"^XZ"},StringSplitOptions.None)[0]==
+   File.ReadAllText(file+"-visible.zpl").Split(new[]{"^XZ"},StringSplitOptions.None)[0],"Zebra raster contains only visible, fixed-position artwork");
+  var batchPlan=OutputPlan.Create(new System.Collections.Generic.List<BatchRecord>{absent,present},template,instant);
+  JobOutput.Export(file+"-batch.zpl","zpl",batchPlan,template.Dpi);
+  var pages=File.ReadAllText(file+"-batch.zpl").Split(new[]{"^XA"},StringSplitOptions.RemoveEmptyEntries);
+  Check(pages.Length==2&&pages[0]!=pages[1],"batch Zebra output resolves visibility per label");
+  using(var form=new MainForm(Path.Combine(dir,"conditional-ui.xml"))){
+   form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);
+   form.Show();Call(form,"Apply",template);Application.DoEvents();
+   var preview=F<PreviewPanel>(form,"preview");
+   Check(preview.HiddenElements.SetEquals(new[]{0,-3})&&preview.Scene.Shapes.Exists(s=>s.Element==1)&&!preview.Scene.Shapes.Exists(s=>s.Element==0||s.Element==-3),"editor preserves identities for visible and hidden artwork");
+   var list=F<ListBox>(form,"elementList");
+   Check(list.Items.Count==4&&Convert.ToString(list.Items[0]).Contains(Loc.T("Skryté pravidlom")),"layers retain conditional elements");
+   var print=All<ModernButton>(form).Find(b=>b.Name=="printCommand");
+   var glyph=typeof(ModernButton).GetProperty("Glyph",BindingFlags.Instance|BindingFlags.NonPublic);
+   Check(print!=null&&(HeaderIcon)glyph.GetValue(print)==HeaderIcon.Print&&!string.IsNullOrEmpty(print.AccessibleName),"toolbar restores print icon and keeps accessible name");
+   preview.SelectElement(0);
+   bool visited=false;
+   using(var timer=new Timer{Interval=75}){
+    timer.Tick+=delegate {
+     foreach(Form dialog in Application.OpenForms)if(dialog!=form){
+      timer.Stop();
+      var mode=(ComboBox)dialog.Controls.Find("visibilityMode",true)[0];
+      var source=(ComboBox)dialog.Controls.Find("visibilitySource",true)[0];
+      visited=mode.SelectedIndex==1&&source.SelectedIndex>=0&&source.AccessibleName==Loc.T("Zdroj údajov");
+      dialog.DialogResult=DialogResult.Cancel;
+      break;
+     }
+    };
+    timer.Start();Call(form,"EditVisibility");
+   }
+   Check(visited,"visibility editor opens for selected group with its current rule");
+   Snapshot(form,Path.Combine(dir,"conditional-toolbar.png"));
+   string copied=(string)Call(form,"CopyElementData");
+   Call(form,"PasteElementData",copied);
+   Check(preview.HiddenElements.SetEquals(new[]{0,-3,2,-4}),"pasted group keeps its rules and remaps its data source");
+   Call(form,"Apply",template);
+   form.Close();
+  }
+ }
  static void Gs1Theme(string dir){using(var owner=new MainForm(Path.Combine(dir,"gs1-theme.xml")))using(var dialog=new Gs1EditorDialog(new System.Collections.Generic.List<AiValue>{new AiValue{AI="01",Data="09506000134352"}})){dialog.StartPosition=FormStartPosition.Manual;dialog.Location=new Point(-20000,-20000);dialog.Show();Application.DoEvents();dialog.UseTheme(c=>Call(owner,"ApplyColors",c));var before=All<TextBox>(dialog).Find(c=>c.Name=="gs1-data-01").BackColor;All<Button>(dialog).Find(b=>b.Name=="gs1-quick-10").PerformClick();Check(All<TextBox>(dialog).Find(c=>c.Name=="gs1-data-01").BackColor==before,"GS1 rebuilding preserves current theme");}}
  static void PanelPersistence(string dir){string path=Path.Combine(dir,"panel-layout.xml");using(var form=new MainForm(path)){form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();form.Hide();form.Show();var body=F<TableLayoutPanel>(form,"studioBody");body.ColumnStyles[0].Width=280;body.ColumnStyles[2].Width=340;Call(form,"SetStudioPanel",0,false);Call(form,"SaveStudioLayout");form.Close();}using(var form=new MainForm(path)){form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();Application.DoEvents();var body=F<TableLayoutPanel>(form,"studioBody");Check(body.ColumnStyles[0].Width==0&&!body.GetControlFromPosition(0,0).Visible,"hidden panel restored hidden");Call(form,"SetStudioPanel",0,true);Check(body.ColumnStyles[0].Width==280&&body.ColumnStyles[2].Width==340,"logical widths survive restart: "+body.ColumnStyles[0].Width+" / "+body.ColumnStyles[2].Width);form.Close();}File.WriteAllLines(path+".layout",new[]{"0","1","1","300"});using(var form=new MainForm(path)){form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-20000,-20000);form.Show();Application.DoEvents();var body=F<TableLayoutPanel>(form,"studioBody");Check(Math.Abs(body.ColumnStyles[0].Width-240*form.DeviceDpi/96f)<1&&Math.Abs(body.ColumnStyles[2].Width-300*form.DeviceDpi/96f)<1,"legacy four-line layout remains compatible");form.Close();}}
  static void GuidedGs1Locales(string dir){foreach(string lang in Loc.Codes)foreach(float scale in new[]{1f,1.5f,2f}){Loc.Language=lang;using(var dialog=new Gs1EditorDialog(new System.Collections.Generic.List<AiValue>{new AiValue{AI="01",Data="09506000134352"},new AiValue{AI="17",Data="271200"}})){dialog.StartPosition=FormStartPosition.Manual;dialog.Location=new Point(-20000,-20000);var controls=All<Control>(dialog);var sizes=new System.Collections.Generic.List<float>();foreach(var c in controls)sizes.Add(c.Font.Size);for(int i=0;i<controls.Count;i++)controls[i].Font=UiFonts.Get(sizes[i]*scale,controls[i].Font.Style);dialog.Size=dialog.MinimumSize;dialog.Show();Application.DoEvents();Check(F<Panel>(dialog,"viewport").ClientSize.Height>=80,"GS1 field viewport remains usable "+lang+" @ "+scale);Check(((Button)dialog.AcceptButton).Enabled,"GS1 month-end date remains valid "+lang);var date=All<TextBox>(dialog).Find(c=>c.Name=="gs1-data-17");date.Text="270231";Check(!((Button)dialog.AcceptButton).Enabled,"GS1 invalid date blocked "+lang);date.Text="271200";var code=All<TextBox>(dialog).Find(c=>c.Name=="gs1-data-01");code.Text="09506000134353";Check(!((Button)dialog.AcceptButton).Enabled,"GS1 checksum error blocked "+lang);code.Text="09506000134352";Check(((Button)dialog.AcceptButton).Enabled,"GS1 corrected fields re-enable Apply "+lang);var search=All<TextBox>(dialog).Find(c=>c.Name=="gs1-search");search.Text="3103";var catalog=All<ComboBox>(dialog).Find(c=>c.Name=="gs1-catalog");Check(catalog.Items.Count==1&&((AiDefinition)catalog.SelectedItem).Code=="3103","GS1 catalogue search "+lang);foreach(Control action in new[]{(Control)dialog.AcceptButton,(Control)dialog.CancelButton}){var rectangle=dialog.RectangleToClient(action.RectangleToScreen(action.ClientRectangle));Check(dialog.ClientRectangle.Contains(rectangle),"GS1 dialog footer inside minimum viewport "+lang+" @ "+scale);}if(lang=="hu"&&scale==2)Snapshot(dialog,Path.Combine(dir,"guided-gs1-hu-200.png"));dialog.Close();}}Loc.Language="sk";}
@@ -271,5 +359,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

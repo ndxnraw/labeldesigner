@@ -44,7 +44,7 @@ namespace EanEtikety {
       if(dialog.ShowDialog(window)==DialogResult.OK)
        AtomicOutput.Save(dialog.FileName,p=>File.WriteAllText(p,log.Text,new UTF8Encoding(false)));
     }catch(Exception ex){Error(ex);}
-   });
+   },HeaderIcon.Save);
    save.Enabled=false;
    save.Visible=false;
    page.VisibleChanged+=delegate{

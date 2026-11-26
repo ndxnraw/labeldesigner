@@ -22,13 +22,13 @@ namespace EanEtikety {
    projectMenu=new UiContextMenuStrip();
    insertMenu=new UiContextMenuStrip();
    featureMenu=new UiContextMenuStrip();
-   AddEditorMenu("projectCommand","Projekt",projectMenu,BuildProjectMenu);
+   AddEditorMenu("projectCommand","Projekt",projectMenu,HeaderIcon.Library,BuildProjectMenu);
    undoButton=HeaderAction("Späť",HeaderIcon.Undo,"Ctrl+Z",()=>StepHistory(false));
    redoButton=HeaderAction("Znova",HeaderIcon.Redo,"Ctrl+Y",()=>StepHistory(true));
    AddEditorCommand(undoButton);
    AddEditorCommand(redoButton);
-   AddEditorMenu("insertCommand","Vložiť",insertMenu,BuildInsertMenu);
-   AddEditorCommand(NamedEditorButton("batchCommand","Dávka",ShowBatch));
+   AddEditorMenu("insertCommand","Vložiť",insertMenu,HeaderIcon.AddText,BuildInsertMenu);
+   AddEditorCommand(NamedEditorButton("batchCommand","Dávka",ShowBatch,HeaderIcon.Data));
 
    viewMenu=new UiContextMenuStrip();
    viewMenu.Items.Add(Loc.T("Ľavý panel"),null,delegate{SetStudioPanel(0,studioBody.ColumnStyles[0].Width==0);});
@@ -41,20 +41,20 @@ namespace EanEtikety {
     ((ToolStripMenuItem)viewMenu.Items[1]).Checked=studioBody.ColumnStyles[2].Width>0;
     ((ToolStripMenuItem)viewMenu.Items[3]).Checked=!tableSplit.Panel2Collapsed;
    };
-   AddEditorMenu("viewCommand","Zobrazenie",viewMenu);
-   AddEditorMenu("moreCommand","Nástroje",featureMenu,BuildFeatureMenu);
+   AddEditorMenu("viewCommand","Zobrazenie",viewMenu,HeaderIcon.Panels);
+   AddEditorMenu("moreCommand","Nástroje",featureMenu,HeaderIcon.Tools,BuildFeatureMenu);
 
    exportMenu=new UiContextMenuStrip();
    foreach(string format in new[]{"pdf","docx","zpl","svg"})
     exportMenu.Items.Add(format=="docx"?"Word":format.ToUpperInvariant(),null,delegate{Export(format);});
-   AddEditorMenu("exportCommand","Exportovať",exportMenu);
-   printPrimary=NamedEditorButton("printCommand","Tlač…",PrintLabel);
+   AddEditorMenu("exportCommand","Exportovať",exportMenu,HeaderIcon.Export);
+   printPrimary=NamedEditorButton("printCommand","Tlač…",PrintLabel,HeaderIcon.Print);
    printPrimary.AccessibleDescription="Ctrl+P";
    AddEditorCommand(printPrimary);
   }
 
-  Button NamedEditorButton(string name,string title,Action action) {
-   var button=Btn(Loc.T(title),action);
+  Button NamedEditorButton(string name,string title,Action action,HeaderIcon? glyph=null) {
+   var button=Btn(Loc.T(title),action,glyph);
    button.Name=name;
    button.AccessibleName=button.Text;
    button.MinimumSize=new Size(36,36);
@@ -68,9 +68,9 @@ namespace EanEtikety {
    headerCommands.Controls.Add(button);
   }
 
-  void AddEditorMenu(string name,string title,ContextMenuStrip menu,Action prepare=null) {
+  void AddEditorMenu(string name,string title,ContextMenuStrip menu,HeaderIcon glyph,Action prepare=null) {
    Button button=null;
-   button=NamedEditorButton(name,title,()=>{prepare?.Invoke();menu.Show(button,new Point(0,button.Height));});
+   button=NamedEditorButton(name,title,()=>{prepare?.Invoke();menu.Show(button,new Point(0,button.Height));},glyph);
    button.AccessibleRole=AccessibleRole.ButtonMenu;
    AddEditorCommand(button);
   }

@@ -16,6 +16,13 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Podmienené zobrazenie** umožňuje zobraziť prvok alebo skupinu, keď je
+  vyplnené zvolené pole alebo premenná, prípadne keď sa hodnota rovná
+  zadanému textu. Vrstvy označia skryté prvky. Rýchla tlač, každý riadok
+  dávky, predtlačová kontrola a exporty vrátane ZPL používajú výsledok
+  rovnakých pravidiel. Polohy ostatných prvkov sú pevné.
+- **Ikony príkazov** dopĺňajú popisy v hornej lište editora, dávkach,
+  knižnici šablón a správe aplikácie.
 - **Formátovanie častí textu** umožňuje použiť tučné písmo a kurzívu v jednom
   poli. Hodnoty premenných preberajú štýl zástupného textu a všetky štýly sa
   spoločne zalamujú aj prispôsobujú pevnej ploche.

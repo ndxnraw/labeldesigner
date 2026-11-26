@@ -70,15 +70,15 @@ namespace EanEtikety {
    primary=Action("Skontrolovať aktualizácie",RunPrimaryAction);
    primary.Name="updatePrimaryAction";
    AddRow(rows,primary);
-   onlineCheck=Action("Skontrolovať aktualizácie",CheckOnline);
+   onlineCheck=Action("Skontrolovať aktualizácie",CheckOnline,HeaderIcon.Update);
    AddRow(rows,onlineCheck);
-   restartPrepared=Action("Spustiť pripravenú verziu…",RequestActivation);
+   restartPrepared=Action("Spustiť pripravenú verziu…",RequestActivation,HeaderIcon.Check);
    AddRow(rows,restartPrepared);
    AddRow(rows,Description("Ručne stiahnutý ZIP môžete overiť a pripraviť aj bez internetu."));
-   AddRow(rows,Action("Použiť ručne stiahnutý ZIP…",Import));
-   rollback=Action("Návrat na predchádzajúcu verziu…",RequestRollback);
+   AddRow(rows,Action("Použiť ručne stiahnutý ZIP…",Import,HeaderIcon.Open));
+   rollback=Action("Návrat na predchádzajúcu verziu…",RequestRollback,HeaderIcon.Undo);
    AddRow(rows,rollback);
-   AddRow(rows,Action("Uvoľniť miesto po aktualizáciách…",Cleanup));
+   AddRow(rows,Action("Uvoľniť miesto po aktualizáciách…",Cleanup,HeaderIcon.Tools));
 
    confirm=message=>{
     using(var dialog=UiMessageBox.Create(this,message,Loc.T("Aktualizácie"),MessageBoxButtons.YesNo,MessageBoxIcon.Question,true))
@@ -135,6 +135,7 @@ namespace EanEtikety {
 
   void RefreshActions() {
    primary.Text=Loc.T(offer!=null?"Stiahnuť a pripraviť":prepared!=null?"Spustiť pripravenú verziu…":"Skontrolovať aktualizácie");
+   primary.Glyph=offer!=null?HeaderIcon.Save:prepared!=null?HeaderIcon.Check:HeaderIcon.Update;
    primary.AccessibleName=primary.Text;
    bool canRecheck=prepared!=null||offer!=null;
    if(!canRecheck&&onlineCheck.Focused)primary.Focus();

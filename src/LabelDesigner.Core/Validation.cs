@@ -87,7 +87,16 @@ public static class LabelChecks {
    return size.Height<=text.Height*dpi/25.4+1&&(!checkWidth||size.Width<=width+1);
   }
  }
- public static List<LabelIssue> Inspect(LabelSettings s){var result=new List<LabelIssue>();Action<int,bool,string> add=(i,b,m)=>result.Add(new LabelIssue{Element=i,Blocking=b,Message=m});var codes=new List<int>();var shapes=new List<int>();if(!s.HideBarcode){codes.Add(-1);try{if(Engine.IsGs1(s))Gs1.Payload(s.ApplicationIdentifiers);else Engine.Normalize(s.Ean,s.Kind);if(Engine.Module(s)<1)throw new Exception(Loc.T("Kód je pre zvolené rozlíšenie príliš úzky."));}catch(Exception ex){add(-1,true,ex.Message);}}
+ public static List<LabelIssue> Inspect(LabelSettings s){
+  if(ConditionalVisibility.HasRules(s)){
+   try{
+    var prepared=QuickPrint.PrepareEditor(s,DateTime.Today);
+    foreach(var issue in prepared.Issues)issue.Element=Elements.SourceIndex(prepared.Label,issue.Element);
+    return prepared.Issues;
+   }catch(OperationCanceledException){throw;}
+   catch(Exception ex){return new List<LabelIssue>{new LabelIssue{Blocking=true,Message=ex.Message}};}
+  }
+  var result=new List<LabelIssue>();Action<int,bool,string> add=(i,b,m)=>result.Add(new LabelIssue{Element=i,Blocking=b,Message=m});var codes=new List<int>();var shapes=new List<int>();if(!s.HideBarcode){codes.Add(-1);try{if(Engine.IsGs1(s))Gs1.Payload(s.ApplicationIdentifiers);else Engine.Normalize(s.Ean,s.Kind);if(Engine.Module(s)<1)throw new Exception(Loc.T("Kód je pre zvolené rozlíšenie príliš úzky."));}catch(Exception ex){add(-1,true,ex.Message);}}
   foreach(int index in Elements.Indices(s)){ElementEdit el;try{el=ElementTransform.Get(s,index);}catch{continue;}if(ElementTransform.Outside(s,el))add(index,false,Loc.T("Prvok presahuje etiketu"));if(index<=-3){var symbol=s.Symbols[-3-index];try{if(symbol.Shape!=null){symbol.Shape.Validate(symbol);shapes.Add(index);}if(symbol.Code!=null){codes.Add(index);Engine.Validate(symbol.Code.Settings());}if(symbol.Matrix!=null){codes.Add(index);var matrix=Assets.Matrix(symbol.Matrix);if(symbol.Width*s.Dpi/25.4<matrix.Width||symbol.Height*s.Dpi/25.4<matrix.Height||BarcodeCatalog.Square(symbol.Matrix.Type)&&Math.Abs(symbol.Width-symbol.Height)>.01)throw new Exception(Loc.T("Neplatné rozmery 2D kódu"));}if(symbol.Image!=null){Assets.Validate(symbol.Image);if(symbol.Image.Mime!="image/svg+xml"&&Math.Min(symbol.Image.PixelWidth*symbol.Image.CropWidth/symbol.Width,symbol.Image.PixelHeight*symbol.Image.CropHeight/symbol.Height)*25.4<s.Dpi*.75)add(index,false,Loc.T("Nízke rozlíšenie obrázka pri tlači"));}}catch(Exception ex){add(index,true,ex.Message);}}
    if(index>=0&&!TextFits(s.Texts[index],s.Dpi))add(index,false,Loc.T("Text sa nezmestí do poľa"));
   }

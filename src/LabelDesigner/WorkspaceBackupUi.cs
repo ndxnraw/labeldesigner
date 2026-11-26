@@ -23,9 +23,9 @@ namespace EanEtikety {
    var profiles=Check(rows,"Profily médií",true);
    var batches=Check(rows,"Dávky a uzávierky",false);
    ManagementLayout.AddRow(rows,Description("Záloha dávok obsahuje identifikátory, počty a uzávierky. Obsah na dotlač sa uchováva v histórii tlače."));
-   var export=Action("Exportovať zálohu do ZIPu…",()=>ExportWorkspace(dialog,service,templates.Checked,profiles.Checked,batches.Checked));
+   var export=Action("Exportovať zálohu do ZIPu…",()=>ExportWorkspace(dialog,service,templates.Checked,profiles.Checked,batches.Checked),HeaderIcon.Export);
    ManagementLayout.AddRow(rows,export);
-   ManagementLayout.AddRow(rows,Action("Otvoriť ZIP na obnovu…",()=>RestoreWorkspace(dialog,service)));
+   ManagementLayout.AddRow(rows,Action("Otvoriť ZIP na obnovu…",()=>RestoreWorkspace(dialog,service),HeaderIcon.Open));
    EventHandler update=delegate{export.Enabled=templates.Checked||profiles.Checked||batches.Checked;};
    templates.CheckedChanged+=update;
    profiles.CheckedChanged+=update;

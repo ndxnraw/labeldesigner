@@ -41,8 +41,8 @@ namespace EanEtikety {
    return new Label{Text=Loc.T(text),AutoSize=true,UseMnemonic=false};
   }
 
-  internal static ModernButton Action(string text,Action action) {
-   var button=new ModernButton{Text=Loc.T(text),AutoSize=true,FlatStyle=FlatStyle.Flat,MinimumSize=new Size(0,38),UseMnemonic=false};
+  internal static ModernButton Action(string text,Action action,HeaderIcon? glyph=null) {
+   var button=new ModernButton{Text=Loc.T(text),AutoSize=true,FlatStyle=FlatStyle.Flat,MinimumSize=new Size(0,38),UseMnemonic=false,Glyph=glyph};
    button.Click+=delegate{action();};
    return button;
   }

@@ -92,11 +92,13 @@ namespace EanEtikety {
 
    var actions=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};
    templates.Controls.Add(actions,0,1);
-   var quick=Btn(Loc.T("Vyplniť a tlačiť…"),QuickPrintSelected);
+   var quick=Btn(Loc.T("Vyplniť a tlačiť…"),QuickPrintSelected,HeaderIcon.Print);
+
    quick.Name="openTemplateQuickPrint";
    quick.MinimumSize=new Size(150,38);
    list.ItemActivate+=delegate{QuickPrintSelected();};
-   var edit=Btn(Loc.T("Upraviť šablónu"),OpenTemplate);
+   var edit=Btn(Loc.T("Upraviť šablónu"),OpenTemplate,HeaderIcon.Open);
+
    var manage=Btn(Loc.T("Správa šablóny"),()=>{});
    manage.AccessibleRole=AccessibleRole.ButtonMenu;
    manage.Click+=delegate{management.Show(manage,0,manage.Height);};

@@ -4,7 +4,7 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Collections.Generic;
 namespace EanEtikety {
-public enum HeaderIcon {Open,Save,SaveAs,Print,Export,AddText,Deposit,SelectCode,CenterCode,Table,Panels,Zoom,Settings,Help,About,Undo,Redo,Tools,Library,Image,Barcode,Data,Check,Diagnostics,Update,AutoSave}
+public enum HeaderIcon {Open,Save,SaveAs,Print,Export,AddText,Deposit,SelectCode,CenterCode,Table,Panels,Zoom,Settings,Help,About,Undo,Redo,Tools,Library,Image,Barcode,Data,Check,Diagnostics,Update,AutoSave,Visibility,Delete}
 // Logical vector paths are created once per button. Pens, brushes and scaled paths
 // are cached outside OnPaint and disposed with their owner.
 public sealed class HeaderActionButton:Button {
@@ -15,7 +15,7 @@ public sealed class HeaderActionButton:Button {
 
  protected override void OnFontChanged(EventArgs e){base.OnFontChanged(e);RebuildGeometry();}
  public HeaderActionButton(HeaderIcon value){icon=value;SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);AutoSize=false;FlatStyle=FlatStyle.Flat;Size=new Size(36,36);MinimumSize=new Size(36,36);Margin=new Padding(0,4,8,2);AccessibleRole=AccessibleRole.PushButton;source=CreateIcon(value);RebuildGeometry();RefreshPalette();}
- static GraphicsPath CreateIcon(HeaderIcon kind){var p=new GraphicsPath();if(kind>=HeaderIcon.Export){switch(kind){
+ internal static GraphicsPath CreateIcon(HeaderIcon kind){var p=new GraphicsPath();if(kind>=HeaderIcon.Export){switch(kind){
 
  case HeaderIcon.Undo:case HeaderIcon.Redo:p.AddArc(5,5,12,12,200,260);p.StartFigure();p.AddLines(new[]{new PointF(2,3),new PointF(2,9),new PointF(8,9)});if(kind==HeaderIcon.Redo)using(var flip=new Matrix(-1,0,0,1,20,0))p.Transform(flip);break;
  case HeaderIcon.Tools:p.AddRectangle(new RectangleF(2,2,6,6));p.AddRectangle(new RectangleF(12,2,6,6));p.AddRectangle(new RectangleF(2,12,6,6));p.AddRectangle(new RectangleF(12,12,6,6));break;
@@ -26,6 +26,8 @@ public sealed class HeaderActionButton:Button {
  case HeaderIcon.Check:p.AddLines(new[]{new PointF(2,10),new PointF(7,15),new PointF(18,4)});break;
  case HeaderIcon.Diagnostics:p.AddRectangle(new RectangleF(2,2,16,16));p.StartFigure();p.AddLines(new[]{new PointF(3,11),new PointF(6,11),new PointF(8,6),new PointF(11,15),new PointF(14,9),new PointF(17,9)});break;
  case HeaderIcon.Update:p.AddArc(2,2,16,16,30,290);p.StartFigure();p.AddLines(new[]{new PointF(16,1),new PointF(19,7),new PointF(13,7)});break;
+ case HeaderIcon.Delete:p.AddLines(new[]{new PointF(5,6),new PointF(6,18),new PointF(14,18),new PointF(15,6)});p.StartFigure();p.AddLine(3,5,17,5);p.StartFigure();p.AddLines(new[]{new PointF(8,5),new PointF(8,2),new PointF(12,2),new PointF(12,5)});break;
+ case HeaderIcon.Visibility:p.AddBezier(1,10,6,2,14,2,19,10);p.AddBezier(19,10,14,18,6,18,1,10);p.CloseFigure();p.AddEllipse(7,7,6,6);break;
  case HeaderIcon.AutoSave:p.AddEllipse(2,2,16,16);p.StartFigure();p.AddLines(new[]{new PointF(10,5),new PointF(10,11),new PointF(14,13)});break;
  case HeaderIcon.Export:p.AddLines(new[]{new PointF(3,10),new PointF(3,17),new PointF(17,17),new PointF(17,10)});p.StartFigure();p.AddLine(10,13,10,2);p.StartFigure();p.AddLines(new[]{new PointF(6,6),new PointF(10,2),new PointF(14,6)});break;
  case HeaderIcon.AddText:p.AddLine(2,3,14,3);p.StartFigure();p.AddLine(8,3,8,17);p.StartFigure();p.AddLine(5,17,11,17);p.StartFigure();p.AddLine(16,10,16,16);p.StartFigure();p.AddLine(13,13,19,13);break;

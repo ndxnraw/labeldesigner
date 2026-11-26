@@ -82,6 +82,11 @@ source attempt. A test transport captures the submitted copy count.
 Manual print result checks cover per-row totals across copies, metadata-only
 attempts, old archives, concurrent edits, bounds, cleanup and a recovery
 proposal through the actual history and print preview.
+`EditorRefinementTests` exercises visibility rules after field substitution,
+group copying, missing data sources, fixed geometry, conditional artwork in
+the editor, quick print, batches, preflight and PDF/SVG/Word/ZPL output. It
+also verifies that toolbar icons preserve accessible command names.
+
 `EditorRefinementTests` covers the six user PDF proposals: opt-in text dimensions,
 legacy geometry and captions, batch expansion, focused live inspector edits,
 actual Enter/Escape command routing, grouped undo, cancellation/clean state,

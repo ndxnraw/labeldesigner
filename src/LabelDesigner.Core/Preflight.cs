@@ -22,7 +22,7 @@ namespace EanEtikety {
   public List<string> Messages(){return Issues.ConvertAll(i=>i.ToString());}
   public static PreflightReport Inspect(OutputPlan plan){
    if(plan==null)throw new ArgumentNullException("plan");var result=new PreflightReport(plan);var seen=new HashSet<LabelSettings>();int index=0;
-   foreach(var placement in plan.Placements){WorkContext.Report("Kontrolujem výstup…",index++,plan.Placements.Count);if(!seen.Add(placement.Label))continue;foreach(var issue in LabelChecks.Inspect(placement.Label))result.Issues.Add(new LabelIssue{Blocking=issue.Blocking,Element=issue.Element,Message=issue.Message,Record=placement.Record,Page=placement.Page+1});}
+   foreach(var placement in plan.Placements){WorkContext.Report("Kontrolujem výstup…",index++,plan.Placements.Count);if(!seen.Add(placement.Label))continue;foreach(var issue in LabelChecks.Inspect(placement.Label))result.Issues.Add(new LabelIssue{Blocking=issue.Blocking,Element=Elements.SourceIndex(placement.Label,issue.Element),Message=issue.Message,Record=placement.Record,Page=placement.Page+1});}
    if(plan.Placements.Count==0)result.Issues.Add(new LabelIssue{Blocking=true,Message=Loc.T("Dokument neobsahuje nič na tlač.")});
    WorkContext.Report("Kontrolujem výstup…",plan.Placements.Count,plan.Placements.Count);return result;
   }

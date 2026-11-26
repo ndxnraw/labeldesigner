@@ -21,7 +21,7 @@ namespace EanEtikety {
  public static class JobPreparation {
   public static LabelSettings Resolve(LabelSettings template,DateTime instant){
    Engine.ValidateDraft(template);
-   if(template.Variables.Count==0){var copy=ProjectXml.Clone(template);BatchReferences.Strip(copy);Engine.Validate(copy);return copy;}
+   if(template.Variables.Count==0&&!ConditionalVisibility.HasRules(template)){var copy=ProjectXml.Clone(template);BatchReferences.Strip(copy);Engine.Validate(copy);return copy;}
    var record=BatchData.Record(template,new string[0],new List<ColumnBinding>(),-1,0,1,instant);
    if(record.Error!=null)throw new InvalidOperationException(record.Error);
    BatchReferences.Strip(record.Label);

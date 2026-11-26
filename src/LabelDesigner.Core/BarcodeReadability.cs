@@ -152,7 +152,7 @@ namespace EanEtikety {
     if (completed >= maxPages || result.Items.Count >= maxCodes) { result.Partial = true; break; }
     var candidates = new List<Candidate>();
     using (var scene = plan.Scene(page, (placement, shape, element, slot) =>
-       candidates.Add(new Candidate { Placement = placement, Shape = shape, Element = element, Slot = slot }))) {
+       candidates.Add(new Candidate { Placement = placement, Shape = shape, Element = Elements.SourceIndex(placement.Label,element), Slot = slot }))) {
      foreach (var candidate in candidates) {
       WorkContext.Check();
       if (result.Items.Count >= maxCodes) { result.Partial = true; break; }

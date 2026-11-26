@@ -61,6 +61,22 @@ namespace EanEtikety {
       foreach(var ai in symbol.Code.ApplicationIdentifiers)ai.Data=resolve(target,ai.Data);
      }
     }
+    if(ConditionalVisibility.HasRules(label)){
+     var ruleErrors=new HashSet<string>(StringComparer.Ordinal);
+     var hidden=ConditionalVisibility.Apply(label,values,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
+      message=>ruleErrors.Add(message));
+     if(hidden.Count>0){
+      record.Issues.RemoveAll(issue=>Elements.TryFieldIndex(issue.Target,out int index)&&hidden.Contains(index));
+      record.Error=record.Issues.Find(issue=>issue.Blocking)?.Message;
+      var remap=new Dictionary<string,string>(StringComparer.Ordinal);
+      foreach(int element in Elements.Indices(label))remap[Elements.FieldTarget(Elements.SourceIndex(label,element))]=Elements.FieldTarget(element);
+      var filteredColumns=new Dictionary<string,int>(StringComparer.Ordinal);
+      foreach(var pair in columns)if(remap.TryGetValue(pair.Key,out string target))filteredColumns[target]=pair.Value;
+      columns=filteredColumns;
+      foreach(var issue in record.Issues)if(issue.Target!=null&&remap.TryGetValue(issue.Target,out string target))issue.Target=target;
+     }
+     foreach(string message in ruleErrors)record.AddIssue(-1,null,message);
+    }
     label.Variables.Clear();
     TextAutoLayout.Apply(label);
     ValidatePreparedLabel(record,label,columns);

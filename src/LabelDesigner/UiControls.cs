@@ -42,12 +42,29 @@ public class ModernComboBox:ComboBox {
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);Invalidate();}
 }
 public class ModernButton:Button {
+ HeaderIcon? glyph;
+ GraphicsPath glyphPath;
+ [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+ internal HeaderIcon? Glyph {
+  get=>glyph;
+  set{
+   if(glyph==value)return;
+   glyph=value;
+   glyphPath?.Dispose();
+   glyphPath=value.HasValue?HeaderActionButton.CreateIcon(value.Value):null;
+   Parent?.PerformLayout(this,nameof(Glyph));
+   Invalidate();
+  }
+ }
+ int GlyphSize=>Math.Max(16,Font.Height-3);
+ int GlyphSpace=>glyph.HasValue?GlyphSize+8:0;
  public override Size GetPreferredSize(Size proposedSize){
   if(!AutoSize)return base.GetPreferredSize(proposedSize);
-  int width=TextRenderer.MeasureText(Text,Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16+Padding.Horizontal;
+  int width=TextRenderer.MeasureText(Text,Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16+Padding.Horizontal+GlyphSpace;
   if((Dock==DockStyle.Top||Dock==DockStyle.Bottom)&&Parent!=null)width=Parent.ClientSize.Width-Parent.Padding.Horizontal-Margin.Horizontal;
-  if(width<=0||width>100000)width=TextRenderer.MeasureText(Text,Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16+Padding.Horizontal;
-  int height=TextRenderer.MeasureText(Text,Font,new Size(Math.Max(1,width-16-Padding.Horizontal),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height+12+Padding.Vertical;
+  if(width<=0||width>100000)width=TextRenderer.MeasureText(Text,Font,Size.Empty,TextFormatFlags.SingleLine|TextFormatFlags.NoPrefix).Width+16+Padding.Horizontal+GlyphSpace;
+  int height=TextRenderer.MeasureText(Text,Font,new Size(Math.Max(1,width-16-Padding.Horizontal-GlyphSpace),0),TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix).Height;
+  height=Math.Max(height,glyph.HasValue?GlyphSize:0)+12+Padding.Vertical;
   return new Size(Math.Max(MinimumSize.Width,width),Math.Max(MinimumSize.Height,height));
  }
  protected virtual bool SelectedVisual{get{return false;}}
@@ -61,12 +78,25 @@ public class ModernButton:Button {
   using(var path=new GraphicsPath()){path.AddArc(r.Left,r.Top,d,d,180,90);path.AddArc(r.Right-d,r.Top,d,d,270,90);path.AddArc(r.Right-d,r.Bottom-d,d,d,0,90);path.AddArc(r.Left,r.Bottom-d,d,d,90,90);path.CloseFigure();using(var b=new SolidBrush(back))g.FillPath(b,path);using(var p=new Pen(hc?SystemColors.WindowText:FlatAppearance.BorderColor))g.DrawPath(p,path);}
   var flags=TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.WordBreak|TextFormatFlags.PreserveGraphicsClipping;
   flags|=!UseMnemonic?TextFormatFlags.NoPrefix:ShowKeyboardCues?0:TextFormatFlags.HidePrefix;
-  TextRenderer.DrawText(g,Text,Font,Rectangle.Inflate(r,-4,-3),ink,flags);
+  var textArea=Rectangle.Inflate(r,-4,-3);
+  if(glyphPath!=null&&textArea.Width>GlyphSpace+8&&textArea.Height>=GlyphSize){
+   var state=g.Save();
+   try{
+    g.TranslateTransform(textArea.Left+4,textArea.Top+(textArea.Height-GlyphSize)/2f);
+    g.ScaleTransform(GlyphSize/20f,GlyphSize/20f);
+    using(var pen=new Pen(ink,1.6f){LineJoin=LineJoin.Round,StartCap=LineCap.Round,EndCap=LineCap.Round})g.DrawPath(pen,glyphPath);
+   }finally{g.Restore(state);}
+   textArea.X+=GlyphSpace+4;
+   textArea.Width-=GlyphSpace+4;
+   flags&=~TextFormatFlags.HorizontalCenter;
+  }
+  TextRenderer.DrawText(g,Text,Font,textArea,ink,flags);
   if(Focused&&Width>12&&Height>12)ControlPaint.DrawFocusRectangle(g,new Rectangle(5,5,Width-10,Height-10),ink,back);
  }
  protected override void OnGotFocus(EventArgs e){base.OnGotFocus(e);Invalidate();}
  protected override void OnLostFocus(EventArgs e){base.OnLostFocus(e);Invalidate();}
  protected override void OnSystemColorsChanged(EventArgs e){base.OnSystemColorsChanged(e);Invalidate();}
+ protected override void Dispose(bool disposing){if(disposing)glyphPath?.Dispose();base.Dispose(disposing);}
 }
 public class ModernTabs:TableLayoutPanel {
  public bool Dark=true;FlowLayoutPanel header;Panel body;List<Button> buttons=new List<Button>();List<Panel> pages=new List<Panel>();int selected;bool refreshing;

@@ -32,7 +32,7 @@ public static class VectorArt {
   height=(int)Math.Round(s.BarHeight*pixels);
   bearer=s.Kind==14?5*module:0;
  }
- internal static VectorScene Build(LabelSettings s,bool inspectCodes){WorkContext.Check();if(s.Variables.Count>0){var record=BatchData.Record(s,new string[0],new List<ColumnBinding>(),-1,0,1,DateTime.Today);if(record.Error!=null)throw new InvalidDataException(record.Error);s=record.Label;}Engine.Validate(s);var scene=new VectorScene{Width=s.Width,Height=s.Height};try{
+ internal static VectorScene Build(LabelSettings s,bool inspectCodes){WorkContext.Check();if(s.Variables.Count>0||ConditionalVisibility.HasRules(s)){var record=BatchData.Record(s,new string[0],new List<ColumnBinding>(),-1,0,1,DateTime.Today);if(record.Error!=null)throw new InvalidDataException(record.Error);s=record.Label;}Engine.Validate(s);var scene=new VectorScene{Width=s.Width,Height=s.Height};try{
   for(int i=0;i<s.Texts.Count;i++){
    WorkContext.Check();
    var t=s.Texts[i];var box=Rect(t.X,t.Y,t.Width,t.Height);

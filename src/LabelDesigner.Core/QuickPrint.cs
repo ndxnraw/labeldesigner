@@ -7,9 +7,10 @@ namespace EanEtikety {
  public sealed class QuickPrintDraft {
   public readonly LabelSettings Label;
   public readonly List<LabelIssue> Issues;
+  public readonly IReadOnlySet<int> Hidden;
   readonly DateTime instant;
-  internal QuickPrintDraft(LabelSettings label, List<LabelIssue> issues, DateTime instant) {
-   Label = label; Issues = issues; this.instant = instant;
+  internal QuickPrintDraft(LabelSettings label, List<LabelIssue> issues, DateTime instant, HashSet<int> hidden) {
+   Label = label; Issues = issues; this.instant = instant; Hidden=hidden;
   }
   public bool CanPrint { get { return !Issues.Exists(issue => issue.Blocking); } }
 
@@ -38,12 +39,13 @@ namespace EanEtikety {
     Loc.T("Čiarový kód") : label.Symbols[-3-index].Matrix.Type);
   }
 
-  public static string Value(LabelSettings label, int index) {
+  public static string Value(LabelSettings label, int index)=>Value(label,index,false);
+  internal static string Value(LabelSettings label,int index,bool forVisibility) {
    if(index >= 0) return label.Texts[index].Text;
-   if(index == -1) return Engine.IsGs1(label) ? AiText(label.ApplicationIdentifiers) : label.Ean;
+   if(index == -1) return Engine.IsGs1(label) ? AiText(label.ApplicationIdentifiers,forVisibility) : label.Ean;
    var symbol=label.Symbols[-3-index];
    if(symbol.Matrix!=null) return symbol.Matrix.Data;
-   return symbol.Code.Gs1Mode && symbol.Code.Kind==128 ? AiText(symbol.Code.ApplicationIdentifiers) : symbol.Code.Ean;
+   return symbol.Code.Gs1Mode && symbol.Code.Kind==128 ? AiText(symbol.Code.ApplicationIdentifiers,forVisibility) : symbol.Code.Ean;
   }
 
   public static bool UsesAiLines(LabelSettings label,int index) {
@@ -53,7 +55,9 @@ namespace EanEtikety {
    return code!=null&&code.Gs1Mode&&code.Kind==128;
   }
 
-  static string AiText(IEnumerable<AiValue> values) { return string.Join(Environment.NewLine,values.Select(ai=>"("+ai.AI+")"+ai.Data)); }
+  static string AiText(IEnumerable<AiValue> values,bool forVisibility) {
+   return string.Join(Environment.NewLine,values.Where(ai=>!forVisibility||!string.IsNullOrWhiteSpace(ai.Data)).Select(ai=>"("+ai.AI+")"+ai.Data));
+  }
 
   static List<AiValue> ParseAiLines(string value) {
    var identifiers=new List<AiValue>();
@@ -63,7 +67,6 @@ namespace EanEtikety {
      throw new ArgumentException(Loc.T("Zadajte každý identifikátor na samostatný riadok vo formáte (AI)hodnota."));
     identifiers.Add(new AiValue{AI=line.Substring(1,end-1),Data=line.Substring(end+1)});
    }
-   Gs1.Payload(identifiers);
    return identifiers;
   }
 
@@ -86,13 +89,16 @@ namespace EanEtikety {
    else symbol.Code.Ean=content(value);
   }
 
-  public static QuickPrintDraft Prepare(LabelSettings template, IDictionary<int,string> values, DateTime instant) {
+  public static QuickPrintDraft Prepare(LabelSettings template, IDictionary<int,string> values, DateTime instant)=>Prepare(template,values,instant,false);
+  public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant)=>Prepare(template,null,instant,true);
+
+  static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,bool editor) {
    Engine.ValidateDraft(template);
    var label=ProjectXml.Clone(template);
-   var selected=new HashSet<int>(Selected(template));
+   var selected=new HashSet<int>(editor?new List<int>():Selected(template));
    var issues=new List<LabelIssue>();
    var variables=BatchData.Variables(template,0,instant);
-   foreach(var text in label.Texts)text.AutoWidth=false;
+   if(!editor)foreach(var text in label.Texts)text.AutoWidth=false;
    foreach(int index in Available(label)){
     WorkContext.Check();
     string original=Value(template,index), value=null;
@@ -102,11 +108,22 @@ namespace EanEtikety {
     catch(XmlException){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=Loc.T("Hodnota obsahuje nepovolený znak.")});}
     catch(Exception ex){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=ex.Message});}
    }
+   var ruleErrors=new HashSet<string>(StringComparer.Ordinal);
+   var hidden=ConditionalVisibility.Apply(label,variables,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
+    message=>ruleErrors.Add(message));
+   if(hidden.Count>0){
+    issues.RemoveAll(issue=>hidden.Contains(issue.Element));
+    var indices=Elements.Indices(label);
+    foreach(var issue in issues)if(issue.Element!=-2)issue.Element=indices.Find(index=>Elements.SourceIndex(label,index)==issue.Element);
+   }
+   foreach(string message in ruleErrors)issues.Add(new LabelIssue{Blocking=true,Message=message});
    label.Variables.Clear();
    BatchReferences.Strip(label);
+   if(editor)TextAutoLayout.Apply(label);
    foreach(var issue in LabelChecks.Inspect(label))
     if(!issues.Exists(item=>item.Blocking&&item.Element==issue.Element))issues.Add(issue);
-   foreach(int index in selected.Where(index=>index>=0)){
+   for(int index=0;index<label.Texts.Count;index++){
+    if(!selected.Contains(Elements.SourceIndex(label,index)))continue;
     if(label.Texts[index].MinimumFitSize>0)continue;
     if(LabelChecks.TextFits(label.Texts[index],label.Dpi,true))continue;
     string message=Loc.T("Text sa nezmestí do poľa");
@@ -114,9 +131,11 @@ namespace EanEtikety {
     if(issue==null)issues.Add(new LabelIssue{Element=index,Blocking=true,Message=message});
     else issue.Blocking=true;
    }
-   if(label.HideBarcode&&label.Symbols.Count==0&&!label.Texts.Exists(text=>!string.IsNullOrWhiteSpace(text.Text)))
-    issues.Add(new LabelIssue{Blocking=true,Message=Loc.T("Dokument neobsahuje nič na tlač.")});
-   return new QuickPrintDraft(label,issues,instant);
+   if(label.HideBarcode&&label.Symbols.Count==0&&!label.Texts.Exists(text=>!string.IsNullOrWhiteSpace(text.Text))){
+    string empty=Loc.T("Dokument neobsahuje nič na tlač.");
+    if(!issues.Exists(issue=>issue.Blocking&&issue.Message==empty))issues.Add(new LabelIssue{Blocking=true,Message=empty});
+   }
+   return new QuickPrintDraft(label,issues,instant,hidden);
   }
  }
 }

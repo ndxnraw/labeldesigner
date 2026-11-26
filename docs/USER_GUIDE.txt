@@ -128,6 +128,20 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+PODMIENENÉ ZOBRAZENIE
+
+Vyberte prvok alebo skupinu. Vo Vlastnostiach alebo v ponuke vrstvy
+otvorte Pravidlo zobrazenia. Zvoľte Vždy, vyplnené pole alebo
+rovnosť s hodnotou. Zdrojom môže byť textové pole, obsah kódu alebo
+premenná. V dávke sa použije hodnota po mapovaní a dosadení premenných.
+Pri rovnosti sa ignorujú okrajové medzery a rozlišujú sa veľké a malé
+písmená. Ak má prvok vlastné pravidlo aj pravidlo skupiny, platia obe.
+
+Skryté prvky sú označené v zozname Prvky. Ich pozície sa zachovajú a
+ostatné prvky sa neposunú. Kontrola, tlač a export pracujú s viditeľným
+obsahom. Pri odstránení zdroja alebo kopírovaní bez zdrojového poľa
+vyberte v pravidle nový zdroj, prípadne nastavte Vždy.
+
 RÝCHLE VYPLNENIE A TLAČ ŠABLÓNY
 Otvorte Projekt → Šablóny a nedávne projekty. Na karte Šablóny vyberte šablónu
 a cez Správa šablóny → Upraviteľné polia šablóny… označte texty alebo kódy, ktoré sa majú

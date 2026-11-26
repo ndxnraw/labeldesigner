@@ -28,10 +28,10 @@ namespace EanEtikety {
     fields.MaximumSize=new Size(640,0);
     page.Controls.Add(fields);
     var actions=StepActions();
-    actions.Controls.Add(owner.Btn(Loc.T("Import CSV / XLSX"),Import));
+    actions.Controls.Add(owner.Btn(Loc.T("Import CSV / XLSX"),Import,HeaderIcon.Open));
     useGenerated=owner.Btn(Loc.T("Použiť generované záznamy"),UseGeneratedSource);
     actions.Controls.Add(useGenerated);
-    actions.Controls.Add(owner.Btn(Loc.T("Predvoľby dávky…"),ShowPresets));
+    actions.Controls.Add(owner.Btn(Loc.T("Predvoľby dávky…"),ShowPresets,HeaderIcon.Library));
     actions.Controls.Add(owner.Btn(Loc.T("Premenné polia"),delegate{owner.EditVariables();Map();}));
     referenceButton=owner.Btn(Loc.T("Referenčná dávka…"),ShowBatchReference);
     actions.Controls.Add(referenceButton);
@@ -77,9 +77,9 @@ namespace EanEtikety {
 
     var actions=StepActions();
     actions.Controls.Add(owner.Btn(Loc.T("Späť na zdroj"),()=>batchSteps.SelectedIndex=SourceStep));
-    sampleButton=owner.Btn(Loc.T("Náhľad prvých záznamov…"),ShowSample);
+    sampleButton=owner.Btn(Loc.T("Náhľad prvých záznamov…"),ShowSample,HeaderIcon.Visibility);
     actions.Controls.Add(sampleButton);
-    prepareButton=owner.Btn(Loc.T("Pripraviť dávku"),Prepare);
+    prepareButton=owner.Btn(Loc.T("Pripraviť dávku"),Prepare,HeaderIcon.Check);
     prepareButton.Name="batchPrepare";
     actions.Controls.Add(prepareButton);
     layout.Controls.Add(actions,0,2);
