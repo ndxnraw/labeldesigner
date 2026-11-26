@@ -10,7 +10,7 @@ namespace EanEtikety {
   Control textTranslations;
   bool HasTextTranslations(int index)=>labelLanguages!=null&&elementMetadata.Exists(meta=>meta.Index==index&&meta.Translations?.Count>0);
 
-  (Form Window,TableLayoutPanel Fields,Button Apply) CreateLanguageDialog(string title){
+  (Form Window,TableLayoutPanel Fields,Button Apply) CreateFieldSettingsDialog(string title){
    var window=FeatureForm(title,590,500);
    window.MinimumSize=new Size(450,360);
    window.MaximizeBox=false;window.MinimizeBox=false;
@@ -29,7 +29,7 @@ namespace EanEtikety {
   void EditLabelLanguages(){
    CommitInspectorIfFocused();
    var existing=labelLanguages;
-   var dialog=CreateLanguageDialog("Jazyky etikety…");
+   var dialog=CreateFieldSettingsDialog("Jazyky etikety…");
    using(var window=dialog.Window){
     var initial=existing?.Codes??new List<string>{"SK","CZ","EN"};
     var codes=Input(dialog.Fields,"Kódy jazykov (jeden na riadok)",string.Join(Environment.NewLine,initial));
@@ -87,7 +87,7 @@ namespace EanEtikety {
    }
    var template=Read();
    var previous=template.Metadata.Find(meta=>meta.Index==index)?.Translations;
-   var dialog=CreateLanguageDialog("Preklady textu…");
+   var dialog=CreateFieldSettingsDialog("Preklady textu…");
    using(var window=dialog.Window){
     var use=Check(dialog.Fields,"Použiť jazykové varianty",true);
     use.Name="enableTextTranslations";

@@ -20,7 +20,7 @@ namespace EanEtikety {
     WorkContext.Report("Pripravujem záznamy…",i,count);
     int rowIndex=start+i;
     var row=table==null?new string[0]:table.Rows[rowIndex];
-    var record=BatchData.Record(template,row,bindings,quantity,i,table==null?i+1:table.SourceRow(rowIndex),instant,csv);
+    var record=BatchData.Record(template,row,bindings,quantity,i,table==null?i+1:table.SourceRow(rowIndex),instant,csv,table?.InputKinds(rowIndex));
     if(record.Label!=null&&record.Label.HideBarcode&&record.Label.Symbols.Count==0&&
         !record.Label.Texts.Exists(text=>!string.IsNullOrWhiteSpace(text.Text))){
      record.AddIssue(-1,null,Loc.T("Dokument neobsahuje nič na tlač."));

@@ -198,13 +198,19 @@ namespace EanEtikety {
    bool ReviewSample(DataTableSource table,bool confirmPositions) {
     var columns=new List<int>();
     var titles=new List<string>();
+    var formats=new List<LabelDataFormat>();
+    var model=owner.Read();
+    int languageColumn=-1;
     for(int i=0;i<targets.Count;i++) {
      int col=ColumnFor(i);
      if(col<0)continue;
+     if(targets[i]==LabelLanguages.BatchTarget)languageColumn=col;
      columns.Add(col);
+     formats.Add(LabelDataFormat.ForTarget(model,targets[i]));
      titles.Add(Convert.ToString(mapping.Rows[i].Cells["target"].Value)+Environment.NewLine+
       Convert.ToString(mapping.Rows[i].Cells["column"].Value));
     }
+    bool formatted=formats.Exists(format=>format!=null);
     var sample=BatchPresets.Sample(table,header.Checked,columns);
     string title="Náhľad prvých záznamov…";
     using(var dialog=owner.FeatureForm(title,850,450)) {
@@ -216,7 +222,8 @@ namespace EanEtikety {
      dialog.Controls.Add(layout);
      var message=new Label{AutoSize=true,MaximumSize=new Size(525,0),Text=Loc.T(confirmPositions?
       "Tabuľka nemá hlavičku. Pred prípravou dávky potvrďte poradie namapovaných stĺpcov.":
-      "Ukážka najviac piatich záznamov s hodnotami zo zdrojovej tabuľky.")};
+      "Ukážka najviac piatich záznamov s hodnotami zo zdrojovej tabuľky.")+
+      (formatted?Environment.NewLine+Loc.T("Šípka označuje hodnotu po formátovaní alebo chybu."):string.Empty)};
      layout.Controls.Add(message,0,0);
      var grid=new DataGridView{Dock=DockStyle.Fill,Name="batchSample",AccessibleName=dialog.Text,ReadOnly=true,
       RowHeadersVisible=false,AllowUserToAddRows=false,AllowUserToDeleteRows=false,
@@ -225,13 +232,27 @@ namespace EanEtikety {
      for(int i=0;i<titles.Count;i++) {
       int index=grid.Columns.Add("value"+i,SampleText(titles[i]));
       grid.Columns[index].Width=185;
+      if(formats[i]!=null)grid.Columns[index].DefaultCellStyle.WrapMode=DataGridViewTriState.True;
      }
+     if(formatted)grid.AutoSizeRowsMode=DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
      foreach(DataGridViewColumn col in grid.Columns)col.SortMode=DataGridViewColumnSortMode.NotSortable;
+     int sourceIndex=header.Checked?1:0;
      foreach(var row in sample) {
       var values=new object[row.Values.Length+1];
       values[0]=row.Row;
-      for(int i=0;i<row.Values.Length;i++)values[i+1]=SampleText(row.Values[i]);
+      var culture=LabelDataFormat.CultureFor(model,languageColumn<0?null:BatchData.Value(table.Rows[sourceIndex],languageColumn));
+      for(int i=0;i<row.Values.Length;i++){
+       string raw=row.Values[i];
+       values[i+1]=SampleText(raw);
+       if(formats[i]==null)continue;
+       string output="",error=null;
+       if(table.HasCsvLineNumbers&&columns[i]>=table.Rows[sourceIndex].Length)error=Loc.T("V riadku chýba namapovaný stĺpec.");
+       else formats[i].TryFormat(raw,table.InputKind(sourceIndex,columns[i]),culture,out output,out error);
+       if(error!=null)values[i+1]=SampleText(raw)+Environment.NewLine+"→ "+Loc.T("Chyba")+" — "+SampleText(error);
+       else if(output.Length>0)values[i+1]=SampleText(raw)+Environment.NewLine+"→ "+SampleText(output);
+      }
       grid.Rows.Add(values);
+      sourceIndex++;
      }
      layout.Controls.Add(grid,0,1);
      var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true};

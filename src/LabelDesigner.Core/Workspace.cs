@@ -31,6 +31,7 @@ public sealed class WorkspaceStore:IDisposable {
 public class ElementMeta {
  public int Index;public bool Locked;public string Group="";public int Layer;public VisibilityRule Visibility,GroupVisibility;
  public List<LanguageTranslation> Translations;
+ public LabelDataFormat DataFormat;
  public bool ShouldSerializeTranslations()=>Translations?.Count>0;
  [XmlIgnore]public int? SourceIndex;
 }

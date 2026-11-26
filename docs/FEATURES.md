@@ -16,6 +16,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Formát údajov** v textovom poli určuje desatinné miesta, zobrazenú
+  jednotku a formát dátumu. Náhľad mapovania CSV/XLSX ukazuje vstup,
+  výsledok na etikete a chyby so zdrojovým riadkom.
 - **Sprievodca zmenou rozmerov** porovná pôvodnú etiketu a nový formát
   v rovnakej mierke. Umožňuje ukotviť prvky, skontroluje všetky jazyky
   a uloží upravený návrh ako novú šablónu.

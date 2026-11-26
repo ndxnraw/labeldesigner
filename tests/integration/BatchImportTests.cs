@@ -1,5 +1,117 @@
 using System;using System.IO;using System.IO.Compression;using System.Collections.Generic;using System.Drawing;using System.Windows.Forms;using EanEtikety;
 class BatchImportTests {
+ static void FormattedFields(string dir){
+  var template=LabelSettings.Default();template.Kind=128;template.Ean="000123";
+  template.Texts[0].Text="1,5";template.Texts[0].AutoWidth=false;
+  template.Texts.Add(new TextItem{X=2,Y=34,Width=44,Height=8,Text="03/04/2026"});
+  var weight=new LabelDataFormat{Kind=TextDataKind.Number,DecimalInput=TextDecimalInput.Comma,Decimals=2,Unit="kg"};
+  var date=new LabelDataFormat{Kind=TextDataKind.Date,DateInput=TextDateOrder.DayMonthSlash,DateOutput=TextDateDisplay.DayMonthDot};
+  Elements.Meta(template,0).DataFormat=weight;Elements.Meta(template,1).DataFormat=date;
+  template.Languages=new LabelLanguages{Codes=new(){"SK","EN"},Selected="SK"};
+  template.QuickPrintFields.Add(0);
+  string path=Path.Combine(dir,"formatted.ean.xml");
+  Engine.Save(path,template);
+  template=Engine.Load(path);
+  var bindings=new List<ColumnBinding>{
+   new(){Target="code",Column=0},new(){Target="text:0",Column=1},new(){Target="text:1",Column=2},
+   new(){Target=LabelLanguages.BatchTarget,Column=3}
+  };
+  var today=new DateTime(2026,11,26);
+  var csv=BatchData.CsvText("Code;Weight;Date;Language;Note\r\n000123;1,5;03/04/2026;SK;\"two\r\nlines\"\r\n000124;bad;31/04/2026;EN;\r\n000125;1,5;03/04/2026;EN;",';');
+  var records=BatchProcessing.Prepare(template,csv,true,bindings,-1,0,today);
+  Check(records[0].Label.Ean=="000123"&&records[0].Label.Texts[0].Text=="1,50 kg"&&records[0].Label.Texts[1].Text=="03. 04. 2026","CSV formatting is explicit and a barcode retains its leading zeros");
+  Check(records[1].Label==null&&records[1].Row==4&&records[1].Issues.Exists(i=>i.Row==4&&i.Column==1&&i.Blocking)&&
+   records[1].Issues.Exists(i=>i.Row==4&&i.Column==2&&i.Blocking),"invalid number and date report the physical CSV row and each source column");
+  Check(records[2].Label.Texts[0].Text=="1.50 kg"&&JobPreparation.Resolve(records[2].Label,today).Texts[0].Text=="1.50 kg",
+   "row language formats decimals and frozen output does not format twice");
+  var dateFormat=LabelDataFormat.ForField(template,1);
+  dateFormat.DateInput=TextDateOrder.MonthDaySlash;
+  Check(QuickPrint.PrepareEditor(template,today).Label.Texts[1].Text=="04. 03. 2026","ambiguous date follows the explicitly selected month-first order");
+  dateFormat.DateInput=TextDateOrder.DayMonthSlash;
+  string zpl=Path.Combine(dir,"formatted-label.zpl");
+  Engine.Zpl(zpl,template);
+  var exported=ZplImport.Project(File.ReadAllText(zpl));
+  Check(exported.Ean=="000123"&&exported.Texts[0].Text=="1,50 kg"&&LabelDataFormat.ForField(exported,0)==null,
+   "direct ZPL export preserves code zeros and stores resolved formatting once");
+  var quick=QuickPrint.Prepare(template,new Dictionary<int,string>{{0,"2,75"}},today,"EN");
+  Check(quick.CanPrint&&quick.Label.Texts[0].Text=="2.75 kg"&&quick.Label.Ean=="000123","quick print uses the same numeric formatter");
+  Check(!QuickPrint.Prepare(template,new Dictionary<int,string>{{0,"1.234"}},today,"SK").CanPrint,"wrong decimal separator is rejected rather than guessed");
+  var ruled=ProjectXml.Clone(template);
+  Elements.Meta(ruled,1).Visibility=new VisibilityRule{Field=0,Mode=VisibilityMode.EqualsValue,Value="1,5"};
+  Check(QuickPrint.PrepareEditor(ruled,today).Label.Texts.Count==2,"visibility compares the source value before adding a unit");
+  string xlsx=Path.Combine(dir,"formatted-input.xlsx");
+  using(var zip=ZipFile.Open(xlsx,ZipArchiveMode.Create)){
+   Entry(zip,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Data' r:id='r1'/></sheets></workbook>");
+   Entry(zip,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>");
+   Entry(zip,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");
+   Entry(zip,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Code</t></is></c></row>"+
+    "<row r='4'><c r='A4' s='1'><v>123</v></c><c r='B4'><v>1.5</v></c><c r='C4' s='2'><v>45292</v></c><c r='D4' t='inlineStr'><is><t>EN</t></is></c></row>"+
+    "<row r='6'><c r='A6' s='1'><v>124</v></c><c r='B6' t='inlineStr'><is><t>1.5</t></is></c><c r='C6' s='2'><v>45292</v></c><c r='D6' t='inlineStr'><is><t>SK</t></is></c></row></sheetData></worksheet>");
+  }
+  var table=BatchData.Xlsx(xlsx)[0];
+  var worksheet=BatchProcessing.Prepare(template,table,true,bindings,-1,0,today);
+  var typed=worksheet.Find(row=>row.Row==4);
+  Check(typed.Label.Ean=="000123"&&typed.Label.Texts[0].Text=="1.50 kg"&&typed.Label.Texts[1].Text=="01. 01. 2024",
+   "native XLSX numbers and dates use their canonical storage independently of text input rules");
+  var bad=worksheet.Find(row=>row.Row==6);
+  Check(bad.Label==null&&bad.Issues.Exists(i=>i.Row==6&&i.Column==1&&i.Blocking),"XLSX text cells still follow the declared decimal separator with an exact worksheet row");
+  FormattingDialogs(dir,template,bindings,csv,table);
+ }
+ static void FormattingDialogs(string dir,LabelSettings template,List<ColumnBinding> bindings,DataTableSource csv,DataTableSource table){
+  const System.Reflection.BindingFlags privateInstance=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+  object Call(object target,string name,params object[] args)=>target.GetType().GetMethod(name,privateInstance).Invoke(target,args);
+  using var owner=new MainForm(Path.Combine(dir,"data-format-ui.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  template.Batch.Bindings=bindings;
+  Call(owner,"Apply",template);
+  ((PreviewPanel)typeof(MainForm).GetField("preview",privateInstance).GetValue(owner)).SelectElement(0);
+  void Modal(string controlName,Action invoke,Action<Form> inspect){
+   Exception failure=null;bool opened=false;
+   using var timer=new Timer{Interval=75};
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner)continue;
+     timer.Stop();
+     try{
+      Check(dialog.Controls.Find(controlName,true).Length==1,"expected formatting dialog opens");
+      opened=true;inspect(dialog);
+     }catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();invoke();
+   if(failure!=null)throw failure;
+   Check(opened,"dialog was inspected");
+  }
+  Modal("dataFormatKind",()=>Call(owner,"EditTextDataFormat"),dialog=>{
+   ((TextBox)dialog.Controls.Find("dataFormatUnit",true)[0]).Text="g";
+   ((TextBox)dialog.Controls.Find("dataFormatSample",true)[0]).Text="3,25";
+   Check(dialog.Controls.Find("dataFormatResult",true)[0].Text=="→ 3,25 g","the formatting dialog updates the displayed value");
+   dialog.AcceptButton.PerformClick();
+  });
+  Check(LabelDataFormat.ForField((LabelSettings)Call(owner,"Read"),0).Unit=="g","the editor saves the selected unit in the template");
+  Call(owner,"Apply",template);
+  var windowType=typeof(MainForm).GetNestedType("BatchWindow",System.Reflection.BindingFlags.NonPublic);
+  using var batchWindow=(IDisposable)Activator.CreateInstance(windowType,owner);
+  void Sample(DataTableSource source,int numberRow,int errorRow,string expected){
+   Call(batchWindow,"InstallTables",new List<DataTableSource>{source});
+   Modal("batchSample",()=>Call(batchWindow,"ReviewSample",source,false),dialog=>{
+    var grid=(DataGridView)dialog.Controls.Find("batchSample",true)[0];
+    bool foundOutput=false,foundError=false;
+    foreach(DataGridViewRow row in grid.Rows){
+     int line=(int)row.Cells["source"].Value;
+     string weight=(string)row.Cells["value2"].Value;
+     if(line==numberRow)foundOutput=weight.Contains(expected)&&Convert.ToString(row.Cells["value1"].Value)=="000123";
+     if(line==errorRow)foundError=weight.Contains("→ "+Loc.T("Chyba")+" — "+Loc.T("Zadajte číslo s desatinnou čiarkou."));
+    }
+    Check(foundOutput&&foundError,"mapping preview preserves the source code and shows formatted output and errors on the source row");
+    dialog.DialogResult=DialogResult.Cancel;
+   });
+  }
+  Sample(csv,2,4,"→ 1,50 kg");
+  Sample(table,4,6,"→ 1.50 kg");
+  Call(owner,"Apply",LabelSettings.Default());owner.Close();
+ }
  static void SavedReferences(string dir){
   var source=BatchData.CsvText("SKU;Name;Qty;Private\r\n001;\"First\r\nlabel\";2;unused secret\r\n002;Old;1;other secret",';');
   var mapping=new BatchSetup{Header=true,QuantityColumn=2,UniqueColumn=0,Bindings=new List<ColumnBinding>{
@@ -409,7 +521,7 @@ class BatchImportTests {
   catch(InvalidDataException ex){Check(ex.Message.Contains("4"),"CSV syntax error cites the source line");}
  }
  static int count;static void Check(bool b,string message){count++;if(!b)throw new Exception(message);}static void Entry(ZipArchive z,string name,string content){using(var w=new StreamWriter(z.CreateEntry(name).Open()))w.Write(content);}
- [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{SavedReferences(dir);Comparison();PortableBackup(dir);PortableBatchBackup(dir);QuickTemplate(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
+ [STAThread]static void Main(string[] args){string dir=args[0];Directory.CreateDirectory(dir);try{FormattedFields(dir);SavedReferences(dir);Comparison();PortableBackup(dir);PortableBatchBackup(dir);QuickTemplate(dir);Presets();CsvValidation();string file=Path.Combine(dir,"source.xlsx");using(var fs=File.Create(file))using(var z=new ZipArchive(fs,ZipArchiveMode.Create)){
  Entry(z,"xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Products' r:id='r1'/><sheet name='Other' r:id='r2'/></sheets></workbook>");Entry(z,"xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/><Relationship Id='r2' Target='worksheets/sheet2.xml'/></Relationships>");Entry(z,"xl/styles.xml","<styleSheet><numFmts><numFmt numFmtId='164' formatCode='000000'/></numFmts><cellXfs><xf numFmtId='0'/><xf numFmtId='164'/><xf numFmtId='14'/></cellXfs></styleSheet>");Entry(z,"xl/sharedStrings.xml","<sst><si><t>Žltý čaj</t></si></sst>");Entry(z,"xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' s='1'><v>123</v></c><c r='B1' t='s'><v>0</v></c><c r='C1' s='2'><v>45292</v></c><c r='D1'><f>1+1</f><v>2</v></c><c r='E1'><f>1+1</f></c></row><row r='3'><c r='A3' t='inlineStr'><is><t>000045</t></is></c></row></sheetData></worksheet>");Entry(z,"xl/worksheets/sheet2.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Other sheet</t></is></c></row></sheetData></worksheet>");}
  var tables=BatchData.Xlsx(file);Check(tables.Count==2&&tables[1].Name=="Other","sheet selection");Check(tables[0].Rows[0][0]=="000123"&&tables[0].Rows[2][0]=="000045","formatted and text leading zeros");Check(tables[0].Rows[0][1]=="Žltý čaj","shared strings unicode");Check(tables[0].Rows[0][2]=="2024-01-01","Excel numeric date");Check(tables[0].Rows[0][3]=="2"&&tables[0].Rows[0][4].StartsWith("!ERROR"),"formula cached result versus error");Check(tables[0].Rows[1].Length==0,"sparse row number retained");
  var persisted=LabelSettings.Default();persisted.Texts.Add(new TextItem{Text="Second"});persisted.Batch.Bindings.Add(new ColumnBinding{Target="text:1",Column=3});persisted=ProjectXml.Clone(persisted);Check(persisted.Batch.Bindings[0].Column==3,"batch mapping project roundtrip");Elements.Remove(persisted,new List<int>{0});Check(persisted.Batch.Bindings[0].Target=="text:0","mapping follows surviving element after deletion");var label=LabelSettings.Default();label.Kind=128;var mappings=new List<ColumnBinding>{new ColumnBinding{Target="code",Column=0},new ColumnBinding{Target="text:0",Column=1}};var record=BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today);Check(record.Error==null&&record.Count==2&&record.Label.Ean=="000123","mapped record quantity");mappings[1].Column=4;Check(BatchData.Record(label,tables[0].Rows[0],mappings,3,0,1,DateTime.Today).Error!=null,"formula error blocks mapped row");

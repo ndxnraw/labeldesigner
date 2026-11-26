@@ -27,7 +27,7 @@ namespace EanEtikety {
    foreach(string variable in used)
     if(!block.Artwork.Variables.Exists(item=>item.Name==variable))
      throw new InvalidDataException(Loc.T("Neznáma premenná")+": "+variable);
-   if(block.Artwork.Metadata.Exists(meta=>meta.Translations?.Count>0))block.Artwork.Languages=copy.Languages;
+   if(block.Artwork.Metadata.Exists(meta=>meta.Translations?.Count>0||meta.DataFormat!=null))block.Artwork.Languages=copy.Languages;
    block.Validate();
    return block;
   }
@@ -117,6 +117,7 @@ namespace EanEtikety {
     if(original!=null){
      meta.Locked=original.Locked;
      meta.Translations=original.Translations;
+     meta.DataFormat=original.DataFormat;
      meta.Visibility=Remap(original.Visibility);
      if(!string.IsNullOrEmpty(original.Group)){
       if(!groups.TryGetValue(original.Group,out string group))groups[original.Group]=group=Guid.NewGuid().ToString("N");

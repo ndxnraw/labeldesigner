@@ -128,6 +128,25 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+FORMÁTOVANIE ÚDAJOV V TEXTOVOM POLI
+
+Vo Vlastnostiach textového poľa otvorte Formát údajov. Pri čísle vyberte
+oddeľovač pre textový vstup, počet desatinných miest a prípadnú jednotku.
+Jednotka sa pripojí k číslu. Pri dátume zadajte poradie častí vstupu
+a vyberte formát na etikete. Napríklad 03/04/2026 má iný význam pri
+D/M/RRRR než pri M/D/RRRR. Prázdna hodnota zostáva prázdna.
+
+Koncový formát čísel a voliteľne dátumov používa jazyk etikety. Pre
+etiketu bez nastavenia jazyka sa použije slovenčina. V dávke vyberá
+jazyk namapovaný stĺpec alebo nastavenie šablóny.
+
+V kroku Mapovanie otvorte Náhľad prvých záznamov. Za šípkou uvidíte
+formátovanú hodnotu alebo chybu na pôvodnom riadku. Textové bunky XLSX
+sa riadia rovnakými pravidlami ako CSV. Číselné a dátumové bunky XLSX
+používajú hodnoty uložené Excelom. Chybný riadok sa nedá tlačiť.
+Čiarové kódy si zachovávajú svoje údaje vrátane úvodných núl.
+Podmienené zobrazenie a výber obrázkov vyhodnotia vstup pred formátovaním.
+
 ZMENA ROZMEROV ETIKETY
 
 Otvorte Rozloženie → Zmeniť rozmery etikety a zadajte nový rozmer v mm.

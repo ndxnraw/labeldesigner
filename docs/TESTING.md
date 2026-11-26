@@ -95,6 +95,10 @@ independent copies, preserved translations and local rule dependencies.
 locked objects, sheet limits, multilingual overflow, template round trips and
 the resize dialog's paired previews and issue selection.
 
+`BatchImportTests` verifies typed XLSX cells, configured CSV and XLSX text
+formats, preserved code zeros, exact source rows, quick print and the editor
+and mapping preview dialogs.
+
 `EditorRefinementTests` covers embedded PNG/SVG image mappings without the
 original files, frame geometry, generated values, original CSV issue positions,
 the three missing-value policies, editor and quick print rendering, PDF/SVG/Word,

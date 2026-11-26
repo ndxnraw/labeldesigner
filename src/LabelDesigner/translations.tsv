@@ -1150,3 +1150,29 @@ Problémy rozloženia	Layout issues	Problémy rozložení	Elrendezési problém�
 Rozloženie je bez problémov.	No layout issues found.	Rozložení je bez problémů.	Az elrendezésben nincs probléma.
 Zistené problémy ({0}). Vyberte položku na označenie prvku.	Issues found ({0}). Select an issue to highlight its element.	Zjištěné problémy ({0}). Vyberte položku pro označení prvku.	Talált problémák ({0}). Az elem kiemeléséhez válasszon problémát.
 Uložiť ako novú šablónu…	Save as new template…	Uložit jako novou šablonu…	Mentés új sablonként…
+Formát údajov…	Data format…	Formát údajů…	Adatformátum…
+Formát poľa	Field format	Formát pole	Mezőformátum
+Bez formátovania	Keep source text	Bez formátování	Formázás nélkül
+Číslo	Number	Číslo	Szám
+Desatinný oddeľovač na vstupe	Input decimal separator	Vstupní desetinný oddělovač	Bemeneti tizedesjel
+Bodka (1.5)	Dot (1.5)	Tečka (1.5)	Pont (1.5)
+Čiarka (1,5)	Comma (1,5)	Čárka (1,5)	Vessző (1,5)
+Desatinné miesta na etikete	Decimal places on label	Desetinná místa na etiketě	Tizedesjegyek a címkén
+Jednotka na etikete	Unit on label	Jednotka na etiketě	Mértékegység a címkén
+Formát dátumu na vstupe	Input date format	Vstupní formát data	Bemeneti dátumformátum
+Formát dátumu na etikete	Date format on label	Formát data na etiketě	Dátumformátum a címkén
+Podľa jazyka etikety	Use label language	Podle jazyka etikety	A címke nyelve szerint
+RRRR-MM-DD	YYYY-MM-DD	RRRR-MM-DD	ÉÉÉÉ-HH-NN
+D.M.RRRR	D.M.YYYY	D.M.RRRR	N.H.ÉÉÉÉ
+D/M/RRRR	D/M/YYYY	D/M/RRRR	N/H/ÉÉÉÉ
+M/D/RRRR	M/D/YYYY	M/D/RRRR	H/N/ÉÉÉÉ
+DD. MM. RRRR	DD. MM. YYYY	DD. MM. RRRR	NN. HH. ÉÉÉÉ
+DD/MM/RRRR	DD/MM/YYYY	DD/MM/RRRR	NN/HH/ÉÉÉÉ
+MM/DD/RRRR	MM/DD/YYYY	MM/DD/RRRR	HH/NN/ÉÉÉÉ
+Skúšobná vstupná hodnota	Sample input value	Zkušební vstupní hodnota	Minta bemeneti érték
+Šípka označuje hodnotu po formátovaní alebo chybu.	The arrow shows the formatted value or an error.	Šipka ukazuje hodnotu po formátování nebo chybu.	A nyíl a formázott értéket vagy a hibát jelzi.
+Neplatný formát údajov.	Invalid data format.	Neplatný formát údajů.	Érvénytelen adatformátum.
+Zadajte číslo s desatinnou čiarkou.	Enter a number with a decimal comma.	Zadejte číslo s desetinnou čárkou.	Adjon meg egy számot tizedesvesszővel.
+Zadajte číslo s desatinnou bodkou.	Enter a number with a decimal point.	Zadejte číslo s desetinnou tečkou.	Adjon meg egy számot tizedesponttal.
+Zadajte platný dátum vo formáte {0}.	Enter a valid date in {0} format.	Zadejte platné datum ve formátu {0}.	Adjon meg érvényes dátumot ebben a formátumban: {0}.
+Dátum je mimo rozsahu zvoleného kalendára.	The date is outside the selected calendar's range.	Datum je mimo rozsah zvoleného kalendáře.	A dátum kívül esik a kiválasztott naptár tartományán.

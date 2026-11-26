@@ -102,6 +102,7 @@ namespace EanEtikety {
    var selected=new HashSet<int>(editor?new List<int>():Selected(template));
    var issues=new List<LabelIssue>();
    var variables=BatchData.Variables(template,0,instant);
+   var outputCulture=LabelDataFormat.HasFields(label)?LabelDataFormat.CultureFor(template,language):null;
    LabelLanguages.Resolve(label,language,(field,message)=>issues.Add(new LabelIssue{Element=field,Blocking=true,Message=message}));
    if(!editor)foreach(var text in label.Texts)text.AutoWidth=false;
    foreach(int index in Available(label)){
@@ -122,6 +123,9 @@ namespace EanEtikety {
     foreach(var issue in issues)if(issue.Element!=-2)issue.Element=indices.Find(index=>Elements.SourceIndex(label,index)==issue.Element);
    }
    foreach(string message in ruleErrors)issues.Add(new LabelIssue{Blocking=true,Message=message});
+   if(outputCulture!=null)LabelDataFormat.ApplyFields(label,outputCulture,_=>TextInputKind.Text,
+    (index,message)=>{if(!issues.Exists(issue=>issue.Element==index&&issue.Blocking))
+     issues.Add(new LabelIssue{Element=index,Blocking=true,Message=message});});
    label.Variables.Clear();
    BatchReferences.Strip(label);
    if(editor)TextAutoLayout.Apply(label);

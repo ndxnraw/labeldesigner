@@ -12,7 +12,7 @@ namespace EanEtikety {
   }
 
   internal static BatchRecord Record(LabelSettings template,string[] row,List<ColumnBinding> mappings,
-      int quantityColumn,int index,int rowNumber,DateTime instant,bool csv) {
+      int quantityColumn,int index,int rowNumber,DateTime instant,bool csv,TextInputKind[] inputKinds=null) {
    var record=new BatchRecord { Row=rowNumber, PreparedAt=instant };
    try {
     WorkContext.Check();
@@ -32,6 +32,7 @@ namespace EanEtikety {
      if(language)requestedLanguage=issue==null?value:"";
      else SetBoundValue(label,binding.Target,issue==null?value:"");
     }
+    var outputCulture=LabelDataFormat.HasFields(label)?LabelDataFormat.CultureFor(template,requestedLanguage):null;
     LabelLanguages.Resolve(label,requestedLanguage,(field,message)=>record.AddIssue(
      columns.TryGetValue(LabelLanguages.BatchTarget,out int column)?column:-1,Elements.FieldTarget(field),message));
 
@@ -55,7 +56,11 @@ namespace EanEtikety {
     foreach(var ai in label.ApplicationIdentifiers)ai.Data=resolve("code",ai.Data);
     for(int i=0;i<label.Texts.Count;i++) {
      var text=label.Texts[i];
-     try { Expand(text,values); }
+     try {
+      // A formatted source cell is a literal typed value.
+      if(outputCulture!=null&&columns.ContainsKey(Elements.FieldTarget(i))&&LabelDataFormat.ForField(label,i)!=null)XmlConvert.VerifyXmlChars(text.Text);
+      else Expand(text,values);
+     }
      catch(InvalidDataException ex){AddFieldIssue(record,columns,"text:"+i,ex.Message);StyledText.ReplaceField(text,"");}
      catch(XmlException){AddFieldIssue(record,columns,"text:"+i,Loc.T("Hodnota obsahuje nepovolený znak."));StyledText.ReplaceField(text,"");}
     }
@@ -84,6 +89,9 @@ namespace EanEtikety {
      }
      foreach(var error in ruleErrors)record.AddIssue(error.Column,null,error.Message);
     }
+    if(outputCulture!=null)LabelDataFormat.ApplyFields(label,outputCulture,field=>
+     inputKinds!=null&&columns.TryGetValue(Elements.FieldTarget(field),out int column)&&column<inputKinds.Length?inputKinds[column]:TextInputKind.Text,
+     (field,message)=>AddFieldIssue(record,columns,Elements.FieldTarget(field),message));
     label.Variables.Clear();
     TextAutoLayout.Apply(label);
     ValidatePreparedLabel(record,label,columns);
