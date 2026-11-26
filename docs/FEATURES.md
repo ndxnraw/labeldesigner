@@ -16,6 +16,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Opakovane použiteľné bloky** ukladajú výber prvkov do lokálnej knižnice.
+  Náhľad zobrazuje spoločné rozmery a vloženie vytvorí upraviteľnú kópiu
+  s prekladmi, obrázkami a pravidlami zobrazenia.
 - **Jazykové varianty textu** ukladajú preklady do šablóny. Jazyk možno
   vybrať v projekte a rýchlej tlači alebo ho namapovať zo stĺpca CSV/XLSX.
   Preklad používa pôvodný rám a nastavenie písma. Pri chýbajúcom preklade

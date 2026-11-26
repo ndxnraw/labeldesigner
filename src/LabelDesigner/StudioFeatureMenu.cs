@@ -41,18 +41,20 @@ public partial class MainForm {
   PrepareFeatureMenu(insertMenu);
   insertMenu.Items.AddRange(new ToolStripItem[]{
    FeatureItem("Pridať text",HeaderIcon.AddText,AddText),
+   FeatureItem("Knižnica blokov…",HeaderIcon.Library,ShowBlockLibrary),
    FeatureItem("Vložiť obrázok",HeaderIcon.Image,AddImage),
    FeatureItem(MappedImageTitle,HeaderIcon.Image,()=>EditMappedImage(-2)),
    FeatureItem("Pridať kód…",HeaderIcon.Barcode,()=>ChooseBarcode(false)),
    FeatureItem("Pridať čiaru…",HeaderIcon.Image,()=>EditShape(-2,true)),
    FeatureItem("Pridať obdĺžnik…",HeaderIcon.Image,()=>EditShape(-2,false)),
    FeatureItem("Symbol Zálohované",HeaderIcon.Deposit,()=>EditSymbol(-2))});
-  if(hideBarcode)insertMenu.Items.Insert(4,FeatureItem("Obnoviť hlavný kód",HeaderIcon.Barcode,AddBarcodeObject));
+  if(hideBarcode)insertMenu.Items.Insert(5,FeatureItem("Obnoviť hlavný kód",HeaderIcon.Barcode,AddBarcodeObject));
  }
  void GroupedFeatureMenu() {
   PrepareFeatureMenu(featureMenu);
   var layout=FeatureGroup("Rozloženie",HeaderIcon.Panels);
   layout.DropDownItems.Add(FeatureItem("Rozloženie a výber",HeaderIcon.Panels,ShowArrange));
+  layout.DropDownItems.Add(FeatureItem("Uložiť výber ako blok…",HeaderIcon.Save,SaveSelectionAsBlock));
   layout.DropDownItems.Add(FeatureItem("Samolepiace hárky",HeaderIcon.Table,EditSheet));
   var maintenance=FeatureGroup("Kontrola a údržba",HeaderIcon.Tools);
   maintenance.DropDownItems.Add(FeatureItem("História tlače",HeaderIcon.Print,ShowPrintHistory));

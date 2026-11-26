@@ -142,7 +142,7 @@ namespace EanEtikety {
    finally{foreach(var thumbnail in thumbnails)thumbnail.Dispose();}
   }
 
-  static TableLayoutPanel LibraryPage(Panel page) {
+  static TableLayoutPanel LibraryPage(ScrollableControl page) {
    page.AutoScroll=false;
    var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2,Padding=new Padding(5)};
    layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));

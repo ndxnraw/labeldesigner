@@ -19,6 +19,7 @@ public class RecoveryDocument {public string OriginalPath;public DateTime SavedU
 public sealed class WorkspaceStore:IDisposable {
  public readonly string DirectoryPath;readonly string recoveryPath;readonly FileStream lease;public WorkspaceOptions Options;
  public string TemplatesPath{get{return Path.Combine(DirectoryPath,"Templates");}}
+ public string BlocksPath=>Path.Combine(DirectoryPath,"Blocks");
  public WorkspaceStore(string preferences){DirectoryPath=preferences+".workspace";Directory.CreateDirectory(DirectoryPath);Directory.CreateDirectory(TemplatesPath);string id=Guid.NewGuid().ToString("N");recoveryPath=Path.Combine(DirectoryPath,id+".recovery.xml");string p=Path.Combine(DirectoryPath,"options.xml");Options=File.Exists(p)?ProjectXml.Decode<WorkspaceOptions>(File.ReadAllText(p)):new WorkspaceOptions();Options.IntervalSeconds=Math.Max(10,Math.Min(3600,Options.IntervalSeconds));if(Options.Recent==null)Options.Recent=new List<string>();lease=new FileStream(recoveryPath+".lock",FileMode.CreateNew,FileAccess.ReadWrite,FileShare.None);}
  public void SaveOptions(){ProjectXml.Save(Path.Combine(DirectoryPath,"options.xml"),Options);}
  public void Remember(string path){path=Path.GetFullPath(path);Options.Recent.RemoveAll(p=>string.Equals(p,path,StringComparison.OrdinalIgnoreCase));Options.Recent.Insert(0,path);if(Options.Recent.Count>15)Options.Recent.RemoveRange(15,Options.Recent.Count-15);SaveOptions();}

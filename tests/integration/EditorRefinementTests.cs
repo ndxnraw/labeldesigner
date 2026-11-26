@@ -1,5 +1,90 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void ReusableBlocks(string dir){
+  var source=LabelSettings.Default();source.HideBarcode=true;source.Texts.Clear();
+  source.Texts.Add(new TextItem{X=13,Y=9,Width=16,Height=7,Text="Lead"});
+  source.Texts.Add(new TextItem{X=33,Y=9,Width=18,Height=7,Text="Base"});
+  source.Languages=new LabelLanguages{Codes=new(){ "SK","EN" },Selected="SK"};
+  source.Variables.Add(new VariableField{Name="lot",Type="Fixed",FixedValue="012"});
+  Elements.Meta(source,1).Translations=new(){new LanguageTranslation{Language="SK",Text="Šarža {lot}"},new LanguageTranslation{Language="EN",Text="Lot {lot}"}};
+  foreach(int index in new[]{0,1}){
+   var meta=Elements.Meta(source,index);meta.Group="source";meta.GroupVisibility=new VisibilityRule{Field=0,Mode=VisibilityMode.Filled};
+  }
+  bool rejected=false;
+  try{LabelBlock.Capture(source,new[]{1},"Partial");}catch(InvalidDataException){rejected=true;}
+  Check(rejected,"blocks require field dependencies in the selection");
+  var block=LabelBlock.Capture(source,new[]{0,1},"Lot label");
+  string path=Path.Combine(dir,"lot-block.xml");block.Save(path);
+  block=LabelBlock.Load(path);
+  Check(Math.Abs(block.Width-38)<.01&&Math.Abs(block.Height-7)<.01,"saved block uses selection bounds");
+  var destination=LabelSettings.Default();destination.HideBarcode=true;
+  var first=block.Insert(destination);
+  var second=block.Insert(destination);
+  Check(first.Count==2&&second.Count==2&&first[0]!=second[0],"block inserts independent instances");
+  var a=Elements.Meta(destination,first[1]);var b=Elements.Meta(destination,second[1]);
+  Check(a.Group!=b.Group&&a.GroupVisibility.Field==first[0]&&b.GroupVisibility.Field==second[0],"block groups and their field references are local to each copy");
+  Check(destination.Languages.Selected=="SK"&&destination.Variables.Exists(v=>v.Name=="lot"),"block brings language and variable defaults");
+  var english=QuickPrint.Prepare(destination,null,new DateTime(2026,11,26),"EN");
+  Check(english.CanPrint&&english.Label.Texts[first[1]].Text=="Lot 012","inserted block resolves its stored translation and variable");
+  a.Translations[1].Text="Edited";
+  destination.Texts[first[0]].Text="";
+  var preview=QuickPrint.PrepareEditor(destination,new DateTime(2026,11,26));
+  Check(b.Translations[1].Text=="Lot {lot}"&&block.Artwork.Metadata.Exists(m=>m.Translations?.Exists(t=>t.Text=="Lot {lot}")==true)&&
+   preview.Hidden.Contains(first[1])&&!preview.Hidden.Contains(second[1]),"changes and visibility in one insert leave the library and second copy intact");
+  var customized=LabelSettings.Default();customized.HideBarcode=true;
+  customized.Languages=new LabelLanguages{Codes=new(){"EN","CZ"},Selected="EN",Fallback="CZ"};
+  customized.Variables.Add(new VariableField{Name="lot",Type="Fixed",FixedValue="999"});
+  var customizedIndices=block.Insert(customized);
+  Check(customized.Languages.Selected=="EN"&&customized.Languages.Fallback=="CZ"&&customized.Languages.Codes.Contains("SK")&&
+   QuickPrint.Prepare(customized,null,new DateTime(2026,11,26)).Label.Texts[customizedIndices[1]].Text=="Lot 999",
+   "insert reuses existing variable definitions and preserves destination language choices");
+  var mapped=LabelSettings.Default();
+  var assetPath=Path.Combine(dir,"reusable-logo.svg");
+  File.WriteAllText(assetPath,"<svg xmlns='http://www.w3.org/2000/svg' width='30' height='10'><rect width='30' height='10' fill='black'/></svg>");
+  var logo=Assets.Import(assetPath);
+  mapped.Symbols.Add(new SymbolItem{X=5,Y=37,Width=20,Height=7,ImageMapping=new ImageMapping{Field=-1,Variants=new(){
+   new ImageVariant{Key=mapped.Ean,Image=logo}}}});
+  var artwork=LabelBlock.Capture(mapped,new[]{-1,-3},"Code and logo");
+  var placed=LabelSettings.Default();
+  var positions=artwork.Insert(placed);
+  Check(placed.Symbols[-3-positions[0]].Code?.Ean==mapped.Ean&&placed.Symbols[-3-positions[1]].ImageMapping.Field==positions[0]&&
+   QuickPrint.PrepareEditor(placed,new DateTime(2026,11,26)).Label.Symbols[-3-positions[1]].Image?.Data==logo.Data,
+   "captured primary barcode and mapped image become editable symbols and retain the source link");
+  string preferences=Path.Combine(dir,"blocks-ui.xml");
+  using var owner=new MainForm(preferences);
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",source);
+  F<PreviewPanel>(owner,"preview").SelectMany(new[]{0,1},true);
+  void Open(string command,Action<Form> act){
+   Exception failure=null;
+   bool opened=false;
+   using var timer=new Timer{Interval=75};
+   timer.Tick+=delegate{
+    foreach(Form window in Application.OpenForms)if(window!=owner){
+     timer.Stop();opened=true;
+     try{act(window);window.AcceptButton.PerformClick();}
+     catch(Exception ex){failure=ex;window.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();Call(owner,command);
+   if(failure!=null)throw failure;
+   Check(opened,command+" opens the expected dialog");
+  }
+  Open("SaveSelectionAsBlock",dialog=>((TextBox)dialog.Controls.Find("blockName",true)[0]).Text="Reusable lot");
+  var savedPath=Path.Combine(preferences+".workspace","Blocks","Reusable lot.block.xml");
+  Check(File.Exists(savedPath),"selection saves to the offline workspace library");
+  Call(owner,"Apply",LabelSettings.Default());
+  Open("ShowBlockLibrary",dialog=>{
+   var list=(ListBox)dialog.Controls.Find("blockList",true)[0];
+   var image=((PictureBox)dialog.Controls.Find("blockPreview",true)[0]).Image;
+   var insert=(Button)dialog.Controls.Find("insertBlock",true)[0];
+   Check(list.Items.Count==1&&image!=null&&image.Width>image.Height&&insert.Enabled,"block library lists saved block with usable preview");
+  });
+  var result=(LabelSettings)Call(owner,"Read");
+  Check(result.Texts.Count==3&&result.Metadata.Exists(meta=>meta.Translations?.Count==2),"library command inserts editable translated artwork");
+  Call(owner,"Apply",LabelSettings.Default());owner.Close();
+ }
  static LabelSettings ConditionalTemplate(){
   var label=LabelSettings.Default();
   label.Texts[0].Text="   ";
@@ -555,8 +640,9 @@ class EditorRefinementTests {
   var list=F<ListBox>(form,"elementList");Check(list.ContextMenuStrip!=null,"layer operations are available in context");
   Call(form,"BuildInsertMenu");
   var insert=F<ContextMenuStrip>(form,"insertMenu");
-  Check(insert.Items.Count==7&&insert.Items[2].Text==Loc.T("Obrázok podľa údajov…")&&insert.Items[3].Text==Loc.T("Pridať kód…"),
-   "mapped image and one general code chooser alongside other elements");
+  Check(insert.Items.Count==8&&insert.Items[1].Text==Loc.T("Knižnica blokov…")&&
+   insert.Items[3].Text==Loc.T("Obrázok podľa údajov…")&&insert.Items[4].Text==Loc.T("Pridať kód…"),
+   "block library and mapped image appear next to the general code chooser");
   var input=F<TextBox>(form,"inspectText");
   input.Focus();input.Select(0,2);Key(input,Keys.Control|Keys.I);
   var styled=((LabelSettings)Call(form,"Read")).Texts[0];
@@ -589,5 +675,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

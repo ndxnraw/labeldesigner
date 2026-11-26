@@ -1118,3 +1118,18 @@ Neplatné nastavenie jazykov etikety.	Invalid label language settings.	Neplatné
 Neplatný preklad textu.	Invalid text translation.	Neplatný překlad textu.	Érvénytelen szövegfordítás.
 Jazyk etikety nie je zadaný.	The label language is missing.	Jazyk etikety není zadán.	A címke nyelve nincs megadva.
 Chýba preklad pre jazyk {0}.	No translation was supplied for {0}.	Chybí překlad pro jazyk {0}.	Nincs fordítás ehhez a nyelvhez: {0}.
+Uložiť výber ako blok…	Save selection as block…	Uložit výběr jako blok…	Kijelölés mentése blokként…
+Knižnica blokov…	Block library…	Knihovna bloků…	Blokktár…
+Názov bloku	Block name	Název bloku	Blokk neve
+Nový blok	New block	Nový blok	Új blokk
+Vložiť kópiu	Insert copy	Vložit kopii	Másolat beszúrása
+Náhľad bloku	Block preview	Náhled bloku	Blokk előnézete
+Odstrániť blok	Delete block	Odstranit blok	Blokk törlése
+Odstrániť vybraný blok z knižnice?	Delete the selected block from the library?	Odstranit vybraný blok z knihovny?	Törli a kijelölt blokkot a tárból?
+Knižnica zatiaľ neobsahuje žiadne bloky.	The library has no blocks yet.	Knihovna zatím neobsahuje žádné bloky.	A tár még nem tartalmaz blokkokat.
+Blok presahuje rozmery aktuálnej etikety.	The block is larger than the current label.	Blok přesahuje rozměry aktuální etikety.	A blokk nagyobb az aktuális címkénél.
+Pri vložení sa doplnia jazyky	Languages added on insert	Jazyky doplněné při vložení	Beszúráskor hozzáadott nyelvek
+Pri vložení sa doplnia premenné	Variables added on insert	Proměnné doplněné při vložení	Beszúráskor hozzáadott változók
+Vyberte prvky na uloženie do bloku.	Select elements to save as a block.	Vyberte prvky k uložení do bloku.	Jelölje ki a blokkba mentendő elemeket.
+Neplatný blok etikety.	Invalid label block.	Neplatný blok etikety.	Érvénytelen címkeblokk.
+Do výberu pridajte aj zdroj údajov pre pravidlo alebo obrázok.	Include the data source for the rule or image in the selection.	Do výběru přidejte také zdroj dat pro pravidlo nebo obrázek.	Jelölje ki a szabály vagy kép adatforrását is.

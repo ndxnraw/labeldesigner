@@ -88,6 +88,9 @@ and explicit fallback, original CSV diagnostics, XLSX mapping, column heading
 presets, variable substitution, fixed geometry and fitting, editor and quick print
 previews, and PDF/SVG/Word and per-record ZPL output.
 
+`EditorRefinementTests` checks block capture, library previews, insertion,
+independent copies, preserved translations and local rule dependencies.
+
 `EditorRefinementTests` covers embedded PNG/SVG image mappings without the
 original files, frame geometry, generated values, original CSV issue positions,
 the three missing-value policies, editor and quick print rendering, PDF/SVG/Word,

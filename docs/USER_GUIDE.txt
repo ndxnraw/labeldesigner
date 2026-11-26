@@ -128,6 +128,17 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+OPAKOVANE POUŽITEĽNÉ BLOKY
+
+Vyberte prvky na plátne a zvoľte Rozloženie → Uložiť výber ako blok.
+Pri pravidle alebo obrázku závislom od iného prvku vyberte aj jeho zdroj.
+Knižnicu s náhľadom a rozmermi otvoríte cez Vložiť → Knižnica blokov.
+Kópia sa vloží do stredu etikety a môžete ju presunúť alebo upraviť.
+Skupiny, preklady, obrázky a ich pravidlá sú súčasťou kópie. Pri rovnakom
+názve premennej sa použije jej nastavenie z cieľovej etikety. Chýbajúce
+premenné a jazyky sa doplnia z bloku. Cieľový jazyk a jeho nastavenie
+náhrady ostávajú v platnosti. Knižnica funguje offline.
+
 JAZYKOVÉ VARIANTY TEXTU
 
 V ponuke Projekt → Jazyky etikety zadajte kódy, napríklad SK, CZ alebo
