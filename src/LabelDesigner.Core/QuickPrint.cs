@@ -27,9 +27,11 @@ namespace EanEtikety {
     label.Symbols[-3-index].Matrix != null);
   }
 
+  public static List<int> Editable(LabelSettings label)=>Available(label).FindAll(index=>!LabelLanguages.Translated(label,index));
+
   public static List<int> Selected(LabelSettings label) {
    var selected = new HashSet<int>(label.QuickPrintFields ?? new List<int>());
-   return Available(label).FindAll(selected.Contains);
+   return Editable(label).FindAll(selected.Contains);
   }
 
   public static string Name(LabelSettings label, int index) {
@@ -89,19 +91,21 @@ namespace EanEtikety {
    else symbol.Code.Ean=content(value);
   }
 
-  public static QuickPrintDraft Prepare(LabelSettings template, IDictionary<int,string> values, DateTime instant)=>Prepare(template,values,instant,false);
-  public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant)=>Prepare(template,null,instant,true);
+  public static QuickPrintDraft Prepare(LabelSettings template, IDictionary<int,string> values, DateTime instant)=>Prepare(template,values,instant,null,false);
+  public static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language)=>Prepare(template,values,instant,language,false);
+  public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant)=>Prepare(template,null,instant,null,true);
 
-  static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,bool editor) {
+  static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,bool editor) {
    Engine.ValidateDraft(template);
    var label=JobPreparation.CloneForPreparation(template);
    var selected=new HashSet<int>(editor?new List<int>():Selected(template));
    var issues=new List<LabelIssue>();
    var variables=BatchData.Variables(template,0,instant);
+   LabelLanguages.Resolve(label,language,(field,message)=>issues.Add(new LabelIssue{Element=field,Blocking=true,Message=message}));
    if(!editor)foreach(var text in label.Texts)text.AutoWidth=false;
    foreach(int index in Available(label)){
     WorkContext.Check();
-    string original=Value(template,index), value=null;
+    string original=Value(label,index), value=null;
     bool edited=selected.Contains(index)&&values!=null&&values.TryGetValue(index,out value)&&value!=original;
     try{ApplyValue(label,index,edited?value:original,!edited,variables);}
     catch(OperationCanceledException){throw;}

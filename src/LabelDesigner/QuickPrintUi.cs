@@ -17,7 +17,7 @@ namespace EanEtikety {
   }
 
   List<int> ChooseQuickPrintFields(Form owner,LabelSettings template) {
-   var available=QuickPrint.Available(template);
+   var available=QuickPrint.Editable(template);
    var selected=new HashSet<int>(QuickPrint.Selected(template));
    using(var dialog=FeatureForm("Upraviteľné polia šablóny…",610,455)){
     var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3,Padding=new Padding(12)};
@@ -96,6 +96,15 @@ namespace EanEtikety {
     var scroll=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Padding=new Padding(0,0,12,0)};
     var fields=Stack();scroll.Controls.Add(fields);layout.Controls.Add(scroll,0,0);
     var editors=new Dictionary<int,TextBox>();
+    ComboBox labelLanguage=null;
+    if(template.Languages!=null){
+     var codes=template.Languages.Codes;
+     int selected=codes.FindIndex(code=>LabelLanguages.SameCode(code,template.Languages.Selected));
+     labelLanguage=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList,Name="quickPrintLabelLanguage"};
+     labelLanguage.Items.AddRange(codes.ToArray());
+     labelLanguage.SelectedIndex=Math.Max(0,selected);
+     StackField(fields,Loc.T("Jazyk etikety"),labelLanguage);
+    }
     var errors=new Dictionary<int,Label>();
     foreach(int index in QuickPrint.Selected(template)){
      bool aiLines=QuickPrint.UsesAiLines(template,index);
@@ -108,7 +117,7 @@ namespace EanEtikety {
      StackAdd(fields,hint);
      editors.Add(index,editor);errors.Add(index,hint);
     }
-    if(editors.Count==0)StackAdd(fields,new Label{AutoSize=true,MaximumSize=new Size(315,0),Text=Loc.T("Šablóna nemá vybrané upraviteľné polia.")});
+    if(editors.Count==0&&labelLanguage==null)StackAdd(fields,new Label{AutoSize=true,MaximumSize=new Size(315,0),Text=Loc.T("Šablóna nemá vybrané upraviteľné polia.")});
     var quantity=Input(fields,"Počet etikiet",(template.Layout.Enabled?template.Layout.Count:template.Copies).ToString(CultureInfo.InvariantCulture));
     quantity.Name="quickPrintQuantity";
     var quantityError=new Label{AutoSize=true,Name="quickPrintQuantityError",Visible=false};
@@ -189,12 +198,13 @@ namespace EanEtikety {
      updateContinue();
      status.Text=Loc.T("Pripravujem náhľad…");
      var values=editors.ToDictionary(item=>item.Key,item=>item.Value.Text);
+     string selectedLanguage=labelLanguage==null?null:template.Languages.Codes[labelLanguage.SelectedIndex];
      int ticket;
      lock(deliveryGate){ticket=revision;}
      PrintWorker.Queue(dialog,delegate{
       var result=new QuickPrintPreview();
       try{
-       result.Draft=QuickPrint.Prepare(template,values,instant);
+       result.Draft=QuickPrint.Prepare(template,values,instant,selectedLanguage);
        result.Image=QuickPrintImage(result.Draft);
       }catch(Exception ex){result.Failure=ex.Message;}
       lock(deliveryGate){
@@ -217,13 +227,15 @@ namespace EanEtikety {
      });
     };
     changes.Tick+=delegate{refresh();};
-    foreach(var editor in editors.Values)editor.TextChanged+=delegate{
+    EventHandler schedulePreview=delegate{
      lock(deliveryGate){revision++;}
      previewReady=false;
      updateContinue();
      status.Text=Loc.T("Pripravujem náhľad…");
      changes.Stop();changes.Start();
     };
+    foreach(var editor in editors.Values)editor.TextChanged+=schedulePreview;
+    if(labelLanguage!=null)labelLanguage.SelectedIndexChanged+=schedulePreview;
     ApplyColors(dialog);
     dialog.Shown+=delegate{refresh();};
     try{dialog.ShowDialog(owner);}finally{

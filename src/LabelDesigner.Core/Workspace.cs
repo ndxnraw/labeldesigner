@@ -27,7 +27,12 @@ public sealed class WorkspaceStore:IDisposable {
  public void Clean(){if(File.Exists(recoveryPath))File.Delete(recoveryPath);}
  public void Dispose(){lease.Dispose();try{File.Delete(recoveryPath+".lock");}catch(IOException){}}
 }
-public class ElementMeta {public int Index;public bool Locked;public string Group="";public int Layer;public VisibilityRule Visibility,GroupVisibility;[XmlIgnore]public int? SourceIndex;}
+public class ElementMeta {
+ public int Index;public bool Locked;public string Group="";public int Layer;public VisibilityRule Visibility,GroupVisibility;
+ public List<LanguageTranslation> Translations;
+ public bool ShouldSerializeTranslations()=>Translations?.Count>0;
+ [XmlIgnore]public int? SourceIndex;
+}
 public class SheetLayout {public bool Enabled;public int Columns=3,Rows=5,FirstSlot,Count=1;public double Left=10,Top=10,Right=10,Bottom=10,HorizontalGap=2,VerticalGap=2;}
 public class VariableField {public string Name="serial",Type="Number",Prefix="",Suffix="",Format="yyyy-MM-dd",FixedValue="";public long Start=1,Step=1;public int Digits=6,Days,Months;public bool FixedDate;public DateTime Date=DateTime.Today;}
 public class ImageContent {public bool KeepAspect=true,FitFrame;public bool ShouldSerializeFitFrame()=>FitFrame;public ImageContent Copy()=>(ImageContent)MemberwiseClone();public string Mime,Data;public double CropX,CropY,CropWidth=1,CropHeight=1;public int PixelWidth,PixelHeight;}
@@ -54,7 +59,7 @@ public static class Elements {
  static List<ColumnBinding> RemapBindings(List<ColumnBinding> bindings,Dictionary<int,int> mapping){
   var result=new List<ColumnBinding>();
   foreach(var binding in bindings){
-   if(binding.Target=="quantity"||binding.Target=="unique"){result.Add(binding);continue;}
+   if(binding.Target=="quantity"||binding.Target=="unique"||binding.Target==LabelLanguages.BatchTarget){result.Add(binding);continue;}
    int key;
    if(binding.Target=="code")key=-1;
    else if(binding.Target.StartsWith("text:",StringComparison.Ordinal))key=int.Parse(binding.Target.Substring(5));

@@ -68,7 +68,7 @@ namespace EanEtikety {
       targets.Add(key);mapping.Rows.Add(name,index>=0&&index<columns?choices[index+1]:choices[0]);
      };
      Action<string,string> bind=(key,name)=>{var saved=setup.Bindings.Find(b=>b.Target==key);add(key,name,saved==null?-1:saved.Column);};
-     var model=owner.Read();if(!model.HideBarcode)bind("code",Loc.T("Čiarový kód"));for(int i=0;i<model.Texts.Count;i++)bind("text:"+i,model.Texts[i].Text);for(int i=0;i<model.Symbols.Count;i++)if(model.Symbols[i].Code!=null||model.Symbols[i].Matrix!=null)bind("symbol:"+i,model.Symbols[i].Name+" "+(i+1));add("quantity",Loc.T("Počet etikiet"),setup.QuantityColumn);
+     var model=owner.Read();if(model.Languages!=null)bind(LabelLanguages.BatchTarget,Loc.T("Jazyk etikety"));if(!model.HideBarcode)bind("code",Loc.T("Čiarový kód"));for(int i=0;i<model.Texts.Count;i++)if(!LabelLanguages.Translated(model,i))bind("text:"+i,model.Texts[i].Text);for(int i=0;i<model.Symbols.Count;i++)if(model.Symbols[i].Code!=null||model.Symbols[i].Matrix!=null)bind("symbol:"+i,model.Symbols[i].Name+" "+(i+1));add("quantity",Loc.T("Počet etikiet"),setup.QuantityColumn);
      if(table!=null)add("unique",Loc.T("Stĺpec s jedinečnými hodnotami"),setup.UniqueColumn<columns?setup.UniqueColumn:-1);
      UpdateMappingState();
     }finally{updating=false;}

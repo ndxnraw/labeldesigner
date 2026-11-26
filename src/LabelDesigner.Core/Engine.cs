@@ -42,7 +42,8 @@ public static class Engine {
   if((s.Unit!="mm"&&s.Unit!="cm")||Array.IndexOf(MoreBarcodes.Kinds,s.Kind)<0||!DraftText(s.Ean,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   if(s.Variables.Count>256||s.Metadata.Count>1000||s.Batch.Bindings.Count>256||s.ApplicationIdentifiers.Count>100)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));
   foreach(var v in s.Variables)if(v==null||!DraftText(v.Name,200)||!DraftText(v.Type,100)||!DraftText(v.Format,4000)||!DraftText(v.Prefix,4000)||!DraftText(v.Suffix,4000)||!DraftText(v.FixedValue,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
-  foreach(var m in s.Metadata)if(m==null)throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
+  s.Languages?.Validate();
+  foreach(var m in s.Metadata){if(m==null)throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));LabelLanguages.ValidateTranslations(m.Translations);}
   foreach(var b in s.Batch.Bindings)if(b==null||!DraftText(b.Target,200))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   BatchPresets.ValidateAll(s.Batch);
   foreach(var ai in s.ApplicationIdentifiers)if(ai==null||!DraftText(ai.AI,200)||!DraftText(ai.Data,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));

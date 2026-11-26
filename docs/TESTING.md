@@ -82,6 +82,12 @@ source attempt. A test transport captures the submitted copy count.
 Manual print result checks cover per-row totals across copies, metadata-only
 attempts, old archives, concurrent edits, bounds, cleanup and a recovery
 proposal through the actual history and print preview.
+
+`EditorRefinementTests` verifies stored language variants, missing translations
+and explicit fallback, original CSV diagnostics, XLSX mapping, column heading
+presets, variable substitution, fixed geometry and fitting, editor and quick print
+previews, and PDF/SVG/Word and per-record ZPL output.
+
 `EditorRefinementTests` covers embedded PNG/SVG image mappings without the
 original files, frame geometry, generated values, original CSV issue positions,
 the three missing-value policies, editor and quick print rendering, PDF/SVG/Word,

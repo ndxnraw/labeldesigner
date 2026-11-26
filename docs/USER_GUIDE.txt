@@ -128,6 +128,26 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+JAZYKOVÉ VARIANTY TEXTU
+
+V ponuke Projekt → Jazyky etikety zadajte kódy, napríklad SK, CZ alebo
+EN. Vyberte jazyk pre náhľad a jednorazový výstup. Pri jednotlivom
+textovom poli vo Vlastnostiach otvorte Preklady textu a vyplňte jeho
+varianty. Preklady sa uložia do šablóny. Použijú rovnaký rám, typografiu
+a nastavené prispôsobenie textu. Premenné, napríklad {sarza}, sa dosadia
+do zvoleného prekladu.
+
+V rýchlej tlači vyberte Jazyk etikety zo zoznamu. Pri dávke môžete
+Jazyk etikety priradiť k stĺpcu CSV alebo XLSX. Kódy ignorujú okrajové
+medzery a veľkosť písmen. Neprepojená dávka použije jazyk projektu.
+Prekladané polia preberajú obsah zo šablóny. Stĺpce s ďalšími údajmi
+priraďte k bežným textovým poliam a kódom.
+
+Prázdny alebo chýbajúci preklad zastaví výstup. V dávke uvidíte pôvodný
+riadok a stĺpec s jazykom. Ak v nastavení šablóny vyberiete náhradný
+jazyk, použije sa jeho preklad pre dané pole. Preklady a výber jazyka
+fungujú offline.
+
 OBRÁZKY PODĽA ÚDAJOV
 
 V ponuke Vložiť zvoľte Obrázok podľa údajov. Vyberte textové pole, kód

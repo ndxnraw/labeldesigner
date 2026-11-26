@@ -1105,3 +1105,16 @@ Neplatné mapovanie obrázka.	Invalid image mapping.	Neplatné mapování obráz
 Zdroj obrázka už nie je dostupný.	The image data source is no longer available.	Zdroj obrázku již není dostupný.	A kép adatforrása már nem érhető el.
 Zdroj obrázka obsahuje chybu.	The image data source contains an error.	Zdroj obrázku obsahuje chybu.	A kép adatforrása hibás.
 Pre hodnotu chýba priradený obrázok.	No image matches the value.	Pro hodnotu chybí přiřazený obrázek.	Az értékhez nincs hozzárendelve kép.
+Jazyky etikety…	Label languages…	Jazyky etikety…	Címkenyelvek…
+Jazyk etikety	Label language	Jazyk etikety	Címke nyelve
+Kódy jazykov (jeden na riadok)	Language codes (one per line)	Kódy jazyků (jeden na řádek)	Nyelvkódok (soronként egy)
+Náhradný jazyk	Fallback language	Náhradní jazyk	Tartalék nyelv
+Bez náhradného jazyka	No fallback language	Bez náhradního jazyka	Nincs tartalék nyelv
+Zadajte jedinečné kódy jazykov, napríklad SK alebo en-GB.	Enter unique language codes, such as SK or en-GB.	Zadejte jedinečné kódy jazyků, například SK nebo en-GB.	Adjon meg egyedi nyelvkódokat, például SK vagy en-GB.
+Zadajte 1 až 16 jazykov etikety.	Enter 1 to 16 label languages.	Zadejte 1 až 16 jazyků etikety.	Adjon meg 1–16 címkenyelvet.
+Preklady textu…	Text translations…	Překlady textu…	Szövegfordítások…
+Použiť jazykové varianty	Use language variants	Použít jazykové varianty	Nyelvi változatok használata
+Neplatné nastavenie jazykov etikety.	Invalid label language settings.	Neplatné nastavení jazyků etikety.	Érvénytelen címkenyelv-beállítások.
+Neplatný preklad textu.	Invalid text translation.	Neplatný překlad textu.	Érvénytelen szövegfordítás.
+Jazyk etikety nie je zadaný.	The label language is missing.	Jazyk etikety není zadán.	A címke nyelve nincs megadva.
+Chýba preklad pre jazyk {0}.	No translation was supplied for {0}.	Chybí překlad pro jazyk {0}.	Nincs fordítás ehhez a nyelvhez: {0}.

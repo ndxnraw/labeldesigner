@@ -186,6 +186,7 @@ namespace EanEtikety {
 
   static bool Equal(string target, string before, string after) {
    if (string.Equals(before, after, StringComparison.Ordinal)) return true;
+   if (target == LabelLanguages.BatchTarget) return LabelLanguages.SameCode(before, after);
    if (target.StartsWith("text:", StringComparison.Ordinal) && before != null && after != null &&
        (before.IndexOf('\r') >= 0 || after.IndexOf('\r') >= 0))
     return string.Equals(NormalizeLineEndings(before), NormalizeLineEndings(after), StringComparison.Ordinal);

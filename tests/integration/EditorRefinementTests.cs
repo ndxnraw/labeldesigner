@@ -11,6 +11,128 @@ class EditorRefinementTests {
    "<ElementMeta><Index>-3</Index><Group>optional</Group><Layer>103</Layer><GroupVisibility><Field>0</Field><Mode>Filled</Mode></GroupVisibility></ElementMeta></Metadata>");
   return ProjectXml.Decode<LabelSettings>(xml);
  }
+ static void TextLanguages(string dir){
+  var label=LabelSettings.Default();label.HideBarcode=true;
+  label.Texts[0].AutoWidth=false;label.Texts[0].Height=14;
+  var xml=ProjectXml.Encode(label).Replace("<Metadata />","<Metadata><ElementMeta><Index>0</Index><Translations>"+
+   "<LanguageTranslation><Language>SK</Language><Text>Príklad etikety</Text></LanguageTranslation>"+
+   "<LanguageTranslation><Language>CZ</Language><Text>Příliš žluťoučký kůň</Text></LanguageTranslation></Translations></ElementMeta></Metadata>")
+   .Replace("</LabelSettings>","<Languages><Codes><string>SK</string><string>CZ</string></Codes><Selected>SK</Selected></Languages></LabelSettings>");
+  var template=ProjectXml.Decode<LabelSettings>(xml);
+  var date=new DateTime(2026,11,26);
+  var batch=BatchData.Record(template,new[]{"CZ"},new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Target="language",Column=0}},-1,0,2,date);
+  Check(batch.Error==null&&batch.Label.Texts[0].Text=="Příliš žluťoučký kůň","mapped language chooses the saved Czech text");
+  template.Languages.Codes.Add("EN");
+  template.Texts[0].Width=30;template.Texts[0].Size=14;template.Texts[0].MinimumFitSize=5;
+  template.Variables.Add(new VariableField{Name="lot",Type="Fixed",FixedValue="ABC"});
+  template.Metadata[0].Translations[1].Text="Minimální trvanlivost do {lot}";
+  template.QuickPrintFields.Add(0);
+  string project=Path.Combine(dir,"translations.ean.xml");
+  Engine.Save(project,template);
+  template=Engine.Load(project);
+  Check(template.Languages.Codes.Count==3&&template.Metadata[0].Translations.Count==2,"languages and translations survive project round trip");
+  var quick=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0,"override"}},date," cz ");
+  var field=quick.Label.Texts[0];
+  Check(quick.CanPrint&&field.Text=="Minimální trvanlivost do ABC"&&quick.Label.Languages==null,"quick print uses normalized language then expands variables");
+  double fitted=FixedTextLayout.Resolve(field,out bool fits);
+  Check(field.Width==template.Texts[0].Width&&field.Height==template.Texts[0].Height&&
+   field.X==template.Texts[0].X&&fits&&fitted>=field.MinimumFitSize,"long translation keeps the fixed field and fits");
+
+  var source=BatchData.CsvText("Jazyk;Dáta\nSK;a\ncz;b\nEN;c",';');
+  var bindings=new System.Collections.Generic.List<ColumnBinding>{new ColumnBinding{Target=LabelLanguages.BatchTarget,Column=0}};
+  var preset=BatchPresets.Capture("Languages",new BatchSetup{Header=true,Separator=';',Bindings=bindings},source,false);
+  var reordered=BatchData.CsvText("Dáta;Jazyk\na;CZ",';');
+  Check(BatchPresets.Resolve(preset,reordered,2).Columns[LabelLanguages.BatchTarget]==1,"preset restores language by column heading");
+  var records=BatchProcessing.Prepare(template,source,true,bindings,-1,0,date);
+  Check(records[0].Label.Texts[0].Text=="Príklad etikety"&&records[1].Label.Texts[0].Text==field.Text,"CSV selects each row's language");
+  Check(records[2].Row==4&&records[2].Label==null&&records[2].Issues.Exists(issue=>issue.Blocking&&issue.Column==0&&issue.Message.Contains("EN")),"missing translation retains original CSV row and language column");
+  Check(!QuickPrint.Prepare(template,null,date,"EN").CanPrint,"missing translation blocks quick print");
+  template.Languages.Fallback="SK";
+  Check(QuickPrint.Prepare(template,null,date,"EN").Label.Texts[0].Text=="Príklad etikety","explicit fallback fills a missing translation");
+  template.Languages.Fallback=null;
+  var optional=ProjectXml.Clone(template);
+  optional.Texts.Add(new TextItem{Text="Keep",X=4,Y=28});
+  Elements.Meta(optional,0).Visibility=new VisibilityRule{Field=1,Mode=VisibilityMode.EqualsValue,Value="show"};
+  Check(QuickPrint.Prepare(optional,null,date,"EN").CanPrint,"a hidden field does not require a translation");
+
+  string xlsx=Path.Combine(dir,"languages.xlsx");
+  using(var zip=System.IO.Compression.ZipFile.Open(xlsx,System.IO.Compression.ZipArchiveMode.Create)){
+   void Entry(string name,string body){using(var writer=new StreamWriter(zip.CreateEntry(name).Open()))writer.Write(body);}
+   Entry("xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Labels' r:id='r1'/></sheets></workbook>");
+   Entry("xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>");
+   Entry("xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Jazyk</t></is></c></row>"+
+    "<row r='2'><c r='A2' t='inlineStr'><is><t>CZ</t></is></c></row></sheetData></worksheet>");
+  }
+  var workbook=BatchData.Xlsx(xlsx)[0];
+  Check(BatchProcessing.Prepare(template,workbook,true,bindings,-1,0,date)[0].Label.Texts[0].Text==field.Text,"XLSX language mapping renders the same text");
+  var both=OutputPlan.Create(records.GetRange(0,2),template,date);
+  Check(!PreflightReport.Inspect(both).Blocking,"both languages pass output inspection");
+  var single=JobPreparation.Resolve(template,date);
+  Check(single.Texts[0].Text=="Príklad etikety"&&quick.CreatePlan(2).Placements.Count==2,
+   "single print uses project language and quick print keeps the requested quantity");
+  string export=Path.Combine(dir,"language-export");
+  Engine.Pdf(export+".pdf",quick.Label);Engine.Docx(export+".docx",quick.Label);
+  Engine.Svg(export+".svg",quick.Label);Engine.Zpl(export+".zpl",quick.Label);
+  Engine.Zpl(export+"-selected.zpl",template);Engine.Zpl(export+"-resolved.zpl",single);
+  Check(File.ReadAllText(export+"-selected.zpl")==File.ReadAllText(export+"-resolved.zpl"),"direct ZPL export uses the selected project language");
+  JobOutput.Export(export+"-batch.zpl","zpl",both,template.Dpi);
+  var pages=File.ReadAllText(export+"-batch.zpl").Split(new[]{"^XA"},StringSplitOptions.RemoveEmptyEntries);
+  Check(pages.Length==2&&pages[0]!=pages[1]&&pages[0].Contains("^GFA")&&pages[1].Contains("^GFA"),"ZPL raster preserves per-label translated text");
+  using(var owner=new MainForm(Path.Combine(dir,"label-language-ui.xml"))){
+   owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+   Call(owner,"Apply",template);Application.DoEvents();
+   var preview=F<PreviewPanel>(owner,"preview");
+   string before=VectorArt.PathData(preview.Scene.Shapes[0].Path,true);
+   void EditLanguageDialog(string command,Action<Form> edit){
+    Exception error=null;
+    bool opened=false;
+    using(var timer=new Timer{Interval=75}){
+     timer.Tick+=delegate{
+      foreach(Form window in Application.OpenForms)if(window!=owner){
+       timer.Stop();opened=true;
+       try{edit(window);window.AcceptButton.PerformClick();}
+       catch(Exception ex){error=ex;window.DialogResult=DialogResult.Cancel;}
+       break;
+      }
+     };
+     timer.Start();Call(owner,command);
+    }
+    if(error!=null)throw error;
+    Check(opened,command+" opens the language editor");
+   }
+   EditLanguageDialog("EditLabelLanguages",dialog=>
+    ((ComboBox)dialog.Controls.Find("selectedLabelLanguage",true)[0]).SelectedIndex=1);
+   Check(VectorArt.PathData(preview.Scene.Shapes[0].Path,true)!=before,"editor repaints after selecting another label language");
+   preview.SelectElement(0);
+   EditLanguageDialog("EditTextTranslations",dialog=>
+    ((TextBox)dialog.Controls.Find("textTranslation-CZ",true)[0]).Text="Změněný text");
+   var edited=(LabelSettings)Call(owner,"Read");
+   Check(edited.Languages.Selected=="CZ"&&edited.Metadata[0].Translations[1].Text=="Změněný text","language dialog saves changes to the template");
+   int step=0;Exception failure=null;Image first=null;
+   var clock=System.Diagnostics.Stopwatch.StartNew();
+   using(var timer=new Timer{Interval=75}){
+    timer.Tick+=delegate{
+     foreach(Form window in Application.OpenForms)if(window!=owner){
+      try{
+       var picker=(ComboBox)window.Controls.Find("quickPrintLabelLanguage",true)[0];
+       var picture=(PictureBox)window.Controls.Find("quickPrintPreview",true)[0];
+       var proceed=(Button)window.Controls.Find("quickPrintContinue",true)[0];
+       if(clock.ElapsedMilliseconds>18000)throw new Exception("Quick print language preview timeout");
+       if(step==0&&picture.Image!=null&&proceed.Enabled){first=picture.Image;step=1;picker.SelectedIndex=1;}
+       else if(step==1&&picture.Image!=null&&picture.Image!=first&&proceed.Enabled){
+        step=2;timer.Stop();window.DialogResult=DialogResult.Cancel;
+       }
+      }catch(Exception ex){failure=ex;timer.Stop();window.DialogResult=DialogResult.Cancel;}
+      break;
+     }
+    };
+    timer.Start();Call(owner,"ShowQuickPrint",owner,template);
+   }
+   if(failure!=null)throw failure;
+   Check(step==2,"quick print language chooser refreshes the live preview");
+   Call(owner,"Apply",template);owner.Close();
+  }
+ }
  static void MappedArtwork(string dir){
   var label=LabelSettings.Default();label.HideBarcode=true;
   label.Texts[0].Text="North";label.QuickPrintFields.Add(0);
@@ -467,5 +589,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

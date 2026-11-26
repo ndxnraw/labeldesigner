@@ -16,6 +16,10 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Jazykové varianty textu** ukladajú preklady do šablóny. Jazyk možno
+  vybrať v projekte a rýchlej tlači alebo ho namapovať zo stĺpca CSV/XLSX.
+  Preklad používa pôvodný rám a nastavenie písma. Pri chýbajúcom preklade
+  sa výstup zastaví, prípadne použije výslovne zvolený náhradný jazyk.
 - **Obrázky podľa údajov** vyberú PNG, JPEG alebo SVG uložené priamo
   v šablóne podľa hodnoty poľa alebo premennej. Logo sa vycentruje
   v pevnom ráme so zachovaným pomerom strán. Pre prázdnu alebo neznámu

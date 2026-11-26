@@ -88,7 +88,7 @@ namespace EanEtikety {
   void SelectEditorIssue(LabelIssue issue){if(issue==null||issue.Element==-2)return;preview.SelectElement(issue.Element);preview.ProblemElements.Clear();preview.ProblemElements.Add(issue.Element);preview.Invalidate();}
   void SyncIssueViews(){if(problemView==null)return;problemView.SetIssues(labelIssues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+(labelIssues.Count==0?"":" ("+labelIssues.Count+")"));}
   void FocusProblems(){if(workspaceTabs==null)return;if(studioBody.ColumnStyles[0].Width==0)SetStudioPanel(0,true);workspaceTabs.SelectedIndex=1;problemView.FocusList();}
-  void FocusInspector(){if(studioBody.ColumnStyles[2].Width==0)SetStudioPanel(2,true);if(preview.Selection.Count!=1){selectionOverview.Focus();return;}if(preview.SelectedIndex==-1)ean.Focus();else if(preview.SelectedIndex>=0)inspectText.Focus();else inspectNumbers[0].Focus();}
+  void FocusInspector(){if(studioBody.ColumnStyles[2].Width==0)SetStudioPanel(2,true);if(preview.Selection.Count!=1){selectionOverview.Focus();return;}if(preview.SelectedIndex==-1)ean.Focus();else if(preview.SelectedIndex>=0){if(HasTextTranslations(preview.SelectedIndex))textTranslations.Focus();else inspectText.Focus();}else inspectNumbers[0].Focus();}
   void CycleEditorSection(bool backwards){
    if(studioBody==null)return;
    var left=studioBody.GetControlFromPosition(0,0);

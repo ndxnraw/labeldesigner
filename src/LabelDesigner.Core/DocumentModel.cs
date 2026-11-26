@@ -16,6 +16,7 @@ public class TextItem {
 }
 public class LabelSettings {
  public BatchSetup Batch=new BatchSetup();public int ProjectVersion=310;public bool HideBarcode;public List<ElementMeta> Metadata=new List<ElementMeta>();public SheetLayout Layout=new SheetLayout();public List<VariableField> Variables=new List<VariableField>();
+ public LabelLanguages Languages;
  public List<int> QuickPrintFields=new List<int>();
  public bool ShouldSerializeQuickPrintFields(){return QuickPrintFields!=null&&QuickPrintFields.Count>0;}
  public double BarRotation;

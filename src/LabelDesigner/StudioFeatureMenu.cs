@@ -34,6 +34,7 @@ public partial class MainForm {
   projectMenu.Items.AddRange(new ToolStripItem[]{open,save,saveAs,new ToolStripSeparator(),
    FeatureItem("Šablóny a nedávne projekty",HeaderIcon.Library,ShowLibrary),
    FeatureItem("Upraviteľné polia šablóny…",HeaderIcon.AddText,ConfigureQuickPrintFields),
+   FeatureItem("Jazyky etikety…",HeaderIcon.Data,EditLabelLanguages),
    FeatureItem("Automatické ukladanie",HeaderIcon.AutoSave,RecoveryPreferences)});
  }
  void BuildInsertMenu() {

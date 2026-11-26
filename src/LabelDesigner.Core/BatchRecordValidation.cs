@@ -18,15 +18,22 @@ namespace EanEtikety {
     WorkContext.Check();
     var label=JobPreparation.CloneForPreparation(template);
     var columns=new Dictionary<string,int>(StringComparer.Ordinal);
+    string requestedLanguage=null;
     foreach(var binding in mappings) {
      if(binding.Column<0)continue;
+     bool language=binding.Target==LabelLanguages.BatchTarget;
+     if(language&&label.Languages==null)continue;
+     if(Elements.TryFieldIndex(binding.Target,out int field)&&LabelLanguages.Translated(label,field))continue;
      string value=Value(row,binding.Column);
      string issue=csv&&binding.Column>=row.Length?Loc.T("V riadku chýba namapovaný stĺpec."):
       value.StartsWith("!ERROR:",StringComparison.Ordinal)?value:null;
      if(issue!=null)record.AddIssue(binding.Column,binding.Target,issue);
      columns[binding.Target]=binding.Column;
-     SetBoundValue(label,binding.Target,issue==null?value:"");
+     if(language)requestedLanguage=issue==null?value:"";
+     else SetBoundValue(label,binding.Target,issue==null?value:"");
     }
+    LabelLanguages.Resolve(label,requestedLanguage,(field,message)=>record.AddIssue(
+     columns.TryGetValue(LabelLanguages.BatchTarget,out int column)?column:-1,Elements.FieldTarget(field),message));
 
     if(quantityColumn>=0) {
      int count;
