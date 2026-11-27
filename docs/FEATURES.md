@@ -16,6 +16,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Bezpečné zóny** ukladajú do šablóny okraje v mm a pomenované
+  obdĺžniky, ktoré majú zostať voľné. Editor môže prichytávať k hranám,
+  kontrola označí zasiahnutý prvok aj zónu a značky sa kreslia iba na plátne.
 - **Referenčný podklad** na plátne ukladá PNG alebo JPEG do projektu.
   Polohu, rozmery v mm a krytie nastavíte v editore. Tlačový náhľad
   a exporty používajú samotné tlačové prvky etikety.

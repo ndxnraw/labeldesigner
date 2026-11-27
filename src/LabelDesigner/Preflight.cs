@@ -35,7 +35,7 @@ namespace EanEtikety {
  public sealed class OutputReviewDialog:Form {
   readonly PreflightReport report;readonly CheckBox acknowledge=new CheckBox();readonly ModernButton proceed=new ModernButton();readonly IssueView issues=new IssueView();
   public LabelIssue EditIssue{get;private set;}
-  internal static bool HasRepairTarget(LabelIssue issue)=>issue!=null&&(issue.Element!=-2||issue.Record>0);
+  internal static bool HasRepairTarget(LabelIssue issue)=>issue!=null&&(issue.Element!=-2||issue.Record>0||issue.SafetyZone.HasValue);
   public OutputReviewDialog(PreflightReport value,int copies,string action,string target,Font font,Icon icon,bool allowEdit=true){
    report=value;Text=Loc.T("Kontrola výstupu");Font=font;Icon=icon;ClientSize=new Size(760,600);MinimumSize=new Size(560,480);AutoScaleMode=AutoScaleMode.Dpi;StartPosition=FormStartPosition.CenterParent;ShowInTaskbar=false;
    var root=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(14),ColumnCount=1,RowCount=5};root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.Percent,100));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));root.RowStyles.Add(new RowStyle(SizeType.AutoSize));Controls.Add(root);
@@ -70,7 +70,7 @@ namespace EanEtikety {
    }
   }
   void NavigateOutputIssue(LabelIssue issue){
-   if(issue.Element==-2){FocusProblems();return;}
+   if(issue.Element==-2){SelectEditorIssue(issue);FocusProblems();return;}
    SelectEditorIssue(issue);
    FocusInspector();
   }

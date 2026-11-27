@@ -1192,3 +1192,23 @@ Projekt nemá referenčný podklad.	This project has no reference underlay.	Proj
 Podklad sa zobrazuje iba pri úpravách na plátne.	The underlay appears only on the editing canvas.	Podklad se zobrazuje pouze při úpravách na plátně.	A referenciakép csak szerkesztéskor látható a vásznon.
 Neplatné nastavenie referenčného podkladu.	Invalid reference underlay settings.	Neplatné nastavení referenčního podkladu.	Érvénytelen referenciakép-beállítás.
 Neplatný referenčný obrázok PNG alebo JPEG.	Invalid PNG or JPEG reference image.	Neplatný referenční obrázek PNG nebo JPEG.	Érvénytelen PNG vagy JPEG referenciakép.
+Bezpečné zóny…	Safety zones…	Bezpečné zóny…	Biztonsági zónák…
+Vyznačiť voľnú zónu…	Draw a reserved zone…	Vyznačit volnou zónu…	Szabad zóna kijelölése…
+Potiahnutím vyznačte zónu na etikete. Esc zruší výber.	Drag on the label to mark a zone. Press Esc to cancel.	Tažením vyznačte zónu na etiketě. Esc zruší výběr.	Húzással jelölje ki a zónát a címkén. Az Esc megszakítja.
+Ľavý bezpečný okraj (mm)	Left safety margin (mm)	Levý bezpečný okraj (mm)	Bal biztonsági margó (mm)
+Pravý bezpečný okraj (mm)	Right safety margin (mm)	Pravý bezpečný okraj (mm)	Jobb biztonsági margó (mm)
+Horný bezpečný okraj (mm)	Top safety margin (mm)	Horní bezpečný okraj (mm)	Felső biztonsági margó (mm)
+Dolný bezpečný okraj (mm)	Bottom safety margin (mm)	Dolní bezpečný okraj (mm)	Alsó biztonsági margó (mm)
+Prichytávať k hranám bezpečných zón	Snap to safety zone edges	Přichytávat k hranám bezpečných zón	Illesztés a biztonsági zónák széleihez
+Voľné zóny (mm)	Reserved zones (mm)	Volné zóny (mm)	Szabad zónák (mm)
+Názov zóny	Zone name	Název zóny	Zóna neve
+Voľná zóna {0}	Reserved zone {0}	Volná zóna {0}	Szabad zóna {0}
+Pridať zónu	Add zone	Přidat zónu	Zóna hozzáadása
+Odstrániť zónu	Remove zone	Odstranit zónu	Zóna eltávolítása
+Najviac 32 voľných zón.	Up to 32 reserved zones.	Nejvýše 32 volných zón.	Legfeljebb 32 szabad zóna.
+Neplatné nastavenie bezpečných zón.	Invalid safety zone settings.	Neplatné nastavení bezpečných zón.	Érvénytelen biztonsági zóna beállítások.
+Zóna potrebuje jedinečný názov a platné rozmery.	A zone needs a unique name and valid dimensions.	Zóna potřebuje jedinečný název a platné rozměry.	A zóna egyedi nevet és érvényes méreteket igényel.
+Bezpečné okraje zaberajú celú etiketu.	The safety margins cover the entire label.	Bezpečné okraje zabírají celou etiketu.	A biztonsági margók lefedik az egész címkét.
+Voľná zóna „{0}“ presahuje etiketu.	Reserved zone “{0}” extends beyond the label.	Volná zóna „{0}“ přesahuje etiketu.	A(z) „{0}” szabad zóna túlnyúlik a címkén.
+{0} presahuje bezpečné okraje.	{0} extends beyond the safety margins.	{0} přesahuje bezpečné okraje.	A(z) {0} túlnyúlik a biztonsági margókon.
+{0} zasahuje do voľnej zóny „{1}“.	{0} overlaps reserved zone “{1}”.	{0} zasahuje do volné zóny „{1}“.	A(z) {0} átfedi a(z) „{1}” szabad zónát.

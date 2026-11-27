@@ -93,6 +93,10 @@ project reopening, editor opacity and position, locking, hiding and undo.
 Comparison of output with and without a reference covers Windows print and
 preview rendering, PDF, SVG, Word, and the ZPL raster and embedded XML.
 
+`EditorRefinementTests` verifies safety margins and named zones, edge
+snapping and rotated-frame geometry, hidden elements, preflight issue
+identity, drawing and highlighting on the canvas, and unmarked PDF, SVG and ZPL.
+
 `EditorRefinementTests` checks block capture, library previews, insertion,
 independent copies, preserved translations and local rule dependencies.
 

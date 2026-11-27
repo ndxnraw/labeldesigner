@@ -1,5 +1,90 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void SafetyZones(string dir){
+  var label=LabelSettings.Default();label.HideBarcode=true;
+  var text=label.Texts[0];text.AutoWidth=false;text.X=4;text.Y=10;text.Width=20;text.Height=8;
+  label.Safety=new LabelSafetyZones{Left=5,Right=2,Top=3,Bottom=4,Snap=true,Zones=new(){
+   new ReservedLabelZone{Name="Logo",X=20,Y=11,Width=12,Height=6},
+   new ReservedLabelZone{Name="Opening",X=35,Y=30,Width=10,Height=10}
+  }};
+  string path=Path.Combine(dir,"safety-zones.ean.xml");Engine.Save(path,label);label=Engine.Load(path);
+  var issues=LabelChecks.Inspect(label);
+  Check(issues.Exists(i=>i.Element==0&&i.SafetyZone==-1&&!i.Blocking)&&
+   issues.Exists(i=>i.Element==0&&i.SafetyZone==0&&i.Message.Contains("Logo"))&&
+   !issues.Exists(i=>i.SafetyZone==1),"safety checks identify the frame and each affected region");
+  var report=PreflightReport.Inspect(OutputPlan.Create(label));
+  Check(report.Issues.Exists(i=>i.Element==0&&i.SafetyZone==0)&&report.HasWarnings&&!report.Blocking,"preflight keeps the zone identity as a warning");
+  var optional=ProjectXml.Clone(label);
+  optional.Texts.Add(new TextItem{X=40,Y=2,Text="Keep",Width=10});
+  Elements.Meta(optional,0).Visibility=new VisibilityRule{Field=1,Mode=VisibilityMode.EqualsValue,Value="other"};
+  Check(!QuickPrint.PrepareEditor(optional,DateTime.Today).Issues.Exists(i=>i.SafetyZone==0),"hidden elements never trigger reserved-zone warnings");
+  var plain=ProjectXml.Clone(label);plain.Safety=null;
+  Check(VectorArt.Svg(label)==VectorArt.Svg(plain),"SVG contains no safety marks");
+  string z1=Path.Combine(dir,"safety.zpl"),z2=Path.Combine(dir,"safety-baseline.zpl");
+  Engine.Zpl(z1,label);Engine.Zpl(z2,plain);
+  Check(File.ReadAllText(z1)==File.ReadAllText(z2),"ZPL and its embedded metadata contain no safety marks");
+  string p1=Path.Combine(dir,"safety.pdf"),p2=Path.Combine(dir,"safety-baseline.pdf");
+  Engine.Pdf(p1,label);Engine.Pdf(p2,plain);
+  Check(File.ReadAllBytes(p1).AsSpan().SequenceEqual(File.ReadAllBytes(p2)),"PDF contains no safety marks");
+  var moving=new ElementEdit{Index=0,X=5.2,Y=18,Width=7,Height=4};
+  var snap=SmartGuides.CalculateSnap(moving,Array.Empty<ElementEdit>(),label.Width,label.Height,20,20,true,
+   boundaries:label.Safety.SnapBounds(label));
+  Check(Math.Abs(snap.Element.X-5)<.001&&snap.X.Position==5,"safe margin snaps a frame edge within screen tolerance");
+  label.Safety.Snap=false;
+  Check(SmartGuides.CalculateSnap(moving,Array.Empty<ElementEdit>(),label.Width,label.Height,20,20,true,
+   boundaries:label.Safety.SnapBounds(label)).Element.X==moving.X,"safety snapping can be disabled independently");
+  label.Safety.Snap=true;
+  moving.X=34.8;
+  Check(Math.Abs(SmartGuides.CalculateSnap(moving,Array.Empty<ElementEdit>(),label.Width,label.Height,20,20,true,
+   boundaries:label.Safety.SnapBounds(label)).Element.X-35)<.001,"named zone edges also snap");
+  var rotated=ProjectXml.Clone(label);
+  rotated.Texts[0].X=10;rotated.Texts[0].Y=10;rotated.Texts[0].Width=10;rotated.Texts[0].Height=4;
+  rotated.Texts[0].Rotation=45;
+  rotated.Safety.Zones=new(){new(){Name="Empty corner",X=10.2,Y=16.2,Width=.4,Height=.4},
+   new(){Name="Inside",X=14.5,Y=11.5,Width=1,Height=1}};
+  var rotatedIssues=LabelChecks.Inspect(rotated);
+  Check(!rotatedIssues.Exists(issue=>issue.SafetyZone==0)&&rotatedIssues.Exists(issue=>issue.SafetyZone==1),
+   "rotated frames use their true corners rather than the enclosing axis-aligned box");
+
+  using var owner=new MainForm(Path.Combine(dir,"safety-ui.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",label);
+  var preview=F<PreviewPanel>(owner,"preview");
+  Call(owner,"SelectEditorIssue",issues.Find(i=>i.SafetyZone==0));
+  Check(preview.SelectedIndex==0&&(int?)typeof(PreviewPanel).GetField("HighlightedSafetyZone",BindingFlags.Instance|BindingFlags.NonPublic)
+   .GetValue(preview)==0,"selecting the issue highlights the element and the named zone");
+  var view=F<ContextMenuStrip>(owner,"viewMenu");
+  foreach(ToolStripItem item in view.Items)if(item.Text==Loc.T("Vyznačiť voľnú zónu…")){item.PerformClick();break;}
+  bool opened=false;Exception failure=null;
+  using(var timer=new Timer{Interval=70}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner)continue;
+     timer.Stop();
+     try{
+      var grid=(DataGridView)dialog.Controls.Find("safetyZoneGrid",true)[0];
+      Check(grid.Rows.Count==3,"drawing on the editor creates a reserved rectangle in settings");
+      grid.Rows[2].Cells[0].Value="Date stamp";
+      Snapshot(dialog,Path.Combine(dir,"safety-zones-settings.png"));
+      opened=true;dialog.AcceptButton.PerformClick();
+     }catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   void Draw(string method,float x,float y){
+    var point=preview.ScreenPoint(new PointF(x,y));
+    typeof(PreviewPanel).GetMethod(method,BindingFlags.Instance|BindingFlags.NonPublic)
+     .Invoke(preview,new object[]{new MouseEventArgs(MouseButtons.Left,1,(int)point.X,(int)point.Y,0)});
+   }
+   timer.Start();Draw("OnMouseDown",29,21);Draw("OnMouseMove",42,25);Draw("OnMouseUp",42,25);
+  }
+  if(failure!=null)throw failure;
+  var saved=(LabelSettings)Call(owner,"Read");
+  Check(opened&&saved.Safety.Zones[2].Name=="Date stamp"&&Math.Abs(saved.Safety.Zones[2].X-29)<1,
+   "the drawn region can be named and is saved in physical millimetres");
+  Snapshot(preview,Path.Combine(dir,"safety-zones-canvas.png"));
+  Call(owner,"Apply",LabelSettings.Default());owner.Close();
+ }
  static void ReferenceUnderlay(string dir){
   var label=LabelSettings.Default();label.HideBarcode=true;
   string png=Path.Combine(dir,"reference-source.png"),jpg=Path.Combine(dir,"reference-source.jpg");
@@ -883,5 +968,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

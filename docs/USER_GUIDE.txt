@@ -128,6 +128,19 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+BEZPEČNÉ ZÓNY ETIKETY
+
+Cez Zobrazenie → Bezpečné zóny nastavte ľavý, pravý, horný a dolný okraj
+v milimetroch. Pomenované obdĺžnikové zóny pridajte v tabuľke alebo
+príkazom Zobrazenie → Vyznačiť voľnú zónu a potiahnutím na plátne.
+Zóny aj okraje sa ukladajú do projektu a šablóny.
+
+Voľba Prichytávať k hranám bezpečných zón funguje spolu s prichytávaním
+pri presúvaní. Alt prichytávanie dočasne vypne. Panel Kontrola a
+predtlačová kontrola upozorňujú na zásahy rámov viditeľných prvkov vrátane
+otočených. Výber upozornenia v editore zvýrazní prvok aj príslušnú zónu.
+Vodiace značky a názvy zón sa zobrazujú iba na plátne editora.
+
 REFERENČNÝ PODKLAD NA PLÁTNE
 
 V ponuke Zobrazenie otvorte Referenčný podklad a načítajte PNG alebo JPEG.

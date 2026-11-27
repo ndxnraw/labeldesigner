@@ -17,8 +17,9 @@ public static class ZplImport {
  static string Hash(string value){using(var sha=SHA256.Create())return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(value)));}
  public static void AddProject(string path,LabelSettings settings){
   settings=settings.WithoutEditorReference();
-  if(settings.Batch!=null&&settings.Batch.Presets!=null&&settings.Batch.Presets.Exists(preset=>preset!=null&&preset.Reference!=null)){
+  if(settings.Safety!=null||settings.Batch!=null&&settings.Batch.Presets!=null&&settings.Batch.Presets.Exists(preset=>preset!=null&&preset.Reference!=null)){
    settings=ProjectXml.Clone(settings);
+   settings.Safety=null;
    BatchReferences.Strip(settings);
   }
   string body=File.ReadAllText(path);string xml;using(var writer=new StringWriter(CultureInfo.InvariantCulture)){new XmlSerializer(typeof(LabelSettings)).Serialize(writer,settings);xml=writer.ToString();}string comment=Marker+Hash(body)+":"+Convert.ToBase64String(Encoding.UTF8.GetBytes(xml))+"^FS";File.WriteAllText(path,body.Insert(3,comment),new UTF8Encoding(false));

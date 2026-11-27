@@ -37,6 +37,7 @@ namespace EanEtikety {
    viewMenu.Items.Add(Loc.T("Tabuľka"),null,delegate{tableSplit.Panel2Collapsed=!tableSplit.Panel2Collapsed;});
    AddCanvasViewOptions(viewMenu);
    AddEditorReferenceMenu(viewMenu);
+   AddSafetyZoneMenu(viewMenu);
    viewMenu.Opening+=delegate{
     ((ToolStripMenuItem)viewMenu.Items[0]).Checked=studioBody.ColumnStyles[0].Width>0;
     ((ToolStripMenuItem)viewMenu.Items[1]).Checked=studioBody.ColumnStyles[2].Width>0;
