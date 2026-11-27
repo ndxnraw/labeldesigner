@@ -15,7 +15,7 @@ namespace EanEtikety {
   public bool CanPrint { get { return !Issues.Exists(issue => issue.Blocking); } }
   public List<LabelIssue> SourceIssues()=>Issues.ConvertAll(issue=>new LabelIssue{
    Element=issue.SourceElement??Elements.SourceIndex(Label,issue.Element),Blocking=issue.Blocking,Message=issue.Message,
-   SafetyZone=issue.SafetyZone,Record=issue.Record,Page=issue.Page
+   SafetyZone=issue.SafetyZone,Record=issue.Record,Page=issue.Page,InputId=issue.InputId
   });
 
   public OutputPlan CreatePlan(int quantity) {
@@ -104,19 +104,25 @@ namespace EanEtikety {
 
   public static QuickPrintDraft Prepare(LabelSettings template, IDictionary<int,string> values, DateTime instant)=>Prepare(template,values,instant,null,false);
   public static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language)=>Prepare(template,values,instant,language,false);
+  public static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,
+      IReadOnlyDictionary<string,TemplateInputValue> inputs)=>Prepare(template,values,instant,language,false,inputs:inputs);
   public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant)=>Prepare(template,null,instant,null,true);
   public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant,string language)=>Prepare(template,null,instant,language,true);
   public static QuickPrintDraft PrepareScenario(LabelSettings template,LabelScenario scenario,DateTime instant)=>
    Prepare(template,null,instant,scenario.Language,true,scenario);
 
   static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,bool editor,
-      LabelScenario scenario=null) {
+      LabelScenario scenario=null,IReadOnlyDictionary<string,TemplateInputValue> inputs=null) {
    template=template?.WithoutEditorReference().WithoutScenarios();
    Engine.ValidateDraft(template);
    var label=JobPreparation.CloneForPreparation(template);
    var selected=new HashSet<int>(editor?new List<int>():InputFields(template));
    var issues=new List<LabelIssue>();
-   var overrides=scenario?.Values.ToDictionary(value=>value.Element);
+   var overrides=scenario?.Values.Where(value=>value.InputId==null).ToDictionary(value=>value.Element);
+   if(scenario!=null)inputs=scenario.Values.Where(value=>value.InputId!=null).ToDictionary(value=>value.InputId,
+    value=>new TemplateInputValue(value.Value,value.InputKind,value.SourceError),StringComparer.Ordinal);
+   var resolvedInputs=TemplateInputResolution.Resolve(label,inputs,
+    (id,message)=>issues.Add(new LabelIssue{InputId=id,Message=message,Blocking=true}));
    var inputKinds=new Dictionary<int,TextInputKind>();
    var variables=BatchData.Variables(template,0,instant);
    var outputCulture=LabelDataFormat.HasFields(label)?LabelDataFormat.CultureFor(template,language):null;
@@ -142,10 +148,10 @@ namespace EanEtikety {
     catch(XmlException){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=Loc.T("Hodnota obsahuje nepovolený znak.")});}
     catch(Exception ex){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=ex.Message});}
    }
-   FieldCalculation.Apply(label,inputKinds,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
-    (field,_,message)=>issues.Add(new LabelIssue{Element=field,Blocking=true,Message=message}));
+   FieldCalculation.Apply(label,inputKinds,resolvedInputs,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
+    (field,_,id,message)=>issues.Add(new LabelIssue{Element=field,InputId=id,Blocking=true,Message=message}));
    var ruleErrors=new HashSet<(int Element,string Message)>();
-   var hidden=JobPreparation.ProjectArtwork(label,variables,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
+   var hidden=JobPreparation.ProjectArtwork(label,variables,resolvedInputs,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
     (index,message)=>ruleErrors.Add((scenario==null?-2:index,message)),scenario!=null);
    if(hidden.Count>0){
     issues.RemoveAll(issue=>hidden.Contains(issue.Element));

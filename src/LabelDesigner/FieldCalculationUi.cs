@@ -50,9 +50,16 @@ namespace EanEtikety {
      if(current.Length>35)current=current.Substring(0,35)+"…";
      combo.Items.Add(new CalculationSource(field,QuickPrint.Name(template,field)+(current==""?"":" · "+current)));
     }
+    foreach(var input in template.Inputs)
+     if(input.Kind!=TemplateInputKind.Text||input.Id==value?.InputId)
+      combo.Items.Add(new CalculationSource(-1,TemplateInputCaption(input),input.Id));
+    if(value?.InputId!=null&&!template.Inputs.Exists(input=>input.Id==value.InputId))
+     combo.Items.Add(new CalculationSource(-1,Loc.T("Pomenovaný vstup už nie je dostupný."),value.InputId));
     combo.SelectedIndex=0;
     for(int i=1;i<combo.Items.Count;i++)
-     if(((CalculationSource)combo.Items[i]).Field==value?.Field){combo.SelectedIndex=i;break;}
+     if(combo.Items[i] is CalculationSource item&&item.Field==value?.Field&&item.InputId==value?.InputId){
+      combo.SelectedIndex=i;break;
+     }
     StackField(operands,Loc.T(title),combo);
     var literal=Input(operands,"Hodnota konštanty",value?.Literal??"");
     literal.Name=name+"Literal";literal.MaxLength=100;
@@ -60,7 +67,8 @@ namespace EanEtikety {
    }
 
    static CalculationOperand ReadOperand((ComboBox Source,TextBox Value) input)=>new(){
-    Field=((CalculationSource)input.Source.SelectedItem).Field,Literal=input.Value.Text.Trim()
+    Field=((CalculationSource)input.Source.SelectedItem).Field,InputId=((CalculationSource)input.Source.SelectedItem).InputId,
+    Literal=input.Value.Text.Trim()
    };
    FieldCalculation Settings()=>operation.SelectedIndex==0?null:new FieldCalculation{
     Operation=(CalculationOperation)(operation.SelectedIndex-1),Left=ReadOperand(left),Right=ReadOperand(right)
@@ -73,8 +81,8 @@ namespace EanEtikety {
    }
    void Refresh(){
     operands.Visible=operation.SelectedIndex>0;
-    left.Value.Enabled=((CalculationSource)left.Source.SelectedItem).Field==-1;
-    right.Value.Enabled=((CalculationSource)right.Source.SelectedItem).Field==-1;
+    left.Value.Enabled=left.Source.SelectedItem is CalculationSource{Field:-1,InputId:null};
+    right.Value.Enabled=right.Source.SelectedItem is CalculationSource{Field:-1,InputId:null};
     var formula=Settings();
     if(formula==null){result.Text="";return;}
     try{
@@ -97,7 +105,7 @@ namespace EanEtikety {
    preview.SelectElement(index);
   }
 
-  sealed record CalculationSource(int Field,string Caption){
+  sealed record CalculationSource(int Field,string Caption,string InputId=null){
    public override string ToString()=>Caption;
   }
  }

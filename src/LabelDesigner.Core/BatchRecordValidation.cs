@@ -12,16 +12,26 @@ namespace EanEtikety {
   }
 
   internal static BatchRecord Record(LabelSettings template,string[] row,List<ColumnBinding> mappings,
-      int quantityColumn,int index,int rowNumber,DateTime instant,bool csv,TextInputKind[] inputKinds=null) {
+      int quantityColumn,int index,int rowNumber,DateTime instant,bool csv,TextInputKind[] inputKinds=null,
+      IReadOnlyDictionary<int,string> worksheetErrors=null) {
    var record=new BatchRecord { Row=rowNumber, PreparedAt=instant };
    try {
     WorkContext.Check();
     var label=JobPreparation.CloneForPreparation(template);
     var columns=new Dictionary<string,int>(StringComparer.Ordinal);
+    var namedValues=new Dictionary<string,TemplateInputValue>(StringComparer.Ordinal);
     var kinds=new Dictionary<int,TextInputKind>();
     string requestedLanguage=null;
     foreach(var binding in mappings) {
      if(binding.Column<0)continue;
+     if(TemplateInput.TryTarget(binding.Target,out string inputId)){
+      string raw=Value(row,binding.Column);
+      string error=csv&&binding.Column>=row.Length?Loc.T("V riadku chýba namapovaný stĺpec."):
+       worksheetErrors?.GetValueOrDefault(binding.Column);
+      namedValues[inputId]=new(raw,inputKinds!=null&&binding.Column<inputKinds.Length?inputKinds[binding.Column]:TextInputKind.Text,error);
+      columns[binding.Target]=binding.Column;
+      continue;
+     }
      bool language=binding.Target==LabelLanguages.BatchTarget;
      if(language&&label.Languages==null)continue;
      bool element=Elements.TryFieldIndex(binding.Target,out int field);
@@ -36,6 +46,10 @@ namespace EanEtikety {
      else SetBoundValue(label,binding.Target,issue==null?value:"");
     }
     var outputCulture=LabelDataFormat.HasFields(label)?LabelDataFormat.CultureFor(template,requestedLanguage):null;
+    var inputs=TemplateInputResolution.Resolve(label,namedValues,(id,message)=>{
+     string target=TemplateInput.Target(id);
+     record.AddIssue(columns.GetValueOrDefault(target,-1),target,message);
+    });
     LabelLanguages.Resolve(label,requestedLanguage,(field,message)=>record.AddIssue(
      columns.TryGetValue(LabelLanguages.BatchTarget,out int column)?column:-1,Elements.FieldTarget(field),message));
 
@@ -77,16 +91,16 @@ namespace EanEtikety {
       foreach(var ai in symbol.Code.ApplicationIdentifiers)ai.Data=resolve(target,ai.Data);
      }
     }
-    FieldCalculation.Apply(label,kinds,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
-     (field,source,message)=>{
-      string input=source>=0?Elements.FieldTarget(source):null;
+    FieldCalculation.Apply(label,kinds,inputs,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
+     (field,source,id,message)=>{
+      string input=id!=null?TemplateInput.Target(id):source>=0?Elements.FieldTarget(source):null;
       int column=input==null?-1:record.Issues.Find(issue=>issue.Target==input&&issue.Blocking&&issue.Column>=0)?.Column??
        columns.GetValueOrDefault(input,-1);
       record.AddIssue(column,Elements.FieldTarget(field),message);
      });
     if(JobPreparation.HasDynamicArtwork(label)){
      var ruleErrors=new HashSet<(int Column,string Message)>();
-     var hidden=JobPreparation.ProjectArtwork(label,values,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
+     var hidden=JobPreparation.ProjectArtwork(label,values,inputs,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
       (index,message)=>ruleErrors.Add((index!=-2&&columns.TryGetValue(Elements.FieldTarget(index),out int column)?column:-1,message)));
      if(hidden.Count>0){
       record.Issues.RemoveAll(issue=>Elements.TryFieldIndex(issue.Target,out int index)&&hidden.Contains(index));

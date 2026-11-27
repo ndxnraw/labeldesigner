@@ -28,10 +28,12 @@ namespace EanEtikety {
    grid.Columns.Add(new DataGridViewCheckBoxColumn{Name="use",HeaderText=Loc.T("Použiť"),FillWeight=24});
    grid.Columns.Add(new DataGridViewTextBoxColumn{Name="field",HeaderText=Loc.T("Pole etikety"),ReadOnly=true,FillWeight=52});
    grid.Columns.Add(new DataGridViewTextBoxColumn{Name="value",HeaderText=Loc.T("Hodnota"),MaxInputLength=4000,FillWeight=100});
-   foreach(int field in QuickPrint.Editable(template)){
-    var sample=original.Values.Find(item=>item.Element==field);
-    var row=grid.Rows[grid.Rows.Add(sample!=null,QuickPrint.Name(template,field),sample?.Value??"")];
-    row.Tag=field;
+   foreach(int field in QuickPrint.Editable(template))AddValue(field,QuickPrint.Name(template,field),"");
+   foreach(var input in template.Inputs)AddValue(input.Id,TemplateInputCaption(input),input.DefaultValue);
+   void AddValue(object target,string caption,string fallback){
+    var sample=original.Values.Find(item=>ScenarioTargets(item,target));
+    var row=grid.Rows[grid.Rows.Add(sample!=null,caption,sample?.Value??fallback)];
+    row.Tag=target;
     InstallSample(row,sample);
    }
    grid.EditingControlShowing+=delegate(object sender,DataGridViewEditingControlShowingEventArgs args){
@@ -47,7 +49,7 @@ namespace EanEtikety {
      var data=ImportScenarioRow(window,template);
      if(data==null)return;
      foreach(DataGridViewRow row in grid.Rows)
-      if(data.Values.Find(value=>value.Element==(int)row.Tag) is { } sample)InstallSample(row,sample);
+      if(data.Values.Find(value=>ScenarioTargets(value,row.Tag)) is { } sample)InstallSample(row,sample);
      if(data.Language!=null){useLanguage.Checked=true;language.Text=data.Language;}
      message.Text="";
     }catch(Exception ex){message.Text=ex.Message;}
@@ -61,13 +63,14 @@ namespace EanEtikety {
      var next=new LabelScenario{Id=original.Id,Name=name.Text.Trim(),Language=useLanguage.Checked?language.Text.Trim():null};
      // Preserve samples for fields currently translated or disabled.
      var editable=new HashSet<int>(QuickPrint.Editable(template));
-     next.Values.AddRange(original.Values.FindAll(value=>!editable.Contains(value.Element)));
+     next.Values.AddRange(original.Values.FindAll(value=>value.InputId==null?!editable.Contains(value.Element):
+      !template.Inputs.Exists(input=>input.Id==value.InputId)));
      foreach(DataGridViewRow row in grid.Rows){
       if(!Equals(row.Cells[0].Value,true))continue;
       string value=Convert.ToString(row.Cells[2].Value)??"";
       var sample=row.Cells[2].Tag as LabelScenarioValue;
       next.Values.Add(sample!=null&&sample.Value==value?sample:
-       new LabelScenarioValue{Element=(int)row.Tag,Value=value});
+       new LabelScenarioValue{Element=row.Tag is int element?element:-2,InputId=row.Tag as string,Value=value});
      }
      var label=template.Scenarios.FindAll(item=>item.Id!=next.Id);
      label.Add(next);
@@ -82,6 +85,9 @@ namespace EanEtikety {
    ApplyColors(window);
    return window.ShowDialog(owner)==DialogResult.OK?result:null;
   }
+
+  static bool ScenarioTargets(LabelScenarioValue value,object target)=>
+   target is string id?value.InputId==id:value.InputId==null&&value.Element==(int)target;
 
   static void ScenarioLineBreak(object sender,KeyEventArgs args){
    if(args.KeyCode!=Keys.Enter||!args.Shift)return;
@@ -140,6 +146,7 @@ namespace EanEtikety {
    grid.Columns.Add(column);
    grid.Columns.Add(new DataGridViewTextBoxColumn{Name="sample",HeaderText=Loc.T("Hodnota"),ReadOnly=true});
    foreach(int field in QuickPrint.Editable(template))grid.Rows[grid.Rows.Add(QuickPrint.Name(template,field))].Tag=field;
+   foreach(var input in template.Inputs)grid.Rows[grid.Rows.Add(TemplateInputCaption(input))].Tag=input.Id;
    if(template.Languages!=null)grid.Rows[grid.Rows.Add(Loc.T("Jazyk etikety"))].Tag=-2;
    ManagementLayout.AddRow(root,grid,SizeType.Percent);
    LabelScenario result=null;
@@ -151,9 +158,8 @@ namespace EanEtikety {
     foreach(DataGridViewRow row in grid.Rows){
      int item=column.Items.IndexOf(row.Cells[1].Value)-1;
      if(item<0)continue;
-     int element=(int)row.Tag;
-     var value=LabelScenario.FromCell(table,index,item,element);
-     if(element==-2){
+     var value=ReadSample(table,index,item,row.Tag);
+     if(value.Element==-2&&value.InputId==null){
       if(value.SourceError!=null){info.Text=value.SourceError;return;}
       sample.Language=value.Value;
      }else sample.Values.Add(value);
@@ -167,6 +173,8 @@ namespace EanEtikety {
    bool refreshing=false;
    DataTableSource CurrentTable()=>tables[sheet.SelectedIndex];
    int RecordIndex()=>(int)record.Value-1+(header.Checked?1:0);
+   static LabelScenarioValue ReadSample(DataTableSource sourceTable,int row,int column,object target)=>
+    LabelScenario.FromCell(sourceTable,row,column,target is int element?element:-2,target as string);
    void UpdateSample(){
     if(refreshing)return;
     var table=CurrentTable();
@@ -174,7 +182,7 @@ namespace EanEtikety {
     info.Text=found?string.Format(Loc.T("Pôvodný riadok: {0}"),table.SourceRow(index)):Loc.T("Tabuľka nemá požadované záznamy.");
     foreach(DataGridViewRow row in grid.Rows){
      int item=column.Items.IndexOf(row.Cells[1].Value)-1;
-     var value=found&&item>=0?LabelScenario.FromCell(table,index,item,(int)row.Tag):null;
+     var value=found&&item>=0?ReadSample(table,index,item,row.Tag):null;
      row.Cells[2].Value=value?.SourceError??value?.Value??"";
      mapped|=item>=0;
     }

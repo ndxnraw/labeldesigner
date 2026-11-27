@@ -1,6 +1,6 @@
 using System;using System.Collections.Generic;using System.Drawing;using System.Drawing.Drawing2D;
 namespace EanEtikety {
-public class LabelIssue {public int Element=-2,Record,Page;public int? SafetyZone;internal int? SourceElement;public bool Blocking;public string Message;public override string ToString(){return (Blocking?Loc.T("Chyba"):Loc.T("Upozornenie"))+": "+(Record>0?Loc.T("Záznam")+" "+Record+", ":"")+(Page>0?Loc.T("Strana")+" "+Page+" — ":"")+Message;}}
+public class LabelIssue {public int Element=-2,Record,Page;public int? SafetyZone;internal int? SourceElement;public bool Blocking;public string Message,InputId;public override string ToString(){return (Blocking?Loc.T("Chyba"):Loc.T("Upozornenie"))+": "+(Record>0?Loc.T("Záznam")+" "+Record+", ":"")+(Page>0?Loc.T("Strana")+" "+Page+" — ":"")+Message;}}
 public static class LabelChecks {
  static bool ShapeOverlaps(LabelSettings label,SymbolItem symbol,ElementEdit code,IList<RectangleF> areas,bool includeWhite){
   using(var ink=GraphicShape.Ink(symbol,includeWhite))

@@ -20,7 +20,7 @@ namespace EanEtikety {
  }
  public static class JobPreparation {
   public static bool HasDynamicArtwork(LabelSettings label)=>label.Languages!=null||ConditionalVisibility.HasRules(label)||
-   HasImageMappings(label)||LabelDataFormat.HasFields(label)||FieldCalculation.HasFields(label)||label.VerticalStacks.Count>0;
+   HasImageMappings(label)||LabelDataFormat.HasFields(label)||FieldCalculation.HasFields(label)||label.VerticalStacks.Count>0||label.Inputs.Count>0;
   static bool HasImageMappings(LabelSettings label)=>label.Symbols?.Exists(symbol=>symbol?.ImageMapping!=null)==true;
 
   internal static LabelSettings CloneForPreparation(LabelSettings template){
@@ -36,9 +36,10 @@ namespace EanEtikety {
    return copy;
   }
 
-  internal static HashSet<int> ProjectArtwork(LabelSettings label,Dictionary<string,string> values,Func<int,bool> invalidSource,
+  internal static HashSet<int> ProjectArtwork(LabelSettings label,Dictionary<string,string> values,
+      IReadOnlyDictionary<string,ResolvedInput> inputs,Func<int,bool> invalidSource,
       Action<int,string> report,bool reportImageTarget=false){
-   var hidden=ConditionalVisibility.FindHidden(label,values,invalidSource,message=>report(-2,message));
+   var hidden=ConditionalVisibility.FindHidden(label,values,inputs,invalidSource,message=>report(-2,message));
    if(HasImageMappings(label)){
     var fields=new HashSet<int>(QuickPrint.Available(label));
     for(int i=0;i<label.Symbols.Count;i++){

@@ -10,6 +10,7 @@ namespace EanEtikety {
  public sealed class CalculationOperand {
   public int Field=-1; // -1 is a literal, -2 is a removed or unavailable source.
   public string Literal="";
+  public string InputId;
   internal CalculationOperand Copy()=>(CalculationOperand)MemberwiseClone();
  }
 
@@ -40,7 +41,8 @@ namespace EanEtikety {
    if(!Enum.IsDefined(Operation)||!Valid(Left)||!Valid(Right))
     throw new InvalidDataException(Loc.T("Neplatná definícia výpočtu."));
    bool Valid(CalculationOperand operand){
-    if(operand==null||operand.Field< -2||operand.Field>=count||operand.Literal==null||operand.Literal.Length>100)return false;
+    if(operand==null||operand.Field< -2||operand.Field>=count||operand.Literal==null||operand.Literal.Length>100||
+       operand.InputId!=null&&(!TemplateInput.IsId(operand.InputId)||operand.Field!=-1))return false;
     XmlConvert.VerifyXmlChars(operand.Literal);
     return true;
    }
@@ -53,15 +55,15 @@ namespace EanEtikety {
    return copy;
   }
 
-  internal static void Apply(LabelSettings label,Dictionary<int,TextInputKind> kinds,Func<int,bool> invalid,
-      Action<int,int,string> report){
+  internal static void Apply(LabelSettings label,Dictionary<int,TextInputKind> kinds,
+      IReadOnlyDictionary<string,ResolvedInput> inputs,Func<int,bool> invalid,Action<int,int,string,string> report){
    Dictionary<int,FieldCalculation> formulas=null;
    foreach(var meta in label.Metadata)
     if(meta.Calculation!=null){(formulas??=new()).Add(meta.Index,meta.Calculation);meta.Calculation=null;}
    if(formulas==null)return;
    var active=new HashSet<int>();
    var completed=new Dictionary<int,bool>();
-   var failedSources=new Dictionary<int,int>();
+   var failedSources=new Dictionary<int,(int Field,string InputId)>();
 
    bool Evaluate(int field){
     WorkContext.Check();
@@ -69,10 +71,10 @@ namespace EanEtikety {
     if(!formulas.TryGetValue(field,out var formula))return !invalid(field);
     active.Add(field);
     int source=-1;
+    string inputId=null;
     try{
      var left=Read(formula.Left,formula.ReturnsDate);
      var right=Read(formula.Right,false);
-     source=formula.Right.Field;
      if(formula.ReturnsDate){
       int offset=Whole(right.Number,-3652058,3652058,Loc.T("Posun dátumu musí byť celý počet dní."));
       StyledText.ReplaceField(label.Texts[field],left.Date.AddDays(offset).ToString(LabelDataFormat.IsoDate,CultureInfo.InvariantCulture));
@@ -98,23 +100,32 @@ namespace EanEtikety {
       _=>ex.Message
      };
      if(source>=0)message=string.Format(Loc.T("Vstup z poľa {0}: {1}"),source+1,message);
+     else if(inputId!=null&&inputs.TryGetValue(inputId,out var input))message=input.Definition.NamedError(message);
      StyledText.ReplaceField(label.Texts[field],"");
-     failedSources[field]=source;
-     report(field,source,string.Format(Loc.T("Výpočet poľa {0}: {1}"),field+1,message));
+     failedSources[field]=(source,inputId);
+     report(field,source,inputId,string.Format(Loc.T("Výpočet poľa {0}: {1}"),field+1,message));
      return completed[field]=false;
     }finally{active.Remove(field);}
 
     (decimal Number,DateOnly Date) Read(CalculationOperand operand,bool date){
      source=operand.Field;
+     inputId=operand.InputId;
      string value=operand.Literal;
      var kind=TextInputKind.Text;
      var format=date?DateInput:NumberInput;
-     if(source!=-1){
+     if(inputId!=null){
+      if(!inputs.TryGetValue(inputId,out var named))throw new InvalidDataException(Loc.T("Pomenovaný vstup už nie je dostupný."));
+      if(!named.Valid)throw new InvalidDataException(Loc.T("Pomenovaný vstup nemá platnú hodnotu."));
+      if(named.Definition.Kind!=(date?TemplateInputKind.Date:TemplateInputKind.Number))
+       throw new InvalidDataException(Loc.T("Typ pomenovaného vstupu nesúhlasí s výpočtom."));
+      value=named.Value;
+      kind=date?TextInputKind.WorksheetDate:TextInputKind.WorksheetNumber;
+     }else if(source!=-1){
       int index=source;
       if(index<0||index>=label.Texts.Count)throw new InvalidDataException(Loc.T("Chýba zdrojové pole výpočtu."));
       if(active.Contains(index))throw new InvalidDataException(Loc.T("Polia výpočtu tvoria cyklus."));
       if(!Evaluate(index)){
-       source=failedSources.GetValueOrDefault(index,index);
+       (source,inputId)=failedSources.GetValueOrDefault(index,(index,null));
        throw new InvalidDataException(string.Format(Loc.T("Pole {0} nemá platnú vstupnú hodnotu."),index+1));
       }
       value=label.Texts[index].Text;

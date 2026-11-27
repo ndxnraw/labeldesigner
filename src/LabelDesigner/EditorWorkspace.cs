@@ -14,7 +14,10 @@ namespace EanEtikety {
    elementList.SelectedIndexChanged+=delegate{if(!studioSync)SelectFromLayerList();};
    elementList.DoubleClick+=delegate{EditSelection();};
    problemView=new IssueView{Dock=DockStyle.Fill};problemView.SelectedIssueChanged+=SelectEditorIssue;
-   problemView.RepairRequested+=issue=>{if(issue.Element!=-2){SelectEditorIssue(issue);FocusInspector();}};
+   problemView.RepairRequested+=issue=>{
+    if(issue.Element!=-2){SelectEditorIssue(issue);FocusInspector();}
+    else if(issue.InputId!=null&&activeScenarioId==null)EditTemplateInputs(issue.InputId);
+   };
    problems.Controls.Add(problemView);
    StackAdd(stack,workspaceTabs);
    workspaceTabs.Margin=Padding.Empty;

@@ -117,7 +117,7 @@ namespace EanEtikety {
    if(preset==null||string.IsNullOrWhiteSpace(preset.Name)||preset.Name.Length>80||preset.Name!=preset.Name.Trim()||
       preset.SheetName!=null&&preset.SheetName.Length>100||preset.CodePage!=65001&&preset.CodePage!=1250||
       preset.Separator!=';'&&preset.Separator!=','&&preset.Separator!='\t'||preset.Bindings==null||
-      preset.Bindings.Count>74)throw InvalidPreset();
+      preset.Bindings.Count>74+TemplateInput.MaximumCount)throw InvalidPreset();
    var targets=new HashSet<string>(StringComparer.Ordinal);
    foreach(var binding in preset.Bindings) {
     if(binding==null||!ValidTarget(binding.Target)||!targets.Add(binding.Target)||
@@ -130,7 +130,8 @@ namespace EanEtikety {
   }
 
   internal static bool ValidTarget(string target) {
-   if(target=="code"||target=="quantity"||target=="unique"||target==LabelLanguages.BatchTarget)return true;
+   if(target=="code"||target=="quantity"||target=="unique"||target==LabelLanguages.BatchTarget||
+      TemplateInput.TryTarget(target,out _))return true;
    if(string.IsNullOrEmpty(target))return false;
    int index;
    if(target.StartsWith("text:",StringComparison.Ordinal))

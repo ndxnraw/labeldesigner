@@ -61,6 +61,7 @@ namespace EanEtikety {
    destination.VerticalStacks=draft.VerticalStacks;
    destination.Languages=draft.Languages;
    destination.Variables=draft.Variables;
+   destination.Inputs=draft.Inputs;
    return added;
   }
 
@@ -72,8 +73,8 @@ namespace EanEtikety {
    var indices=new HashSet<int>(Elements.Indices(Artwork));
    if(indices.Count==0)throw new InvalidDataException(Loc.T("Neplatný blok etikety."));
    foreach(var meta in Artwork.Metadata){
-    CheckDependency(meta.Visibility?.Field??-2,meta.Visibility?.Variable,meta.Visibility!=null,indices);
-    CheckDependency(meta.GroupVisibility?.Field??-2,meta.GroupVisibility?.Variable,meta.GroupVisibility!=null,indices);
+    CheckDependency(meta.Visibility?.Field??-2,meta.Visibility?.Variable,meta.Visibility is {InputId:null},indices);
+    CheckDependency(meta.GroupVisibility?.Field??-2,meta.GroupVisibility?.Variable,meta.GroupVisibility is {InputId:null},indices);
    }
    foreach(var symbol in Artwork.Symbols)
     if(symbol.ImageMapping!=null)CheckDependency(symbol.ImageMapping.Field,symbol.ImageMapping.Variable,true,indices);
@@ -108,6 +109,7 @@ namespace EanEtikety {
    }
    VisibilityRule Remap(VisibilityRule rule){
     if(rule==null)return null;
+    if(rule.InputId!=null)return rule.Copy();
     CheckDependency(rule.Field,rule.Variable,true,map.Keys);
     var copy=rule.Copy();
     if(string.IsNullOrEmpty(copy.Variable))copy.Field=map[copy.Field];
@@ -140,6 +142,7 @@ namespace EanEtikety {
     }
    }
    VerticalStack.AppendCopies(source.VerticalStacks,target,map,groups,x,y);
+   TemplateInput.MergeReferenced(source.Inputs,target);
    return indices.ConvertAll(index=>map[index]);
   }
 

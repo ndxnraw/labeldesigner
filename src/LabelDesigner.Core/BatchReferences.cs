@@ -158,7 +158,8 @@ namespace EanEtikety {
   internal static void Validate(BatchReference reference) {
    if (reference == null || reference.Version != 1 || string.IsNullOrWhiteSpace(reference.SourceName) || reference.SourceName.Length > 260 ||
        reference.SheetName != null && reference.SheetName.Length > 100 || reference.SavedUtc.Kind != DateTimeKind.Utc ||
-       reference.RowCount < 1 || reference.RowCount > MaxRows || reference.Fields == null || reference.Fields.Count > 72 ||
+       reference.RowCount < 1 || reference.RowCount > MaxRows || reference.Fields == null ||
+       reference.Fields.Count > 72+TemplateInput.MaximumCount ||
        reference.PackedRows == null || reference.PackedRows.Length == 0 || reference.PackedRows.Length > MaxPackedBytes ||
        reference.Identifier == null || reference.Identifier.Target != "unique") throw InvalidReference();
    ValidateBinding(reference.Identifier, reference.Header);

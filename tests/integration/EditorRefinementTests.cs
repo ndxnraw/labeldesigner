@@ -1,5 +1,162 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void NamedTemplateInputs(string dir){
+  var label=LabelSettings.Default();
+  label.HideBarcode=true;
+  label.Texts[0].AutoWidth=false;
+  var amount=new TemplateInput{Name="Amount",Kind=TemplateInputKind.Number,DefaultValue="2,5",Required=true};
+  var show=new TemplateInput{Name="Show result",DefaultValue="yes"};
+  label.Inputs.AddRange(new[]{amount,show});
+  var meta=Elements.Meta(label,0);
+  meta.Calculation=new(){Operation=CalculationOperation.Multiply,Left=new(){InputId=amount.Id},Right=new(){Literal="2"}};
+  meta.Visibility=new(){InputId=show.Id,Mode=VisibilityMode.EqualsValue,Value="yes"};
+  var date=DateTime.Today;
+  var draft=QuickPrint.PrepareEditor(label,date);
+  Check(draft.CanPrint&&draft.Label.Texts[0].Text=="5"&&draft.Label.Inputs.Count==0,"named defaults feed formulas and are cleared from prepared output");
+  var values=new System.Collections.Generic.Dictionary<string,TemplateInputValue>{{amount.Id,new("3.25")}};
+  var quick=QuickPrint.Prepare(label,null,date,null,values);
+  Check(quick.Label.Texts[0].Text=="6.5","quick fill overrides a named numeric input");
+  values[amount.Id]=new("");
+  Check(QuickPrint.Prepare(label,null,date,null,values).Issues.Exists(i=>i.Blocking&&i.InputId==amount.Id),"an empty override does not reuse a required default");
+  var scenario=new LabelScenario{Name="Hide",Values=new(){new(){InputId=show.Id,Element=-2,Value="no"}}};
+  Check(QuickPrint.PrepareScenario(label,scenario,date).Hidden.Contains(0),"a scenario can use a named visibility input");
+  var rows=BatchProcessing.Prepare(label,BatchData.CsvText("Amount\r\n3,5\r\ninvalid",';'),true,
+   new(){new(){Target=TemplateInput.Target(amount.Id),Column=0}},-1,0,date);
+  Check(rows[0].Label.Texts[0].Text=="7"&&rows[1].Label==null&&rows[1].Issues.Exists(i=>i.Row==3&&i.Column==0&&i.Blocking),
+   "invalid named CSV input reports the original row and column");
+  Check(new PreparedLabelJob(label,date).Plan.Placements[0].Label.Texts[0].Text=="5"&&
+   quick.CreatePlan(1).Placements[0].Label.Texts[0].Text=="6.5"&&
+   OutputPlan.Create(new(){rows[0]},label,date).Placements[0].Label.Texts[0].Text=="7",
+   "single, quick and batch print plans freeze the correct input values");
+  var blank=ProjectXml.Clone(label);
+  blank.Inputs[0].DefaultValue="";blank.Layout.Enabled=true;
+  blank.Layout.Columns=2;blank.Layout.Rows=2;
+  OutputPlan.ValidateLayout(blank);
+  Check(!QuickPrint.PrepareEditor(blank,date).CanPrint,"layout can be configured while a required input awaits data");
+  string file=Path.Combine(dir,"named-inputs.ean.xml");Engine.Save(file,label);
+  Check(Engine.Load(file).Inputs[0].Id==amount.Id,"named input identity survives saving");
+  var table=BatchData.CsvText("Amount\r\n3,5",';');
+  label.Batch.Bindings.Add(new ColumnBinding{Target=TemplateInput.Target(amount.Id),Column=0});
+  var preset=BatchPresets.Capture("Named",label.Batch,table,false);
+  label.Batch.Presets.Add(preset);
+  amount.Name="Renamed amount";
+  Check(BatchPresets.Resolve(preset,table,1).Columns[TemplateInput.Target(amount.Id)]==0&&
+   QuickPrint.PrepareEditor(label,date).Label.Texts[0].Text=="5","renaming preserves formula and batch bindings");
+  var copied=LabelBlock.Capture(label,new[]{0},"Named block");
+  var destination=LabelSettings.Default();
+  int inserted=copied.Insert(destination)[0];
+  Check(destination.Inputs.Count==2&&QuickPrint.PrepareEditor(destination,date).Label.Texts[inserted].Text=="5",
+   "a reusable block carries the input definitions it uses");
+
+  var dateLabel=ProjectXml.Clone(label);
+  dateLabel.Inputs.Clear();dateLabel.Batch=new BatchSetup();
+  var start=new TemplateInput{Name="Start",Kind=TemplateInputKind.Date,Required=true,DefaultValue="2028-02-28"};
+  var offset=new TemplateInput{Name="Offset",Kind=TemplateInputKind.Number,DefaultValue="1"};
+  var optional=new TemplateInput{Name="Optional note"};
+  dateLabel.Inputs.AddRange(new[]{start,offset,optional});
+  var dateMeta=Elements.Meta(dateLabel,0);dateMeta.Visibility=null;
+  dateMeta.Calculation=new(){Operation=CalculationOperation.AddDays,Left=new(){InputId=start.Id},Right=new(){InputId=offset.Id}};
+  string xlsx=Path.Combine(dir,"named-inputs.xlsx");
+  using(var zip=System.IO.Compression.ZipFile.Open(xlsx,System.IO.Compression.ZipArchiveMode.Create)){
+   void Entry(string name,string body){using var writer=new StreamWriter(zip.CreateEntry(name).Open());writer.Write(body);}
+   Entry("xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Input' r:id='r1'/></sheets></workbook>");
+   Entry("xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>");
+   Entry("xl/styles.xml","<styleSheet><cellXfs><xf numFmtId='0'/><xf numFmtId='14'/></cellXfs></styleSheet>");
+   int serial=(int)new DateTime(2028,2,28).ToOADate();
+   Entry("xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Start</t></is></c>"+
+    "<c r='B1' t='inlineStr'><is><t>Offset</t></is></c><c r='C1' t='inlineStr'><is><t>Note</t></is></c></row>"+
+    "<row r='2'><c r='A2' s='1'><v>"+serial+"</v></c><c r='B2'><v>2</v></c></row>"+
+    "<row r='3'><c r='A3' s='1'><v>"+serial+"</v></c><c r='B3'><v>2</v></c><c r='C3' t='inlineStr'><is><t>!ERROR: literal text</t></is></c></row>"+
+    "<row r='4'><c r='A4' s='1'><v>"+serial+"</v></c><c r='B4'><v>2</v></c><c r='C4' t='e'><v>#VALUE!</v></c></row>"+
+    "<row r='5'><c r='A5'><v>"+serial+"</v></c><c r='B5'><v>1</v></c></row></sheetData></worksheet>");
+  }
+  var sheet=BatchData.Xlsx(xlsx)[0];
+  var dates=BatchProcessing.Prepare(dateLabel,sheet,true,new(){
+   new(){Target=TemplateInput.Target(start.Id),Column=0},new(){Target=TemplateInput.Target(offset.Id),Column=1},
+   new(){Target=TemplateInput.Target(optional.Id),Column=2}
+  },-1,0,date);
+  Check(dates[0].Label.Texts[0].Text=="2028-03-01"&&dates[^1].Label==null&&
+   dates[^1].Issues.Exists(i=>i.Row==5&&i.Column==0&&i.Blocking),
+   "XLSX typed dates and numbers calculate correctly and invalid cells retain the physical row");
+  Check(dates[1].Label!=null&&dates[2].Label==null&&dates[2].Issues.Exists(i=>i.Row==4&&i.Column==2&&i.Blocking),
+   "worksheet text beginning with the error prefix stays valid while an actual cell error blocks the row");
+  var sourced=new LabelScenario{Name="Worksheet row",Values=new(){LabelScenario.FromCell(sheet,1,0,-2,start.Id),
+   LabelScenario.FromCell(sheet,1,1,-2,offset.Id)}};
+  Check(QuickPrint.PrepareScenario(dateLabel,sourced,date).Label.Texts[0].Text=="2028-03-01",
+   "scenario retains typed named values imported from a sheet");
+  Check(LabelScenario.FromCell(sheet,1,2,-2,optional.Id).SourceError==null,
+   "a sparse trailing XLSX cell is an empty named value");
+
+  using var owner=new MainForm(Path.Combine(dir,"named-inputs-ui.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",label);Call(owner,"DocumentOpened");
+  Exception failure=null;bool opened=false;
+  using(var timer=new Timer{Interval=60}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner||dialog.Controls.Find("templateInputName",true).Length==0)continue;
+     timer.Stop();opened=true;
+     try{
+      var name=(TextBox)dialog.Controls.Find("templateInputName",true)[0];
+      name.Text=show.Name;
+      Check(!((Button)dialog.AcceptButton).Enabled,"duplicate names cannot be applied");
+      name.Text="Number of units";
+      Check(((Button)dialog.AcceptButton).Enabled,"unique typed input can be saved");
+      dialog.AcceptButton.PerformClick();
+     }catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();
+   var edited=(TemplateInput)Call(owner,"EditTemplateInput",owner,amount,label.Inputs);
+   if(failure!=null)throw failure;
+   Check(opened&&edited.Id==amount.Id&&edited.Name=="Number of units","editing preserves the input identity");
+  }
+  using(var timer=new Timer{Interval=80}){
+   int phase=0;var deadline=DateTime.UtcNow.AddSeconds(20);
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     var editor=dialog.Controls.Find("quickPrintInput"+amount.Id,true);
+     if(dialog==owner||editor.Length==0)continue;
+     try{
+      var proceed=(Button)dialog.Controls.Find("quickPrintContinue",true)[0];
+      if(phase==0&&proceed.Enabled){
+       Check(editor[0].Text=="2,5","quick fill shows the named default");
+       editor[0].Text="";phase=1;
+      }else if(phase==1&&dialog.Controls.Find("quickPrintInputError"+amount.Id,true)[0].Visible){
+       Check(!proceed.Enabled,"the named validation message disables quick printing");phase=2;
+       timer.Stop();dialog.DialogResult=DialogResult.Cancel;
+      }else if(DateTime.UtcNow>deadline)throw new Exception("named input quick-print preview did not update");
+     }catch(Exception ex){failure=ex;timer.Stop();dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();Call(owner,"ShowQuickPrint",owner,label);
+   if(failure!=null)throw failure;
+   Check(phase==2,"quick fill updates validation for named inputs");
+  }
+  using(var timer=new Timer{Interval=60}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner||dialog.Controls.Find("scenarioMapping",true).Length==0)continue;
+     timer.Stop();
+     try{
+      var grid=(DataGridView)dialog.Controls.Find("scenarioMapping",true)[0];
+      foreach(DataGridViewRow row in grid.Rows)if(Equals(row.Tag,start.Id))
+       row.Cells[1].Value=((DataGridViewComboBoxColumn)grid.Columns[1]).Items[1];
+      dialog.AcceptButton.PerformClick();
+     }catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();var sample=(LabelScenario)Call(owner,"PickScenarioRow",owner,dateLabel,
+    new System.Collections.Generic.List<DataTableSource>{sheet},false);
+   if(failure!=null)throw failure;
+   Check(sample?.Values[0].InputId==start.Id&&sample.Values[0].InputKind==TextInputKind.WorksheetDate,
+    "the scenario mapping dialog can select and preserve a typed named cell");
+  }
+  owner.Close();
+ }
  static void CalculatedFields(string dir){
   var label=LabelSettings.Default();
   label.HideBarcode=true;label.Height=80;
@@ -1338,5 +1495,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);CalculatedFields(args[0]);VerticalStacks(args[0]);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);NamedTemplateInputs(args[0]);CalculatedFields(args[0]);VerticalStacks(args[0]);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

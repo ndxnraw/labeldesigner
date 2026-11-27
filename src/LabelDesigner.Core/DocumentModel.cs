@@ -23,6 +23,8 @@ public class LabelSettings {
  public bool ShouldSerializeVerticalStacks()=>VerticalStacks?.Count>0;
  internal List<LabelIssue> StackIssues;
  public List<LabelScenario> Scenarios=new();
+ public List<TemplateInput> Inputs=new();
+ public bool ShouldSerializeInputs()=>Inputs?.Count>0;
  public bool ShouldSerializeScenarios()=>Scenarios?.Count>0;
  public List<int> QuickPrintFields=new List<int>();
  public bool ShouldSerializeQuickPrintFields(){return QuickPrintFields!=null&&QuickPrintFields.Count>0;}

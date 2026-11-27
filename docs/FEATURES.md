@@ -16,6 +16,12 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Pomenované vstupy šablóny** v ponuke Projekt majú typ text, číslo alebo
+  dátum, predvolenú hodnotu a voliteľnú povinnosť. Bez prvku na plátne môžu
+  riadiť výpočty alebo zobrazenie prvkov. Pri rýchlom vyplnení, mapovaní
+  CSV/XLSX a v scenároch sa zobrazia pod rovnakým názvom. Zadaná prázdna
+  hodnota sa kontroluje ako prázdna. Nepriradený vstup použije predvolenú
+  hodnotu. Premenovanie zachová všetky prepojenia.
 - **Vypočítané polia** používajú čísla alebo dátumy z textových polí a
   konštánt. Vo vlastnostiach textu vyberiete operáciu aj oba vstupy a uvidíte
   výsledok. Vstupné polia sa zobrazia v rýchlom vyplnení alebo ich namapujete

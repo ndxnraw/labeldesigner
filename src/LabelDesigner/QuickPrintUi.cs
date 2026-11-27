@@ -106,6 +106,16 @@ namespace EanEtikety {
      StackField(fields,Loc.T("Jazyk etikety"),labelLanguage);
     }
     var errors=new Dictionary<int,Label>();
+    var namedEditors=new Dictionary<string,TextBox>(StringComparer.Ordinal);
+    var namedErrors=new Dictionary<string,Label>(StringComparer.Ordinal);
+    foreach(var input in template.Inputs){
+     var editor=Input(fields,TemplateInputCaption(input),input.DefaultValue);
+     editor.Name="quickPrintInput"+input.Id;editor.MaxLength=4000;
+     if(input.Kind==TemplateInputKind.Text){editor.Multiline=true;editor.AcceptsReturn=true;editor.Height=54;}
+     var hint=new Label{AutoSize=true,MaximumSize=new Size(330,0),Visible=false,Name="quickPrintInputError"+input.Id};
+     StackAdd(fields,hint);
+     namedEditors.Add(input.Id,editor);namedErrors.Add(input.Id,hint);
+    }
     foreach(int index in QuickPrint.InputFields(template)){
      bool aiLines=QuickPrint.UsesAiLines(template,index);
      bool multiline=aiLines||index>=0;
@@ -117,7 +127,7 @@ namespace EanEtikety {
      StackAdd(fields,hint);
      editors.Add(index,editor);errors.Add(index,hint);
     }
-    if(editors.Count==0&&labelLanguage==null)StackAdd(fields,new Label{AutoSize=true,MaximumSize=new Size(315,0),Text=Loc.T("Šablóna nemá vybrané upraviteľné polia.")});
+    if(editors.Count==0&&namedEditors.Count==0&&labelLanguage==null)StackAdd(fields,new Label{AutoSize=true,MaximumSize=new Size(315,0),Text=Loc.T("Šablóna nemá vybrané upraviteľné polia.")});
     var quantity=Input(fields,"Počet etikiet",(template.Layout.Enabled?template.Layout.Count:template.Copies).ToString(CultureInfo.InvariantCulture));
     quantity.Name="quickPrintQuantity";
     var quantityError=new Label{AutoSize=true,Name="quickPrintQuantityError",Visible=false};
@@ -175,15 +185,21 @@ namespace EanEtikety {
     Action<QuickPrintPreview> apply=preview=>{
      clearImage();
      foreach(var error in errors.Values){error.Text="";error.Visible=false;}
+     foreach(var error in namedErrors.Values){error.Text="";error.Visible=false;}
       draft=preview.Draft;
       if(draft==null){status.Text=preview.Failure;return;}
       foreach(var issue in draft.Issues){
        Label error;
+       if(issue.InputId!=null&&namedErrors.TryGetValue(issue.InputId,out error)){
+        if(error.Text.Length==0){error.Text=issue.Message;error.Visible=true;}
+        continue;
+       }
        if(!errors.TryGetValue(Elements.SourceIndex(draft.Label,issue.Element),out error)||(!issue.Blocking&&error.Text.Length>0))continue;
        error.Text=issue.Message;
        error.Visible=true;
       }
-      var general=draft.Issues.Find(issue=>issue.Blocking&&!errors.ContainsKey(Elements.SourceIndex(draft.Label,issue.Element)));
+      var general=draft.Issues.Find(issue=>issue.Blocking&&
+       (issue.InputId==null||!namedErrors.ContainsKey(issue.InputId))&&!errors.ContainsKey(Elements.SourceIndex(draft.Label,issue.Element)));
       status.Text=general!=null?general.Message:!draft.CanPrint?Loc.T("Opravte údaje pred tlačou."):
        draft.Issues.Count>0?Loc.T("Upozornenia skontrolujte v tlačovom náhľade."):Loc.T("Náhľad etikety");
       picture.Image=preview.Image;
@@ -198,13 +214,14 @@ namespace EanEtikety {
      updateContinue();
      status.Text=Loc.T("Pripravujem náhľad…");
      var values=editors.ToDictionary(item=>item.Key,item=>item.Value.Text);
+     var named=namedEditors.ToDictionary(item=>item.Key,item=>new TemplateInputValue(item.Value.Text),StringComparer.Ordinal);
      string selectedLanguage=labelLanguage==null?null:template.Languages.Codes[labelLanguage.SelectedIndex];
      int ticket;
      lock(deliveryGate){ticket=revision;}
      PrintWorker.Queue(dialog,delegate{
       var result=new QuickPrintPreview();
       try{
-       result.Draft=QuickPrint.Prepare(template,values,instant,selectedLanguage);
+       result.Draft=QuickPrint.Prepare(template,values,instant,selectedLanguage,named);
        result.Image=QuickPrintImage(result.Draft);
       }catch(Exception ex){result.Failure=ex.Message;}
       lock(deliveryGate){
@@ -235,6 +252,7 @@ namespace EanEtikety {
      changes.Stop();changes.Start();
     };
     foreach(var editor in editors.Values)editor.TextChanged+=schedulePreview;
+    foreach(var editor in namedEditors.Values)editor.TextChanged+=schedulePreview;
     if(labelLanguage!=null)labelLanguage.SelectedIndexChanged+=schedulePreview;
     ApplyColors(dialog);
     dialog.Shown+=delegate{refresh();};

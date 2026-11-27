@@ -20,17 +20,21 @@ namespace EanEtikety {
   Button VisibilityAction()=>Btn(Loc.T(VisibilityTitle),EditVisibility,HeaderIcon.Visibility);
 
   sealed class ArtworkDataSource {
-   public readonly string Name,Variable;
+   public readonly string Name,Variable,InputId;
    public readonly int Field;
-   public ArtworkDataSource(string name,int field=-2,string variable=null){Name=name;Field=field;Variable=variable;}
+   public ArtworkDataSource(string name,int field=-2,string variable=null,string inputId=null){
+    Name=name;Field=field;Variable=variable;InputId=inputId;
+   }
    public override string ToString()=>Name;
   }
 
-  static void AddArtworkSources(ComboBox choices,LabelSettings template){
+  static void AddArtworkSources(ComboBox choices,LabelSettings template,bool includeInputs=false){
    foreach(int field in QuickPrint.Available(template))
     choices.Items.Add(new ArtworkDataSource(QuickPrint.Name(template,field),field));
    foreach(var variable in template.Variables)
     choices.Items.Add(new ArtworkDataSource(Loc.T("Premenná")+" · "+variable.Name,variable:variable.Name));
+   if(includeInputs)foreach(var input in template.Inputs)
+    choices.Items.Add(new ArtworkDataSource(TemplateInputCaption(input),inputId:input.Id));
   }
 
   void EditVisibility(){
@@ -54,7 +58,7 @@ namespace EanEtikety {
     mode.Name="visibilityMode";
     var source=new ModernComboBox{DropDownStyle=ComboBoxStyle.DropDownList,Name="visibilitySource"};
     StackField(rows,Loc.T("Zdroj údajov"),source);
-    AddArtworkSources(source,template);
+    AddArtworkSources(source,template,true);
     var expected=Input(rows,"Porovnávaná hodnota","");
     expected.Name="visibilityExpected";expected.MaxLength=4000;
     var footer=new UiMessageBox.ActionRow();
@@ -77,7 +81,7 @@ namespace EanEtikety {
      source.SelectedIndex=-1;
      for(int i=0;rule!=null&&i<source.Items.Count;i++){
       var item=(ArtworkDataSource)source.Items[i];
-      if(item.Field==rule.Field&&item.Variable==rule.Variable){source.SelectedIndex=i;break;}
+      if(item.Field==rule.Field&&item.Variable==rule.Variable&&item.InputId==rule.InputId){source.SelectedIndex=i;break;}
      }
      expected.Text=rule?.Value??"";
      RefreshActions();
@@ -90,7 +94,7 @@ namespace EanEtikety {
     if(dialog.ShowDialog(this)!=DialogResult.OK)return;
     var data=(ArtworkDataSource)source.SelectedItem;
     var result=mode.SelectedIndex==0?null:new VisibilityRule{
-     Field=data.Field,Variable=data.Variable,Mode=mode.SelectedIndex==1?VisibilityMode.Filled:VisibilityMode.EqualsValue,
+     Field=data.Field,Variable=data.Variable,InputId=data.InputId,Mode=mode.SelectedIndex==1?VisibilityMode.Filled:VisibilityMode.EqualsValue,
      Value=mode.SelectedIndex==2?expected.Text:null
     };
     var selection=new List<int>(preview.Selection);

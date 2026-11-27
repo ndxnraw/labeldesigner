@@ -6,6 +6,7 @@ using System.Xml;
 namespace EanEtikety {
  public sealed class LabelScenarioValue {
   public int Element;
+  public string InputId;
   public string Value="";
   public TextInputKind InputKind;
   public string SourceError;
@@ -24,12 +25,17 @@ namespace EanEtikety {
    Id=Id,Name=Name,Language=Language,Values=Values.ConvertAll(value=>value.Copy())
   };
 
-  public static LabelScenarioValue FromCell(DataTableSource table,int row,int column,int element){
+  public static LabelScenarioValue FromCell(DataTableSource table,int row,int column,int element,string inputId=null){
    var cells=table.Rows[row];
-   var value=new LabelScenarioValue{Element=element,InputKind=table.InputKind(row,column)};
-   if(column>=cells.Length)value.SourceError=Loc.T("V riadku chýba namapovaný stĺpec.");
-   else if(!table.HasCsvLineNumbers&&cells[column].StartsWith("!ERROR:",StringComparison.Ordinal))value.SourceError=cells[column];
-   else value.Value=cells[column];
+   var value=new LabelScenarioValue{Element=element,InputId=inputId,InputKind=table.InputKind(row,column)};
+   if(column>=cells.Length){
+    if(inputId==null||table.HasCsvLineNumbers)value.SourceError=Loc.T("V riadku chýba namapovaný stĺpec.");
+   }
+   else{
+    value.SourceError=inputId==null&&!table.HasCsvLineNumbers&&cells[column].StartsWith("!ERROR:",StringComparison.Ordinal)?
+     cells[column]:table.ErrorsFor(row)?.GetValueOrDefault(column);
+    if(value.SourceError==null)value.Value=cells[column];
+   }
    return value;
   }
 
@@ -47,8 +53,10 @@ namespace EanEtikety {
     XmlConvert.VerifyXmlChars(scenario.Name);
     if(scenario.Language!=null)XmlConvert.VerifyXmlChars(scenario.Language);
     var elements=new HashSet<int>();
+    var inputs=new HashSet<string>(StringComparer.Ordinal);
     foreach(var value in scenario.Values){
-     if(value==null||value.Element==-2||!elements.Add(value.Element)||value.Value==null||
+     if(value==null||(value.InputId==null?(value.Element==-2||!elements.Add(value.Element)):
+        (!TemplateInput.IsId(value.InputId)||!inputs.Add(value.InputId)))||value.Value==null||
         value.Value.Length>4000||value.SourceError?.Length>4000||!Enum.IsDefined(value.InputKind))
       throw new InvalidDataException(Loc.T("Neplatná hodnota testovacieho scenára."));
      XmlConvert.VerifyXmlChars(value.Value);

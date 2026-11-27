@@ -88,14 +88,14 @@ public static class Elements {
   return false;
  }
  static void RemapVisibility(VisibilityRule rule,Dictionary<int,int> mapping){
-  if(rule!=null&&string.IsNullOrEmpty(rule.Variable))rule.Field=mapping.TryGetValue(rule.Field,out int mapped)?mapped:-2;
+  if(rule!=null&&rule.InputId==null&&string.IsNullOrEmpty(rule.Variable))rule.Field=mapping.TryGetValue(rule.Field,out int mapped)?mapped:-2;
  }
  public static bool Locked(LabelSettings s,int index){var m=s.Metadata.Find(x=>x.Index==index);return m!=null&&m.Locked;}
  public static void Set(LabelSettings s,ElementEdit e){if(e.Index==-1){s.BarX=e.X;s.BarY=e.Y;s.BarWidth=e.Width;s.BarRotation=e.Rotation;s.DigitSize=e.Font;s.BarHeight=Math.Max(1,e.Height-Engine.ExtraHeight(s,e.Width,e.Font));}else if(e.Index>=0){var t=s.Texts[e.Index];if(Math.Abs(t.Width-e.Width)>.001||Math.Abs(t.Height-e.Height)>.001)t.AutoWidth=false;t.X=e.X;t.Y=e.Y;t.Width=e.Width;t.Height=e.Height;t.Rotation=e.Rotation;t.Size=e.Font;}else{var t=s.Symbols[-3-e.Index];t.X=e.X;t.Y=e.Y;t.Width=e.Width;t.Height=e.Height;t.Rotation=e.Rotation;}}
  static List<ColumnBinding> RemapBindings(List<ColumnBinding> bindings,Dictionary<int,int> mapping){
   var result=new List<ColumnBinding>();
   foreach(var binding in bindings){
-   if(binding.Target=="quantity"||binding.Target=="unique"||binding.Target==LabelLanguages.BatchTarget){result.Add(binding);continue;}
+   if(binding.Target=="quantity"||binding.Target=="unique"||binding.Target==LabelLanguages.BatchTarget||TemplateInput.TryTarget(binding.Target,out _)){result.Add(binding);continue;}
    int key;
    if(binding.Target=="code")key=-1;
    else if(binding.Target.StartsWith("text:",StringComparison.Ordinal))key=int.Parse(binding.Target.Substring(5));
@@ -108,6 +108,6 @@ public static class Elements {
   }
   return result;
  }
- public static void Remove(LabelSettings s,List<int> selection){var old=new List<ElementMeta>();foreach(var m in s.Metadata)old.Add(m);var indices=Indices(s);var mapping=new Dictionary<int,int>();int text=0,symbol=0;foreach(int i in indices){if(selection.Contains(i)){if(i==-1)s.HideBarcode=true;continue;}mapping[i]=i>=0?text++:i<=-3?-3-symbol++:-1;}if(s.Batch!=null&&s.Batch.Bindings!=null){s.Batch.Bindings=RemapBindings(s.Batch.Bindings,mapping);foreach(var preset in s.Batch.Presets)preset.Bindings=RemapBindings(preset.Bindings,mapping);}s.QuickPrintFields=(s.QuickPrintFields??new List<int>()).FindAll(mapping.ContainsKey).ConvertAll(index=>mapping[index]);foreach(var scenario in s.Scenarios){scenario.Values.RemoveAll(value=>!mapping.ContainsKey(value.Element));foreach(var value in scenario.Values)value.Element=mapping[value.Element];}VerticalStack.Remap(s,mapping);s.Metadata.Clear();foreach(var m in old)if(mapping.ContainsKey(m.Index)){m.Index=mapping[m.Index];m.Calculation=m.Calculation?.Remap(mapping);RemapVisibility(m.Visibility,mapping);RemapVisibility(m.GroupVisibility,mapping);s.Metadata.Add(m);}for(int i=s.Texts.Count-1;i>=0;i--)if(selection.Contains(i))s.Texts.RemoveAt(i);for(int i=s.Symbols.Count-1;i>=0;i--){if(selection.Contains(-3-i)){s.Symbols.RemoveAt(i);continue;}var image=s.Symbols[i].ImageMapping;if(image!=null&&string.IsNullOrEmpty(image.Variable))image.Field=mapping.TryGetValue(image.Field,out int next)?next:-2;}}
+ public static void Remove(LabelSettings s,List<int> selection){var old=new List<ElementMeta>();foreach(var m in s.Metadata)old.Add(m);var indices=Indices(s);var mapping=new Dictionary<int,int>();int text=0,symbol=0;foreach(int i in indices){if(selection.Contains(i)){if(i==-1)s.HideBarcode=true;continue;}mapping[i]=i>=0?text++:i<=-3?-3-symbol++:-1;}if(s.Batch!=null&&s.Batch.Bindings!=null){s.Batch.Bindings=RemapBindings(s.Batch.Bindings,mapping);foreach(var preset in s.Batch.Presets)preset.Bindings=RemapBindings(preset.Bindings,mapping);}s.QuickPrintFields=(s.QuickPrintFields??new List<int>()).FindAll(mapping.ContainsKey).ConvertAll(index=>mapping[index]);foreach(var scenario in s.Scenarios){scenario.Values.RemoveAll(value=>value.InputId==null&&!mapping.ContainsKey(value.Element));foreach(var value in scenario.Values)if(value.InputId==null)value.Element=mapping[value.Element];}VerticalStack.Remap(s,mapping);s.Metadata.Clear();foreach(var m in old)if(mapping.ContainsKey(m.Index)){m.Index=mapping[m.Index];m.Calculation=m.Calculation?.Remap(mapping);RemapVisibility(m.Visibility,mapping);RemapVisibility(m.GroupVisibility,mapping);s.Metadata.Add(m);}for(int i=s.Texts.Count-1;i>=0;i--)if(selection.Contains(i))s.Texts.RemoveAt(i);for(int i=s.Symbols.Count-1;i>=0;i--){if(selection.Contains(-3-i)){s.Symbols.RemoveAt(i);continue;}var image=s.Symbols[i].ImageMapping;if(image!=null&&string.IsNullOrEmpty(image.Variable))image.Field=mapping.TryGetValue(image.Field,out int next)?next:-2;}}
 }
 }

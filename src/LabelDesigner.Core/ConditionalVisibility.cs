@@ -7,6 +7,7 @@ namespace EanEtikety {
  public sealed class VisibilityRule {
   public int Field=-2;
   public string Variable;
+  public string InputId;
   public VisibilityMode Mode;
   public string Value;
   public VisibilityRule Copy()=> (VisibilityRule)MemberwiseClone();
@@ -17,7 +18,8 @@ namespace EanEtikety {
 
   // Apply only to an owned copy after data substitution. Frozen output can then
   // use the ordinary validators and renderers without evaluating rules again.
-  internal static HashSet<int> FindHidden(LabelSettings label,Dictionary<string,string> values,Func<int,bool> invalidSource,Action<string> report) {
+  internal static HashSet<int> FindHidden(LabelSettings label,Dictionary<string,string> values,
+      IReadOnlyDictionary<string,ResolvedInput> inputs,Func<int,bool> invalidSource,Action<string> report) {
    var hidden=new HashSet<int>();
    if(!HasRules(label))return hidden;
    var indices=Elements.Indices(label);
@@ -27,7 +29,19 @@ namespace EanEtikety {
 
    bool Matches(VisibilityRule rule) {
     string value;
-    if(!string.IsNullOrEmpty(rule.Variable)){
+    if(rule.InputId!=null){
+     if(!inputs.TryGetValue(rule.InputId,out var input)){
+      report(Loc.T("Zdroj pravidla zobrazenia už nie je dostupný."));
+      return true;
+     }
+     if(!input.Valid)return true;
+     if(rule.Mode==VisibilityMode.Filled)return input.Value.Length>0&&!string.IsNullOrWhiteSpace(input.Value);
+     if(!input.Definition.TryNormalize(new(rule.Value),false,out string expected,out string error)){
+      report(input.Definition.NamedError(error));
+      return true;
+     }
+     return string.Equals(input.Value.Trim(),expected.Trim(),StringComparison.Ordinal);
+    }else if(!string.IsNullOrEmpty(rule.Variable)){
      if(!values.TryGetValue(rule.Variable,out value)){
       report(Loc.T("Zdroj pravidla zobrazenia už nie je dostupný."));
       return true;

@@ -20,9 +20,32 @@ public class OutputPlan {
  public const int MaxLabels=10000;
  public int RecordCount;public DateTime? PreparedAt;public string VariableValues;public double Width,Height;public readonly List<OutputPlacement> Placements=new List<OutputPlacement>();public int PageCount{get{return Placements.Count==0?0:Placements[Placements.Count-1].Page+1;}}
  public static OutputPlan Create(LabelSettings label){return Create(new List<BatchRecord>{new BatchRecord{Label=label,Count=label.Layout.Enabled?label.Layout.Count:label.Copies}},label);}
- public static OutputPlan Create(List<BatchRecord> records,LabelSettings format,DateTime? preparedAt=null){var instant=preparedAt??(records.Count>0?records[0].PreparedAt:null)??DateTime.Now;int requested=0;foreach(var item in records){WorkContext.Check();requested=(int)Math.Min((long)MaxLabels,requested+Math.Max(0,item.Count));}var plan=new OutputPlan{RecordCount=records.Count,PreparedAt=instant,Width=format.Layout.Enabled||format.UsePaper||format.Sheet?format.PageWidth:format.Width,Height=format.Layout.Enabled||format.UsePaper||format.Sheet?format.PageHeight:format.Height};bool sheet=format.Layout.Enabled;int cols=sheet?format.Layout.Columns:Engine.Columns(format),rows=sheet?format.Layout.Rows:Engine.Rows(format),slot=sheet?format.Layout.FirstSlot:0;double left=sheet?format.Layout.Left:format.UsePaper||format.Sheet?format.MarginX:0,top=sheet?format.Layout.Top:format.UsePaper||format.Sheet?format.MarginY:0,gapX=sheet?format.Layout.HorizontalGap:format.GapX,gapY=sheet?format.Layout.VerticalGap:format.GapY;
-  if(double.IsNaN(left+top+gapX+gapY+format.Layout.Right+format.Layout.Bottom)||double.IsInfinity(left+top+gapX+gapY+format.Layout.Right+format.Layout.Bottom)||left<0||top<0||gapX<0||gapY<0||format.Layout.Right<0||format.Layout.Bottom<0)throw new InvalidDataException(Loc.T("Neplatné rozloženie hárka"));if(cols<1||rows<1||cols>100||rows>100||slot<0||slot>=cols*rows)throw new InvalidDataException(Loc.T("Neplatné rozloženie hárka"));if(sheet&&(left+cols*format.Width+(cols-1)*gapX+format.Layout.Right>plan.Width+.001||top+rows*format.Height+(rows-1)*gapY+format.Layout.Bottom>plan.Height+.001))throw new InvalidDataException(Loc.T("Etikety presahujú papier"));
+ public static OutputPlan Create(List<BatchRecord> records,LabelSettings format,DateTime? preparedAt=null){var instant=preparedAt??(records.Count>0?records[0].PreparedAt:null)??DateTime.Now;int requested=0;foreach(var item in records){WorkContext.Check();requested=(int)Math.Min((long)MaxLabels,requested+Math.Max(0,item.Count));}var (width,height,cols,rows,slot,left,top,gapX,gapY)=ReadLayout(format);
+  var plan=new OutputPlan{RecordCount=records.Count,PreparedAt=instant,Width=width,Height=height};
   foreach(var record in records){WorkContext.Report("Pripravujem tlačovú úlohu…",plan.Placements.Count,requested);if(record.Error!=null)throw new InvalidDataException(Loc.T("Dávka obsahuje chyby")+": "+record.Row+" — "+record.Error);if(record.Count<1||record.Count>MaxLabels)throw new InvalidDataException(Loc.T("Neplatný počet etikiet"));if(record.PreparedAt.HasValue&&record.PreparedAt.Value!=instant)throw new InvalidDataException(Loc.T("Záznamy majú odlišný čas prípravy. Pripravte dávku znova."));var frozen=JobPreparation.Resolve(record.Label,instant);if(!string.IsNullOrEmpty(record.VariableValues)){if(string.IsNullOrEmpty(plan.VariableValues))plan.VariableValues=record.VariableValues;else if(plan.VariableValues!=record.VariableValues)plan.VariableValues=records[0].VariableValues+" → "+record.VariableValues;}if(frozen.HideBarcode&&frozen.Symbols.Count==0&&!frozen.Texts.Exists(t=>!string.IsNullOrWhiteSpace(t.Text)))throw new InvalidDataException(Loc.T("Dokument neobsahuje nič na tlač."));for(int i=0;i<record.Count;i++,slot++){WorkContext.Check();if(plan.Placements.Count>=MaxLabels)throw new InvalidDataException(Loc.T("Najviac 10000 etikiet"));int cell=slot%(cols*rows);plan.Placements.Add(new OutputPlacement{Page=slot/(cols*rows),Slot=cell+1,Record=record.Row,Label=frozen,Bounds=new RectangleF((float)(left+cell%cols*(format.Width+gapX)),(float)(top+cell/cols*(format.Height+gapY)),(float)format.Width,(float)format.Height)});}}if(plan.Placements.Count==0)throw new InvalidDataException(Loc.T("Dokument neobsahuje nič na tlač."));WorkContext.Report("Pripravujem tlačovú úlohu…",plan.Placements.Count,requested);return plan;
+ }
+ public static void ValidateLayout(LabelSettings settings){
+  _=ReadLayout(settings);
+  if(!settings.Layout.Enabled&&settings.UsePaper&&
+     (settings.MarginX+settings.MarginRight+settings.Width>settings.PageWidth+.001||
+      settings.MarginY+settings.MarginBottom+settings.Height>settings.PageHeight+.001))
+   throw new InvalidDataException(Loc.T("Na papier sa nezmestí ani jedna etiketa. Upravte rozmery alebo okraje."));
+ }
+ static (double Width,double Height,int Columns,int Rows,int Slot,double Left,double Top,double GapX,double GapY) ReadLayout(LabelSettings format){
+  var layout=format.Layout;
+  bool sheet=layout.Enabled,usePaper=sheet||format.UsePaper||format.Sheet;
+  double width=usePaper?format.PageWidth:format.Width,height=usePaper?format.PageHeight:format.Height;
+  int cols=sheet?layout.Columns:Engine.Columns(format),rows=sheet?layout.Rows:Engine.Rows(format),slot=sheet?layout.FirstSlot:0;
+  double left=sheet?layout.Left:usePaper?format.MarginX:0,top=sheet?layout.Top:usePaper?format.MarginY:0;
+  double gapX=sheet?layout.HorizontalGap:format.GapX,gapY=sheet?layout.VerticalGap:format.GapY;
+  if(!double.IsFinite(left+top+gapX+gapY+layout.Right+layout.Bottom)||
+     left<0||top<0||gapX<0||gapY<0||layout.Right<0||layout.Bottom<0||
+     cols<1||rows<1||cols>100||rows>100||slot<0||slot>=cols*rows)
+   throw new InvalidDataException(Loc.T("Neplatné rozloženie hárka"));
+  if(sheet&&(left+cols*format.Width+(cols-1)*gapX+layout.Right>width+.001||
+             top+rows*format.Height+(rows-1)*gapY+layout.Bottom>height+.001))
+   throw new InvalidDataException(Loc.T("Etikety presahujú papier"));
+  return (width,height,cols,rows,slot,left,top,gapX,gapY);
  }
  readonly object pageGate=new object();Dictionary<int,List<OutputPlacement>> pageIndex;int indexedCount=-1;
  public List<OutputPlacement> PlacementsForPage(int page){lock(pageGate){if(pageIndex==null||indexedCount!=Placements.Count){var index=new Dictionary<int,List<OutputPlacement>>();foreach(var placement in Placements){WorkContext.Check();List<OutputPlacement> items;if(!index.TryGetValue(placement.Page,out items)){items=new List<OutputPlacement>();index.Add(placement.Page,items);}items.Add(placement);}pageIndex=index;indexedCount=Placements.Count;}List<OutputPlacement> found;return pageIndex.TryGetValue(page,out found)?found:new List<OutputPlacement>();}}

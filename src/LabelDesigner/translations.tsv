@@ -1280,3 +1280,21 @@ Polia výpočtu tvoria cyklus.	The calculated fields have a circular reference.	
 Pole {0} nemá platnú vstupnú hodnotu.	Field {0} has no valid input value.	Pole {0} nemá platnou vstupní hodnotu.	A(z) {0}. mezőnek nincs érvényes bemeneti értéke.
 Chýba vstupná hodnota.	An input value is missing.	Chybí vstupní hodnota.	Hiányzik egy bemeneti érték.
 Do výberu pridajte aj zdrojové polia výpočtu.	Include the calculation source fields in the selection.	Do výběru přidejte i zdrojová pole výpočtu.	Vegye fel a számítás forrásmezőit is a kijelölésbe.
+Pomenované vstupy šablóny…	Named template inputs…	Pojmenované vstupy šablony…	Elnevezett sablonbemenetek…
+Vstupy používajú výpočty, pravidlá zobrazenia a formuláre šablóny.	Calculations, visibility rules and template forms use these inputs.	Vstupy používají výpočty, pravidla zobrazení a formuláře šablony.	A bemeneteket a számítások, megjelenítési szabályok és sablonűrlapok használják.
+Povinné	Required	Povinné	Kötelező
+Povinný vstup	Required input	Povinný vstup	Kötelező bemenet
+Vlastnosti vstupu šablóny	Template input properties	Vlastnosti vstupu šablony	Sablonbemenet tulajdonságai
+Názov vstupu	Input name	Název vstupu	Bemenet neve
+Typ vstupu	Input type	Typ vstupu	Bemenet típusa
+Predvolená hodnota	Default value	Výchozí hodnota	Alapértelmezett érték
+Čísla môžu používať desatinnú čiarku alebo bodku.	Numbers can use a decimal comma or point.	Čísla mohou používat desetinnou čárku nebo tečku.	A számokban tizedesvessző vagy tizedespont használható.
+Zadajte dátum vo formáte RRRR-MM-DD.	Enter a date in YYYY-MM-DD format.	Zadejte datum ve formátu RRRR-MM-DD.	ÉÉÉÉ-HH-NN formátumú dátumot adjon meg.
+Zadajte platné číslo.	Enter a valid number.	Zadejte platné číslo.	Érvényes számot adjon meg.
+Vstup používa výpočet alebo pravidlo zobrazenia.	A calculation or visibility rule uses this input.	Vstup používá výpočet nebo pravidlo zobrazení.	A bemenetet számítás vagy megjelenítési szabály használja.
+Pomenované vstupy potrebujú platné a jedinečné názvy.	Named inputs require valid, unique names.	Pojmenované vstupy potřebují platné a jedinečné názvy.	Az elnevezett bemenetekhez érvényes, egyedi nevek szükségesek.
+Povinný vstup nemá hodnotu.	A required input has no value.	Povinný vstup nemá hodnotu.	Hiányzik egy kötelező bemenet értéke.
+Pomenovaný vstup už nie je dostupný.	The named input is no longer available.	Pojmenovaný vstup již není k dispozici.	Az elnevezett bemenet már nem érhető el.
+Pomenovaný vstup nemá platnú hodnotu.	The named input has no valid value.	Pojmenovaný vstup nemá platnou hodnotu.	Az elnevezett bemenetnek nincs érvényes értéke.
+Typ pomenovaného vstupu nesúhlasí s výpočtom.	The named input type does not match the calculation.	Typ pojmenovaného vstupu neodpovídá výpočtu.	Az elnevezett bemenet típusa nem egyezik a számítással.
+Vstup používa uložená referenčná dávka.	A saved reference batch uses this input.	Vstup používá uložená referenční dávka.	A bemenetet egy mentett referencia-köteg használja.
