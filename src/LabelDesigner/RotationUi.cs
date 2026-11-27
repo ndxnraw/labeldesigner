@@ -4,7 +4,19 @@ public partial class MainForm {
  double barRotation;NumericUpDown codeRotation,textRotation;ContextMenuStrip rotationMenu;
  void StoreRotation(int index,double angle){angle=ElementTransform.Normalize(angle);if(index==-1)barRotation=angle;else if(index>=0&&index<grid.Rows.Count)grid.Rows[index].Tag=angle;else if(index<=-3&&-3-index<symbols.Count)symbols[-3-index].Rotation=angle;}
  NumericUpDown AddRotationField(TableLayoutPanel panel){var n=new ClickWheelNumericUpDown{DecimalPlaces=2,Minimum=0,Maximum=359.99m,Increment=1,AccessibleName=Loc.T("Rotácia")};StackField(panel,Loc.T("Rotácia")+" (°)",n);n.ValueChanged+=delegate{if(!studioSync&&!loading)SetSelectedRotation((double)n.Value);};return n;}
- void SetSelectedRotation(double angle){var e=preview.Element(preview.SelectedIndex);if(e==null)return;e.Rotation=ElementTransform.Normalize(angle);EditElement(e);timer.Stop();UpdatePreview();}
+ void SetSelectedRotation(double angle){
+  var element=preview.Element(preview.SelectedIndex);
+  if(element==null)return;
+  if(preview.InVerticalStack(element.Index)){
+   if(elementMetadata.Exists(meta=>meta.Index==element.Index&&meta.Locked))return;
+   StoreRotation(element.Index,angle);
+   Changed(this,EventArgs.Empty);
+  }else{
+   element.Rotation=ElementTransform.Normalize(angle);
+   EditElement(element);
+  }
+  timer.Stop();UpdatePreview();
+ }
  void RotateSelected(double delta){var e=preview.Element(preview.SelectedIndex);if(e!=null)SetSelectedRotation(e.Rotation+delta);}
  void SyncRotation(){var e=preview.Element(preview.SelectedIndex);foreach(var n in new[]{codeRotation,textRotation})if(n!=null){n.AccessibleName=Loc.T("Rotácia");n.Enabled=e!=null;if(e!=null&&!n.ContainsFocus)n.Value=Math.Min(n.Maximum,(decimal)e.Rotation);}}
  void CustomRotation(){var el=preview.Element(preview.SelectedIndex);if(el==null)return;using(var f=new Form{Text=Loc.T("Rotácia"),ClientSize=new Size(320,145),Font=Font,StartPosition=FormStartPosition.CenterParent,ShowInTaskbar=false,MinimizeBox=false,MaximizeBox=false}){var p=Stack();f.Controls.Add(p);var n=new ClickWheelNumericUpDown{DecimalPlaces=2,Maximum=359.99m,Value=Math.Min(359.99m,(decimal)el.Rotation)};StackField(p,Loc.T("Rotácia")+" (°)",n);var buttons=new FlowLayoutPanel{AutoSize=true};var ok=Btn(Loc.T("Použiť"),delegate{f.DialogResult=DialogResult.OK;});var cancel=Btn(Loc.T("Zrušiť"),delegate{f.DialogResult=DialogResult.Cancel;});buttons.Controls.Add(ok);buttons.Controls.Add(cancel);StackAdd(p,buttons);f.AcceptButton=ok;f.CancelButton=cancel;ApplyColors(f);if(f.ShowDialog(this)==DialogResult.OK)SetSelectedRotation((double)n.Value);}}

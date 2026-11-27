@@ -19,6 +19,8 @@ namespace EanEtikety {
     throw new InvalidDataException(Loc.T("Vyberte prvky na uloženie do bloku."));
    var copy=ProjectXml.Clone(source);
    var bounds=indices.Select(index=>ElementTransform.Bounds(ElementTransform.Get(copy,index))).Aggregate(RectangleF.Union);
+   foreach(var stack in copy.VerticalStacks)
+    if(stack.Order.TrueForAll(selected.Contains))bounds=RectangleF.Union(bounds,stack.Bounds());
    var block=new LabelBlock{Name=name?.Trim(),Width=bounds.Width,Height=bounds.Height,
     Artwork=new LabelSettings{HideBarcode=true,Width=Math.Max(10,bounds.Width),Height=Math.Max(10,bounds.Height),Dpi=source.Dpi}};
    Append(copy,indices,block.Artwork,-bounds.Left,-bounds.Top);
@@ -56,6 +58,7 @@ namespace EanEtikety {
    destination.Texts=draft.Texts;
    destination.Symbols=draft.Symbols;
    destination.Metadata=draft.Metadata;
+   destination.VerticalStacks=draft.VerticalStacks;
    destination.Languages=draft.Languages;
    destination.Variables=draft.Variables;
    return added;
@@ -130,6 +133,7 @@ namespace EanEtikety {
      image.Field=map[image.Field];
     }
    }
+   VerticalStack.AppendCopies(source.VerticalStacks,target,map,groups,x,y);
    return indices.ConvertAll(index=>map[index]);
   }
 

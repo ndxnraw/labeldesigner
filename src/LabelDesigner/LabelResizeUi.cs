@@ -12,13 +12,14 @@ namespace EanEtikety {
    public override string ToString()=>Caption;
   }
 
-  sealed class ResizeReview(LabelSettings variant,List<ResizeProblem> problems,VectorScene before,VectorScene after):IDisposable {
+  sealed class ResizeReview(LabelSettings variant,List<ResizeProblem> problems,ResizeArtwork before,ResizeArtwork after):IDisposable {
    public LabelSettings Variant{get;}=variant;
    public List<ResizeProblem> Problems{get;}=problems;
-   public VectorScene Before{get;}=before;
-   public VectorScene After{get;}=after;
-   public void Dispose(){Before.Dispose();After.Dispose();}
+   public ResizeArtwork Before{get;}=before;
+   public ResizeArtwork After{get;}=after;
+   public void Dispose(){Before.Scene.Dispose();After.Scene.Dispose();}
   }
+  sealed record ResizeArtwork(LabelSettings Label,VectorScene Scene);
 
   sealed class ResizeCanvas:Control {
    public LabelSettings Geometry;
@@ -34,7 +35,10 @@ namespace EanEtikety {
     var area=new RectangleF((ClientSize.Width-width)/2,(ClientSize.Height-height)/2,width,height);
     e.Graphics.FillRectangle(Brushes.White,area);
     Scene.Draw(e.Graphics,area,false);
-    var item=ElementTransform.Get(Geometry,FocusedElement);
+    var indices=Elements.Indices(Geometry);
+    int index=indices.FindIndex(i=>Elements.SourceIndex(Geometry,i)==FocusedElement);
+    if(index<0)return;
+    var item=ElementTransform.Get(Geometry,indices[index]);
     if(item==null)return;
     var corners=ElementTransform.Corners(item);
     for(int i=0;i<corners.Length;i++)corners[i]=new PointF(area.X+corners[i].X*scale,area.Y+corners[i].Y*scale);
@@ -51,9 +55,9 @@ namespace EanEtikety {
    }
   }
 
-  static VectorScene ResizeScene(LabelSettings settings,DateTime instant,string language){
+  static ResizeArtwork ResizeScene(LabelSettings settings,DateTime instant,string language){
    var draft=QuickPrint.PrepareEditor(settings,instant,language);
-   return PreviewValidation.Build(draft.Label,draft.Issues);
+   return new ResizeArtwork(draft.Label,PreviewValidation.Build(draft.Label,draft.Issues));
   }
 
   void ShowResizeLabel(){
@@ -111,6 +115,7 @@ namespace EanEtikety {
    foreach(int index in Elements.Indices(original)){
     string caption=index>=-1?QuickPrint.Name(original,index):original.Symbols[-3-index].Name+" "+(-2-index);
     if(Elements.Locked(original,index))caption+=" · "+Loc.T("Zamknuté");
+    if(VerticalStack.ForElement(original,index)!=null)caption+=" · "+Loc.T("Zvislá skupina");
     elements.Items.Add(new ResizeElement(index,caption));
    }
    compare.Controls.Add(elements,0,0);
@@ -153,7 +158,7 @@ namespace EanEtikety {
      if(index>=0&&LabelResize.CanStretch(original,index))horizontal.Items.Add(Loc.T("Oba okraje"));
      anchors.TryGetValue(index,out var value);
      horizontal.SelectedIndex=(int)value.Horizontal;vertical.SelectedIndex=(int)value.Vertical;
-     horizontal.Enabled=vertical.Enabled=index!=-2&&!Elements.Locked(original,index);
+     horizontal.Enabled=vertical.Enabled=LabelResize.CanAnchor(original,index);
     }finally{changing=false;}
     Highlight();
    }
@@ -164,7 +169,7 @@ namespace EanEtikety {
     debounce.Stop();debounce.Start();
    }
    void UpdateAnchor(){
-    if(changing||SelectedElement()==-2||horizontal.SelectedIndex<0||vertical.SelectedIndex<0)return;
+    if(changing||!LabelResize.CanAnchor(original,SelectedElement())||horizontal.SelectedIndex<0||vertical.SelectedIndex<0)return;
     anchors[SelectedElement()]=new ResizeAnchor((ResizeEdge)horizontal.SelectedIndex,(ResizeEdge)vertical.SelectedIndex);
     Schedule();
    }
@@ -197,14 +202,14 @@ namespace EanEtikety {
       var problems=LabelResize.Inspect(variant,instant);
       var originalScene=ResizeScene(original,instant,selectedLanguage);
       try{return new ResizeReview(variant,problems,originalScene,ResizeScene(variant,instant,selectedLanguage));}
-      catch{originalScene.Dispose();throw;}
+      catch{originalScene.Scene.Dispose();throw;}
      });
      if(closed||active!=work)return;
      var selectedIssue=issues.SelectedItem as ResizeProblem;
      review?.Dispose();
      review=result;result=null;
-     before.Geometry=original;before.Scene=review.Before;
-     after.Geometry=review.Variant;after.Scene=review.After;
+     before.Geometry=review.Before.Label;before.Scene=review.Before.Scene;
+     after.Geometry=review.After.Label;after.Scene=review.After.Scene;
      before.ComparisonSize=after.ComparisonSize=new SizeF((float)Math.Max(original.Width,review.Variant.Width),
       (float)Math.Max(original.Height,review.Variant.Height));
      afterCaption.Text=Loc.T("Nový rozmer")+" · "+Dimensions(review.Variant);

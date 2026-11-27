@@ -94,6 +94,11 @@ namespace EanEtikety {
      (field,message)=>AddFieldIssue(record,columns,Elements.FieldTarget(field),message));
     label.Variables.Clear();
     TextAutoLayout.Apply(label);
+    VerticalStack.Apply(label);
+    if(label.StackIssues!=null)foreach(var issue in label.StackIssues){
+     string target=Elements.FieldTarget(issue.Element);
+     record.AddIssue(columns.GetValueOrDefault(target,-1),target,issue.Message,issue.Blocking);
+    }
     ValidatePreparedLabel(record,label,columns);
    }catch(OperationCanceledException){throw;}
     catch(Exception ex){record.AddIssue(-1,null,ex.Message);}

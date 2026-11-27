@@ -1242,3 +1242,14 @@ Bez mapovania	Unmapped	Bez mapování	Nincs hozzárendelve
 Príliš veľa testovacích scenárov.	Too many test scenarios.	Příliš mnoho testovacích scénářů.	Túl sok tesztforgatókönyv.
 Každý scenár potrebuje jedinečný názov a platné údaje.	Each scenario needs a unique name and valid data.	Každý scénář potřebuje jedinečný název a platná data.	Minden forgatókönyvhöz egyedi név és érvényes adatok szükségesek.
 Neplatná hodnota testovacieho scenára.	Invalid test scenario value.	Neplatná hodnota testovacího scénáře.	Érvénytelen tesztforgatókönyv-érték.
+Zvislá skupina	Vertical stack	Svislá skupina	Függőleges csoport
+Zvislá skupina…	Vertical stack…	Svislá skupina…	Függőleges csoport…
+Neplatná zvislá skupina.	Invalid vertical stack.	Neplatná svislá skupina.	Érvénytelen függőleges csoport.
+Rám zvislej skupiny presahuje etiketu.	The vertical stack frame extends beyond the label.	Rám svislé skupiny přesahuje etiketu.	A függőleges csoport kerete túlnyúlik a címkén.
+Zvislá skupina presahuje rám.	The vertical stack exceeds its frame.	Svislá skupina přesahuje rám.	A függőleges csoport túlnyúlik a kereten.
+Zvislý rozostup (mm)	Vertical gap (mm)	Svislá mezera (mm)	Függőleges térköz (mm)
+Prvky sa zoradia zhora nadol. Skryté prvky uvoľnia miesto.	Elements are placed top to bottom. Hidden elements free up space.	Prvky se seřadí shora dolů. Skryté prvky uvolní místo.	Az elemek felülről lefelé rendeződnek. A rejtett elemek helye felszabadul.
+Poradie prvkov	Element order	Pořadí prvků	Elemek sorrendje
+Vyššie	Move up	Posunout výše	Fel
+Nižšie	Move down	Posunout níže	Le
+Vypnúť pružné rozloženie	Turn off flexible layout	Vypnout pružné rozložení	Rugalmas elrendezés kikapcsolása

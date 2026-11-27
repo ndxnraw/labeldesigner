@@ -16,6 +16,12 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Zvislé skupiny** rozmiestňujú prvky zhora nadol v pevnom ráme v mm.
+  Vlastnosti skupiny určujú poradie a rozostup. Skryté prvky uvoľnia miesto
+  a neotočené texty sa podľa obsahu rozšíria nadol. Kódy si zachovávajú
+  rozmery a natočenie. Na pretečenie rámu upozorní kontrola s prechodom na
+  prvok. Rovnaké rozloženie sa používa v scenároch, dávkach, tlači a exporte.
+  Nastavenie sa zachová aj pri kopírovaní celej skupiny do bloku.
 - **Testovacie scenáre** pri plátne ukladajú pomenované ukážkové hodnoty a
   voliteľný jazyk do šablóny. Hodnoty možno zadať ručne alebo priradiť zo
   zvoleného riadka CSV či hárka XLSX. Spoločná kontrola umožňuje prejsť na

@@ -2,7 +2,7 @@ using System;using System.Drawing;
 namespace EanEtikety {
 // Opt-in content geometry. Stored/manual fields remain unchanged.
 public static class TextAutoLayout {
- public static void Apply(LabelSettings label){for(int i=0;i<label.Texts.Count;i++)if(!LabelLanguages.Translated(label,i))Fit(label.Texts[i],label.Width,label.Height);}
+ public static void Apply(LabelSettings label){for(int i=0;i<label.Texts.Count;i++)if(!LabelLanguages.Translated(label,i)&&VerticalStack.ForElement(label,i)==null)Fit(label.Texts[i],label.Width,label.Height);}
  public static void Fit(TextItem text,double labelWidth,double labelHeight){
   if(text==null||!text.AutoWidth||text.MinimumFitSize>0||(text.Text!=null&&text.Text.Length>4000))return;
   if(double.IsNaN(text.Size)||double.IsInfinity(text.Size)||text.Size<4||text.Size>144||labelWidth<10||labelHeight<10)return;

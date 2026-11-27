@@ -6,6 +6,22 @@ namespace EanEtikety {
  public static class FixedTextLayout {
   const double PointsPerStep = .1;
 
+  internal static double RequiredHeight(TextItem text,double width,double dpi){
+   if(string.IsNullOrWhiteSpace(text.Text))return 0;
+   if(text.Styles.Count>0)return RichFieldLayout.WrappedHeight(text,width)+.05;
+   using var path=new GraphicsPath();
+   using var family=VectorArt.Family(text.FontName);
+   using var format=new StringFormat(StringFormat.GenericTypographic){Trimming=StringTrimming.None};
+   format.FormatFlags|=StringFormatFlags.NoClip;
+   string value=text.Text.Replace("\r\n","\n").Replace('\r','\n');
+   path.AddString(value,family,(int)VectorArt.Style(family,text.Bold),(float)(text.Size*25.4/72),
+    new RectangleF(0,0,(float)width,100000),format);
+   var ink=path.GetBounds();
+   double inkHeight=ink.Bottom+Math.Max(0,-ink.Top);
+   double lineHeight=text.MinimumFitSize>0?0:LabelChecks.MeasurePlainText(text,dpi,width).Height*25.4/dpi;
+   return Math.Max(inkHeight,lineHeight)+.05;
+  }
+
   public static double Resolve(TextItem text, out bool fits) {
    using var path = Build(text, out double size, out fits);
    return size;

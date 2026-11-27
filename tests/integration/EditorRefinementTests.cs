@@ -1,5 +1,146 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void VerticalStacks(string dir){
+  var template=LabelSettings.Default();
+  template.Width=90;template.Height=100;
+  template.Texts[0].AutoWidth=false;template.Texts[0].Width=28;template.Texts[0].Height=5;
+  template.Texts[0].Text="Short";
+  template.Texts.Add(new TextItem{Text="Optional",Width=23,Height=5,X=30,Y=22});
+  template.Texts.Add(new TextItem{Text="show",Width=15,X=65,Y=4});
+  template.Symbols.Add(new SymbolItem{X=40,Y=51,Width=19,Height=19,Rotation=90,Matrix=new MatrixContent{Data="https://example.com"}});
+  foreach(int index in new[]{0,1,-1,-3})Elements.Meta(template,index).Group="flow";
+  Elements.Meta(template,1).Visibility=new VisibilityRule{Field=2,Mode=VisibilityMode.EqualsValue,Value="show"};
+  template.VerticalStacks.Add(new VerticalStack{Group="flow",X=8,Y=4,Width=50,Height=52,Gap=2,Order=new(){0,1,-1,-3}});
+  template.QuickPrintFields.Add(0);
+  var baseline=QuickPrint.PrepareEditor(template,DateTime.Today);
+  Check(baseline.Label.BarY==18&&baseline.Label.BarX==8,"stack places main barcode after two text fields and two gaps");
+  Check(baseline.Label.BarWidth==template.BarWidth&&baseline.Label.BarHeight==template.BarHeight&&
+   baseline.Label.Symbols[0].Width==19&&baseline.Label.Symbols[0].Height==19&&baseline.Label.Symbols[0].Rotation==90,
+   "stack preserves both barcode frames and orientation");
+  var scenario=new LabelScenario{Name="Hide optional",Values=new(){new(){Element=2,Value=""}}};
+  var hidden=QuickPrint.PrepareScenario(template,scenario,DateTime.Today);
+  Check(hidden.Hidden.Contains(1)&&hidden.Label.BarY==11,"hidden field consumes neither height nor spacing");
+  Check(baseline.SourceIssues().Exists(i=>i.Element==-3&&!i.Blocking&&i.Message.Contains(Loc.T("Zvislá skupina"))),
+   "overflow on the final code is navigable");
+  Check(template.BarX==10&&template.BarY==10&&template.Symbols[0].X==40,"layout never changes the stored design geometry");
+  var resized=LabelResize.Apply(template,110,120,new System.Collections.Generic.Dictionary<int,ResizeAnchor>{
+   {-1,new(ResizeEdge.End,ResizeEdge.End)}
+  });
+  Check(!LabelResize.CanAnchor(template,-1)&&resized.VerticalStacks[0].X==8&&resized.BarX==10,
+   "resize retains the fixed frame rather than applying individual anchors to its members");
+  string project=Path.Combine(dir,"vertical-stack.ean.xml");
+  Engine.Save(project,template);
+  Check(Engine.Load(project).VerticalStacks[0].Order[3]==-3,"stack order and frame survive project XML");
+
+  const string longer="A much longer description that wraps over several lines in the fixed frame";
+  var sameDay=DateTime.Today;
+  var quick=QuickPrint.Prepare(template,new System.Collections.Generic.Dictionary<int,string>{{0,longer}},sameDay);
+  Check(quick.CanPrint&&quick.Label.Texts[0].Height>5&&quick.Label.BarY>baseline.Label.BarY,
+   "quick print expands wrapped text before placing later elements and accepts the fitted text");
+  var localized=ProjectXml.Clone(template);
+  localized.Languages=new(){Codes=new(){"SK","CZ"},Selected="SK"};
+  Elements.Meta(localized,0).Translations=new(){new(){Language="SK",Text="Short"},new(){Language="CZ",Text=longer}};
+  Check(QuickPrint.PrepareEditor(localized,sameDay,"CZ").Label.BarY>baseline.Label.BarY&&
+   QuickPrint.PrepareEditor(localized,sameDay,"SK").Label.BarY==baseline.Label.BarY,"selected translation drives the height");
+
+  var data=BatchData.CsvText("Name;Toggle\r\nShort;show\r\n"+longer+";hide",';');
+  var records=BatchProcessing.Prepare(template,data,true,new(){
+   new(){Target="text:0",Column=0},new(){Target="text:2",Column=1}
+  },-1,0,sameDay);
+  Check(records.Count==2&&records[0].Label.BarY==18&&records[1].Label.Texts.Count==2&&
+   records[1].Label.BarY>18,"batch recomputes text height and visibility separately per row");
+  Check(records[0].Issues.Exists(i=>!i.Blocking&&i.Message.Contains(Loc.T("Zvislá skupina presahuje rám."))),
+   "batch record retains the overflow warning");
+  var output=OutputPlan.Create(records,template,sameDay);
+  Check(PreflightReport.Inspect(output).Issues.Exists(i=>i.Element==-3&&i.Record==records[0].Row&&!i.Blocking&&
+   i.Message==Loc.T("Zvislá skupina presahuje rám.")),"print review preserves the original element and source row");
+  using(var printing=new LabelPrintDocument(template,output))
+  using(var frozenPrinting=new LabelPrintDocument(baseline.Label)){
+   byte[] Raster(LabelPrintDocument document,bool previewMode){
+    using var bitmap=new Bitmap(420,480);
+    using(var graphics=Graphics.FromImage(bitmap)){
+     graphics.Clear(Color.White);
+     document.RenderPrinterPage(graphics,0,new RectangleF(0,0,400,440),0,0,previewMode);
+    }
+    using var memory=new MemoryStream();bitmap.Save(memory,System.Drawing.Imaging.ImageFormat.Png);return memory.ToArray();
+   }
+   Check(Raster(printing,false).AsSpan().SequenceEqual(Raster(frozenPrinting,false))&&
+    Raster(printing,true).AsSpan().SequenceEqual(Raster(frozenPrinting,true)),
+    "Windows print and print preview match the resolved group placement");
+  }
+
+  string originalPath=Path.Combine(dir,"vertical-stack"),frozenPath=originalPath+"-resolved";
+  Engine.Pdf(originalPath+".pdf",template);Engine.Pdf(frozenPath+".pdf",baseline.Label);
+  Engine.Svg(originalPath+".svg",template);Engine.Svg(frozenPath+".svg",baseline.Label);
+  Engine.Zpl(originalPath+".zpl",template);Engine.Zpl(frozenPath+".zpl",baseline.Label);
+  Engine.Docx(originalPath+".docx",template);Engine.Docx(frozenPath+".docx",baseline.Label);
+  foreach(string extension in new[]{".pdf",".svg",".zpl"})
+   Check(File.ReadAllBytes(originalPath+extension).AsSpan().SequenceEqual(File.ReadAllBytes(frozenPath+extension)),
+    extension+" exports the same artwork as the resolved preview");
+  using(var a=System.IO.Compression.ZipFile.OpenRead(originalPath+".docx"))
+  using(var b=System.IO.Compression.ZipFile.OpenRead(frozenPath+".docx")){
+   Check(a.Entries.Count==b.Entries.Count,"Word contains all resolved artwork parts");
+   foreach(var entry in a.Entries){
+    using var left=entry.Open();using var right=b.GetEntry(entry.FullName).Open();
+    using var lm=new MemoryStream();using var rm=new MemoryStream();
+    left.CopyTo(lm);right.CopyTo(rm);
+    Check(lm.ToArray().AsSpan().SequenceEqual(rm.ToArray()),"Word part matches the resolved preview: "+entry.FullName);
+   }
+  }
+  var zpl=ZplImport.Project(File.ReadAllText(originalPath+".zpl"));
+  Check(zpl!=null&&zpl.VerticalStacks.Count==0&&zpl.BarY==18&&zpl.BarWidth==template.BarWidth,
+   "ZPL reopens with the final coordinates and unchanged barcode size");
+  JobOutput.Export(originalPath+"-batch.zpl","zpl",output,template.Dpi);
+  JobOutput.Export(frozenPath+"-batch.zpl","zpl",OutputPlan.Create(
+   new(){new(){Label=baseline.Label},new(){Label=records[1].Label}},template,sameDay),template.Dpi);
+  Check(File.ReadAllText(originalPath+"-batch.zpl")==File.ReadAllText(frozenPath+"-batch.zpl"),
+   "batch ZPL uses each row's final geometry");
+
+  var removed=ProjectXml.Clone(template);
+  Elements.Remove(removed,new(){0});
+  Check(removed.VerticalStacks[0].Order[0]==0&&removed.VerticalStacks[0].Order.Count==3&&
+   QuickPrint.PrepareEditor(removed,sameDay).Label.BarY==11,"deletion remaps the remaining order");
+  var block=LabelBlock.Capture(template,new[]{0,1,2,-1,-3},"Complete stack");
+  var destination=new LabelSettings{HideBarcode=true,Width=120,Height=120};
+  block.Insert(destination);
+  Check(destination.VerticalStacks.Count==1&&destination.VerticalStacks[0].Order.Count==4&&
+   destination.VerticalStacks[0].Group!="flow","complete reusable block gets a separate stack and member references");
+
+  using var owner=new MainForm(Path.Combine(dir,"stack-editor.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",template);
+  Call(owner,"DocumentOpened");
+  var editor=F<PreviewPanel>(owner,"preview");
+  Call(owner,"SelectEditorIssue",baseline.SourceIssues().Find(i=>i.Element==-3&&i.Message==Loc.T("Zvislá skupina presahuje rám.")));
+  Check(editor.SelectedIndex==-3&&editor.Selection.Count==1&&editor.Element(-3).Y>40&&editor.Handles().Length==0,
+   "editor selects the moved overflow element at the visible coordinates");
+  using(var timer=new Timer{Interval=60}){
+   Exception failure=null;bool opened=false;
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner||dialog.Controls.Find("stackGap",true).Length==0)continue;
+     timer.Stop();opened=true;
+     try{((NumericUpDown)dialog.Controls.Find("stackGap",true)[0]).Value=3;dialog.AcceptButton.PerformClick();}
+     catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();Call(owner,"ConfigureStack");
+   if(failure!=null)throw failure;
+   var updated=(LabelSettings)Call(owner,"Read");
+   Check(opened&&updated.VerticalStacks[0].Gap==3&&editor.Element(-1).Y==20&&updated.BarY==10,
+    "editing the frame updates the preview and preserves authored coordinates");
+   Call(owner,"StepHistory",false);
+   Check(editor.Element(-1).Y==18,"stack settings are undoable");
+  }
+  editor.SelectElement(-3);
+  Call(owner,"SetSelectedRotation",180d);
+  var rotated=(LabelSettings)Call(owner,"Read");
+  Check(rotated.Symbols[0].Rotation==180&&editor.Element(-3).Rotation==180&&
+   rotated.Symbols[0].X==40&&rotated.Symbols[0].Width==19,"explicit rotation keeps authored position and dimensions");
+  Call(owner,"StepHistory",false);
+  owner.Close();
+ }
  static void TemplateScenarios(string dir){
   var template=LabelSettings.Default();
   template.Texts[0].AutoWidth=false;
@@ -1071,5 +1212,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);VerticalStacks(args[0]);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

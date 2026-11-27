@@ -8,12 +8,13 @@ public partial class MainForm {
  void UpdatePreview(){if(IsDisposed||Disposing)return;TrackHistory();scenarioPreviewIssues=null;try{var raw=Read();LabelSettings s=raw;VectorScene scene=null;
   var scenario=raw.Scenarios.Find(item=>item.Id==activeScenarioId);
   preview.HiddenElements.Clear();
+  preview.ProjectedStackElements.Clear();
   if(JobPreparation.HasDynamicArtwork(raw)){
    var instant=currentTime();previewDay=instant.Date;
    var draft=QuickPrint.PrepareEditor(raw,instant);
    if(scenario==null)scene=BuildEditorScene(draft);
    labelIssues=draft.SourceIssues();
-   if(scenario==null)preview.HiddenElements.UnionWith(draft.Hidden);
+   if(scenario==null){preview.HiddenElements.UnionWith(draft.Hidden);UseStackGeometry(raw,draft.Label);}
   }else{
    string variableError=null;try{s=PreparedLabel(raw);}catch(Exception ex){variableError=ex.Message;}
    labelIssues=LabelChecks.Inspect(s);
@@ -26,6 +27,7 @@ public partial class MainForm {
     var draft=QuickPrint.PrepareScenario(raw,scenario,currentTime());
     scene=BuildEditorScene(draft);
     preview.HiddenElements.UnionWith(draft.Hidden);
+    UseStackGeometry(raw,draft.Label);
     scenarioPreviewIssues=draft.SourceIssues();
    }catch(Exception ex){scenarioPreviewIssues=new List<LabelIssue>{new(){Blocking=true,Message=ex.Message}};}
   }

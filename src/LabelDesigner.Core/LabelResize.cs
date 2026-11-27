@@ -9,7 +9,11 @@ namespace EanEtikety {
  }
 
  public static class LabelResize {
-  public static bool CanStretch(LabelSettings source,int index)=>index>=0&&source.Texts[index].Rotation==0;
+  public static bool CanAnchor(LabelSettings source,int index)=>index!=-2&&
+   VerticalStack.ForElement(source,index)==null&&!Elements.Locked(source,index);
+
+  public static bool CanStretch(LabelSettings source,int index)=>index>=0&&source.Texts[index].Rotation==0&&
+   VerticalStack.ForElement(source,index)==null;
 
   public static LabelSettings Apply(LabelSettings source,double width,double height,IReadOnlyDictionary<int,ResizeAnchor> anchors){
    var result=ProjectXml.Clone(source);
@@ -20,9 +24,10 @@ namespace EanEtikety {
    double dx=width-source.Width,dy=height-source.Height;
    foreach(int index in Elements.Indices(result)){
     WorkContext.Check();
+    if(VerticalStack.ForElement(result,index)!=null)continue;
     // Keep the previewed geometry when this variant is reopened or rendered.
     if(index>=0)result.Texts[index].AutoWidth=false;
-    if(Elements.Locked(result,index)||!anchors.TryGetValue(index,out var anchor))continue;
+    if(!CanAnchor(result,index)||!anchors.TryGetValue(index,out var anchor))continue;
     double x=Displacement(dx,anchor.Horizontal),y=Displacement(dy,anchor.Vertical);
     if(index==-1){
      result.BarX+=x;result.BarY+=y;

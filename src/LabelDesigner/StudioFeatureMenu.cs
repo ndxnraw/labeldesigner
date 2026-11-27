@@ -54,6 +54,8 @@ public partial class MainForm {
   PrepareFeatureMenu(featureMenu);
   var layout=FeatureGroup("Rozloženie",HeaderIcon.Panels);
   layout.DropDownItems.Add(FeatureItem("Rozloženie a výber",HeaderIcon.Panels,ShowArrange));
+  var stack=FeatureItem(StackTitle,HeaderIcon.Panels,ConfigureStack);
+  stack.Enabled=CanConfigureStack();layout.DropDownItems.Add(stack);
   layout.DropDownItems.Add(FeatureItem("Zmeniť rozmery etikety…",HeaderIcon.Panels,ShowResizeLabel));
   layout.DropDownItems.Add(FeatureItem("Uložiť výber ako blok…",HeaderIcon.Save,SaveSelectionAsBlock));
   layout.DropDownItems.Add(FeatureItem("Samolepiace hárky",HeaderIcon.Table,EditSheet));

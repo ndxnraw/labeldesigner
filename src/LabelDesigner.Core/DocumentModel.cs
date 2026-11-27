@@ -19,6 +19,9 @@ public class LabelSettings {
  public LabelLanguages Languages;
  public EditorReference EditorReference;
  public LabelSafetyZones Safety;
+ public List<VerticalStack> VerticalStacks=new();
+ public bool ShouldSerializeVerticalStacks()=>VerticalStacks?.Count>0;
+ internal List<LabelIssue> StackIssues;
  public List<LabelScenario> Scenarios=new();
  public bool ShouldSerializeScenarios()=>Scenarios?.Count>0;
  public List<int> QuickPrintFields=new List<int>();

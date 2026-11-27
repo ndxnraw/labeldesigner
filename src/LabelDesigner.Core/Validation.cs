@@ -78,13 +78,15 @@ public static class LabelChecks {
  }
  internal static bool TextFits(TextItem text,double dpi,bool checkWidth=false){
   if(text.MinimumFitSize>0||text.Styles.Count>0){FixedTextLayout.Resolve(text,out bool fits);return fits;}
+  var size=MeasurePlainText(text,dpi,text.Width);
+  return size.Height<=text.Height*dpi/25.4+1&&(!checkWidth||size.Width<=text.Width*dpi/25.4+1);
+ }
+ internal static SizeF MeasurePlainText(TextItem text,double dpi,double width){
   using(var bitmap=new Bitmap(1,1))using(var graphics=Graphics.FromImage(bitmap))
   using(var family=VectorArt.Family(text.FontName))
   using(var font=new Font(family,(float)(text.Size*dpi/72),VectorArt.Style(family,text.Bold),GraphicsUnit.Pixel))
   using(var format=new StringFormat(StringFormat.GenericTypographic)){
-   float width=(float)(text.Width*dpi/25.4);
-   var size=graphics.MeasureString(text.Text,font,new SizeF(width,100000),format);
-   return size.Height<=text.Height*dpi/25.4+1&&(!checkWidth||size.Width<=width+1);
+   return graphics.MeasureString(text.Text,font,new SizeF((float)(width*dpi/25.4),100000),format);
   }
  }
  public static List<LabelIssue> Inspect(LabelSettings s){
@@ -96,7 +98,7 @@ public static class LabelChecks {
    }catch(OperationCanceledException){throw;}
    catch(Exception ex){return new List<LabelIssue>{new LabelIssue{Blocking=true,Message=ex.Message}};}
   }
-  var result=new List<LabelIssue>();Action<int,bool,string> add=(i,b,m)=>result.Add(new LabelIssue{Element=i,Blocking=b,Message=m});var codes=new List<int>();var shapes=new List<int>();if(!s.HideBarcode){codes.Add(-1);try{if(Engine.IsGs1(s))Gs1.Payload(s.ApplicationIdentifiers);else Engine.Normalize(s.Ean,s.Kind);if(Engine.Module(s)<1)throw new Exception(Loc.T("Kód je pre zvolené rozlíšenie príliš úzky."));}catch(Exception ex){add(-1,true,ex.Message);}}
+  var result=s.StackIssues==null?new List<LabelIssue>():s.StackIssues.ConvertAll(issue=>new LabelIssue{Element=issue.Element,Blocking=issue.Blocking,Message=issue.Message});Action<int,bool,string> add=(i,b,m)=>result.Add(new LabelIssue{Element=i,Blocking=b,Message=m});var codes=new List<int>();var shapes=new List<int>();if(!s.HideBarcode){codes.Add(-1);try{if(Engine.IsGs1(s))Gs1.Payload(s.ApplicationIdentifiers);else Engine.Normalize(s.Ean,s.Kind);if(Engine.Module(s)<1)throw new Exception(Loc.T("Kód je pre zvolené rozlíšenie príliš úzky."));}catch(Exception ex){add(-1,true,ex.Message);}}
   foreach(int index in Elements.Indices(s)){ElementEdit el;try{el=ElementTransform.Get(s,index);}catch{continue;}if(ElementTransform.Outside(s,el))add(index,false,Loc.T("Prvok presahuje etiketu"));if(index<=-3){var symbol=s.Symbols[-3-index];try{if(symbol.Shape!=null){symbol.Shape.Validate(symbol);shapes.Add(index);}if(symbol.Code!=null){codes.Add(index);Engine.Validate(symbol.Code.Settings());}if(symbol.Matrix!=null){codes.Add(index);var matrix=Assets.Matrix(symbol.Matrix);if(symbol.Width*s.Dpi/25.4<matrix.Width||symbol.Height*s.Dpi/25.4<matrix.Height||BarcodeCatalog.Square(symbol.Matrix.Type)&&Math.Abs(symbol.Width-symbol.Height)>.01)throw new Exception(Loc.T("Neplatné rozmery 2D kódu"));}if(symbol.Image!=null){Assets.Validate(symbol.Image);if(symbol.Image.Mime!="image/svg+xml"&&Assets.ImageDpi(symbol)<s.Dpi*.75)add(index,false,Loc.T("Nízke rozlíšenie obrázka pri tlači"));}}catch(Exception ex){add(index,true,ex.Message);}}
    if(index>=0&&!TextFits(s.Texts[index],s.Dpi))add(index,false,Loc.T("Text sa nezmestí do poľa"));
   }

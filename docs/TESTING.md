@@ -93,6 +93,11 @@ project reopening, editor opacity and position, locking, hiding and undo.
 Comparison of output with and without a reference covers Windows print and
 preview rendering, PDF, SVG, Word, and the ZPL raster and embedded XML.
 
+`EditorRefinementTests` verifies vertical stack geometry and order, barcode
+dimensions, conditional gaps, wrapped translations, row-specific batch
+layout, overflow navigation, undo and reusable blocks. It compares the
+resolved artwork with Windows print, print preview, PDF, Word, SVG and ZPL.
+
 `EditorRefinementTests` verifies persisted template scenarios, CSV/XLSX
 sample mapping and language overrides, editor preview switching, navigation
 to the original element, and isolation from regular output.

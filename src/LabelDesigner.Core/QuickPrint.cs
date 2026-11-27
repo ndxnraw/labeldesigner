@@ -149,6 +149,7 @@ namespace EanEtikety {
    label.Variables.Clear();
    BatchReferences.Strip(label);
    if(editor)TextAutoLayout.Apply(label);
+   VerticalStack.Apply(label);
    foreach(var issue in LabelChecks.Inspect(label))
     if(!issues.Exists(item=>item.Blocking&&item.Element==issue.Element))issues.Add(issue);
    for(int index=0;index<label.Texts.Count;index++){
