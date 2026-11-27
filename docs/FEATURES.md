@@ -16,6 +16,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Testovacie scenáre** pri plátne ukladajú pomenované ukážkové hodnoty a
+  voliteľný jazyk do šablóny. Hodnoty možno zadať ručne alebo priradiť zo
+  zvoleného riadka CSV či hárka XLSX. Spoločná kontrola umožňuje prejsť na
+  scenár a dotknutý prvok. Bežný náhľad obnoví údaje šablóny. Scenáre sa
+  používajú iba v editore, takže tlač, dávky a exporty používajú bežné údaje.
 - **Bezpečné zóny** ukladajú do šablóny okraje v mm a pomenované
   obdĺžniky, ktoré majú zostať voľné. Editor môže prichytávať k hranám,
   kontrola označí zasiahnutý prvok aj zónu a značky sa kreslia iba na plátne.

@@ -14,7 +14,7 @@ namespace EanEtikety {
    elementList.SelectedIndexChanged+=delegate{if(!studioSync)SelectFromLayerList();};
    elementList.DoubleClick+=delegate{EditSelection();};
    problemView=new IssueView{Dock=DockStyle.Fill};problemView.SelectedIssueChanged+=SelectEditorIssue;
-   problemView.RepairRequested+=issue=>{if(issue.Element!=-2)NavigateOutputIssue(issue);};
+   problemView.RepairRequested+=issue=>{if(issue.Element!=-2){SelectEditorIssue(issue);FocusInspector();}};
    problems.Controls.Add(problemView);
    StackAdd(stack,workspaceTabs);
    workspaceTabs.Margin=Padding.Empty;
@@ -86,7 +86,7 @@ namespace EanEtikety {
   void ToggleSelectionLock(){var selected=SelectedElements();bool unlock=selected.Count>0&&selected.TrueForAll(index=>elementMetadata.Exists(m=>m.Index==index&&m.Locked));Arrange(unlock?"unlock":"lock");}
   void EditSelection(){if(preview.Selection.Count!=1)return;int index=preview.SelectedIndex;if(elementMetadata.Exists(m=>m.Index==index&&m.Locked))return;if(index==-1){FocusInspector();return;}if(index>=0)BeginInlineText(index);else if(index<=-3)EditSymbol(index);}
   void SelectEditorIssue(LabelIssue issue){preview.HighlightedSafetyZone=issue?.SafetyZone;if(issue!=null&&issue.Element!=-2){preview.SelectElement(issue.Element);preview.ProblemElements.Clear();preview.ProblemElements.Add(issue.Element);}preview.Invalidate();}
-  void SyncIssueViews(){if(problemView==null)return;problemView.SetIssues(labelIssues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+(labelIssues.Count==0?"":" ("+labelIssues.Count+")"));}
+  void SyncIssueViews(){if(problemView==null)return;var issues=scenarioPreviewIssues??labelIssues;problemView.SetIssues(issues);workspaceTabs.SetTitle(1,Loc.T("Kontrola")+(issues.Count==0?"":" ("+issues.Count+")"));}
   void FocusProblems(){if(workspaceTabs==null)return;if(studioBody.ColumnStyles[0].Width==0)SetStudioPanel(0,true);workspaceTabs.SelectedIndex=1;problemView.FocusList();}
   void FocusInspector(){if(studioBody.ColumnStyles[2].Width==0)SetStudioPanel(2,true);if(preview.Selection.Count!=1){selectionOverview.Focus();return;}if(preview.SelectedIndex==-1)ean.Focus();else if(preview.SelectedIndex>=0){if(HasTextTranslations(preview.SelectedIndex))textTranslations.Focus();else inspectText.Focus();}else inspectNumbers[0].Focus();}
   void CycleEditorSection(bool backwards){

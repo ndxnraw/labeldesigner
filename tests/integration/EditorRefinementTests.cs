@@ -1,5 +1,108 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void TemplateScenarios(string dir){
+  var template=LabelSettings.Default();
+  template.Texts[0].AutoWidth=false;
+  template.Texts.Add(new TextItem{Text="Original",X=4,Y=34,Width=14,Height=4,MinimumFitSize=9});
+  Elements.Meta(template,0).Visibility=new VisibilityRule{Field=1,Mode=VisibilityMode.EqualsValue,Value="Original"};
+  var source=BatchData.CsvText("Product;EAN\r\nA long description for a tiny fixed field;broken",';');
+  var scenario=new LabelScenario{Name="Overflow"};
+  scenario.Values.Add(LabelScenario.FromCell(source,1,0,1));
+  scenario.Values.Add(LabelScenario.FromCell(source,1,1,-1));
+  template.Scenarios.Add(scenario);
+  string path=Path.Combine(dir,"scenarios.ean.xml");Engine.Save(path,template);
+  template=Engine.Load(path);scenario=template.Scenarios[0];
+  var draft=QuickPrint.PrepareScenario(template,scenario,DateTime.Today);
+  Check(draft.Hidden.Contains(0)&&draft.Label.Texts[0].Text.StartsWith("A long"),"scenario overrides drive visibility before rendering");
+  Check(draft.Issues.Exists(i=>Elements.SourceIndex(draft.Label,i.Element)==1&&!i.Blocking),"scenario issues retain original element indices");
+  Check(!draft.CanPrint&&QuickPrint.PrepareEditor(template,DateTime.Today).CanPrint&&
+   JobPreparation.Resolve(template,DateTime.Today).Texts[1].Text=="Original","scenario errors and sample values stay out of output");
+  var reduced=ProjectXml.Clone(template);Elements.Remove(reduced,new(){0});
+  Check(reduced.Scenarios[0].Values.Exists(v=>v.Element==0)&&
+   !reduced.Scenarios[0].Values.Exists(v=>v.Element==1),"removing an element remaps scenario targets");
+  string zpl=Path.Combine(dir,"scenarios.zpl"),baseline=Path.Combine(dir,"scenarios-baseline.zpl");
+  Engine.Zpl(zpl,template);Engine.Zpl(baseline,template.WithoutScenarios());
+  Check(File.ReadAllBytes(zpl).AsSpan().SequenceEqual(File.ReadAllBytes(baseline)),"ZPL excludes scenario data, including embedded XML");
+
+  using var owner=new MainForm(Path.Combine(dir,"scenario-studio.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",template);
+  var picker=(ComboBox)owner.Controls.Find("canvasScenario",true)[0];
+  var preview=F<PreviewPanel>(owner,"preview");
+  picker.SelectedIndex=1;
+  Check(preview.HiddenElements.Contains(0)&&preview.ProblemElements.Contains(1)&&
+   F<Button>(owner,"printPrimary").Enabled&&!F<bool>(owner,"dirty"),"canvas switches samples without dirtying the document or disabling print");
+  picker.SelectedIndex=0;
+  Check(!preview.HiddenElements.Contains(0),"ordinary canvas preview restores template values");
+  Drive("templateScenarios",manager=>{
+   Drive("scenarioFindings",report=>{
+    var list=(ListBox)report.Controls.Find("scenarioFindings",true)[0];
+    for(int i=0;i<list.Items.Count;i++)if(list.Items[i].ToString().Contains(Loc.T("Text sa nezmestí do poľa"))){
+     list.SelectedIndex=i;break;
+    }
+    report.AcceptButton.PerformClick();
+   },()=>{((Button)manager.Controls.Find("checkScenarios",true)[0]).PerformClick();return null;});
+  },()=>{Call(owner,"ManageScenarios");return null;});
+  Check(picker.SelectedIndex==1&&preview.SelectedIndex==1,"combined review opens the selected scenario and original element");
+  picker.SelectedIndex=0;
+
+  var manual=(LabelScenario)Drive("scenarioName",dialog=>{
+   ((TextBox)dialog.Controls.Find("scenarioName",true)[0]).Text="Manual";
+   var grid=(DataGridView)dialog.Controls.Find("scenarioValues",true)[0];
+   grid.Rows[0].Cells[0].Value=true;
+   grid.Rows[0].Cells[2].Value="Manual data";
+   dialog.AcceptButton.PerformClick();
+  },()=>Call(owner,"EditScenario",owner,template,new LabelScenario()));
+  Check(manual.Name=="Manual"&&manual.Values[0].Value=="Manual data","scenario editor accepts manually entered values");
+
+  var csv=(LabelScenario)Drive("scenarioMapping",dialog=>{
+   var grid=(DataGridView)dialog.Controls.Find("scenarioMapping",true)[0];
+   grid.Rows[1].Cells[1].Value=((DataGridViewComboBoxColumn)grid.Columns[1]).Items[1];
+   Check(Convert.ToString(grid.Rows[1].Cells[2].Value)==source.Rows[1][0],"CSV mapping previews the selected data row");
+   dialog.AcceptButton.PerformClick();
+  },()=>Call(owner,"PickScenarioRow",owner,template,new System.Collections.Generic.List<DataTableSource>{source},true));
+  Check(csv.Values[0].Element==1&&csv.Values[0].Value==source.Rows[1][0],"CSV mapping stores a copy of the chosen value");
+
+  template.Languages=new LabelLanguages{Codes=new(){"SK","CZ"},Selected="SK"};
+  Elements.Meta(template,1).Translations=new(){new(){Language="SK",Text="Slovenský text"}};
+  string workbookPath=Path.Combine(dir,"scenario-source.xlsx");
+  using(var zip=System.IO.Compression.ZipFile.Open(workbookPath,System.IO.Compression.ZipArchiveMode.Create)){
+   void Entry(string name,string body){using var writer=new StreamWriter(zip.CreateEntry(name).Open());writer.Write(body);}
+   Entry("xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Variants' r:id='r1'/></sheets></workbook>");
+   Entry("xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>");
+   Entry("xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Language</t></is></c></row>"+
+    "<row r='2'><c r='A2' t='inlineStr'><is><t>CZ</t></is></c></row></sheetData></worksheet>");
+  }
+  var xlsx=(LabelScenario)Drive("scenarioMapping",dialog=>{
+   var grid=(DataGridView)dialog.Controls.Find("scenarioMapping",true)[0];
+   grid.Rows[grid.Rows.Count-1].Cells[1].Value=((DataGridViewComboBoxColumn)grid.Columns[1]).Items[1];
+   dialog.AcceptButton.PerformClick();
+  },()=>Call(owner,"PickScenarioRow",owner,template,BatchData.Xlsx(workbookPath),false));
+  Check(xlsx.Language=="CZ"&&QuickPrint.PrepareScenario(template,xlsx,DateTime.Today).SourceIssues().Exists(i=>i.Element==1&&i.Blocking),
+   "XLSX scenario language reports missing translations on the original element");
+
+  owner.Close();
+
+  object Drive(string control,Action<Form> work,Func<object> show){
+   Exception failure=null;bool handled=false;
+   using var clock=new Timer{Interval=60};
+   clock.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner||dialog.Controls.Find(control,true).Length==0)continue;
+     clock.Stop();handled=true;
+     try{work(dialog);}
+     catch(Exception ex){failure=ex;}
+     if(dialog.DialogResult==DialogResult.None)dialog.DialogResult=DialogResult.Cancel;
+     break;
+    }
+   };
+   clock.Start();
+   var result=show();
+   if(failure!=null)throw failure;
+   Check(handled,"scenario dialog opened for "+control);
+   return result;
+  }
+ }
  static void SafetyZones(string dir){
   var label=LabelSettings.Default();label.HideBarcode=true;
   var text=label.Texts[0];text.AutoWidth=false;text.X=4;text.Y=10;text.Width=20;text.Height=8;
@@ -968,5 +1071,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

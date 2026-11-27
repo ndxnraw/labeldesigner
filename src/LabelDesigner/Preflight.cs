@@ -70,11 +70,13 @@ namespace EanEtikety {
    }
   }
   void NavigateOutputIssue(LabelIssue issue){
+   if(activeScenarioId!=null)SelectScenario(null);
    if(issue.Element==-2){SelectEditorIssue(issue);FocusProblems();return;}
    SelectEditorIssue(issue);
    FocusInspector();
   }
   void OpenBlockingOutputIssue(){
+   if(activeScenarioId!=null)SelectScenario(null);
    FocusProblems();
    problemView.SelectFirstBlocking();
   }

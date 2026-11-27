@@ -24,7 +24,7 @@ namespace EanEtikety {
   static bool HasImageMappings(LabelSettings label)=>label.Symbols?.Exists(symbol=>symbol?.ImageMapping!=null)==true;
 
   internal static LabelSettings CloneForPreparation(LabelSettings template){
-   template=template.WithoutEditorReference();
+   template=template.WithoutEditorReference().WithoutScenarios();
    if(!template.Symbols.Exists(symbol=>symbol?.ImageMapping!=null||symbol?.Image?.FitFrame==true))return ProjectXml.Clone(template);
    // Share immutable encoded bytes across records and output placements.
    var copy=ProjectXml.Clone(template.WithoutDataDrivenImages());
@@ -36,7 +36,8 @@ namespace EanEtikety {
    return copy;
   }
 
-  internal static HashSet<int> ProjectArtwork(LabelSettings label,Dictionary<string,string> values,Func<int,bool> invalidSource,Action<int,string> report){
+  internal static HashSet<int> ProjectArtwork(LabelSettings label,Dictionary<string,string> values,Func<int,bool> invalidSource,
+      Action<int,string> report,bool reportImageTarget=false){
    var hidden=ConditionalVisibility.FindHidden(label,values,invalidSource,message=>report(-2,message));
    if(HasImageMappings(label)){
     var fields=new HashSet<int>(QuickPrint.Available(label));
@@ -66,7 +67,7 @@ namespace EanEtikety {
       catch(OperationCanceledException){throw;}
       catch(Exception ex){failure=ex.Message;symbol.Image=null;}
      }
-     if(failure!=null)report(field,string.Format(Loc.T("Obrázok {0}"),i+1)+" — "+failure);
+     if(failure!=null)report(reportImageTarget?index:field,string.Format(Loc.T("Obrázok {0}"),i+1)+" — "+failure);
      if(symbol.Image==null)hidden.Add(index);
     }
    }

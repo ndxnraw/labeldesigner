@@ -19,6 +19,8 @@ public class LabelSettings {
  public LabelLanguages Languages;
  public EditorReference EditorReference;
  public LabelSafetyZones Safety;
+ public List<LabelScenario> Scenarios=new();
+ public bool ShouldSerializeScenarios()=>Scenarios?.Count>0;
  public List<int> QuickPrintFields=new List<int>();
  public bool ShouldSerializeQuickPrintFields(){return QuickPrintFields!=null&&QuickPrintFields.Count>0;}
  public double BarRotation;
@@ -38,6 +40,12 @@ public class LabelSettings {
   if(EditorReference==null)return this;
   var copy=(LabelSettings)MemberwiseClone();
   copy.EditorReference=null;
+  return copy;
+ }
+ public LabelSettings WithoutScenarios(){
+  if(Scenarios?.Count==0)return this;
+  var copy=(LabelSettings)MemberwiseClone();
+  copy.Scenarios=new();
   return copy;
  }
  // Keep the constructor's missing-field XML default; only new documents opt in.

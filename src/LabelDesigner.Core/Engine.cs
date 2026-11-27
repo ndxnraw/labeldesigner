@@ -41,6 +41,7 @@ public static class Engine {
   if(s==null||s.Layout==null||s.Variables==null||s.Metadata==null||s.Batch==null||s.Batch.Bindings==null||s.ApplicationIdentifiers==null)throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   s.EditorReference?.ValidateSettings();
   s.Safety?.Validate();
+  if(draft)LabelScenario.Validate(s.Scenarios);
   if((s.Unit!="mm"&&s.Unit!="cm")||Array.IndexOf(MoreBarcodes.Kinds,s.Kind)<0||!DraftText(s.Ean,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   if(s.Variables.Count>256||s.Metadata.Count>1000||s.Batch.Bindings.Count>256||s.ApplicationIdentifiers.Count>100)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));
   foreach(var v in s.Variables)if(v==null||!DraftText(v.Name,200)||!DraftText(v.Type,100)||!DraftText(v.Format,4000)||!DraftText(v.Prefix,4000)||!DraftText(v.Suffix,4000)||!DraftText(v.FixedValue,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));

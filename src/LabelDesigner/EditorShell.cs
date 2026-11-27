@@ -111,6 +111,7 @@ namespace EanEtikety {
     ()=>zoomMenu.Show(canvasZoomMode,new Point(0,0),ToolStripDropDownDirection.AboveRight));
    canvasZoomMode.AccessibleRole=AccessibleRole.ButtonMenu;
    controls.Controls.AddRange(new Control[]{zoomOut,canvasZoomMode,zoomIn});
+   AddScenarioControls(controls);
    area.Controls.Add(controls,0,1);
    preview.ZoomChanged+=delegate{RefreshCanvasZoom();PositionInlineText();};
    RefreshCanvasZoom();

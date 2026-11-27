@@ -13,6 +13,10 @@ namespace EanEtikety {
    Label = label; Issues = issues; this.instant = instant; Hidden=hidden;
   }
   public bool CanPrint { get { return !Issues.Exists(issue => issue.Blocking); } }
+  public List<LabelIssue> SourceIssues()=>Issues.ConvertAll(issue=>new LabelIssue{
+   Element=issue.SourceElement??Elements.SourceIndex(Label,issue.Element),Blocking=issue.Blocking,Message=issue.Message,
+   SafetyZone=issue.SafetyZone,Record=issue.Record,Page=issue.Page
+  });
 
   public OutputPlan CreatePlan(int quantity) {
    if (!CanPrint) throw new InvalidOperationException(Loc.T("Opravte údaje pred tlačou."));
@@ -95,13 +99,18 @@ namespace EanEtikety {
   public static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language)=>Prepare(template,values,instant,language,false);
   public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant)=>Prepare(template,null,instant,null,true);
   public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant,string language)=>Prepare(template,null,instant,language,true);
+  public static QuickPrintDraft PrepareScenario(LabelSettings template,LabelScenario scenario,DateTime instant)=>
+   Prepare(template,null,instant,scenario.Language,true,scenario);
 
-  static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,bool editor) {
-   template=template?.WithoutEditorReference();
+  static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,bool editor,
+      LabelScenario scenario=null) {
+   template=template?.WithoutEditorReference().WithoutScenarios();
    Engine.ValidateDraft(template);
    var label=JobPreparation.CloneForPreparation(template);
    var selected=new HashSet<int>(editor?new List<int>():Selected(template));
    var issues=new List<LabelIssue>();
+   var overrides=scenario?.Values.ToDictionary(value=>value.Element);
+   var inputKinds=new Dictionary<int,TextInputKind>();
    var variables=BatchData.Variables(template,0,instant);
    var outputCulture=LabelDataFormat.HasFields(label)?LabelDataFormat.CultureFor(template,language):null;
    LabelLanguages.Resolve(label,language,(field,message)=>issues.Add(new LabelIssue{Element=field,Blocking=true,Message=message}));
@@ -110,21 +119,31 @@ namespace EanEtikety {
     WorkContext.Check();
     string original=Value(label,index), value=null;
     bool edited=selected.Contains(index)&&values!=null&&values.TryGetValue(index,out value)&&value!=original;
+    if(overrides!=null&&overrides.TryGetValue(index,out var sample)&&!LabelLanguages.Translated(template,index)){
+     if(sample.SourceError!=null){
+      issues.Add(new LabelIssue{Element=index,Blocking=true,Message=sample.SourceError});
+      continue;
+     }
+     edited=true;
+     value=sample.Value;
+     inputKinds[index]=sample.InputKind;
+    }
     try{ApplyValue(label,index,edited?value:original,!edited,variables);}
     catch(OperationCanceledException){throw;}
     catch(XmlException){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=Loc.T("Hodnota obsahuje nepovolený znak.")});}
     catch(Exception ex){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=ex.Message});}
    }
-   var ruleErrors=new HashSet<string>(StringComparer.Ordinal);
+   var ruleErrors=new HashSet<(int Element,string Message)>();
    var hidden=JobPreparation.ProjectArtwork(label,variables,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
-    (_,message)=>ruleErrors.Add(message));
+    (index,message)=>ruleErrors.Add((scenario==null?-2:index,message)),scenario!=null);
    if(hidden.Count>0){
     issues.RemoveAll(issue=>hidden.Contains(issue.Element));
     var indices=Elements.Indices(label);
     foreach(var issue in issues)if(issue.Element!=-2)issue.Element=indices.Find(index=>Elements.SourceIndex(label,index)==issue.Element);
    }
-   foreach(string message in ruleErrors)issues.Add(new LabelIssue{Blocking=true,Message=message});
-   if(outputCulture!=null)LabelDataFormat.ApplyFields(label,outputCulture,_=>TextInputKind.Text,
+   foreach(var error in ruleErrors)issues.Add(new LabelIssue{Blocking=true,Message=error.Message,SourceElement=error.Element});
+   if(outputCulture!=null)LabelDataFormat.ApplyFields(label,outputCulture,
+    index=>inputKinds.GetValueOrDefault(Elements.SourceIndex(label,index),TextInputKind.Text),
     (index,message)=>{if(!issues.Exists(issue=>issue.Element==index&&issue.Blocking))
      issues.Add(new LabelIssue{Element=index,Blocking=true,Message=message});});
    label.Variables.Clear();

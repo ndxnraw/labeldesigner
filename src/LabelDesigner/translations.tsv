@@ -1212,3 +1212,33 @@ Bezpečné okraje zaberajú celú etiketu.	The safety margins cover the entire l
 Voľná zóna „{0}“ presahuje etiketu.	Reserved zone “{0}” extends beyond the label.	Volná zóna „{0}“ přesahuje etiketu.	A(z) „{0}” szabad zóna túlnyúlik a címkén.
 {0} presahuje bezpečné okraje.	{0} extends beyond the safety margins.	{0} přesahuje bezpečné okraje.	A(z) {0} túlnyúlik a biztonsági margókon.
 {0} zasahuje do voľnej zóny „{1}“.	{0} overlaps reserved zone “{1}”.	{0} zasahuje do volné zóny „{1}“.	A(z) {0} átfedi a(z) „{1}” szabad zónát.
+Scenár náhľadu	Preview scenario	Scénář náhledu	Előnézeti forgatókönyv
+Bežný náhľad	Standard preview	Běžný náhled	Normál előnézet
+Testovacie scenáre…	Test scenarios…	Testovací scénáře…	Tesztforgatókönyvek…
+Scenáre použijete na skúšanie návrhu v editore. Tlač a export používajú údaje šablóny.	Use scenarios to test the design in the editor. Printing and export use the template data.	Scénáře slouží k testování návrhu v editoru. Tisk a export používají údaje šablony.	A forgatókönyvekkel a szerkesztőben tesztelheti a tervet. A nyomtatás és az export a sablon adatait használja.
+Upraviť	Edit	Upravit	Szerkesztés
+Zobraziť na plátne	Show on canvas	Zobrazit na plátně	Megjelenítés a vásznon
+Skontrolovať všetky scenáre	Check all scenarios	Zkontrolovat všechny scénáře	Összes forgatókönyv ellenőrzése
+Kontrolujem scenáre…	Checking scenarios…	Kontroluji scénáře…	Forgatókönyvek ellenőrzése…
+Kontrola testovacích scenárov	Test scenario review	Kontrola testovacích scénářů	Tesztforgatókönyvek ellenőrzése
+Scenáre: {0} · Problémy: {1}	Scenarios: {0} · Issues: {1}	Scénáře: {0} · Problémy: {1}	Forgatókönyvek: {0} · Problémák: {1}
+Prejsť v editore	Go to issue in editor	Přejít na problém v editoru	Ugrás a problémra a szerkesztőben
+Údaje testovacieho scenára	Test scenario data	Údaje testovacího scénáře	Tesztforgatókönyv adatai
+Názov scenára	Scenario name	Název scénáře	Forgatókönyv neve
+Použiť jazyk zo scenára	Use scenario language	Použít jazyk scénáře	Forgatókönyv nyelvének használata
+Zaškrtnuté polia použijú hodnotu scenára. Prázdna hodnota je tiež testovací údaj.	Checked fields use scenario values. A blank value is also test data.	Zaškrtnutá pole používají hodnoty scénáře. Prázdná hodnota je také testovací údaj.	A bejelölt mezők a forgatókönyv értékeit használják. Az üres érték is tesztadat.
+Pole etikety	Label field	Pole etikety	Címkemező
+Hodnota	Value	Hodnota	Érték
+Načítať riadok CSV/XLSX…	Load CSV/XLSX row…	Načíst řádek CSV/XLSX…	CSV/XLSX-sor betöltése…
+Nastavenie CSV	CSV settings	Nastavení CSV	CSV-beállítások
+Tabuľka nemá požadované záznamy.	The table has no matching records.	Tabulka nemá požadované záznamy.	A táblázatban nincsenek megfelelő rekordok.
+Výber riadka a mapovanie	Select and map row	Výběr řádku a mapování	Sor kiválasztása és hozzárendelése
+Prvý riadok obsahuje názvy stĺpcov	First row contains column names	První řádek obsahuje názvy sloupců	Az első sor oszlopneveket tartalmaz
+Poradie dátového záznamu	Data record number	Pořadí datového záznamu	Adatrekord sorszáma
+Mapovanie scenára	Scenario mapping	Mapování scénáře	Forgatókönyv hozzárendelése
+Použiť riadok	Use row	Použít řádek	Sor használata
+Pôvodný riadok: {0}	Source row: {0}	Původní řádek: {0}	Forrássor: {0}
+Bez mapovania	Unmapped	Bez mapování	Nincs hozzárendelve
+Príliš veľa testovacích scenárov.	Too many test scenarios.	Příliš mnoho testovacích scénářů.	Túl sok tesztforgatókönyv.
+Každý scenár potrebuje jedinečný názov a platné údaje.	Each scenario needs a unique name and valid data.	Každý scénář potřebuje jedinečný název a platná data.	Minden forgatókönyvhöz egyedi név és érvényes adatok szükségesek.
+Neplatná hodnota testovacieho scenára.	Invalid test scenario value.	Neplatná hodnota testovacího scénáře.	Érvénytelen tesztforgatókönyv-érték.
