@@ -54,7 +54,7 @@ namespace EanEtikety {
    string code=languages.Codes.Find(item=>SameCode(item,wanted));
    foreach(var meta in label.Metadata){
     var entries=meta.Translations;
-    if(entries?.Count>0&&meta.Index>=0&&meta.Index<label.Texts.Count){
+    if(meta.Calculation==null&&entries?.Count>0&&meta.Index>=0&&meta.Index<label.Texts.Count){
      string Translation(string language)=>string.IsNullOrEmpty(language)?null:
       entries.Find(entry=>SameCode(entry.Language,language))?.Text;
      string text=Translation(code);

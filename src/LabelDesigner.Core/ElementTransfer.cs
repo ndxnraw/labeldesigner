@@ -17,11 +17,11 @@ public class BarcodeContent {
 }
 public class ElementTransfer {
  public TextItem Text; public SymbolItem Symbol;
- public int SourceIndex=-2; public VisibilityRule Visibility,GroupVisibility;public List<LanguageTranslation> Translations;public LabelDataFormat DataFormat;
- public bool ShouldSerializeSourceIndex()=>Visibility!=null||GroupVisibility!=null||SourceIndex!=-2;
+ public int SourceIndex=-2; public VisibilityRule Visibility,GroupVisibility;public List<LanguageTranslation> Translations;public LabelDataFormat DataFormat;public FieldCalculation Calculation;
+ public bool ShouldSerializeSourceIndex()=>Visibility!=null||GroupVisibility!=null||Calculation!=null||SourceIndex!=-2;
  public bool ShouldSerializeTranslations()=>Translations?.Count>0;
  public static string Encode(ElementTransfer element){using(var w=new StringWriter()){new XmlSerializer(typeof(ElementTransfer)).Serialize(w,element);return w.ToString();}}
- public static ElementTransfer Decode(string xml){if(xml==null||xml.Length>64000000)throw new InvalidDataException(Loc.T("Neplatný prvok v schránke."));using(var r=XmlReader.Create(new StringReader(xml),new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=64000000})){var e=(ElementTransfer)new XmlSerializer(typeof(ElementTransfer)).Deserialize(r);if((e.Text==null)==(e.Symbol==null))throw new InvalidDataException(Loc.T("Neplatný prvok v schránke."));var s=LabelSettings.Default();s.Texts.Clear();if(e.Text!=null)s.Texts.Add(e.Text);else s.Symbols.Add(e.Symbol);LabelLanguages.ValidateTranslations(e.Translations);e.DataFormat?.Validate();if(e.Visibility!=null||e.Symbol?.ImageMapping!=null)Engine.ValidateDraft(s);else Engine.Validate(s);return e;}}
+ public static ElementTransfer Decode(string xml){if(xml==null||xml.Length>64000000)throw new InvalidDataException(Loc.T("Neplatný prvok v schránke."));using(var r=XmlReader.Create(new StringReader(xml),new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=64000000})){var e=(ElementTransfer)new XmlSerializer(typeof(ElementTransfer)).Deserialize(r);if((e.Text==null)==(e.Symbol==null))throw new InvalidDataException(Loc.T("Neplatný prvok v schránke."));var s=LabelSettings.Default();s.Texts.Clear();if(e.Text!=null)s.Texts.Add(e.Text);else s.Symbols.Add(e.Symbol);LabelLanguages.ValidateTranslations(e.Translations);e.DataFormat?.Validate();e.Calculation?.Validate(50);if(e.Visibility!=null||e.Symbol?.ImageMapping!=null)Engine.ValidateDraft(s);else Engine.Validate(s);return e;}}
 }
 
 }

@@ -18,17 +18,20 @@ namespace EanEtikety {
     WorkContext.Check();
     var label=JobPreparation.CloneForPreparation(template);
     var columns=new Dictionary<string,int>(StringComparer.Ordinal);
+    var kinds=new Dictionary<int,TextInputKind>();
     string requestedLanguage=null;
     foreach(var binding in mappings) {
      if(binding.Column<0)continue;
      bool language=binding.Target==LabelLanguages.BatchTarget;
      if(language&&label.Languages==null)continue;
-     if(Elements.TryFieldIndex(binding.Target,out int field)&&LabelLanguages.Translated(label,field))continue;
+     bool element=Elements.TryFieldIndex(binding.Target,out int field);
+     if(element&&(LabelLanguages.Translated(label,field)||FieldCalculation.ForField(label,field)!=null))continue;
      string value=Value(row,binding.Column);
      string issue=csv&&binding.Column>=row.Length?Loc.T("V riadku chýba namapovaný stĺpec."):
       value.StartsWith("!ERROR:",StringComparison.Ordinal)?value:null;
      if(issue!=null)record.AddIssue(binding.Column,binding.Target,issue);
      columns[binding.Target]=binding.Column;
+     if(element&&inputKinds!=null&&binding.Column<inputKinds.Length)kinds[field]=inputKinds[binding.Column];
      if(language)requestedLanguage=issue==null?value:"";
      else SetBoundValue(label,binding.Target,issue==null?value:"");
     }
@@ -55,6 +58,7 @@ namespace EanEtikety {
     label.Ean=resolve("code",label.Ean);
     foreach(var ai in label.ApplicationIdentifiers)ai.Data=resolve("code",ai.Data);
     for(int i=0;i<label.Texts.Count;i++) {
+     if(FieldCalculation.ForField(label,i)!=null)continue;
      var text=label.Texts[i];
      try {
       // A formatted source cell is a literal typed value.
@@ -73,6 +77,13 @@ namespace EanEtikety {
       foreach(var ai in symbol.Code.ApplicationIdentifiers)ai.Data=resolve(target,ai.Data);
      }
     }
+    FieldCalculation.Apply(label,kinds,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
+     (field,source,message)=>{
+      string input=source>=0?Elements.FieldTarget(source):null;
+      int column=input==null?-1:record.Issues.Find(issue=>issue.Target==input&&issue.Blocking&&issue.Column>=0)?.Column??
+       columns.GetValueOrDefault(input,-1);
+      record.AddIssue(column,Elements.FieldTarget(field),message);
+     });
     if(JobPreparation.HasDynamicArtwork(label)){
      var ruleErrors=new HashSet<(int Column,string Message)>();
      var hidden=JobPreparation.ProjectArtwork(label,values,index=>record.Issues.Exists(issue=>issue.Blocking&&issue.Target==Elements.FieldTarget(index)),
@@ -90,7 +101,7 @@ namespace EanEtikety {
      foreach(var error in ruleErrors)record.AddIssue(error.Column,null,error.Message);
     }
     if(outputCulture!=null)LabelDataFormat.ApplyFields(label,outputCulture,field=>
-     inputKinds!=null&&columns.TryGetValue(Elements.FieldTarget(field),out int column)&&column<inputKinds.Length?inputKinds[column]:TextInputKind.Text,
+     kinds.GetValueOrDefault(Elements.SourceIndex(label,field)),
      (field,message)=>AddFieldIssue(record,columns,Elements.FieldTarget(field),message));
     label.Variables.Clear();
     TextAutoLayout.Apply(label);

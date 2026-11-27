@@ -7,7 +7,6 @@ using static EanEtikety.ManagementLayout;
 
 namespace EanEtikety {
  public partial class PreviewPanel {
-  internal readonly Dictionary<int,ElementEdit> ProjectedStackElements=new();
   internal bool InVerticalStack(int index)=>Settings!=null&&VerticalStack.ForElement(Settings,index)!=null;
 
   void DrawVerticalStack(Graphics graphics,Rectangle label){
@@ -38,17 +37,6 @@ namespace EanEtikety {
    if(group!=null)return verticalStacks.Exists(stack=>stack.Group==group)||preview.Selection.Count>=2;
    return preview.Selection.Count>=2&&!preview.Selection.Exists(index=>
     elementMetadata.Exists(meta=>meta.Index==index&&!string.IsNullOrEmpty(meta.Group)));
-  }
-
-  void UseStackGeometry(LabelSettings source,LabelSettings placed){
-   if(source.VerticalStacks.Count==0)return;
-   foreach(int index in Elements.Indices(placed)){
-    int original=Elements.SourceIndex(placed,index);
-    if(VerticalStack.ForElement(source,original)==null)continue;
-    var item=ElementTransform.Get(placed,index);
-    item.Index=original;
-    preview.ProjectedStackElements[original]=item;
-   }
   }
 
   void ConfigureStack(){

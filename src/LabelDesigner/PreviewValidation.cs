@@ -5,16 +5,27 @@ public static class PreviewValidation {
  public static VectorScene Build(LabelSettings source,List<LabelIssue> issues){if(!issues.Exists(i=>i.Blocking))return VectorArt.Build(source);var result=new VectorScene{Width=source.Width,Height=source.Height};try{foreach(int index in Elements.Indices(source)){if(issues.Exists(i=>i.Blocking&&i.Element==index))continue;var part=ProjectXml.Clone(source);part.Variables.Clear();part.Texts.Clear();part.Symbols.Clear();part.HideBarcode=index!=-1;part.UsePaper=part.Sheet=false;part.Layout.Enabled=false;part.Metadata.Clear();if(index>=0)part.Texts.Add(source.Texts[index]);if(index<=-3)part.Symbols.Add(source.Symbols[-3-index]);try{using(var scene=VectorArt.Build(part))foreach(var shape in scene.Shapes){var copy=shape.Copy();copy.Element=index;result.Shapes.Add(copy);}}catch{ /* The problem remains listed and the element remains selectable. */ }}var order=new Dictionary<ArtShape,int>();for(int i=0;i<result.Shapes.Count;i++)order[result.Shapes[i]]=i;result.Shapes.Sort((a,b)=>{int layer=Elements.Layer(source,a.Element).CompareTo(Elements.Layer(source,b.Element));return layer==0?order[a].CompareTo(order[b]):layer;});return result;}catch{result.Dispose();throw;}}
 }
 public partial class MainForm {
+ void UsePreparedGeometry(LabelSettings source,LabelSettings placed){
+  if(source.VerticalStacks.Count==0&&!source.Metadata.Exists(meta=>meta.Calculation!=null))return;
+  foreach(int index in Elements.Indices(placed)){
+   int original=Elements.SourceIndex(placed,index);
+   if(VerticalStack.ForElement(source,original)==null&&
+      !(original>=0&&source.Texts[original].AutoWidth&&FieldCalculation.ForField(source,original)!=null))continue;
+   var item=ElementTransform.Get(placed,index);
+   item.Index=original;
+   preview.ProjectedElements[original]=item;
+  }
+ }
  void UpdatePreview(){if(IsDisposed||Disposing)return;TrackHistory();scenarioPreviewIssues=null;try{var raw=Read();LabelSettings s=raw;VectorScene scene=null;
   var scenario=raw.Scenarios.Find(item=>item.Id==activeScenarioId);
   preview.HiddenElements.Clear();
-  preview.ProjectedStackElements.Clear();
+  preview.ProjectedElements.Clear();
   if(JobPreparation.HasDynamicArtwork(raw)){
    var instant=currentTime();previewDay=instant.Date;
    var draft=QuickPrint.PrepareEditor(raw,instant);
    if(scenario==null)scene=BuildEditorScene(draft);
    labelIssues=draft.SourceIssues();
-   if(scenario==null){preview.HiddenElements.UnionWith(draft.Hidden);UseStackGeometry(raw,draft.Label);}
+   if(scenario==null){preview.HiddenElements.UnionWith(draft.Hidden);UsePreparedGeometry(raw,draft.Label);}
   }else{
    string variableError=null;try{s=PreparedLabel(raw);}catch(Exception ex){variableError=ex.Message;}
    labelIssues=LabelChecks.Inspect(s);
@@ -27,7 +38,7 @@ public partial class MainForm {
     var draft=QuickPrint.PrepareScenario(raw,scenario,currentTime());
     scene=BuildEditorScene(draft);
     preview.HiddenElements.UnionWith(draft.Hidden);
-    UseStackGeometry(raw,draft.Label);
+    UsePreparedGeometry(raw,draft.Label);
     scenarioPreviewIssues=draft.SourceIssues();
    }catch(Exception ex){scenarioPreviewIssues=new List<LabelIssue>{new(){Blocking=true,Message=ex.Message}};}
   }

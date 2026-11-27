@@ -62,23 +62,15 @@ namespace EanEtikety {
     error=value;return false;
    }
    if(Kind==TextDataKind.Number){
-    bool comma=DecimalInput==TextDecimalInput.Comma&&inputKind!=TextInputKind.WorksheetNumber;
-    var numberFormat=comma?CommaDecimal:CultureInfo.InvariantCulture.NumberFormat;
-    if(!decimal.TryParse(value,NumberStyles.AllowLeadingSign|NumberStyles.AllowDecimalPoint,numberFormat,out decimal number)){
-     error=Loc.T(comma?"Zadajte číslo s desatinnou čiarkou.":"Zadajte číslo s desatinnou bodkou.");
+    if(!TryNumber(value,inputKind,out decimal number)){
+     error=NumberError(inputKind);
      return false;
     }
     output=number.ToString("F"+Decimals,culture);
     if(!string.IsNullOrWhiteSpace(Unit))output+=" "+Unit.Trim();
     return true;
    }
-   string pattern=inputKind==TextInputKind.WorksheetDate?IsoDate:DateInput switch {
-    TextDateOrder.DayMonthDot=>"d.M.yyyy",
-    TextDateOrder.DayMonthSlash=>"d/M/yyyy",
-    TextDateOrder.MonthDaySlash=>"M/d/yyyy",
-    _=>IsoDate
-   };
-   if(DateOnly.TryParseExact(value,pattern,CultureInfo.InvariantCulture,DateTimeStyles.AllowWhiteSpaces,out DateOnly date)){
+   if(TryDate(value,inputKind,out DateOnly date,out string pattern)){
     string display=DateOutput switch {
      TextDateDisplay.Iso=>IsoDate,
      TextDateDisplay.DayMonthDot=>"dd. MM. yyyy",
@@ -96,6 +88,20 @@ namespace EanEtikety {
    }
    error=string.Format(Loc.T("Zadajte platný dátum vo formáte {0}."),pattern);
    return false;
+  }
+
+  bool UsesComma(TextInputKind kind)=>DecimalInput==TextDecimalInput.Comma&&kind!=TextInputKind.WorksheetNumber;
+  internal string NumberError(TextInputKind kind)=>Loc.T(UsesComma(kind)?
+   "Zadajte číslo s desatinnou čiarkou.":"Zadajte číslo s desatinnou bodkou.");
+  internal bool TryNumber(string value,TextInputKind kind,out decimal number)=>
+   decimal.TryParse(value,NumberStyles.AllowLeadingSign|NumberStyles.AllowDecimalPoint,
+    UsesComma(kind)?CommaDecimal:CultureInfo.InvariantCulture.NumberFormat,out number);
+  internal bool TryDate(string value,TextInputKind kind,out DateOnly date,out string pattern){
+   pattern=kind==TextInputKind.WorksheetDate?IsoDate:DateInput switch {
+    TextDateOrder.DayMonthDot=>"d.M.yyyy",TextDateOrder.DayMonthSlash=>"d/M/yyyy",
+    TextDateOrder.MonthDaySlash=>"M/d/yyyy",_=>IsoDate
+   };
+   return DateOnly.TryParseExact(value,pattern,CultureInfo.InvariantCulture,DateTimeStyles.AllowWhiteSpaces,out date);
   }
 
   // Apply after data-driven artwork is selected. Rules and image keys continue

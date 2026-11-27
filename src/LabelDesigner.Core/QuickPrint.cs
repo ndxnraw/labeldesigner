@@ -31,11 +31,18 @@ namespace EanEtikety {
     label.Symbols[-3-index].Matrix != null);
   }
 
-  public static List<int> Editable(LabelSettings label)=>Available(label).FindAll(index=>!LabelLanguages.Translated(label,index));
+  public static List<int> Editable(LabelSettings label)=>Available(label).FindAll(index=>
+   !LabelLanguages.Translated(label,index)&&FieldCalculation.ForField(label,index)==null);
 
   public static List<int> Selected(LabelSettings label) {
    var selected = new HashSet<int>(label.QuickPrintFields ?? new List<int>());
    return Editable(label).FindAll(selected.Contains);
+  }
+
+  public static List<int> InputFields(LabelSettings label){
+   var inputs=FieldCalculation.TextInputs(label);
+   inputs.UnionWith(Selected(label));
+   return Editable(label).FindAll(inputs.Contains);
   }
 
   public static string Name(LabelSettings label, int index) {
@@ -107,16 +114,18 @@ namespace EanEtikety {
    template=template?.WithoutEditorReference().WithoutScenarios();
    Engine.ValidateDraft(template);
    var label=JobPreparation.CloneForPreparation(template);
-   var selected=new HashSet<int>(editor?new List<int>():Selected(template));
+   var selected=new HashSet<int>(editor?new List<int>():InputFields(template));
    var issues=new List<LabelIssue>();
    var overrides=scenario?.Values.ToDictionary(value=>value.Element);
    var inputKinds=new Dictionary<int,TextInputKind>();
    var variables=BatchData.Variables(template,0,instant);
    var outputCulture=LabelDataFormat.HasFields(label)?LabelDataFormat.CultureFor(template,language):null;
    LabelLanguages.Resolve(label,language,(field,message)=>issues.Add(new LabelIssue{Element=field,Blocking=true,Message=message}));
-   if(!editor)foreach(var text in label.Texts)text.AutoWidth=false;
+   if(!editor)for(int index=0;index<label.Texts.Count;index++)
+    if(FieldCalculation.ForField(label,index)==null)label.Texts[index].AutoWidth=false;
    foreach(int index in Available(label)){
     WorkContext.Check();
+    if(FieldCalculation.ForField(label,index)!=null)continue;
     string original=Value(label,index), value=null;
     bool edited=selected.Contains(index)&&values!=null&&values.TryGetValue(index,out value)&&value!=original;
     if(overrides!=null&&overrides.TryGetValue(index,out var sample)&&!LabelLanguages.Translated(template,index)){
@@ -133,6 +142,8 @@ namespace EanEtikety {
     catch(XmlException){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=Loc.T("Hodnota obsahuje nepovolený znak.")});}
     catch(Exception ex){issues.Add(new LabelIssue{Element=index,Blocking=true,Message=ex.Message});}
    }
+   FieldCalculation.Apply(label,inputKinds,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
+    (field,_,message)=>issues.Add(new LabelIssue{Element=field,Blocking=true,Message=message}));
    var ruleErrors=new HashSet<(int Element,string Message)>();
    var hidden=JobPreparation.ProjectArtwork(label,variables,index=>issues.Exists(issue=>issue.Blocking&&issue.Element==index),
     (index,message)=>ruleErrors.Add((scenario==null?-2:index,message)),scenario!=null);
@@ -148,7 +159,7 @@ namespace EanEtikety {
      issues.Add(new LabelIssue{Element=index,Blocking=true,Message=message});});
    label.Variables.Clear();
    BatchReferences.Strip(label);
-   if(editor)TextAutoLayout.Apply(label);
+   TextAutoLayout.Apply(label);
    VerticalStack.Apply(label);
    foreach(var issue in LabelChecks.Inspect(label))
     if(!issues.Exists(item=>item.Blocking&&item.Element==issue.Element))issues.Add(issue);

@@ -106,7 +106,7 @@ namespace EanEtikety {
      StackField(fields,Loc.T("Jazyk etikety"),labelLanguage);
     }
     var errors=new Dictionary<int,Label>();
-    foreach(int index in QuickPrint.Selected(template)){
+    foreach(int index in QuickPrint.InputFields(template)){
      bool aiLines=QuickPrint.UsesAiLines(template,index);
      bool multiline=aiLines||index>=0;
      var editor=new TextBox{Text=QuickPrint.Value(template,index)??"",Name="quickPrintValue"+index,MaxLength=4000,

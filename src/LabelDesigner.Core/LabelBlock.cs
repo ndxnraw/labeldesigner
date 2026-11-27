@@ -121,6 +121,12 @@ namespace EanEtikety {
      meta.Locked=original.Locked;
      meta.Translations=original.Translations;
      meta.DataFormat=original.DataFormat;
+     if(original.Calculation is { } formula){
+      foreach(int field in new[]{formula.Left.Field,formula.Right.Field})
+       if(field>=0&&!map.ContainsKey(field))
+        throw new InvalidDataException(Loc.T("Do výberu pridajte aj zdrojové polia výpočtu."));
+      meta.Calculation=formula.Remap(map);
+     }
      meta.Visibility=Remap(original.Visibility);
      if(!string.IsNullOrEmpty(original.Group)){
       if(!groups.TryGetValue(original.Group,out string group))groups[original.Group]=group=Guid.NewGuid().ToString("N");

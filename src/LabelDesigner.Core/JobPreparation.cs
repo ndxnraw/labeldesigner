@@ -20,7 +20,7 @@ namespace EanEtikety {
  }
  public static class JobPreparation {
   public static bool HasDynamicArtwork(LabelSettings label)=>label.Languages!=null||ConditionalVisibility.HasRules(label)||
-   HasImageMappings(label)||LabelDataFormat.HasFields(label)||label.VerticalStacks.Count>0;
+   HasImageMappings(label)||LabelDataFormat.HasFields(label)||FieldCalculation.HasFields(label)||label.VerticalStacks.Count>0;
   static bool HasImageMappings(LabelSettings label)=>label.Symbols?.Exists(symbol=>symbol?.ImageMapping!=null)==true;
 
   internal static LabelSettings CloneForPreparation(LabelSettings template){

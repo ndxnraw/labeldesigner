@@ -49,6 +49,10 @@ public static class Engine {
   foreach(var m in s.Metadata){
    if(m==null)throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
    LabelLanguages.ValidateTranslations(m.Translations);
+   if(m.Calculation!=null){
+    if(m.Index<0||s.Texts==null||m.Index>=s.Texts.Count)throw new InvalidDataException(Loc.T("Neplatná definícia výpočtu."));
+    m.Calculation.Validate(s.Texts.Count);
+   }
    if(m.DataFormat!=null){
     if(m.Index<0||s.Texts==null||m.Index>=s.Texts.Count)throw new InvalidDataException(Loc.T("Neplatný formát údajov."));
     m.DataFormat.Validate();

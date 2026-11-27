@@ -54,9 +54,10 @@ namespace EanEtikety {
    }
    char Separator{get{return separator.SelectedIndex==2?'\t':separator.Text[0];}}int CodePage{get{return encoding.SelectedIndex==0?65001:1250;}}
    void Clear(){records.RowCount=0;batch=new List<BatchRecord>();comparisonTable=null;included.Clear();preparedInfo.Text="";ShowRecordPreview();UpdateSelectionSummary();}
+   readonly HashSet<string> calculatedTargets=new();
    void Map(){
     Clear();positionsConfirmed=false;updating=true;try{
-     mapping.Rows.Clear();targets.Clear();var table=CurrentTable;
+     mapping.Rows.Clear();targets.Clear();calculatedTargets.Clear();var table=CurrentTable;
      var preset=ActivePreset;header.Enabled=preset==null;generated.Enabled=tables.Count==0&&preset==null;
      var choices=new List<string>{Loc.T("Neprepojené")};int columns=0;if(table!=null)foreach(var row in table.Rows)columns=Math.Max(columns,row.Length);
      for(int i=0;i<columns;i++)choices.Add((i+1)+": "+(header.Checked&&table.Rows.Count>0?BatchData.Value(table.Rows[0],i):Loc.T("Stĺpec")));
@@ -68,7 +69,7 @@ namespace EanEtikety {
       targets.Add(key);mapping.Rows.Add(name,index>=0&&index<columns?choices[index+1]:choices[0]);
      };
      Action<string,string> bind=(key,name)=>{var saved=setup.Bindings.Find(b=>b.Target==key);add(key,name,saved==null?-1:saved.Column);};
-     var model=owner.Read();if(model.Languages!=null)bind(LabelLanguages.BatchTarget,Loc.T("Jazyk etikety"));if(!model.HideBarcode)bind("code",Loc.T("Čiarový kód"));for(int i=0;i<model.Texts.Count;i++)if(!LabelLanguages.Translated(model,i))bind("text:"+i,model.Texts[i].Text);for(int i=0;i<model.Symbols.Count;i++)if(model.Symbols[i].Code!=null||model.Symbols[i].Matrix!=null)bind("symbol:"+i,model.Symbols[i].Name+" "+(i+1));add("quantity",Loc.T("Počet etikiet"),setup.QuantityColumn);
+     var model=owner.Read();var inputs=FieldCalculation.TextInputs(model);if(model.Languages!=null)bind(LabelLanguages.BatchTarget,Loc.T("Jazyk etikety"));if(!model.HideBarcode)bind("code",Loc.T("Čiarový kód"));for(int i=0;i<model.Texts.Count;i++){string key="text:"+i;if(FieldCalculation.ForField(model,i)!=null)calculatedTargets.Add(key);else if(!LabelLanguages.Translated(model,i))bind(key,inputs.Contains(i)?QuickPrint.Name(model,i)+" · "+model.Texts[i].Text:model.Texts[i].Text);}for(int i=0;i<model.Symbols.Count;i++)if(model.Symbols[i].Code!=null||model.Symbols[i].Matrix!=null)bind("symbol:"+i,model.Symbols[i].Name+" "+(i+1));add("quantity",Loc.T("Počet etikiet"),setup.QuantityColumn);
      if(table!=null)add("unique",Loc.T("Stĺpec s jedinečnými hodnotami"),setup.UniqueColumn<columns?setup.UniqueColumn:-1);
      UpdateMappingState();
     }finally{updating=false;}

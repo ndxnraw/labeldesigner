@@ -76,7 +76,7 @@ namespace EanEtikety {
    bool CanPrepare() {
     var preset=ActivePreset;
     if(CurrentTable==null)return preset==null&&tables.Count==0;
-    if(preset!=null&&preset.Bindings.Exists(binding=>!targets.Contains(binding.Target)))return false;
+    if(preset!=null&&preset.Bindings.Exists(binding=>!targets.Contains(binding.Target)&&!calculatedTargets.Contains(binding.Target)))return false;
     for(int i=0;i<targets.Count;i++)
      if(schema!=null&&schema.Problems.ContainsKey(targets[i])&&ColumnFor(i)<0)return false;
     return true;

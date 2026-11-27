@@ -16,6 +16,11 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Vypočítané polia** používajú čísla alebo dátumy z textových polí a
+  konštánt. Vo vlastnostiach textu vyberiete operáciu aj oba vstupy a uvidíte
+  výsledok. Vstupné polia sa zobrazia v rýchlom vyplnení alebo ich namapujete
+  na stĺpce CSV/XLSX. Výsledok sa prepočíta pre každý záznam a použije formát
+  poľa. Pri chybnej hodnote vidno pri dávke pôvodný riadok aj mapovaný stĺpec.
 - **Zvislé skupiny** rozmiestňujú prvky zhora nadol v pevnom ráme v mm.
   Vlastnosti skupiny určujú poradie a rozostup. Skryté prvky uvoľnia miesto
   a neotočené texty sa podľa obsahu rozšíria nadol. Kódy si zachovávajú

@@ -1,5 +1,131 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void CalculatedFields(string dir){
+  var label=LabelSettings.Default();
+  label.HideBarcode=true;label.Height=80;
+  label.Texts.Clear();
+  foreach(string value in new[]{"2","1,25","Mass","28.02.2028","1","Date"})
+   label.Texts.Add(new TextItem{Text=value,X=3,Y=5+label.Texts.Count*8,Width=48,Height=6});
+  Elements.Meta(label,1).DataFormat=new LabelDataFormat{DecimalInput=TextDecimalInput.Comma};
+  Elements.Meta(label,2).Calculation=new FieldCalculation{Operation=CalculationOperation.Multiply,Left=new(){Field=0},Right=new(){Field=1}};
+  Elements.Meta(label,2).DataFormat=new LabelDataFormat{Unit="kg"};
+  Elements.Meta(label,3).DataFormat=new LabelDataFormat{Kind=TextDataKind.Date,DateInput=TextDateOrder.DayMonthDot};
+  Elements.Meta(label,5).Calculation=new FieldCalculation{Operation=CalculationOperation.AddDays,Left=new(){Field=3},Right=new(){Field=4}};
+  Elements.Meta(label,5).DataFormat=new LabelDataFormat{Kind=TextDataKind.Date,DateOutput=TextDateDisplay.Iso};
+  var day=new DateTime(2026,11,27);
+  var preview=QuickPrint.PrepareEditor(label,day);
+  Check(preview.CanPrint&&preview.Label.Texts[2].Text=="2,50 kg"&&preview.Label.Texts[5].Text=="2028-02-29","editor computes number and leap date before formatting");
+  Check(!QuickPrint.Editable(label).Contains(2)&&QuickPrint.InputFields(label).Contains(0),"results are derived and their inputs appear in quick print");
+  var quick=QuickPrint.Prepare(label,new System.Collections.Generic.Dictionary<int,string>{{0,"4"},{4,"2"}},day);
+  Check(quick.CanPrint&&quick.Label.Texts[2].Text=="5,00 kg"&&quick.Label.Texts[5].Text=="2028-03-01","quick print recalculates changed operands");
+  var csv=BatchData.CsvText("Count;Mass\r\n3;1,25\r\ninvalid;2,00",';');
+  var rows=BatchProcessing.Prepare(label,csv,true,new(){
+   new(){Target="text:0",Column=0},new(){Target="text:1",Column=1}
+  },-1,0,day);
+  Check(rows[0].Label.Texts[2].Text=="3,75 kg"&&rows[1].Label==null&&
+   rows[1].Issues.Exists(issue=>issue.Row==3&&issue.Column==0&&issue.Blocking),"invalid CSV operand reports its original row and column");
+  string path=Path.Combine(dir,"calculations.ean.xml");
+  Engine.Save(path,label);
+  Check(Engine.Load(path).Metadata.Find(meta=>meta.Index==2).Calculation.Operation==CalculationOperation.Multiply,"calculations persist in templates");
+  string xlsx=Path.Combine(dir,"calculations.xlsx");
+  using(var zip=System.IO.Compression.ZipFile.Open(xlsx,System.IO.Compression.ZipArchiveMode.Create)){
+   void Entry(string name,string body){using var writer=new StreamWriter(zip.CreateEntry(name).Open());writer.Write(body);}
+   Entry("xl/workbook.xml","<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Values' r:id='r1'/></sheets></workbook>");
+   Entry("xl/_rels/workbook.xml.rels","<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>");
+   Entry("xl/styles.xml","<styleSheet><cellXfs><xf numFmtId='0'/><xf numFmtId='14'/></cellXfs></styleSheet>");
+   int serial=(int)new DateTime(2028,2,28).ToOADate();
+   Entry("xl/worksheets/sheet1.xml","<worksheet><sheetData><row r='1'><c r='A1' t='inlineStr'><is><t>Count</t></is></c></row>"+
+    "<row r='2'><c r='A2'><v>3</v></c><c r='B2'><v>1.25</v></c><c r='C2' s='1'><v>"+serial+"</v></c></row>"+
+    "<row r='4'><c r='A4'><v>3</v></c><c r='B4'><v>1.25</v></c><c r='C4' t='inlineStr'><is><t>invalid</t></is></c></row></sheetData></worksheet>");
+  }
+  var workbook=BatchData.Xlsx(xlsx)[0];
+  var sheetRows=BatchProcessing.Prepare(label,workbook,true,new(){
+   new(){Target="text:0",Column=0},new(){Target="text:1",Column=1},new(){Target="text:3",Column=2}
+  },-1,0,day);
+  Check(sheetRows[0].Label.Texts[2].Text=="3,75 kg"&&sheetRows[0].Label.Texts[5].Text=="2028-02-29",
+   "worksheet numeric and date types bypass text-only input formats");
+  Check(sheetRows[^1].Label==null&&sheetRows[^1].Issues.Exists(issue=>issue.Row==4&&issue.Column==2&&issue.Blocking),
+   "worksheet error retains the physical row after a gap");
+  var scenario=new LabelScenario{Name="Computed example",Values=new(){new(){Element=0,Value="8"}}};
+  Check(QuickPrint.PrepareScenario(label,scenario,day).Label.Texts[2].Text=="10,00 kg","test scenarios recalculate their sample values");
+  var derived=ProjectXml.Clone(label);
+  derived.Texts.Add(new TextItem{Text="Chained",X=3,Y=53,Width=48});
+  Elements.Meta(derived,6).Calculation=new(){Operation=CalculationOperation.Divide,Left=new(){Field=2},Right=new(){Literal="2"}};
+  Check(QuickPrint.PrepareEditor(derived,day).Label.Texts[6].Text=="1.25","chained calculation reads the unformatted numeric value");
+  var hiddenSource=ProjectXml.Clone(derived);
+  Elements.Meta(hiddenSource,2).Visibility=new VisibilityRule{Field=1,Mode=VisibilityMode.EqualsValue,Value="hidden"};
+  var chain=BatchProcessing.Prepare(hiddenSource,csv,true,new(){new(){Target="text:0",Column=0}},-1,0,day);
+  Check(chain[1].Issues.Exists(issue=>issue.Row==3&&issue.Column==0&&issue.Blocking&&issue.Message.Contains("7")),
+   "visible result retains the original source column through a hidden calculation");
+  var wide=ProjectXml.Clone(label);
+  wide.Width=100;
+  wide.Texts[2].Text="X";wide.Texts[2].Width=3;wide.Texts[2].AutoWidth=true;
+  Elements.Meta(wide,2).Calculation=new(){Operation=CalculationOperation.Multiply,Left=new(){Literal="12345678"},Right=new(){Literal="12345678"}};
+  var wideEditor=QuickPrint.PrepareEditor(wide,day);
+  var widePrint=QuickPrint.Prepare(wide,null,day);
+  Check(widePrint.CanPrint&&widePrint.Label.Texts[2].Width>3&&widePrint.Label.Texts[2].Width==wideEditor.Label.Texts[2].Width,
+   "quick print fits the calculated result to the same auto-width frame as the editor");
+  var rounded=ProjectXml.Clone(label);
+  Elements.Meta(rounded,2).Calculation=new(){Operation=CalculationOperation.Round,Left=new(){Literal="-1.25"},Right=new(){Literal="1"}};
+  Check(QuickPrint.PrepareEditor(rounded,day).Label.Texts[2].Text=="-1,30 kg","rounding handles negative midpoints consistently");
+  Elements.Meta(derived,6).Calculation.Right.Literal="0";
+  Check(QuickPrint.PrepareEditor(derived,day).SourceIssues().Exists(i=>i.Element==6&&i.Blocking&&i.Message.Contains(Loc.T("Delenie nulou."))),
+   "division by zero blocks output and identifies the calculation");
+  Elements.Meta(derived,2).Calculation.Left.Field=6;
+  Check(QuickPrint.PrepareEditor(derived,day).SourceIssues().Exists(i=>i.Blocking&&i.Message.Contains(Loc.T("Polia výpočtu tvoria cyklus."))),
+   "cyclic expressions report an error without recursion failures");
+  Elements.Remove(derived,new(){1});
+  Check(Elements.Meta(derived,1).Calculation.Right.Field==-2,"deleting an operand does not silently attach the calculation to a different field");
+
+  using var owner=new MainForm(Path.Combine(dir,"calculation-editor.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",wide);
+  Check(F<PreviewPanel>(owner,"preview").Element(2).Width>3,"canvas hit bounds use the calculated auto-width geometry");
+  Call(owner,"Apply",label);Call(owner,"DocumentOpened");
+  F<PreviewPanel>(owner,"preview").SelectElement(2);
+  Exception failure=null;bool opened=false;
+  using(var timer=new Timer{Interval=60}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner||dialog.Controls.Find("calculationOperation",true).Length==0)continue;
+     timer.Stop();opened=true;
+     try{
+      var result=(Label)dialog.Controls.Find("calculationResult",true)[0];
+      Check(result.Text.Contains("2,50 kg"),"calculation dialog shows the current formatted result");
+      ((ComboBox)dialog.Controls.Find("calculationOperation",true)[0]).SelectedIndex=1;
+      Check(result.Text.Contains("3,25 kg"),"operation change updates the sample immediately");
+      dialog.AcceptButton.PerformClick();
+     }catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();Call(owner,"EditFieldCalculation");
+  }
+  if(failure!=null)throw failure;
+  Check(opened&&FieldCalculation.ForField((LabelSettings)Call(owner,"Read"),2).Operation==CalculationOperation.Add,
+   "accepting the dialog saves the new calculation");
+  Call(owner,"StepHistory",false);
+  F<PreviewPanel>(owner,"preview").SelectElement(5);
+  using(var timer=new Timer{Interval=60}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner||dialog.Controls.Find("dataFormatKind",true).Length==0)continue;
+     timer.Stop();
+     try{
+      Check(((ComboBox)dialog.Controls.Find("dataFormatKind",true)[0]).Items.Count==2,
+       "a date calculation cannot be formatted as a number");
+      Check(((Label)dialog.Controls.Find("dataFormatResult",true)[0]).Text.Contains("2028-02-29"),
+       "the formatter samples the actual calculation result");
+     }catch(Exception ex){failure=ex;}
+     dialog.DialogResult=DialogResult.Cancel;
+     break;
+    }
+   };
+   timer.Start();Call(owner,"EditTextDataFormat");
+  }
+  if(failure!=null)throw failure;
+  owner.Close();
+ }
  static void VerticalStacks(string dir){
   var template=LabelSettings.Default();
   template.Width=90;template.Height=100;
@@ -1212,5 +1338,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);VerticalStacks(args[0]);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);CalculatedFields(args[0]);VerticalStacks(args[0]);TemplateScenarios(args[0]);SafetyZones(args[0]);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

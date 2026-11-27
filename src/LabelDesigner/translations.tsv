@@ -1253,3 +1253,30 @@ Poradie prvkov	Element order	Pořadí prvků	Elemek sorrendje
 Vyššie	Move up	Posunout výše	Fel
 Nižšie	Move down	Posunout níže	Le
 Vypnúť pružné rozloženie	Turn off flexible layout	Vypnout pružné rozložení	Rugalmas elrendezés kikapcsolása
+Výpočet poľa…	Field calculation…	Výpočet pole…	Mezőszámítás…
+Výpočet	Calculation	Výpočet	Számítás
+Bez výpočtu	No calculation	Bez výpočtu	Nincs számítás
+Sčítanie (A + B)	Addition (A + B)	Sčítání (A + B)	Összeadás (A + B)
+Odčítanie (A − B)	Subtraction (A − B)	Odčítání (A − B)	Kivonás (A − B)
+Násobenie (A × B)	Multiplication (A × B)	Násobení (A × B)	Szorzás (A × B)
+Delenie (A ÷ B)	Division (A ÷ B)	Dělení (A ÷ B)	Osztás (A ÷ B)
+Zaokrúhlenie A na B miest	Round A to B decimal places	Zaokrouhlení A na B míst	A kerekítése B tizedesjegyre
+Posun dátumu A o B dní	Shift date A by B days	Posun data A o B dní	A dátum eltolása B nappal
+Vstup A	Input A	Vstup A	A bemenet
+Vstup B	Input B	Vstup B	B bemenet
+Konštanta	Constant	Konstanta	Állandó
+Hodnota konštanty	Constant value	Hodnota konstanty	Állandó értéke
+Výsledok výpočtu	Calculation result	Výsledek výpočtu	Számítás eredménye
+Konštanty zadávajte s desatinnou bodkou a dátumy vo formáte RRRR-MM-DD.	Use a decimal point for constants and YYYY-MM-DD for dates.	Konstanty zadávejte s desetinnou tečkou a data ve formátu RRRR-MM-DD.	Az állandóknál tizedespontot, a dátumoknál ÉÉÉÉ-HH-NN formátumot használjon.
+Neplatná definícia výpočtu.	Invalid calculation definition.	Neplatná definice výpočtu.	Érvénytelen számítási meghatározás.
+Posun dátumu musí byť celý počet dní.	The date offset must be a whole number of days.	Posun data musí být celý počet dní.	A dátum eltolása egész számú nap legyen.
+Počet desatinných miest musí byť celé číslo od 0 do 8.	Decimal places must be a whole number from 0 to 8.	Počet desetinných míst musí být celé číslo od 0 do 8.	A tizedesjegyek száma 0 és 8 közötti egész szám legyen.
+Delenie nulou.	Division by zero.	Dělení nulou.	Osztás nullával.
+Výsledok výpočtu je mimo rozsahu.	The calculation result is out of range.	Výsledek výpočtu je mimo rozsah.	A számítás eredménye tartományon kívül esik.
+Výpočet poľa {0}: {1}	Calculation for field {0}: {1}	Výpočet pole {0}: {1}	A(z) {0}. mező számítása: {1}
+Vstup z poľa {0}: {1}	Input from field {0}: {1}	Vstup z pole {0}: {1}	Bemenet a(z) {0}. mezőből: {1}
+Chýba zdrojové pole výpočtu.	The source field for the calculation is missing.	Chybí zdrojové pole výpočtu.	Hiányzik a számítás forrásmezője.
+Polia výpočtu tvoria cyklus.	The calculated fields have a circular reference.	Pole výpočtu tvoří cyklus.	A számított mezők körkörösen hivatkoznak egymásra.
+Pole {0} nemá platnú vstupnú hodnotu.	Field {0} has no valid input value.	Pole {0} nemá platnou vstupní hodnotu.	A(z) {0}. mezőnek nincs érvényes bemeneti értéke.
+Chýba vstupná hodnota.	An input value is missing.	Chybí vstupní hodnota.	Hiányzik egy bemeneti érték.
+Do výberu pridajte aj zdrojové polia výpočtu.	Include the calculation source fields in the selection.	Do výběru přidejte i zdrojová pole výpočtu.	Vegye fel a számítás forrásmezőit is a kijelölésbe.

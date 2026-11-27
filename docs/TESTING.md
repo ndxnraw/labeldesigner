@@ -93,6 +93,10 @@ project reopening, editor opacity and position, locking, hiding and undo.
 Comparison of output with and without a reference covers Windows print and
 preview rendering, PDF, SVG, Word, and the ZPL raster and embedded XML.
 
+`EditorRefinementTests` verifies calculated fields in template XML, the
+calculation dialog, quick-print and scenario values, typed worksheet cells,
+CSV/XLSX source rows, chained calculations, cycles and missing operands.
+
 `EditorRefinementTests` verifies vertical stack geometry and order, barcode
 dimensions, conditional gaps, wrapped translations, row-specific batch
 layout, overflow navigation, undo and reusable blocks. It compares the
