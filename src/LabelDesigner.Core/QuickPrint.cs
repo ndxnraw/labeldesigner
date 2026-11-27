@@ -97,6 +97,7 @@ namespace EanEtikety {
   public static QuickPrintDraft PrepareEditor(LabelSettings template,DateTime instant,string language)=>Prepare(template,null,instant,language,true);
 
   static QuickPrintDraft Prepare(LabelSettings template,IDictionary<int,string> values,DateTime instant,string language,bool editor) {
+   template=template?.WithoutEditorReference();
    Engine.ValidateDraft(template);
    var label=JobPreparation.CloneForPreparation(template);
    var selected=new HashSet<int>(editor?new List<int>():Selected(template));

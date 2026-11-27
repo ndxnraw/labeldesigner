@@ -1176,3 +1176,19 @@ Zadajte číslo s desatinnou čiarkou.	Enter a number with a decimal comma.	Zade
 Zadajte číslo s desatinnou bodkou.	Enter a number with a decimal point.	Zadejte číslo s desetinnou tečkou.	Adjon meg egy számot tizedesponttal.
 Zadajte platný dátum vo formáte {0}.	Enter a valid date in {0} format.	Zadejte platné datum ve formátu {0}.	Adjon meg érvényes dátumot ebben a formátumban: {0}.
 Dátum je mimo rozsahu zvoleného kalendára.	The date is outside the selected calendar's range.	Datum je mimo rozsah zvoleného kalendáře.	A dátum kívül esik a kiválasztott naptár tartományán.
+Referenčný podklad…	Reference underlay…	Referenční podklad…	Referenciakép…
+Zobraziť referenčný podklad	Show reference underlay	Zobrazit referenční podklad	Referenciakép megjelenítése
+Poloha podkladu X (mm)	Underlay X (mm)	Poloha podkladu X (mm)	Referenciakép X (mm)
+Poloha podkladu Y (mm)	Underlay Y (mm)	Poloha podkladu Y (mm)	Referenciakép Y (mm)
+Šírka podkladu (mm)	Underlay width (mm)	Šířka podkladu (mm)	Referenciakép szélessége (mm)
+Výška podkladu (mm)	Underlay height (mm)	Výška podkladu (mm)	Referenciakép magassága (mm)
+Krytie podkladu (%)	Underlay opacity (%)	Krytí podkladu (%)	Referenciakép fedettsége (%)
+Zamknúť polohu a rozmery	Lock position and size	Zamknout polohu a rozměry	Helyzet és méret zárolása
+Skryť podklad	Hide underlay	Skrýt podklad	Referenciakép elrejtése
+Načítať PNG alebo JPEG…	Load PNG or JPEG…	Načíst PNG nebo JPEG…	PNG vagy JPEG betöltése…
+Referenčný obrázok (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg	Reference image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg	Referenční obrázek (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg	Referenciakép (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg
+Odstrániť podklad	Remove underlay	Odstranit podklad	Referenciakép eltávolítása
+Projekt nemá referenčný podklad.	This project has no reference underlay.	Projekt nemá referenční podklad.	A projektben nincs referenciakép.
+Podklad sa zobrazuje iba pri úpravách na plátne.	The underlay appears only on the editing canvas.	Podklad se zobrazuje pouze při úpravách na plátně.	A referenciakép csak szerkesztéskor látható a vásznon.
+Neplatné nastavenie referenčného podkladu.	Invalid reference underlay settings.	Neplatné nastavení referenčního podkladu.	Érvénytelen referenciakép-beállítás.
+Neplatný referenčný obrázok PNG alebo JPEG.	Invalid PNG or JPEG reference image.	Neplatný referenční obrázek PNG nebo JPEG.	Érvénytelen PNG vagy JPEG referenciakép.

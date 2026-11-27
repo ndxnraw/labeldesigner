@@ -16,6 +16,9 @@ Názov produktu je naďalej Pre-release.
 
 ## Nové možnosti
 
+- **Referenčný podklad** na plátne ukladá PNG alebo JPEG do projektu.
+  Polohu, rozmery v mm a krytie nastavíte v editore. Tlačový náhľad
+  a exporty používajú samotné tlačové prvky etikety.
 - **Formát údajov** v textovom poli určuje desatinné miesta, zobrazenú
   jednotku a formát dátumu. Náhľad mapovania CSV/XLSX ukazuje vstup,
   výsledok na etikete a chyby so zdrojovým riadkom.

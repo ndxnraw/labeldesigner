@@ -24,6 +24,7 @@ namespace EanEtikety {
   static bool HasImageMappings(LabelSettings label)=>label.Symbols?.Exists(symbol=>symbol?.ImageMapping!=null)==true;
 
   internal static LabelSettings CloneForPreparation(LabelSettings template){
+   template=template.WithoutEditorReference();
    if(!template.Symbols.Exists(symbol=>symbol?.ImageMapping!=null||symbol?.Image?.FitFrame==true))return ProjectXml.Clone(template);
    // Share immutable encoded bytes across records and output placements.
    var copy=ProjectXml.Clone(template.WithoutDataDrivenImages());
@@ -81,6 +82,7 @@ namespace EanEtikety {
   }
 
   public static LabelSettings Resolve(LabelSettings template,DateTime instant){
+   template=template?.WithoutEditorReference();
    Engine.ValidateDraft(template);
    if(template.Variables.Count==0&&!HasDynamicArtwork(template)){var copy=CloneForPreparation(template);BatchReferences.Strip(copy);Engine.Validate(copy);return copy;}
    var record=BatchData.Record(template,new string[0],new List<ColumnBinding>(),-1,0,1,instant);

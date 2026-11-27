@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace EanEtikety {
  public static class BatchProcessing {
   public static List<BatchRecord> Prepare(LabelSettings template,DataTableSource table,bool header,List<ColumnBinding> bindings,int quantity,int generated,DateTime instant){
+   template=template.WithoutEditorReference();
    int start=table!=null&&header&&table.Rows.Count>0?1:0,count=table==null?generated:table.Rows.Count-start;
    if(count<0||count>10000)throw new InvalidOperationException(Loc.T("Najviac 10000 záznamov"));
    var result=new List<BatchRecord>();

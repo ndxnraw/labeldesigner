@@ -88,6 +88,11 @@ and explicit fallback, original CSV diagnostics, XLSX mapping, column heading
 presets, variable substitution, fixed geometry and fitting, editor and quick print
 previews, and PDF/SVG/Word and per-record ZPL output.
 
+`EditorRefinementTests` verifies an embedded PNG/JPEG reference survives
+project reopening, editor opacity and position, locking, hiding and undo.
+Comparison of output with and without a reference covers Windows print and
+preview rendering, PDF, SVG, Word, and the ZPL raster and embedded XML.
+
 `EditorRefinementTests` checks block capture, library previews, insertion,
 independent copies, preserved translations and local rule dependencies.
 

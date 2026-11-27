@@ -17,6 +17,7 @@ public class TextItem {
 public class LabelSettings {
  public BatchSetup Batch=new BatchSetup();public int ProjectVersion=310;public bool HideBarcode;public List<ElementMeta> Metadata=new List<ElementMeta>();public SheetLayout Layout=new SheetLayout();public List<VariableField> Variables=new List<VariableField>();
  public LabelLanguages Languages;
+ public EditorReference EditorReference;
  public List<int> QuickPrintFields=new List<int>();
  public bool ShouldSerializeQuickPrintFields(){return QuickPrintFields!=null&&QuickPrintFields.Count>0;}
  public double BarRotation;
@@ -32,6 +33,12 @@ public class LabelSettings {
  public List<TextItem> Texts=new List<TextItem>();
  public List<SymbolItem> Symbols=new List<SymbolItem>();
  internal LabelSettings WithoutDataDrivenImages(){var copy=(LabelSettings)MemberwiseClone();copy.Symbols=Symbols.ConvertAll(symbol=>symbol.WithoutDataDrivenImages());return copy;}
+ public LabelSettings WithoutEditorReference(){
+  if(EditorReference==null)return this;
+  var copy=(LabelSettings)MemberwiseClone();
+  copy.EditorReference=null;
+  return copy;
+ }
  // Keep the constructor's missing-field XML default; only new documents opt in.
  public static LabelSettings Default(){var s=new LabelSettings{DigitSize=12};s.Texts.Add(new TextItem{Text=Loc.T("Názov produktu"),X=3,Y=3,Bold=true,Center=true,AutoWidth=true});TextAutoLayout.Apply(s);return s;}
 }

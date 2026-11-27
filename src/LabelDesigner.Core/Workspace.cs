@@ -9,10 +9,43 @@ public static class ProjectXml {
  public static void Save<T>(string path,T value,string backup){Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path)));string temp=path+"."+Guid.NewGuid().ToString("N")+".tmp";try{string xml=Encode(value);if(xml.Length>64000000)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));File.WriteAllText(temp,xml,new System.Text.UTF8Encoding(false));if(File.Exists(path))File.Replace(temp,path,backup,true);else File.Move(temp,path);}finally{if(File.Exists(temp))File.Delete(temp);}}
 }
 public sealed class EditHistory {
- readonly List<string> states=new List<string>();int position=-1;long bytes;public bool CanUndo{get{return position>0;}}public bool CanRedo{get{return position>=0&&position<states.Count-1;}}
- public void Reset(LabelSettings s){states.Clear();position=-1;bytes=0;Record(s);}
- public bool Record(LabelSettings s){string xml=ProjectXml.Encode(s);if(position>=0&&states[position]==xml)return false;while(states.Count>position+1){bytes-=states[states.Count-1].Length*2;states.RemoveAt(states.Count-1);}states.Add(xml);position++;bytes+=xml.Length*2;while(states.Count>2&&(states.Count>100||bytes>128*1024*1024)){bytes-=states[0].Length*2;states.RemoveAt(0);position--;}return true;}
- public LabelSettings Undo(){return CanUndo?ProjectXml.Decode<LabelSettings>(states[--position]):null;}public LabelSettings Redo(){return CanRedo?ProjectXml.Decode<LabelSettings>(states[++position]):null;}
+ readonly List<(string Xml,EditorReference Reference)> states=new();
+ readonly Dictionary<string,int> rasters=new(ReferenceEqualityComparer.Instance);
+ int position=-1;long bytes;
+ public bool CanUndo=>position>0;
+ public bool CanRedo=>position>=0&&position<states.Count-1;
+ public void Reset(LabelSettings s){states.Clear();rasters.Clear();position=-1;bytes=0;Record(s);}
+ public bool Record(LabelSettings s){
+  // Keep the raster shared across ordinary editor changes.
+  var reference=s.EditorReference;
+  string xml=ProjectXml.Encode(s.WithoutEditorReference());
+  if(position>=0&&states[position].Xml==xml&&states[position].Reference==reference)return false;
+  while(states.Count>position+1)Remove(states.Count-1);
+  states.Add((xml,reference==null?null:reference with { }));
+  position++;bytes+=xml.Length*2L;
+  if(reference?.Raster is string raster){
+   if(!rasters.TryGetValue(raster,out int count))bytes+=raster.Length*2L;
+   rasters[raster]=count+1;
+  }
+  while(states.Count>2&&(states.Count>100||bytes>128*1024*1024)){Remove(0);position--;}
+  return true;
+ }
+ void Remove(int index){
+  var state=states[index];states.RemoveAt(index);bytes-=state.Xml.Length*2L;
+  if(state.Reference?.Raster is string raster){
+   int remaining=rasters[raster]-1;
+   if(remaining==0){rasters.Remove(raster);bytes-=raster.Length*2L;}
+   else rasters[raster]=remaining;
+  }
+ }
+ LabelSettings Restore(){
+  var state=states[position];
+  var label=ProjectXml.Decode<LabelSettings>(state.Xml);
+  label.EditorReference=state.Reference==null?null:state.Reference with { };
+  return label;
+ }
+ public LabelSettings Undo(){if(!CanUndo)return null;position--;return Restore();}
+ public LabelSettings Redo(){if(!CanRedo)return null;position++;return Restore();}
 }
 public class WorkspaceOptions {public bool AutoSave=true;public int IntervalSeconds=60;public List<string> Recent=new List<string>();}
 public class RecoveryDocument {public string OriginalPath;public DateTime SavedUtc;public LabelSettings Label;}
@@ -23,7 +56,7 @@ public sealed class WorkspaceStore:IDisposable {
  public WorkspaceStore(string preferences){DirectoryPath=preferences+".workspace";Directory.CreateDirectory(DirectoryPath);Directory.CreateDirectory(TemplatesPath);string id=Guid.NewGuid().ToString("N");recoveryPath=Path.Combine(DirectoryPath,id+".recovery.xml");string p=Path.Combine(DirectoryPath,"options.xml");Options=File.Exists(p)?ProjectXml.Decode<WorkspaceOptions>(File.ReadAllText(p)):new WorkspaceOptions();Options.IntervalSeconds=Math.Max(10,Math.Min(3600,Options.IntervalSeconds));if(Options.Recent==null)Options.Recent=new List<string>();lease=new FileStream(recoveryPath+".lock",FileMode.CreateNew,FileAccess.ReadWrite,FileShare.None);}
  public void SaveOptions(){ProjectXml.Save(Path.Combine(DirectoryPath,"options.xml"),Options);}
  public void Remember(string path){path=Path.GetFullPath(path);Options.Recent.RemoveAll(p=>string.Equals(p,path,StringComparison.OrdinalIgnoreCase));Options.Recent.Insert(0,path);if(Options.Recent.Count>15)Options.Recent.RemoveRange(15,Options.Recent.Count-15);SaveOptions();}
- public void Recoverable(Action<string,RecoveryDocument> found,Action<string> invalid){foreach(string p in Directory.GetFiles(DirectoryPath,"*.recovery.xml")){if(p==recoveryPath)continue;try{using(var l=new FileStream(p+".lock",FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)){RecoveryDocument d;try{d=ProjectXml.Decode<RecoveryDocument>(File.ReadAllText(p));Engine.ValidateDraft(d.Label);}catch(Exception ex){invalid(Path.GetFileName(p)+": "+ex.Message);continue;}found(p,d);}}catch(IOException){/* A running instance owns the recovery; do not touch it. */}}}
+ public void Recoverable(Action<string,RecoveryDocument> found,Action<string> invalid){foreach(string p in Directory.GetFiles(DirectoryPath,"*.recovery.xml")){if(p==recoveryPath)continue;try{using(var l=new FileStream(p+".lock",FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)){RecoveryDocument d;try{d=ProjectXml.Decode<RecoveryDocument>(File.ReadAllText(p));Engine.ValidateDraft(d.Label);d.Label.EditorReference?.ValidateImage();}catch(Exception ex){invalid(Path.GetFileName(p)+": "+ex.Message);continue;}found(p,d);}}catch(IOException){/* A running instance owns the recovery; do not touch it. */}}}
  public void SaveRecovery(LabelSettings s,string original){Engine.ValidateDraft(s);ProjectXml.Save(recoveryPath,new RecoveryDocument{OriginalPath=original,SavedUtc=DateTime.UtcNow,Label=s});}
  public void Clean(){if(File.Exists(recoveryPath))File.Delete(recoveryPath);}
  public void Dispose(){lease.Dispose();try{File.Delete(recoveryPath+".lock");}catch(IOException){}}

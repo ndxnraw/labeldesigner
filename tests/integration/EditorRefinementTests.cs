@@ -1,5 +1,100 @@
 using System;using System.IO;using System.Drawing;using System.Windows.Forms;using System.Reflection;using EanEtikety;
 class EditorRefinementTests {
+ static void ReferenceUnderlay(string dir){
+  var label=LabelSettings.Default();label.HideBarcode=true;
+  string png=Path.Combine(dir,"reference-source.png"),jpg=Path.Combine(dir,"reference-source.jpg");
+  using(var image=new Bitmap(120,80))using(var graphics=Graphics.FromImage(image)){
+   graphics.Clear(Color.Red);image.Save(png,System.Drawing.Imaging.ImageFormat.Png);
+   image.Save(jpg,System.Drawing.Imaging.ImageFormat.Jpeg);
+  }
+  var reference=EditorReference.Import(png,label.Width,label.Height) with {X=7,Y=15,Width=24,Height=16,Opacity=50,Locked=true};
+  Check(EditorReference.Import(jpg,label.Width,label.Height).Width==60,"JPEG keeps its aspect ratio on import");
+  label.EditorReference=reference;
+  string project=Path.Combine(dir,"reference.ean.xml");
+  Engine.Save(project,label);File.Delete(png);File.Delete(jpg);
+  label=Engine.Load(project);
+  Check(label.EditorReference==reference,"the reference image and settings survive project reopening without source files");
+  var plain=ProjectXml.Clone(label);plain.EditorReference=null;
+  var plan=OutputPlan.Create(label);
+  Check(plan.Placements[0].Label.EditorReference==null&&QuickPrint.PrepareEditor(label,DateTime.Today).Label.EditorReference==null,
+   "print and quick print plans do not copy editor-only image bytes");
+  Check(PreflightReport.Inspect(plan).Fingerprint==PreflightReport.Inspect(OutputPlan.Create(plain)).Fingerprint,
+   "preflight only checks printable artwork");
+  Check(VectorArt.Svg(label)==VectorArt.Svg(plain),"SVG does not include editor-only artwork");
+  string output=Path.Combine(dir,"reference-output"),expected=Path.Combine(dir,"reference-plain");
+  Engine.Zpl(output+".zpl",label);Engine.Zpl(expected+".zpl",plain);
+  Check(File.ReadAllText(output+".zpl")==File.ReadAllText(expected+".zpl")&&ZplImport.Project(File.ReadAllText(output+".zpl")).EditorReference==null,
+   "ZPL raster and embedded metadata exclude the editor reference");
+  Engine.Pdf(output+".pdf",label);Engine.Pdf(expected+".pdf",plain);
+  Check(File.ReadAllBytes(output+".pdf").AsSpan().SequenceEqual(File.ReadAllBytes(expected+".pdf")),"PDF artwork excludes the editor reference");
+  Engine.Docx(output+".docx",label);Engine.Docx(expected+".docx",plain);
+  using(var actual=System.IO.Compression.ZipFile.OpenRead(output+".docx"))
+  using(var baseline=System.IO.Compression.ZipFile.OpenRead(expected+".docx")){
+   Check(actual.Entries.Count==baseline.Entries.Count,"Word adds no reference image parts");
+   foreach(var entry in actual.Entries){
+    using var a=entry.Open();
+    using var b=baseline.GetEntry(entry.FullName).Open();
+    using var left=new MemoryStream();using var right=new MemoryStream();
+    a.CopyTo(left);b.CopyTo(right);
+    Check(left.ToArray().AsSpan().SequenceEqual(right.ToArray()),"Word part excludes the reference: "+entry.FullName);
+   }
+  }
+  byte[] PrintRaster(LabelSettings settings,bool previewMode){
+   using var document=new LabelPrintDocument(settings);
+   using var image=new Bitmap(300,240);
+   using(var graphics=Graphics.FromImage(image)){
+    graphics.Clear(Color.White);document.RenderPrinterPage(graphics,0,new RectangleF(0,0,300,300),0,0,previewMode);
+   }
+   using var result=new MemoryStream();image.Save(result,System.Drawing.Imaging.ImageFormat.Png);return result.ToArray();
+  }
+  Check(PrintRaster(label,false).AsSpan().SequenceEqual(PrintRaster(plain,false))&&
+   PrintRaster(label,true).AsSpan().SequenceEqual(PrintRaster(plain,true)),"Windows print and print preview render identical artwork with and without the reference");
+
+  using var owner=new MainForm(Path.Combine(dir,"reference-ui.xml"));
+  owner.StartPosition=FormStartPosition.Manual;owner.Location=new Point(-20000,-20000);owner.Show();
+  Call(owner,"Apply",label);
+  var preview=F<PreviewPanel>(owner,"preview");
+  Color Pixel(float x,float y){
+   using var frame=new Bitmap(preview.Width,preview.Height);
+   preview.DrawToBitmap(frame,new Rectangle(Point.Empty,frame.Size));
+   var point=preview.ScreenPoint(new PointF(x,y));
+   return frame.GetPixel((int)point.X,(int)point.Y);
+  }
+  var blend=Pixel(10,19);
+  Check(blend.R>240&&blend.G is >110 and <145&&Pixel(5,19).ToArgb()==Color.White.ToArgb(),"editor draws the reference at its position, scale and opacity");
+  bool inspected=false;Exception failure=null;
+  using(var timer=new Timer{Interval=75}){
+   timer.Tick+=delegate{
+    foreach(Form dialog in Application.OpenForms){
+     if(dialog==owner)continue;
+     timer.Stop();
+     try{
+      Control Find(string name)=>dialog.Controls.Find(name,true)[0];
+      var x=(NumericUpDown)Find("referenceX");
+      var locked=(CheckBox)Find("referenceLocked");
+      Check(locked.Checked&&!x.Enabled&&!Find("referenceWidth").Enabled,"locked reference prevents changes to position and dimensions");
+      Snapshot(dialog,Path.Combine(dir,"reference-settings.png"));
+      locked.Checked=false;
+      Check(x.Enabled&&Find("referenceWidth").Enabled,"unlocking restores reference geometry controls");
+      x.Value=18;
+      ((NumericUpDown)Find("referenceOpacity")).Value=60;
+      inspected=true;dialog.AcceptButton.PerformClick();
+     }catch(Exception ex){failure=ex;dialog.DialogResult=DialogResult.Cancel;}
+     break;
+    }
+   };
+   timer.Start();Call(owner,"EditEditorReference");
+  }
+  if(failure!=null)throw failure;
+  Check(inspected&&((LabelSettings)Call(owner,"Read")).EditorReference.X==18&&Pixel(10,19).ToArgb()==Color.White.ToArgb()&&
+   Pixel(21,19).G is >86 and <117,"position and opacity changes apply to the canvas");
+  var view=F<ContextMenuStrip>(owner,"viewMenu");
+  view.Items["editorReferenceVisible"].PerformClick();
+  Check(((LabelSettings)Call(owner,"Read")).EditorReference.Hidden&&Pixel(21,19).ToArgb()==Color.White.ToArgb(),"hiding removes the reference from the editor");
+  Call(owner,"StepHistory",false);
+  Check(!((LabelSettings)Call(owner,"Read")).EditorReference.Hidden&&Pixel(21,19).G<117,"undo restores the reference display");
+  Call(owner,"Apply",LabelSettings.Default());owner.Close();
+ }
  static void ResizeLabel(string dir){
   var original=LabelSettings.Default();original.Width=100;original.Height=60;original.PageWidth=100;original.PageHeight=60;
   original.BarX=54;original.BarY=25;
@@ -788,5 +883,5 @@ class EditorRefinementTests {
   }
   Call(form,"Apply",LabelSettings.Default());form.Close();
  }
- [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
+ [STAThread]static void Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);ReferenceUnderlay(args[0]);ResizeLabel(args[0]);ReusableBlocks(args[0]);TextLanguages(args[0]);MappedArtwork(args[0]);ConditionalOutput(args[0]);EditorShell(args[0]);PdfWorkspace(args[0]);PanelPersistence(args[0]);GuidedGs1(args[0]);Gs1Theme(args[0]);GuidedGs1Locales(args[0]);WheelEditing(args[0]);WheelViewport();NativeWheelEditing();ComboWheels();SettingExplanations();ComboCaptions();ComboRows();PrintTextLayout(args[0]);TabCaptions();Sizing();MoreSizing();FixedText(args[0]);StyledField(args[0]);FixedTextEditor(args[0]);Editor(args[0]);PrintSections(args[0]);File.WriteAllText(Path.Combine(args[0],"passed.txt"),"PASS "+count+" editor refinement checks");}catch(Exception ex){File.WriteAllText(Path.Combine(args[0],"failed.txt"),ex.ToString());Environment.ExitCode=1;}}
 }

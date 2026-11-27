@@ -16,6 +16,7 @@ public static class ZplImport {
  public static string ReadFile(string path){if(new FileInfo(path).Length>96000000)throw new Exception(Loc.T("ZPL súbor je príliš veľký (limit 96 MB)."));return File.ReadAllText(path,new UTF8Encoding(false,true));}
  static string Hash(string value){using(var sha=SHA256.Create())return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(value)));}
  public static void AddProject(string path,LabelSettings settings){
+  settings=settings.WithoutEditorReference();
   if(settings.Batch!=null&&settings.Batch.Presets!=null&&settings.Batch.Presets.Exists(preset=>preset!=null&&preset.Reference!=null)){
    settings=ProjectXml.Clone(settings);
    BatchReferences.Strip(settings);

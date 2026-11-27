@@ -35,10 +35,11 @@ public static class Engine {
   b.Append("01010");for(int i=start+half;i<kind;i++)foreach(char c in L[s[i]-'0'])b.Append(c=='0'?'1':'0');b.Append("101");return b.ToString();
  }
  static void Range(double n,double min,double max,string field){if(double.IsNaN(n)||double.IsInfinity(n)||n<min||n>max)throw new Exception(field+Loc.T(": povolený rozsah ")+min+Loc.T(" až ")+max+".");}
- public static void Validate(LabelSettings s){Validate(s,false);}
+ public static void Validate(LabelSettings s){Validate(s?.WithoutEditorReference(),false);}
  public static void ValidateDraft(LabelSettings s){Validate(s,true);}
  static void Validate(LabelSettings s,bool draft){
   if(s==null||s.Layout==null||s.Variables==null||s.Metadata==null||s.Batch==null||s.Batch.Bindings==null||s.ApplicationIdentifiers==null)throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
+  s.EditorReference?.ValidateSettings();
   if((s.Unit!="mm"&&s.Unit!="cm")||Array.IndexOf(MoreBarcodes.Kinds,s.Kind)<0||!DraftText(s.Ean,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
   if(s.Variables.Count>256||s.Metadata.Count>1000||s.Batch.Bindings.Count>256||s.ApplicationIdentifiers.Count>100)throw new InvalidDataException(Loc.T("Príliš veľa údajov"));
   foreach(var v in s.Variables)if(v==null||!DraftText(v.Name,200)||!DraftText(v.Type,100)||!DraftText(v.Format,4000)||!DraftText(v.Prefix,4000)||!DraftText(v.Suffix,4000)||!DraftText(v.FixedValue,4000))throw new InvalidDataException(Loc.T("Neplatná štruktúra projektu."));
@@ -133,8 +134,8 @@ public static class Engine {
    foreach(var part in allParts){WorkContext.Check();ZipText(z,"word/media/part"+part.Number+".svg",part.Svg);using(var stream=z.CreateEntry("word/media/part"+part.Number+".png").Open())stream.Write(part.Png,0,part.Png.Length);}
   }
  }
- public static void Save(string file,LabelSettings s){ValidateDraft(s);string backup=null;if(File.Exists(file)){try{Load(file);backup=file+".bak";}catch(IOException){throw;}catch(UnauthorizedAccessException){throw;}catch{ /* Keep an existing backup when the overwritten file is damaged. */ }}ProjectXml.Save(file,s,backup);}
+ public static void Save(string file,LabelSettings s){ValidateDraft(s);s.EditorReference?.ValidateImage();string backup=null;if(File.Exists(file)){try{Load(file);backup=file+".bak";}catch(IOException){throw;}catch(UnauthorizedAccessException){throw;}catch{ /* Keep an existing backup when the overwritten file is damaged. */ }}ProjectXml.Save(file,s,backup);}
  public static LabelSettings Load(string file){using(var stream=File.OpenRead(file))return Load(stream);}
- public static LabelSettings Load(Stream stream){using(var r=XmlReader.Create(stream,new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=64000000})){var s=(LabelSettings)new XmlSerializer(typeof(LabelSettings)).Deserialize(r);ValidateDraft(s);return s;}}
+ public static LabelSettings Load(Stream stream){using(var r=XmlReader.Create(stream,new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=64000000})){var s=(LabelSettings)new XmlSerializer(typeof(LabelSettings)).Deserialize(r);ValidateDraft(s);s.EditorReference?.ValidateImage();return s;}}
 }
 }

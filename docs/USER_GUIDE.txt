@@ -128,6 +128,18 @@ dávkou, vybrať referenčný súbor alebo referenciu nahradiť či odstrániť
 po potvrdení. Pri zmene mapovania uložte aktualizovanú predvoľbu a pripravte
 novú referenciu. Celý postup funguje offline.
 
+REFERENČNÝ PODKLAD NA PLÁTNE
+
+V ponuke Zobrazenie otvorte Referenčný podklad a načítajte PNG alebo JPEG.
+Pri načítaní sa obrázok prispôsobí plátnu so zachovaním pomeru strán.
+V nastaveniach zadajte polohu X a Y, presnú šírku a výšku v mm a krytie.
+Zamknutie chráni polohu a rozmery. Viditeľnosť prepnete aj priamo v ponuke
+Zobrazenie. Zmeny podkladu sa dajú vrátiť cez Späť.
+
+Obrázok aj nastavenia sa ukladajú priamo do projektu alebo šablóny.
+Podklad vidíte iba na plátne editora. Pri tlačovom náhľade, tlači,
+predtlačovej kontrole a exporte sa použijú tlačové prvky etikety.
+
 FORMÁTOVANIE ÚDAJOV V TEXTOVOM POLI
 
 Vo Vlastnostiach textového poľa otvorte Formát údajov. Pri čísle vyberte
